@@ -381,6 +381,71 @@ async def vote_post(post_id: str, request: Request):
         
         return {"message": "Voted", "voted": True}
 
+@api_router.delete("/posts/{post_id}")
+async def delete_post(post_id: str, request: Request):
+    """Delete a post (only by owner)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    post = await db.posts.find_one({"_id": ObjectId(post_id)})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Check if user is the owner
+    if post["user_id"] != user["_id"]:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this post")
+    
+    # Delete the post
+    await db.posts.delete_one({"_id": ObjectId(post_id)})
+    
+    # Remove points for the deleted post
+    await db.users.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$inc": {"points": -5}}
+    )
+    
+    # Update star rating
+    updated_user = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    new_rating = calculate_star_rating(updated_user["points"])
+    is_guide = new_rating >= 3
+    
+    await db.users.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$set": {"star_rating": new_rating, "is_guide": is_guide}}
+    )
+    
+    return {"message": "Post deleted"}
+
+@api_router.put("/posts/{post_id}")
+async def update_post(post_id: str, post_data: dict, request: Request):
+    """Update a post (only by owner)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    post = await db.posts.find_one({"_id": ObjectId(post_id)})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Check if user is the owner
+    if post["user_id"] != user["_id"]:
+        raise HTTPException(status_code=403, detail="Not authorized to edit this post")
+    
+    # Update the post
+    update_data = {}
+    if "content" in post_data:
+        update_data["content"] = post_data["content"]
+    if "image" in post_data:
+        update_data["image"] = post_data["image"]
+    
+    await db.posts.update_one(
+        {"_id": ObjectId(post_id)},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Post updated"}
+
 # Comment endpoints
 @api_router.post("/posts/{post_id}/comments")
 async def create_comment(post_id: str, comment_data: dict, request: Request):
