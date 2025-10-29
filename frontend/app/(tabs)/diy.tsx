@@ -126,46 +126,76 @@ export default function DIYScreen() {
     const isSelected = quantity > 0;
 
     return (
-      <TouchableOpacity
-        style={[styles.ingredientCard, isSelected && styles.ingredientCardSelected]}
-        onPress={() => toggleIngredient(item._id)}
-      >
-        <View style={styles.ingredientInfo}>
-          <Text style={styles.ingredientName}>{item.name}</Text>
-          <Text style={styles.ingredientPrice}>
-            ${item.price_per_unit.toFixed(2)} / {item.unit}
-          </Text>
-          {item.description && (
-            <Text style={styles.ingredientDescription} numberOfLines={1}>
-              {item.description}
-            </Text>
-          )}
-        </View>
-
-        {isSelected && (
-          <View style={styles.quantityControl}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => updateQuantity(item._id, quantity - 1)}
+      <View style={styles.ingredientCard}>
+        {item.images && item.images.length > 0 && (
+          <View style={styles.imageContainer}>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              style={styles.imageScroll}
             >
-              <Ionicons name="remove" size={20} color="#ffd700" />
-            </TouchableOpacity>
-
-            <Text style={styles.quantity}>{quantity}</Text>
-
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => updateQuantity(item._id, quantity + 1)}
-            >
-              <Ionicons name="add" size={20} color="#ffd700" />
-            </TouchableOpacity>
+              {item.images.map((image, index) => (
+                <Image
+                  key={index}
+                  source={{ uri: image }}
+                  style={styles.ingredientImage}
+                />
+              ))}
+            </ScrollView>
           </View>
         )}
 
-        {!isSelected && (
-          <Ionicons name="add-circle-outline" size={32} color="#ffd700" />
-        )}
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.ingredientContent, isSelected && styles.ingredientContentSelected]}
+          onPress={() => toggleIngredient(item._id)}
+        >
+          <View style={styles.ingredientInfo}>
+            <Text style={styles.ingredientName}>{item.name}</Text>
+            <Text style={styles.ingredientPrice}>
+              ₹{item.price_per_unit.toFixed(2)} / {item.unit}
+            </Text>
+            {item.description && (
+              <Text style={styles.ingredientDescription} numberOfLines={1}>
+                {item.description}
+              </Text>
+            )}
+            {item.tags && item.tags.length > 0 && (
+              <View style={styles.tagsContainer}>
+                {item.tags.map((tag, index) => (
+                  <View key={index} style={styles.tag}>
+                    <Text style={styles.tagText}>{tag}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {isSelected && (
+            <View style={styles.quantityControl}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => updateQuantity(item._id, quantity - 1)}
+              >
+                <Ionicons name="remove" size={20} color="#ffd700" />
+              </TouchableOpacity>
+
+              <Text style={styles.quantity}>{quantity}</Text>
+
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => updateQuantity(item._id, quantity + 1)}
+              >
+                <Ionicons name="add" size={20} color="#ffd700" />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {!isSelected && (
+            <Ionicons name="add-circle-outline" size={32} color="#ffd700" />
+          )}
+        </TouchableOpacity>
+      </View>
     );
   };
 
