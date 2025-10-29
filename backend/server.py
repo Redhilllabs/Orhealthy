@@ -683,6 +683,17 @@ async def create_ingredient(ingredient: Ingredient, request: Request):
     result = await db.ingredients.insert_one(ingredient.dict())
     return {"message": "Ingredient created", "id": str(result.inserted_id)}
 
+@api_router.put("/admin/ingredients/{ingredient_id}")
+async def update_ingredient(ingredient_id: str, ingredient: Ingredient, request: Request):
+    """Update ingredient (admin only)"""
+    result = await db.ingredients.update_one(
+        {"_id": ObjectId(ingredient_id)},
+        {"$set": ingredient.dict()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+    return {"message": "Ingredient updated"}
+
 @api_router.delete("/admin/ingredients/{ingredient_id}")
 async def delete_ingredient(ingredient_id: str, request: Request):
     """Delete ingredient (admin only)"""
