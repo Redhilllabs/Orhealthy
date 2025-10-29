@@ -80,7 +80,7 @@ export default function CheckoutScreen() {
         phone: shipPhone,
       };
 
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       
       // For now, we'll just create the order without Razorpay integration
       // You can add Razorpay integration later
