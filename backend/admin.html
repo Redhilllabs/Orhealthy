@@ -750,14 +750,26 @@
             };
             
             try {
-                const response = await fetch(`${API_URL}/admin/meals`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
+                let response;
+                if (editingMealId) {
+                    // Update existing meal
+                    response = await fetch(`${API_URL}/admin/meals/${editingMealId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new meal
+                    response = await fetch(`${API_URL}/admin/meals`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
+                
                 if (response.ok) {
                     closeModal('mealModal');
-                    showAlert('meals', 'Meal saved successfully', 'success');
+                    showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal saved successfully', 'success');
                     loadMeals();
                 }
             } catch (error) {
