@@ -41,17 +41,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const processSessionId = async (sessionId: string) => {
     try {
+      console.log('[AuthContext] Processing session ID:', sessionId);
       const response = await axios.get(`${API_URL}/auth/session-data`, {
         headers: { 'X-Session-ID': sessionId },
       });
 
+      console.log('[AuthContext] Session data received:', response.data);
       const { session_token } = response.data;
       await storage.setItemAsync('session_token', session_token);
+      console.log('[AuthContext] Session token stored');
 
       // Get user data
       await checkSession();
     } catch (error) {
-      console.error('Error processing session:', error);
+      console.error('[AuthContext] Error processing session:', error);
+      throw error;
     }
   };
 
