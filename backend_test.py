@@ -33,9 +33,9 @@ class AdminPanelTester:
         })
         
     def test_admin_panel_access(self):
-        """Test 1: Admin Panel Access - GET /admin"""
+        """Test 1: Admin Panel Access - GET /api/admin-panel"""
         try:
-            response = self.session.get(f"{BASE_URL}/admin")
+            response = self.session.get(f"{API_BASE_URL}/admin-panel")
             if response.status_code == 200 and "admin" in response.text.lower():
                 self.log_test("Admin Panel Access", True, f"Status: {response.status_code}, Content contains admin HTML")
                 return True
