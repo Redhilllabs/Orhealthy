@@ -300,26 +300,52 @@ const styles = StyleSheet.create({
   createPost: {
     backgroundColor: '#fff',
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
+  imagePreview: {
+    position: 'relative',
+    marginBottom: 12,
+  },
+  previewImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+  },
+  inputRow: {
+    gap: 12,
+  },
   input: {
-    flex: 1,
     backgroundColor: '#f5f5f5',
-    borderRadius: 20,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginRight: 12,
-    maxHeight: 100,
+    marginBottom: 8,
+    minHeight: 60,
     fontSize: 16,
   },
+  actionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  imageButton: {
+    padding: 8,
+  },
   postButton: {
+    flex: 1,
     backgroundColor: '#4CAF50',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 20,
+    alignItems: 'center',
   },
   postButtonDisabled: {
     backgroundColor: '#ccc',
