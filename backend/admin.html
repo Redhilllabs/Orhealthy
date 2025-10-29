@@ -854,36 +854,85 @@
             }
         }
 
+        let starRatings = {};
+
+        function renderStarRatings() {
+            const container = document.getElementById('starRatingsList');
+            const sortedKeys = Object.keys(starRatings).sort((a, b) => {
+                const numA = parseInt(a.replace('star', ''));
+                const numB = parseInt(b.replace('star', ''));
+                return numA - numB;
+            });
+            
+            container.innerHTML = sortedKeys.map((key, index) => {
+                const starNum = parseInt(key.replace('star', ''));
+                const stars = '⭐'.repeat(starNum);
+                const isFirst = index === 0;
+                return `
+                    <div class="config-item">
+                        <div style="min-width: 150px;">
+                            <span class="config-label">${stars} ${starNum} Star${starNum > 1 ? 's' : ''}</span>
+                        </div>
+                        <input type="number" class="config-input" id="${key}" value="${starRatings[key]}" min="0" style="width: 150px;">
+                        <span style="color: #64748b; font-size: 13px; min-width: 180px;">${isFirst ? 'points (Becomes Guide)' : 'points'}</span>
+                        ${!isFirst ? `<button class="btn-danger" style="padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px;" onclick="removeStarRating('${key}')">Remove</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addStarRating() {
+            const maxStar = Math.max(...Object.keys(starRatings).map(k => parseInt(k.replace('star', ''))));
+            const newStarNum = maxStar + 1;
+            const prevPoints = starRatings[`star${maxStar}`] || 0;
+            starRatings[`star${newStarNum}`] = Math.ceil(prevPoints * 1.5);
+            renderStarRatings();
+        }
+
+        function removeStarRating(key) {
+            if (Object.keys(starRatings).length <= 1) {
+                return alert('You must have at least one star rating level');
+            }
+            delete starRatings[key];
+            renderStarRatings();
+        }
+
         function loadSettings() {
             // Load star rating configuration from backend
             fetch(`${API_URL}/admin/star-config`)
                 .then(r => r.json())
                 .then(config => {
-                    document.getElementById('star1').value = config.star1;
-                    document.getElementById('star2').value = config.star2;
-                    document.getElementById('star3').value = config.star3;
-                    document.getElementById('star4').value = config.star4;
-                    document.getElementById('star5').value = config.star5;
+                    starRatings = config;
+                    renderStarRatings();
                 })
                 .catch(error => {
                     console.error('Error loading star config:', error);
+                    // Default configuration
+                    starRatings = {
+                        star1: 25,
+                        star2: 100,
+                        star3: 250,
+                        star4: 500,
+                        star5: 1000
+                    };
+                    renderStarRatings();
                 });
         }
 
         async function saveStarConfig() {
-            const config = {
-                star1: parseInt(document.getElementById('star1').value),
-                star2: parseInt(document.getElementById('star2').value),
-                star3: parseInt(document.getElementById('star3').value),
-                star4: parseInt(document.getElementById('star4').value),
-                star5: parseInt(document.getElementById('star5').value)
-            };
+            // Update values from inputs
+            Object.keys(starRatings).forEach(key => {
+                const input = document.getElementById(key);
+                if (input) {
+                    starRatings[key] = parseInt(input.value);
+                }
+            });
             
             try {
                 const response = await fetch(`${API_URL}/admin/star-config`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(config)
+                    body: JSON.stringify(starRatings)
                 });
                 
                 if (response.ok) {
