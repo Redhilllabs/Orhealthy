@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for OrHealthy Admin Panel - Phase 1
-Tests all admin panel backend APIs as specified in the review request.
+Backend API Testing for OrHealthy Mobile App
+Tests all mobile app feature backend APIs as specified in test_result.md
 """
 
 import requests
 import json
 import sys
-from typing import Dict, Any, Optional
+from datetime import datetime
+import base64
 
 # Backend URL from frontend/.env
-BASE_URL = "https://nutrition-guide-9.preview.emergentagent.com"
-API_BASE_URL = f"{BASE_URL}/api"
+BACKEND_URL = "https://nutrition-guide-9.preview.emergentagent.com/api"
 
-class AdminPanelTester:
+class BackendTester:
     def __init__(self):
         self.session = requests.Session()
         self.test_results = []
