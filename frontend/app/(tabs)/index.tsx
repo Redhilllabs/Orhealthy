@@ -402,6 +402,12 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 16,
   },
+  postImage: {
+    width: '100%',
+    height: 250,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
   postActions: {
     flexDirection: 'row',
     alignItems: 'center',
