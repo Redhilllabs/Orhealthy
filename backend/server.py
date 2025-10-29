@@ -546,11 +546,27 @@ async def create_ingredient(ingredient: Ingredient, request: Request):
     result = await db.ingredients.insert_one(ingredient.dict())
     return {"message": "Ingredient created", "id": str(result.inserted_id)}
 
+@api_router.delete("/admin/ingredients/{ingredient_id}")
+async def delete_ingredient(ingredient_id: str, request: Request):
+    """Delete ingredient (admin only)"""
+    result = await db.ingredients.delete_one({"_id": ObjectId(ingredient_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Ingredient not found")
+    return {"message": "Ingredient deleted"}
+
 @api_router.post("/admin/meals")
 async def create_meal(meal: Meal, request: Request):
     """Create meal (admin only)"""
     result = await db.meals.insert_one(meal.dict())
     return {"message": "Meal created", "id": str(result.inserted_id)}
+
+@api_router.delete("/admin/meals/{meal_id}")
+async def delete_meal(meal_id: str, request: Request):
+    """Delete meal (admin only)"""
+    result = await db.meals.delete_one({"_id": ObjectId(meal_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    return {"message": "Meal deleted"}
 
 @api_router.get("/admin/orders")
 async def get_all_orders(request: Request):
