@@ -1,0 +1,40 @@
+diff --git a/backend/server.py b/backend/server.py
+index ef05960..3edde11 100644
+--- a/backend/server.py
++++ b/backend/server.py
+@@ -370,7 +370,7 @@ async def create_post(post_data: dict, request: Request):
+     # Update star rating
+     updated_user = await db.users.find_one({"_id": ObjectId(user["_id"])})
+     new_rating = calculate_star_rating(updated_user["points"])
+-    is_guide = new_rating >= 3
++    is_guide = new_rating >= 1
+     
+     await db.users.update_one(
+         {"_id": ObjectId(user["_id"])},
+@@ -426,7 +426,7 @@ async def vote_post(post_id: str, request: Request):
+         # Update star rating
+         post_owner = await db.users.find_one({"_id": ObjectId(post["user_id"])})
+         new_rating = calculate_star_rating(post_owner["points"])
+-        is_guide = new_rating >= 3
++        is_guide = new_rating >= 1
+         
+         await db.users.update_one(
+             {"_id": ObjectId(post["user_id"])},
+@@ -462,7 +462,7 @@ async def delete_post(post_id: str, request: Request):
+     # Update star rating
+     updated_user = await db.users.find_one({"_id": ObjectId(user["_id"])})
+     new_rating = calculate_star_rating(updated_user["points"])
+-    is_guide = new_rating >= 3
++    is_guide = new_rating >= 1
+     
+     await db.users.update_one(
+         {"_id": ObjectId(user["_id"])},
+@@ -724,7 +724,7 @@ async def update_user_points(user_id: str, points_data: dict, request: Request):
+     user = await db.users.find_one({"_id": ObjectId(user_id)})
+     total_points = user["points"] + user["inherent_points"]
+     new_rating = calculate_star_rating(total_points)
+-    is_guide = new_rating >= 3
++    is_guide = new_rating >= 1
+     
+     await db.users.update_one(
+         {"_id": ObjectId(user_id)},
