@@ -9,12 +9,14 @@ export default function AuthScreen() {
   const handleLogin = async () => {
     if (Platform.OS === 'web') {
       // On web, redirect directly
-      const redirectUrl = window.location.origin + '/';
+      const redirectUrl = window.location.origin + '/callback';
       const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+      console.log('[Auth] Redirecting to:', authUrl);
+      console.log('[Auth] Callback URL:', redirectUrl);
       window.location.href = authUrl;
     } else {
       // On mobile, use WebBrowser
-      const redirectUrl = Linking.createURL('/');
+      const redirectUrl = Linking.createURL('/callback');
       const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
       await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
     }
