@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,13 +17,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Modal from 'react-native-modal';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
+const { width } = Dimensions.get('window');
 
 interface Meal {
   _id: string;
   name: string;
   description: string;
-  image?: string;
+  images?: string[];
   base_price: number;
+  tags?: string[];
   ingredients: Array<{
     ingredient_id: string;
     name: string;
@@ -33,19 +37,38 @@ interface Meal {
 
 export default function PresetsScreen() {
   const [meals, setMeals] = useState<Meal[]>([]);
+  const [filteredMeals, setFilteredMeals] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [customizations, setCustomizations] = useState<any[]>([]);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const { addToCart } = useCart();
 
   useEffect(() => {
     fetchMeals();
   }, []);
 
+  useEffect(() => {
+    if (selectedTag) {
+      setFilteredMeals(meals.filter(meal => meal.tags?.includes(selectedTag)));
+    } else {
+      setFilteredMeals(meals);
+    }
+  }, [selectedTag, meals]);
+
   const fetchMeals = async () => {
     try {
       const response = await axios.get(`${API_URL}/meals`);
       setMeals(response.data);
+      setFilteredMeals(response.data);
+      
+      // Extract unique tags
+      const tags = new Set<string>();
+      response.data.forEach((meal: Meal) => {
+        meal.tags?.forEach(tag => tags.add(tag));
+      });
+      setAllTags(Array.from(tags));
     } catch (error) {
       console.error('Error fetching meals:', error);
     } finally {
@@ -95,16 +118,37 @@ export default function PresetsScreen() {
     return customizations.reduce((sum, ing) => sum + ing.price * (ing.quantity || 0), 0);
   };
 
+  const renderImageCarousel = (images: string[] | undefined) => {
+    if (!images || images.length === 0) {
+      return (
+        <View style={styles.mealImagePlaceholder}>
+          <Ionicons name="restaurant" size={48} color="#ccc" />
+        </View>
+      );
+    }
+
+    return (
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        style={styles.imageCarousel}
+      >
+        {images.map((image, index) => (
+          <Image
+            key={index}
+            source={{ uri: image }}
+            style={styles.mealImage}
+          />
+        ))}
+      </ScrollView>
+    );
+  };
+
   const renderMeal = ({ item }: { item: Meal }) => (
     <View style={styles.mealCard}>
       <View style={styles.mealImageContainer}>
-        {item.image ? (
-          <Image source={{ uri: item.image }} style={styles.mealImage} />
-        ) : (
-          <View style={styles.mealImagePlaceholder}>
-            <Ionicons name="restaurant" size={48} color="#ccc" />
-          </View>
-        )}
+        {renderImageCarousel(item.images)}
       </View>
 
       <View style={styles.mealInfo}>
@@ -112,7 +156,18 @@ export default function PresetsScreen() {
         <Text style={styles.mealDescription} numberOfLines={2}>
           {item.description}
         </Text>
-        <Text style={styles.mealPrice}>${item.base_price.toFixed(2)}</Text>
+        
+        {item.tags && item.tags.length > 0 && (
+          <View style={styles.tagsContainer}>
+            {item.tags.map((tag, index) => (
+              <View key={index} style={styles.tag}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+        
+        <Text style={styles.mealPrice}>₹{item.base_price.toFixed(2)}</Text>
 
         <View style={styles.mealActions}>
           <TouchableOpacity
@@ -148,8 +203,55 @@ export default function PresetsScreen() {
         <Text style={styles.headerTitle}>Preset Meals</Text>
       </View>
 
+      {/* Tags Filter */}
+      {allTags.length > 0 && (
+        <View style={styles.tagsFilterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tagsFilter}
+          >
+            <TouchableOpacity
+              style={[
+                styles.filterTag,
+                !selectedTag && styles.filterTagActive,
+              ]}
+              onPress={() => setSelectedTag(null)}
+            >
+              <Text
+                style={[
+                  styles.filterTagText,
+                  !selectedTag && styles.filterTagTextActive,
+                ]}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
+            {allTags.map((tag) => (
+              <TouchableOpacity
+                key={tag}
+                style={[
+                  styles.filterTag,
+                  selectedTag === tag && styles.filterTagActive,
+                ]}
+                onPress={() => setSelectedTag(tag)}
+              >
+                <Text
+                  style={[
+                    styles.filterTagText,
+                    selectedTag === tag && styles.filterTagTextActive,
+                  ]}
+                >
+                  {tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
       <FlatList
-        data={meals}
+        data={filteredMeals}
         renderItem={renderMeal}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
@@ -182,7 +284,7 @@ export default function PresetsScreen() {
               <View style={styles.ingredientRow}>
                 <View style={styles.ingredientInfo}>
                   <Text style={styles.ingredientName}>{item.name}</Text>
-                  <Text style={styles.ingredientPrice}>${item.price.toFixed(2)}</Text>
+                  <Text style={styles.ingredientPrice}>₹{item.price.toFixed(2)}</Text>
                 </View>
 
                 <View style={styles.quantityControl}>
@@ -209,7 +311,7 @@ export default function PresetsScreen() {
 
           <View style={styles.modalFooter}>
             <Text style={styles.totalPrice}>
-              Total: ${calculateCustomPrice().toFixed(2)}
+              Total: ₹{calculateCustomPrice().toFixed(2)}
             </Text>
             <TouchableOpacity
               style={styles.addToCartButton}
@@ -245,6 +347,37 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  tagsFilterContainer: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  tagsFilter: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  filterTag: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  filterTagActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  filterTagText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  filterTagTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
   listContent: {
     padding: 16,
   },
@@ -263,9 +396,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 180,
   },
-  mealImage: {
+  imageCarousel: {
     width: '100%',
-    height: '100%',
+    height: 180,
+  },
+  mealImage: {
+    width: width - 32,
+    height: 180,
   },
   mealImagePlaceholder: {
     width: '100%',
@@ -287,6 +424,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 12,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 12,
+  },
+  tag: {
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ffd700',
+  },
+  tagText: {
+    fontSize: 12,
+    color: '#856404',
+    fontWeight: '500',
   },
   mealPrice: {
     fontSize: 24,

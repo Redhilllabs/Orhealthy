@@ -44,7 +44,7 @@ export default function CartScreen() {
         )}
 
         <View style={styles.itemFooter}>
-          <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+          <Text style={styles.itemPrice}>₹{item.price.toFixed(2)}</Text>
           <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
         </View>
       </View>
@@ -75,6 +75,11 @@ export default function CartScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Cart</Text>
+        {cartItems.length > 0 && (
+          <View style={styles.itemCount}>
+            <Text style={styles.itemCountText}>{cartItems.length}</Text>
+          </View>
+        )}
       </View>
 
       {cartItems.length === 0 ? (
@@ -97,7 +102,7 @@ export default function CartScreen() {
           <View style={styles.footer}>
             <View style={styles.totalContainer}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalPrice}>${totalPrice.toFixed(2)}</Text>
+              <Text style={styles.totalPrice}>₹{totalPrice.toFixed(2)}</Text>
             </View>
 
             <TouchableOpacity
@@ -125,6 +130,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
@@ -134,6 +142,19 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+  },
+  itemCount: {
+    backgroundColor: '#ffd700',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  itemCountText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   listContent: {
     padding: 16,
