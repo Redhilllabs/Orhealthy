@@ -6,75 +6,134 @@
     <title>OrHealthy Admin Panel</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
-        .container { max-width: 1400px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; padding: 24px; display: flex; align-items: center; gap: 16px; border-radius: 12px 12px 0 0; }
-        .header img { width: 48px; height: 48px; border-radius: 24px; }
-        .header h1 { font-size: 28px; font-weight: 700; }
-        .tabs { display: flex; border-bottom: 2px solid #eee; background: #fafafa; }
-        .tab { padding: 16px 24px; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; font-weight: 500; }
-        .tab:hover { background: #f0f0f0; }
-        .tab.active { border-bottom-color: #ffd700; background: white; color: #ffd700; }
-        .content { padding: 24px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); color: white; display: flex; flex-direction: column; box-shadow: 4px 0 12px rgba(0,0,0,0.2); position: fixed; height: 100vh; left: 0; top: 0; }
+        .logo-section { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 12px; background: rgba(255,215,0,0.1); }
+        .logo-section img { width: 48px; height: 48px; border-radius: 12px; }
+        .logo-text h1 { font-size: 20px; font-weight: 700; color: #ffd700; }
+        .logo-text p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .nav-menu { flex: 1; padding: 16px 0; overflow-y: auto; }
+        .nav-item { padding: 14px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; color: rgba(255,255,255,0.7); border-left: 3px solid transparent; font-size: 14px; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(255,215,0,0.15); color: #ffd700; border-left-color: #ffd700; }
+        .nav-icon { font-size: 18px; width: 20px; }
+        
+        /* Main Content */
+        .main-content { flex: 1; margin-left: 260px; }
+        .top-bar { background: white; padding: 20px 32px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .page-title { font-size: 24px; font-weight: 700; color: #1e293b; }
+        .content-area { padding: 32px; }
+        
         .section { display: none; }
         .section.active { display: block; }
+        
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(255,215,0,0.2); }
+        .stat-number { font-size: 40px; font-weight: 800; margin-bottom: 8px; }
+        .stat-label { font-size: 13px; opacity: 0.8; font-weight: 600; }
+        
+        .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .card-title { font-size: 20px; font-weight: 700; color: #1e293b; }
+        
         .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
-        input, textarea, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #ffd700; }
-        textarea { min-height: 100px; resize: vertical; }
-        .btn { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: transform 0.2s; }
-        .btn:hover { transform: translateY(-2px); }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, textarea, select { width: 100%; padding: 12px 14px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: all 0.2s; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #ffd700; box-shadow: 0 0 0 3px rgba(255,215,0,0.1); }
+        textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+        
+        .btn { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #1e293b; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; transition: all 0.2s; box-shadow: 0 2px 8px rgba(255,215,0,0.3); }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255,215,0,0.4); }
         .btn-secondary { background: #64748b; color: white; }
         .btn-danger { background: #ef4444; color: white; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; padding: 24px; border-radius: 12px; }
-        .stat-number { font-size: 42px; font-weight: 800; margin-bottom: 8px; }
-        .stat-label { font-size: 14px; opacity: 0.8; }
-        .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-        .table th { background: #f9f9f9; font-weight: 600; }
-        .table tr:hover { background: #f9f9f9; }
+        
+        .image-upload { border: 2px dashed #cbd5e1; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fafc; }
+        .image-upload:hover { border-color: #ffd700; background: rgba(255,215,0,0.05); }
+        .image-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-top: 12px; }
+        .image-preview-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .image-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .image-remove { position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 14px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        .table th { background: #f8fafc; font-weight: 700; color: #475569; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+        .table tr:hover { background: #f8fafc; }
+        .table-image { width: 50px; height: 50px; border-radius: 6px; object-fit: cover; }
+        
         .actions { display: flex; gap: 8px; }
-        .actions button { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 1000; }
+        .actions button { padding: 6px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 32px; border-radius: 16px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-title { font-size: 24px; font-weight: 700; }
-        .close { font-size: 32px; cursor: pointer; color: #999; }
-        .close:hover { color: #333; }
-        .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
-        .alert-success { background: #d4edda; color: #155724; }
-        .alert-error { background: #f8d7da; color: #721c24; }
-        .ingredient-list { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
-        .ingredient-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f0f0f0; border-radius: 8px; }
-        .ingredient-item input { width: 70px; padding: 6px; }
-        .ingredient-item button { background: #ef4444; color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; }
+        .modal-content { background: white; padding: 32px; border-radius: 16px; max-width: 700px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
+        .modal-title { font-size: 22px; font-weight: 700; color: #1e293b; }
+        .close { font-size: 28px; cursor: pointer; color: #94a3b8; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s; }
+        .close:hover { background: #f1f5f9; color: #475569; }
+        
+        .alert { padding: 14px 18px; border-radius: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+        .alert-success { background: #d1fae5; color: #065f46; }
+        .alert-error { background: #fee2e2; color: #991b1b; }
+        
+        .ingredient-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+        .ingredient-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; font-size: 13px; }
+        .ingredient-item input { width: 60px; padding: 4px 8px; font-size: 13px; }
+        .ingredient-item button { background: #ef4444; color: white; border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-weight: 600; }
+        
+        .config-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; }
+        .config-label { font-weight: 600; color: #475569; }
+        .config-input { width: 120px; padding: 8px 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="https://customer-assets.emergentagent.com/job_nutritionhub-1/artifacts/kq74ajf1_Orhealthy%20Favicon.png" alt="OrHealthy Logo">
-            <div>
-                <h1>OrHealthy Admin Panel</h1>
-                <p>Manage your nutrition ecosystem</p>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo-section">
+            <img src="https://customer-assets.emergentagent.com/job_nutritionhub-1/artifacts/kq74ajf1_Orhealthy%20Favicon.png" alt="Logo">
+            <div class="logo-text">
+                <h1>OrHealthy</h1>
+                <p>Admin Panel</p>
             </div>
         </div>
-
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
-            <div class="tab" onclick="switchTab('ingredients')">Ingredients</div>
-            <div class="tab" onclick="switchTab('meals')">Preset Meals</div>
-            <div class="tab" onclick="switchTab('users')">Users</div>
-            <div class="tab" onclick="switchTab('orders')">Orders</div>
+        <div class="nav-menu">
+            <div class="nav-item active" onclick="switchTab('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('ingredients')">
+                <span class="nav-icon">🥗</span>
+                <span>Ingredients</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('meals')">
+                <span class="nav-icon">🍽️</span>
+                <span>Preset Meals</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('users')">
+                <span class="nav-icon">👥</span>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('orders')">
+                <span class="nav-icon">📦</span>
+                <span>Orders</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('settings')">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </div>
         </div>
+    </div>
 
-        <div class="content">
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        </div>
+        
+        <div class="content-area">
             <!-- Dashboard -->
             <div id="dashboard" class="section active">
-                <h2 style="margin-bottom: 24px;">Dashboard</h2>
                 <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number" id="totalUsers">0</div>
@@ -97,82 +156,129 @@
 
             <!-- Ingredients -->
             <div id="ingredients" class="section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Ingredients Management</h2>
-                    <button class="btn" onclick="showIngredientModal()">+ Add Ingredient</button>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Ingredients Management</h2>
+                        <button class="btn" onclick="showIngredientModal()">+ Add Ingredient</button>
+                    </div>
+                    <div id="alert-ingredients"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Price/Unit</th>
+                                <th>Unit</th>
+                                <th>Tags</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ingredientsBody"></tbody>
+                    </table>
                 </div>
-                <div id="alert-ingredients"></div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Price/Unit</th>
-                            <th>Unit</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ingredientsBody"></tbody>
-                </table>
             </div>
 
             <!-- Meals -->
             <div id="meals" class="section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Preset Meals Management</h2>
-                    <button class="btn" onclick="showMealModal()">+ Add Meal</button>
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Preset Meals Management</h2>
+                        <button class="btn" onclick="showMealModal()">+ Add Meal</button>
+                    </div>
+                    <div id="alert-meals"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Tags</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mealsBody"></tbody>
+                    </table>
                 </div>
-                <div id="alert-meals"></div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Base Price</th>
-                            <th>Ingredients</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mealsBody"></tbody>
-                </table>
             </div>
 
             <!-- Users -->
             <div id="users" class="section">
-                <h2 style="margin-bottom: 20px;">Users Management</h2>
-                <div id="alert-users"></div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Points</th>
-                            <th>Inherent Points</th>
-                            <th>Star Rating</th>
-                            <th>Is Guide</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersBody"></tbody>
-                </table>
+                <div class="card">
+                    <h2 class="card-title" style="margin-bottom: 20px;">Users Management</h2>
+                    <div id="alert-users"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Points</th>
+                                <th>Inherent</th>
+                                <th>Stars</th>
+                                <th>Is Guide</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Orders -->
             <div id="orders" class="section">
-                <h2 style="margin-bottom: 20px;">Orders Management</h2>
-                <div id="alert-orders"></div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Total Price</th>
-                            <th>Status</th>
-                            <th>Created At</th>
-                            <th>Items</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersBody"></tbody>
-                </table>
+                <div class="card">
+                    <h2 class="card-title" style="margin-bottom: 20px;">Orders Management</h2>
+                    <div id="alert-orders"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div id="settings" class="section">
+                <div class="card">
+                    <h2 class="card-title" style="margin-bottom: 20px;">Star Rating Configuration</h2>
+                    <p style="color: #64748b; margin-bottom: 24px;">Configure the points required for each star rating level. Users with 1+ stars become Guides.</p>
+                    <div id="alert-settings"></div>
+                    
+                    <div class="config-item">
+                        <span class="config-label">⭐ 1 Star</span>
+                        <input type="number" class="config-input" id="star1" value="25" min="0">
+                        <span style="color: #64748b; font-size: 13px;">points (Becomes Guide)</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">⭐⭐ 2 Stars</span>
+                        <input type="number" class="config-input" id="star2" value="100" min="0">
+                        <span style="color: #64748b; font-size: 13px;">points</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">⭐⭐⭐ 3 Stars</span>
+                        <input type="number" class="config-input" id="star3" value="250" min="0">
+                        <span style="color: #64748b; font-size: 13px;">points</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">⭐⭐⭐⭐ 4 Stars</span>
+                        <input type="number" class="config-input" id="star4" value="500" min="0">
+                        <span style="color: #64748b; font-size: 13px;">points</span>
+                    </div>
+                    <div class="config-item">
+                        <span class="config-label">⭐⭐⭐⭐⭐ 5 Stars</span>
+                        <input type="number" class="config-input" id="star5" value="1000" min="0">
+                        <span style="color: #64748b; font-size: 13px;">points</span>
+                    </div>
+                    
+                    <button class="btn" style="margin-top: 24px;" onclick="saveStarConfig()">Save Configuration</button>
+                </div>
             </div>
         </div>
     </div>
@@ -186,11 +292,21 @@
             </div>
             <form id="ingredientForm" onsubmit="saveIngredient(event)">
                 <div class="form-group">
+                    <label>Images</label>
+                    <div class="image-upload" onclick="document.getElementById('ingredientImages').click()">
+                        <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+                        <div style="font-weight: 600; color: #475569;">Click to upload images</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Multiple images supported</div>
+                    </div>
+                    <input type="file" id="ingredientImages" multiple accept="image/*" style="display: none;" onchange="handleIngredientImages(event)">
+                    <div id="ingredientImagePreview" class="image-preview-grid"></div>
+                </div>
+                <div class="form-group">
                     <label>Name *</label>
                     <input type="text" id="ingredientName" required>
                 </div>
                 <div class="form-group">
-                    <label>Price per Unit *</label>
+                    <label>Price per Unit (₹) *</label>
                     <input type="number" step="0.01" id="ingredientPrice" required>
                 </div>
                 <div class="form-group">
@@ -204,6 +320,10 @@
                         <option value="ml">Milliliters</option>
                         <option value="bowl">Bowl</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="ingredientTags" placeholder="e.g. protein, vegetarian, organic">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -222,6 +342,16 @@
             </div>
             <form id="mealForm" onsubmit="saveMeal(event)">
                 <div class="form-group">
+                    <label>Images</label>
+                    <div class="image-upload" onclick="document.getElementById('mealImages').click()">
+                        <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+                        <div style="font-weight: 600; color: #475569;">Click to upload images</div>
+                        <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Multiple images supported</div>
+                    </div>
+                    <input type="file" id="mealImages" multiple accept="image/*" style="display: none;" onchange="handleMealImages(event)">
+                    <div id="mealImagePreview" class="image-preview-grid"></div>
+                </div>
+                <div class="form-group">
                     <label>Meal Name *</label>
                     <input type="text" id="mealName" required>
                 </div>
@@ -230,8 +360,12 @@
                     <textarea id="mealDescription" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Base Price *</label>
+                    <label>Price (₹) *</label>
                     <input type="number" step="0.01" id="mealPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="mealTags" placeholder="e.g. high-protein, low-carb, vegan">
                 </div>
                 <div class="form-group">
                     <label>Ingredients *</label>
@@ -275,12 +409,24 @@
         const API_URL = '/api';
         let selectedMealIngredients = [];
         let allIngredients = [];
+        let ingredientImages = [];
+        let mealImages = [];
+
+        const pageTitles = {
+            dashboard: 'Dashboard',
+            ingredients: 'Ingredients Management',
+            meals: 'Preset Meals Management',
+            users: 'Users Management',
+            orders: 'Orders Management',
+            settings: 'Settings'
+        };
 
         function switchTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
+            document.getElementById('pageTitle').textContent = pageTitles[tabName];
 
             switch(tabName) {
                 case 'dashboard': loadDashboard(); break;
@@ -288,7 +434,64 @@
                 case 'meals': loadMeals(); break;
                 case 'users': loadUsers(); break;
                 case 'orders': loadOrders(); break;
+                case 'settings': loadSettings(); break;
             }
+        }
+
+        function handleIngredientImages(event) {
+            const files = Array.from(event.target.files);
+            ingredientImages = [];
+            const preview = document.getElementById('ingredientImagePreview');
+            preview.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    ingredientImages.push(e.target.result);
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button type="button" class="image-remove" onclick="removeIngredientImage(${index})">×</button>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeIngredientImage(index) {
+            ingredientImages.splice(index, 1);
+            document.getElementById('ingredientImages').value = '';
+            handleIngredientImages({ target: { files: [] } });
+        }
+
+        function handleMealImages(event) {
+            const files = Array.from(event.target.files);
+            mealImages = [];
+            const preview = document.getElementById('mealImagePreview');
+            preview.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    mealImages.push(e.target.result);
+                    const div = document.createElement('div');
+                    div.className = 'image-preview-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button type="button" class="image-remove" onclick="removeMealImage(${index})">×</button>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeMealImage(index) {
+            mealImages.splice(index, 1);
+            document.getElementById('mealImages').value = '';
+            handleMealImages({ target: { files: [] } });
         }
 
         async function loadDashboard() {
@@ -315,12 +518,13 @@
                 const tbody = document.getElementById('ingredientsBody');
                 tbody.innerHTML = ingredients.map(ing => `
                     <tr>
-                        <td>₹{ing.name}</td>
-                        <td>$₹{ing.price_per_unit.toFixed(2)}</td>
-                        <td>₹{ing.unit}</td>
-                        <td>₹{ing.description || '-'}</td>
+                        <td>${ing.images && ing.images.length > 0 ? `<img src="${ing.images[0]}" class="table-image">` : '-'}</td>
+                        <td>${ing.name}</td>
+                        <td>₹${ing.price_per_unit.toFixed(2)}</td>
+                        <td>${ing.unit}</td>
+                        <td>${ing.tags ? ing.tags.join(', ') : '-'}</td>
                         <td class="actions">
-                            <button class="btn btn-danger" onclick="deleteIngredient('₹{ing._id}')">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteIngredient('${ing._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -333,16 +537,24 @@
         function showIngredientModal() {
             document.getElementById('ingredientModal').classList.add('active');
             document.getElementById('ingredientForm').reset();
+            ingredientImages = [];
+            document.getElementById('ingredientImagePreview').innerHTML = '';
         }
 
         async function saveIngredient(e) {
             e.preventDefault();
+            const tags = document.getElementById('ingredientTags').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+            
             const data = {
                 name: document.getElementById('ingredientName').value,
                 price_per_unit: parseFloat(document.getElementById('ingredientPrice').value),
                 unit: document.getElementById('ingredientUnit').value,
-                description: document.getElementById('ingredientDescription').value
+                description: document.getElementById('ingredientDescription').value,
+                tags: tags,
+                images: ingredientImages
             };
+            
             try {
                 const response = await fetch(`${API_URL}/admin/ingredients`, {
                     method: 'POST',
@@ -362,7 +574,7 @@
         async function deleteIngredient(id) {
             if (!confirm('Delete this ingredient?')) return;
             try {
-                await fetch(`${API_URL}/admin/ingredients/₹{id}`, { method: 'DELETE' });
+                await fetch(`${API_URL}/admin/ingredients/${id}`, { method: 'DELETE' });
                 showAlert('ingredients', 'Deleted successfully', 'success');
                 loadIngredients();
             } catch (error) {
@@ -376,12 +588,13 @@
                 const tbody = document.getElementById('mealsBody');
                 tbody.innerHTML = meals.map(meal => `
                     <tr>
-                        <td>₹{meal.name}</td>
-                        <td>₹{meal.description}</td>
-                        <td>$₹{meal.base_price.toFixed(2)}</td>
-                        <td>₹{meal.ingredients.length} ingredients</td>
+                        <td>${meal.images && meal.images.length > 0 ? `<img src="${meal.images[0]}" class="table-image">` : '-'}</td>
+                        <td>${meal.name}</td>
+                        <td>${meal.description}</td>
+                        <td>₹${meal.base_price.toFixed(2)}</td>
+                        <td>${meal.tags ? meal.tags.join(', ') : '-'}</td>
                         <td class="actions">
-                            <button class="btn btn-danger" onclick="deleteMeal('₹{meal._id}')">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteMeal('${meal._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -394,13 +607,15 @@
             document.getElementById('mealModal').classList.add('active');
             document.getElementById('mealForm').reset();
             selectedMealIngredients = [];
+            mealImages = [];
             document.getElementById('mealIngredients').innerHTML = '';
+            document.getElementById('mealImagePreview').innerHTML = '';
         }
 
         function updateMealIngredientSelect() {
             const select = document.getElementById('mealIngredientSelect');
             select.innerHTML = '<option value="">-- Select ingredient --</option>' +
-                allIngredients.map(ing => `<option value="₹{ing._id}">₹{ing.name} ($₹{ing.price_per_unit}/₹{ing.unit})</option>`).join('');
+                allIngredients.map(ing => `<option value="${ing._id}">${ing.name} (₹${ing.price_per_unit}/${ing.unit})</option>`).join('');
         }
 
         function addIngredientToMeal() {
@@ -424,10 +639,10 @@
         function renderMealIngredients() {
             document.getElementById('mealIngredients').innerHTML = selectedMealIngredients.map((ing, idx) => `
                 <div class="ingredient-item">
-                    <span>₹{ing.name}</span>
-                    <input type="number" min="0.1" step="0.1" value="₹{ing.default_quantity}" 
-                           onchange="updateIngredientQuantity(₹{idx}, this.value)">
-                    <button type="button" onclick="removeIngredientFromMeal(₹{idx})">×</button>
+                    <span>${ing.name}</span>
+                    <input type="number" min="0.1" step="0.1" value="${ing.default_quantity}" 
+                           onchange="updateIngredientQuantity(${idx}, this.value)">
+                    <button type="button" onclick="removeIngredientFromMeal(${idx})">×</button>
                 </div>
             `).join('');
         }
@@ -444,14 +659,21 @@
         async function saveMeal(e) {
             e.preventDefault();
             if (selectedMealIngredients.length === 0) return alert('Add at least one ingredient');
+            
+            const tags = document.getElementById('mealTags').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+            
             const data = {
                 name: document.getElementById('mealName').value,
                 description: document.getElementById('mealDescription').value,
                 base_price: parseFloat(document.getElementById('mealPrice').value),
                 ingredients: selectedMealIngredients,
+                tags: tags,
+                images: mealImages,
                 is_preset: true,
                 created_by: 'admin'
             };
+            
             try {
                 const response = await fetch(`${API_URL}/admin/meals`, {
                     method: 'POST',
@@ -471,7 +693,7 @@
         async function deleteMeal(id) {
             if (!confirm('Delete this meal?')) return;
             try {
-                await fetch(`${API_URL}/admin/meals/₹{id}`, { method: 'DELETE' });
+                await fetch(`${API_URL}/admin/meals/${id}`, { method: 'DELETE' });
                 showAlert('meals', 'Deleted successfully', 'success');
                 loadMeals();
             } catch (error) {
@@ -485,15 +707,15 @@
                 const tbody = document.getElementById('usersBody');
                 tbody.innerHTML = users.map(user => `
                     <tr>
-                        <td>₹{user.name}</td>
-                        <td>₹{user.email}</td>
-                        <td>₹{user.points}</td>
-                        <td>₹{user.inherent_points}</td>
-                        <td>₹{user.star_rating} ⭐</td>
-                        <td>₹{user.is_guide ? 'Yes' : 'No'}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>${user.points}</td>
+                        <td>${user.inherent_points}</td>
+                        <td>${user.star_rating} ⭐</td>
+                        <td>${user.is_guide ? 'Yes' : 'No'}</td>
                         <td class="actions">
-                            <button class="btn" onclick="showUserPointsModal('₹{user._id}', '₹{user.name}', ₹{user.points}, ₹{user.inherent_points})">
-                                Update Points
+                            <button class="btn" onclick="showUserPointsModal('${user._id}', '${user.name}', ${user.points}, ${user.inherent_points})">
+                                Update
                             </button>
                         </td>
                     </tr>
@@ -516,7 +738,7 @@
             const userId = document.getElementById('userId').value;
             const inherentPoints = parseInt(document.getElementById('inherentPoints').value);
             try {
-                const response = await fetch(`${API_URL}/admin/users/₹{userId}/points`, {
+                const response = await fetch(`${API_URL}/admin/users/${userId}/points`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ inherent_points: inherentPoints })
@@ -537,17 +759,17 @@
                 const tbody = document.getElementById('ordersBody');
                 tbody.innerHTML = orders.map(order => `
                     <tr>
-                        <td>₹{order._id.substring(0, 8)}...</td>
-                        <td>$₹{order.total_price.toFixed(2)}</td>
+                        <td>${order._id.substring(0, 8)}...</td>
+                        <td>₹${order.total_price.toFixed(2)}</td>
                         <td>
-                            <select onchange="updateOrderStatus('₹{order._id}', this.value)">
-                                <option value="pending" ₹{order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="confirmed" ₹{order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="delivered" ₹{order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <select onchange="updateOrderStatus('${order._id}', this.value)">
+                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                             </select>
                         </td>
-                        <td>₹{new Date(order.created_at).toLocaleDateString()}</td>
-                        <td>₹{order.items.length} items</td>
+                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>${order.items.length}</td>
                     </tr>
                 `).join('');
             } catch (error) {
@@ -557,7 +779,7 @@
 
         async function updateOrderStatus(orderId, status) {
             try {
-                await fetch(`${API_URL}/admin/orders/₹{orderId}`, {
+                await fetch(`${API_URL}/admin/orders/${orderId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ status })
@@ -568,13 +790,29 @@
             }
         }
 
+        function loadSettings() {
+            // Settings already loaded with default values
+        }
+
+        async function saveStarConfig() {
+            const config = {
+                star1: parseInt(document.getElementById('star1').value),
+                star2: parseInt(document.getElementById('star2').value),
+                star3: parseInt(document.getElementById('star3').value),
+                star4: parseInt(document.getElementById('star4').value),
+                star5: parseInt(document.getElementById('star5').value)
+            };
+            showAlert('settings', 'Configuration saved! (Note: Backend integration pending)', 'success');
+            console.log('Star rating config:', config);
+        }
+
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
 
         function showAlert(section, message, type) {
-            const alertDiv = document.getElementById(`alert-₹{section}`);
-            alertDiv.innerHTML = `<div class="alert alert-₹{type}">₹{message}</div>`;
+            const alertDiv = document.getElementById(`alert-${section}`);
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
             setTimeout(() => alertDiv.innerHTML = '', 3000);
         }
 
