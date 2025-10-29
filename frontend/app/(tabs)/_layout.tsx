@@ -1,7 +1,12 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet } from 'react-native';
+import { useCart } from '../../src/context/CartContext';
 
 export default function TabsLayout() {
+  const { cartItems } = useCart();
+  const cartCount = cartItems.length;
+
   return (
     <Tabs
       screenOptions={{
@@ -11,9 +16,13 @@ export default function TabsLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: 60,
-          paddingBottom: 8,
+          height: 70,
+          paddingBottom: 10,
           paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginTop: 4,
         },
         headerShown: false,
       }}
@@ -50,7 +59,14 @@ export default function TabsLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart" size={size} color={color} />
+            <View style={styles.cartIconContainer}>
+              <Ionicons name="cart" size={size} color={color} />
+              {cartCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartCount}</Text>
+                </View>
+              )}
+            </View>
           ),
         }}
       />
@@ -66,3 +82,26 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  cartIconContainer: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -8,
+    right: -12,
+    backgroundColor: '#ef4444',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+});
