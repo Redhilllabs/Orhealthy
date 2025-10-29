@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 import { useEffect } from 'react';
@@ -7,10 +7,17 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function AuthScreen() {
   const handleLogin = async () => {
-    const redirectUrl = Linking.createURL('/');
-    const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-    
-    await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+    if (Platform.OS === 'web') {
+      // On web, redirect directly
+      const redirectUrl = window.location.origin + '/';
+      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+      window.location.href = authUrl;
+    } else {
+      // On mobile, use WebBrowser
+      const redirectUrl = Linking.createURL('/');
+      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+      await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+    }
   };
 
   return (
