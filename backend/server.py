@@ -443,7 +443,7 @@ async def vote_post(post_id: str, request: Request):
         
         # Update star rating
         post_owner = await db.users.find_one({"_id": ObjectId(post["user_id"])})
-        new_rating = calculate_star_rating(post_owner["points"])
+        new_rating = await calculate_star_rating(post_owner["points"])
         is_guide = new_rating >= 1
         
         await db.users.update_one(
