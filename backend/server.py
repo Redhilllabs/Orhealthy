@@ -166,26 +166,35 @@ async def get_current_user(request: Request) -> Optional[dict]:
 async def get_session_data(request: Request):
     """Process session ID and return session data"""
     session_id = request.headers.get("X-Session-ID")
+    logger.info(f"Received session request with session_id: {session_id}")
+    
     if not session_id:
+        logger.error("No session ID provided")
         raise HTTPException(status_code=400, detail="No session ID provided")
     
     try:
         # Call Emergent auth service
+        logger.info(f"Calling Emergent auth service with session_id: {session_id}")
         response = requests.get(
             "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
             headers={"X-Session-ID": session_id}
         )
         
+        logger.info(f"Emergent auth response status: {response.status_code}")
+        
         if response.status_code != 200:
+            logger.error(f"Invalid session, status code: {response.status_code}, response: {response.text}")
             raise HTTPException(status_code=401, detail="Invalid session")
         
         data = response.json()
+        logger.info(f"Received user data: {data.get('email')}")
         
         # Check if user exists
         user = await db.users.find_one({"email": data["email"]})
         
         if not user:
             # Create new user
+            logger.info(f"Creating new user: {data['email']}")
             new_user = User(
                 email=data["email"],
                 name=data["name"],
@@ -194,8 +203,10 @@ async def get_session_data(request: Request):
             )
             result = await db.users.insert_one(new_user.dict())
             user_id = str(result.inserted_id)
+            logger.info(f"New user created with id: {user_id}")
         else:
             user_id = str(user["_id"])
+            logger.info(f"Existing user found with id: {user_id}")
         
         # Create session
         session_token = data["session_token"]
@@ -208,6 +219,7 @@ async def get_session_data(request: Request):
         )
         
         await db.sessions.insert_one(session.dict())
+        logger.info(f"Session created for user: {user_id}")
         
         return {
             "id": data["id"],
@@ -217,8 +229,10 @@ async def get_session_data(request: Request):
             "session_token": session_token,
             "user_id": user_id
         }
+    except HTTPException:
+        raise
     except Exception as e:
-        logging.error(f"Error processing session: {str(e)}")
+        logger.error(f"Error processing session: {str(e)}")
         raise HTTPException(status_code=500, detail="Error processing session")
 
 @api_router.post("/auth/logout")
