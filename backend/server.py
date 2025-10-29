@@ -387,7 +387,7 @@ async def create_post(post_data: dict, request: Request):
     
     # Update star rating
     updated_user = await db.users.find_one({"_id": ObjectId(user["_id"])})
-    new_rating = calculate_star_rating(updated_user["points"])
+    new_rating = await calculate_star_rating(updated_user["points"])
     is_guide = new_rating >= 1
     
     await db.users.update_one(
@@ -479,7 +479,7 @@ async def delete_post(post_id: str, request: Request):
     
     # Update star rating
     updated_user = await db.users.find_one({"_id": ObjectId(user["_id"])})
-    new_rating = calculate_star_rating(updated_user["points"])
+    new_rating = await calculate_star_rating(updated_user["points"])
     is_guide = new_rating >= 1
     
     await db.users.update_one(
