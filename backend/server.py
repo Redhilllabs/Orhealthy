@@ -289,7 +289,59 @@ async def get_user(user_id: str):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user["_id"] = str(user["_id"])
+    
+    # Get user's posts
+    posts = await db.posts.find({"user_id": user_id}).sort("created_at", -1).to_list(50)
+    for post in posts:
+        post["_id"] = str(post["_id"])
+    user["posts"] = posts
+    
     return user
+
+@api_router.post("/users/{user_id}/become-fan")
+async def become_fan(user_id: str, request: Request):
+    """Become a fan of another user (idol relationship)"""
+    current_user = await get_current_user(request)
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    if current_user["_id"] == user_id:
+        raise HTTPException(status_code=400, detail="Cannot be your own fan")
+    
+    # Add to current user's idols list
+    await db.users.update_one(
+        {"_id": ObjectId(current_user["_id"])},
+        {"$addToSet": {"idols": user_id}}
+    )
+    
+    # Add current user to target user's fans list
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$addToSet": {"fans": current_user["_id"]}}
+    )
+    
+    return {"message": "Successfully became a fan"}
+
+@api_router.delete("/users/{user_id}/unfan")
+async def unfan(user_id: str, request: Request):
+    """Remove fan relationship"""
+    current_user = await get_current_user(request)
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Remove from current user's idols list
+    await db.users.update_one(
+        {"_id": ObjectId(current_user["_id"])},
+        {"$pull": {"idols": user_id}}
+    )
+    
+    # Remove current user from target user's fans list
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$pull": {"fans": current_user["_id"]}}
+    )
+    
+    return {"message": "Unfanned successfully"}
 
 # Post endpoints
 @api_router.post("/posts")
