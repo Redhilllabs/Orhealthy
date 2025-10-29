@@ -60,7 +60,7 @@ export default function HomeScreen() {
 
     try {
       setPosting(true);
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       await axios.post(
         `${API_URL}/posts`,
         { content },
@@ -79,7 +79,7 @@ export default function HomeScreen() {
 
   const toggleVote = async (postId: string) => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       await axios.post(
         `${API_URL}/posts/${postId}/vote`,
         {},
