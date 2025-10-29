@@ -33,7 +33,7 @@ export default function CheckoutScreen() {
   const [billingPhone, setBillingPhone] = useState('');
 
   // Shipping address
-  const [sameAsB illing, setSameAsBilling] = useState(true);
+  const [sameAsBilling, setSameAsBilling] = useState(true);
   const [shippingName, setShippingName] = useState('');
   const [shippingStreet, setShippingStreet] = useState('');
   const [shippingCity, setShippingCity] = useState('');
