@@ -192,25 +192,45 @@ export default function HomeScreen() {
         style={styles.flex}
       >
         <View style={styles.createPost}>
-          <TextInput
-            style={styles.input}
-            placeholder="Share your healthy eating experience..."
-            value={content}
-            onChangeText={setContent}
-            multiline
-            maxLength={500}
-          />
-          <TouchableOpacity
-            style={[styles.postButton, !content.trim() && styles.postButtonDisabled]}
-            onPress={createPost}
-            disabled={!content.trim() || posting}
-          >
-            {posting ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.postButtonText}>Post</Text>
-            )}
-          </TouchableOpacity>
+          {selectedImage && (
+            <View style={styles.imagePreview}>
+              <Image source={{ uri: selectedImage }} style={styles.previewImage} />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => setSelectedImage(null)}
+              >
+                <Ionicons name="close-circle" size={24} color="#F44336" />
+              </TouchableOpacity>
+            </View>
+          )}
+          
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Share your healthy eating experience..."
+              value={content}
+              onChangeText={setContent}
+              multiline
+              maxLength={500}
+            />
+            <View style={styles.actionsRow}>
+              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+                <Ionicons name="image-outline" size={24} color="#4CAF50" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.postButton, (!content.trim() || posting) && styles.postButtonDisabled]}
+                onPress={createPost}
+                disabled={!content.trim() || posting}
+              >
+                {posting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.postButtonText}>Post</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
 
         <FlatList
