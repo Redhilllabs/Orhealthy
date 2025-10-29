@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../utils/storage';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
