@@ -597,6 +597,7 @@
                         <td>₹${meal.base_price.toFixed(2)}</td>
                         <td>${meal.tags ? meal.tags.join(', ') : '-'}</td>
                         <td class="actions">
+                            <button class="btn" onclick="editMeal('${meal._id}')">Edit</button>
                             <button class="btn btn-danger" onclick="deleteMeal('${meal._id}')">Delete</button>
                         </td>
                     </tr>
