@@ -76,7 +76,8 @@ class Ingredient(BaseModel):
     unit: str  # g, ml, piece
     description: Optional[str] = None
     nutritional_info: Optional[dict] = None
-    image: Optional[str] = None
+    images: List[str] = []  # Base64 encoded images
+    tags: List[str] = []  # Tags for filtering
 
 class MealIngredient(BaseModel):
     ingredient_id: str
