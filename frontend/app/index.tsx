@@ -1,22 +1,43 @@
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, Platform } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../src/context/AuthContext';
 
 export default function Index() {
   const router = useRouter();
-  const { session_id } = useLocalSearchParams();
+  const params = useLocalSearchParams();
   const { user, loading, processSessionId, checkSession } = useAuth();
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     const init = async () => {
-      // If session_id in URL, process it
-      if (session_id && typeof session_id === 'string') {
+      // Check for session_id in URL fragment (from OAuth redirect)
+      let sessionId = params.session_id as string | undefined;
+      
+      // On web, check URL hash for session_id
+      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        const hash = window.location.hash;
+        const match = hash.match(/session_id=([^&]+)/);
+        if (match) {
+          sessionId = match[1];
+          // Clean up the URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+
+      // If session_id found, process it
+      if (sessionId) {
+        console.log('Processing session_id:', sessionId);
         setProcessing(true);
-        await processSessionId(session_id);
-        setProcessing(false);
-        router.replace('/(tabs)');
+        try {
+          await processSessionId(sessionId);
+          router.replace('/(tabs)');
+        } catch (error) {
+          console.error('Error processing session:', error);
+          router.replace('/auth');
+        } finally {
+          setProcessing(false);
+        }
         return;
       }
 
@@ -25,7 +46,7 @@ export default function Index() {
     };
 
     init();
-  }, [session_id]);
+  }, []);
 
   useEffect(() => {
     if (!loading && !processing) {
