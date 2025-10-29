@@ -538,10 +538,36 @@
         }
 
         function showIngredientModal() {
+            editingIngredientId = null;
             document.getElementById('ingredientModal').classList.add('active');
+            document.querySelector('#ingredientModal .modal-title').textContent = 'Add Ingredient';
             document.getElementById('ingredientForm').reset();
             ingredientImages = [];
             document.getElementById('ingredientImagePreview').innerHTML = '';
+        }
+
+        function editIngredient(id) {
+            editingIngredientId = id;
+            const ingredient = allIngredients.find(i => i._id === id);
+            if (!ingredient) return;
+            
+            document.getElementById('ingredientModal').classList.add('active');
+            document.querySelector('#ingredientModal .modal-title').textContent = 'Edit Ingredient';
+            document.getElementById('ingredientName').value = ingredient.name;
+            document.getElementById('ingredientPrice').value = ingredient.price_per_unit;
+            document.getElementById('ingredientUnit').value = ingredient.unit;
+            document.getElementById('ingredientDescription').value = ingredient.description || '';
+            document.getElementById('ingredientTags').value = ingredient.tags ? ingredient.tags.join(', ') : '';
+            
+            // Set existing images
+            ingredientImages = ingredient.images || [];
+            const preview = document.getElementById('ingredientImagePreview');
+            preview.innerHTML = ingredientImages.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview">
+                    <button type="button" class="image-remove" onclick="removeIngredientImage(${index})">×</button>
+                </div>
+            `).join('');
         }
 
         async function saveIngredient(e) {
