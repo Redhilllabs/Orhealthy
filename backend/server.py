@@ -89,9 +89,10 @@ class MealIngredient(BaseModel):
 class Meal(BaseModel):
     name: str
     description: str
-    image: Optional[str] = None
+    images: List[str] = []  # Base64 encoded images
     base_price: float
     ingredients: List[MealIngredient]
+    tags: List[str] = []  # Tags for filtering
     is_preset: bool = True
     created_by: str = "admin"
 
