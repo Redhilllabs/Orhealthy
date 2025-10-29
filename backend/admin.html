@@ -294,10 +294,10 @@
         async function loadDashboard() {
             try {
                 const [users, ingredients, meals, orders] = await Promise.all([
-                    fetch(`${API_URL}/admin/users`).then(r => r.json()),
-                    fetch(`${API_URL}/ingredients`).then(r => r.json()),
-                    fetch(`${API_URL}/meals`).then(r => r.json()),
-                    fetch(`${API_URL}/admin/orders`).then(r => r.json())
+                    fetch(`₹{API_URL}/admin/users`).then(r => r.json()),
+                    fetch(`₹{API_URL}/ingredients`).then(r => r.json()),
+                    fetch(`₹{API_URL}/meals`).then(r => r.json()),
+                    fetch(`₹{API_URL}/admin/orders`).then(r => r.json())
                 ]);
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalIngredients').textContent = ingredients.length;
@@ -310,17 +310,17 @@
 
         async function loadIngredients() {
             try {
-                const ingredients = await fetch(`${API_URL}/ingredients`).then(r => r.json());
+                const ingredients = await fetch(`₹{API_URL}/ingredients`).then(r => r.json());
                 allIngredients = ingredients;
                 const tbody = document.getElementById('ingredientsBody');
                 tbody.innerHTML = ingredients.map(ing => `
                     <tr>
-                        <td>${ing.name}</td>
-                        <td>$${ing.price_per_unit.toFixed(2)}</td>
-                        <td>${ing.unit}</td>
-                        <td>${ing.description || '-'}</td>
+                        <td>₹{ing.name}</td>
+                        <td>$₹{ing.price_per_unit.toFixed(2)}</td>
+                        <td>₹{ing.unit}</td>
+                        <td>₹{ing.description || '-'}</td>
                         <td class="actions">
-                            <button class="btn btn-danger" onclick="deleteIngredient('${ing._id}')">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteIngredient('₹{ing._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -344,7 +344,7 @@
                 description: document.getElementById('ingredientDescription').value
             };
             try {
-                const response = await fetch(`${API_URL}/admin/ingredients`, {
+                const response = await fetch(`₹{API_URL}/admin/ingredients`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
@@ -362,7 +362,7 @@
         async function deleteIngredient(id) {
             if (!confirm('Delete this ingredient?')) return;
             try {
-                await fetch(`${API_URL}/admin/ingredients/${id}`, { method: 'DELETE' });
+                await fetch(`₹{API_URL}/admin/ingredients/₹{id}`, { method: 'DELETE' });
                 showAlert('ingredients', 'Deleted successfully', 'success');
                 loadIngredients();
             } catch (error) {
@@ -372,16 +372,16 @@
 
         async function loadMeals() {
             try {
-                const meals = await fetch(`${API_URL}/meals`).then(r => r.json());
+                const meals = await fetch(`₹{API_URL}/meals`).then(r => r.json());
                 const tbody = document.getElementById('mealsBody');
                 tbody.innerHTML = meals.map(meal => `
                     <tr>
-                        <td>${meal.name}</td>
-                        <td>${meal.description}</td>
-                        <td>$${meal.base_price.toFixed(2)}</td>
-                        <td>${meal.ingredients.length} ingredients</td>
+                        <td>₹{meal.name}</td>
+                        <td>₹{meal.description}</td>
+                        <td>$₹{meal.base_price.toFixed(2)}</td>
+                        <td>₹{meal.ingredients.length} ingredients</td>
                         <td class="actions">
-                            <button class="btn btn-danger" onclick="deleteMeal('${meal._id}')">Delete</button>
+                            <button class="btn btn-danger" onclick="deleteMeal('₹{meal._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -400,7 +400,7 @@
         function updateMealIngredientSelect() {
             const select = document.getElementById('mealIngredientSelect');
             select.innerHTML = '<option value="">-- Select ingredient --</option>' +
-                allIngredients.map(ing => `<option value="${ing._id}">${ing.name} ($${ing.price_per_unit}/${ing.unit})</option>`).join('');
+                allIngredients.map(ing => `<option value="₹{ing._id}">₹{ing.name} ($₹{ing.price_per_unit}/₹{ing.unit})</option>`).join('');
         }
 
         function addIngredientToMeal() {
@@ -424,10 +424,10 @@
         function renderMealIngredients() {
             document.getElementById('mealIngredients').innerHTML = selectedMealIngredients.map((ing, idx) => `
                 <div class="ingredient-item">
-                    <span>${ing.name}</span>
-                    <input type="number" min="0.1" step="0.1" value="${ing.default_quantity}" 
-                           onchange="updateIngredientQuantity(${idx}, this.value)">
-                    <button type="button" onclick="removeIngredientFromMeal(${idx})">×</button>
+                    <span>₹{ing.name}</span>
+                    <input type="number" min="0.1" step="0.1" value="₹{ing.default_quantity}" 
+                           onchange="updateIngredientQuantity(₹{idx}, this.value)">
+                    <button type="button" onclick="removeIngredientFromMeal(₹{idx})">×</button>
                 </div>
             `).join('');
         }
@@ -453,7 +453,7 @@
                 created_by: 'admin'
             };
             try {
-                const response = await fetch(`${API_URL}/admin/meals`, {
+                const response = await fetch(`₹{API_URL}/admin/meals`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
@@ -471,7 +471,7 @@
         async function deleteMeal(id) {
             if (!confirm('Delete this meal?')) return;
             try {
-                await fetch(`${API_URL}/admin/meals/${id}`, { method: 'DELETE' });
+                await fetch(`₹{API_URL}/admin/meals/₹{id}`, { method: 'DELETE' });
                 showAlert('meals', 'Deleted successfully', 'success');
                 loadMeals();
             } catch (error) {
@@ -481,18 +481,18 @@
 
         async function loadUsers() {
             try {
-                const users = await fetch(`${API_URL}/admin/users`).then(r => r.json());
+                const users = await fetch(`₹{API_URL}/admin/users`).then(r => r.json());
                 const tbody = document.getElementById('usersBody');
                 tbody.innerHTML = users.map(user => `
                     <tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td>${user.points}</td>
-                        <td>${user.inherent_points}</td>
-                        <td>${user.star_rating} ⭐</td>
-                        <td>${user.is_guide ? 'Yes' : 'No'}</td>
+                        <td>₹{user.name}</td>
+                        <td>₹{user.email}</td>
+                        <td>₹{user.points}</td>
+                        <td>₹{user.inherent_points}</td>
+                        <td>₹{user.star_rating} ⭐</td>
+                        <td>₹{user.is_guide ? 'Yes' : 'No'}</td>
                         <td class="actions">
-                            <button class="btn" onclick="showUserPointsModal('${user._id}', '${user.name}', ${user.points}, ${user.inherent_points})">
+                            <button class="btn" onclick="showUserPointsModal('₹{user._id}', '₹{user.name}', ₹{user.points}, ₹{user.inherent_points})">
                                 Update Points
                             </button>
                         </td>
@@ -516,7 +516,7 @@
             const userId = document.getElementById('userId').value;
             const inherentPoints = parseInt(document.getElementById('inherentPoints').value);
             try {
-                const response = await fetch(`${API_URL}/admin/users/${userId}/points`, {
+                const response = await fetch(`₹{API_URL}/admin/users/₹{userId}/points`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ inherent_points: inherentPoints })
@@ -533,21 +533,21 @@
 
         async function loadOrders() {
             try {
-                const orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
+                const orders = await fetch(`₹{API_URL}/admin/orders`).then(r => r.json());
                 const tbody = document.getElementById('ordersBody');
                 tbody.innerHTML = orders.map(order => `
                     <tr>
-                        <td>${order._id.substring(0, 8)}...</td>
-                        <td>$${order.total_price.toFixed(2)}</td>
+                        <td>₹{order._id.substring(0, 8)}...</td>
+                        <td>$₹{order.total_price.toFixed(2)}</td>
                         <td>
-                            <select onchange="updateOrderStatus('${order._id}', this.value)">
-                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <select onchange="updateOrderStatus('₹{order._id}', this.value)">
+                                <option value="pending" ₹{order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                <option value="confirmed" ₹{order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                <option value="delivered" ₹{order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                             </select>
                         </td>
-                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
-                        <td>${order.items.length} items</td>
+                        <td>₹{new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>₹{order.items.length} items</td>
                     </tr>
                 `).join('');
             } catch (error) {
@@ -557,7 +557,7 @@
 
         async function updateOrderStatus(orderId, status) {
             try {
-                await fetch(`${API_URL}/admin/orders/${orderId}`, {
+                await fetch(`₹{API_URL}/admin/orders/₹{orderId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ status })
@@ -573,8 +573,8 @@
         }
 
         function showAlert(section, message, type) {
-            const alertDiv = document.getElementById(`alert-${section}`);
-            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            const alertDiv = document.getElementById(`alert-₹{section}`);
+            alertDiv.innerHTML = `<div class="alert alert-₹{type}">₹{message}</div>`;
             setTimeout(() => alertDiv.innerHTML = '', 3000);
         }
 
