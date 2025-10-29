@@ -12,8 +12,8 @@ import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
-import { storage } from '../src/utils/storage';
-import { useAuth } from '../src/context/AuthContext';
+import { storage } from '../../src/utils/storage';
+import { useAuth } from '../../src/context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
