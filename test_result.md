@@ -103,131 +103,246 @@
 #====================================================================================================
 
 user_problem_statement: |
-  OrHealthy nutrition app - Phase 1: Complete Admin Panel implementation
-  - Fix and verify admin panel UI structure
-  - Implement star rating configuration (save/load from database)
-  - Verify image pickers work for ingredients and meals (multi-image support)
-  - Verify tags functionality for ingredients and meals
-  - Test all CRUD operations in admin panel
+  OrHealthy Mobile App - Complete Feature Upgrades:
+  
+  **Home Screen (Posts):**
+  - Comment system with modal UI
+  - Edit post functionality  
+  - Delete post functionality with confirmation
+  - Clickable user profiles
+  
+  **Presets & DIY Screens:**
+  - Horizontal image scrollers for meals
+  - Tags display and filtering with horizontal carousel
+  - Rupee (₹) currency throughout
+  
+  **Cart Screen:**
+  - Cart counter badge on tab
+  - Rupee pricing
+  
+  **Checkout Screen:**
+  - Cash on Delivery payment option
+  - Online payment (coming soon)
+  - Billing and shipping address forms
+  
+  **User Profile Screen:**
+  - Star rating display
+  - Points display
+  - Follow/Unfollow (Fan/Idol) functionality
+  - Tabs for Posts, Following, Fans
+  - User stats cards
+  
+  **Bottom Navigation:**
+  - Cart badge with count
+  - Fixed label truncation
 
 backend:
-  - task: "Star rating configuration API"
+  - task: "Comments API endpoints"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Added GET /api/admin/star-config and POST /api/admin/star-config endpoints. Updated calculate_star_rating to be async and load config from database. Updated all calls to calculate_star_rating to await it."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: GET /api/admin/star-config returns default config, POST saves new config successfully, GET verifies saved config persists. Star rating thresholds working correctly."
+        comment: "GET /api/posts/{post_id}/comments and POST /api/posts/{post_id}/comments endpoints"
 
-  - task: "Admin ingredients API with images and tags"
+  - task: "Edit post endpoint"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "POST /api/admin/ingredients endpoint accepts images (List[str]) and tags (List[str]) arrays"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: POST /api/admin/ingredients creates ingredient with base64 images and tags arrays. GET /api/ingredients retrieves ingredients with images and tags intact. DELETE /api/admin/ingredients/{id} removes ingredient successfully."
+        comment: "PUT /api/posts/{post_id} endpoint to update post content and image"
 
-  - task: "Admin meals API with images and tags"
+  - task: "User profile endpoint with relationships"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "POST /api/admin/meals endpoint accepts images (List[str]) and tags (List[str]) arrays"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: POST /api/admin/meals creates meal with base64 images, tags arrays, and ingredient references. GET /api/meals retrieves meals with all data intact. DELETE /api/admin/meals/{id} removes meal successfully."
+        comment: "GET /api/users/{user_id} returns user data with posts, fans, idols, guides, guidees"
 
-  - task: "Admin panel HTML serving"
+  - task: "Fan/Idol relationship endpoints"
     implemented: true
-    working: true
+    working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "GET /admin serves admin.html file"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: GET /api/admin-panel serves admin.html successfully (Note: /admin route not accessible via Kubernetes ingress, but /api/admin-panel works correctly)."
+        comment: "POST /api/users/{user_id}/become-fan and DELETE /api/users/{user_id}/unfan endpoints"
+
+  - task: "Meal images array support"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Meals model supports images (List[str]) and tags (List[str])"
 
 frontend:
-  - task: "Admin panel UI structure"
+  - task: "Home screen - Comments modal"
     implemented: true
     working: "NA"
-    file: "backend/admin.html"
+    file: "frontend/app/(tabs)/index.tsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Clean admin panel with sidebar navigation, dashboard, and all sections (Ingredients, Meals, Users, Orders, Settings)"
+        comment: "Full modal with comments list, comment input, and send button"
 
-  - task: "Image upload with preview for ingredients"
+  - task: "Home screen - Edit post modal"
     implemented: true
     working: "NA"
-    file: "backend/admin.html"
+    file: "frontend/app/(tabs)/index.tsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Multi-image upload with preview and remove functionality implemented for ingredients"
+        comment: "Modal with content editor, image picker, save/cancel buttons"
 
-  - task: "Image upload with preview for meals"
+  - task: "Home screen - Delete post"
     implemented: true
     working: "NA"
-    file: "backend/admin.html"
+    file: "frontend/app/(tabs)/index.tsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Multi-image upload with preview and remove functionality implemented for meals"
+        comment: "Delete with confirmation dialog"
 
-  - task: "Star rating configuration UI"
+  - task: "Presets screen - Image carousel"
     implemented: true
     working: "NA"
-    file: "backend/admin.html"
+    file: "frontend/app/(tabs)/presets.tsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
-        comment: "Settings section with star rating configuration. Integrated with backend API to load and save config."
+        comment: "Horizontal ScrollView for multiple meal images"
+
+  - task: "Presets screen - Tags filter"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/presets.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Horizontal tag carousel with filter functionality"
+
+  - task: "Presets screen - Rupee currency"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/presets.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "All prices displayed with ₹ symbol"
+
+  - task: "Cart screen - Counter badge"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/cart.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Badge showing cart item count in header"
+
+  - task: "Cart screen - Rupee currency"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/cart.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "All prices displayed with ₹ symbol"
+
+  - task: "Checkout - Cash on Delivery"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/checkout.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "COD payment option with billing/shipping address forms"
+
+  - task: "User profile screen"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/user/[userId].tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Complete profile with star rating, follow/unfollow, tabs for posts/following/fans"
+
+  - task: "Bottom nav - Cart badge"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/_layout.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Red badge on cart icon showing item count"
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
+  version: "2.0"
   test_sequence: 1
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Comments API endpoints"
+    - "Edit post endpoint"
+    - "User profile endpoint with relationships"
+    - "Fan/Idol relationship endpoints"
+    - "Meal images array support"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -235,26 +350,23 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Phase 1 implementation complete. Need to test:
-      1. Admin panel access at /admin
-      2. Star rating configuration save/load
-      3. Ingredient creation with multiple images and tags
-      4. Meal creation with multiple images and tags
-      5. All CRUD operations (create, read, delete for ingredients and meals)
-      6. User points update and star rating recalculation
-      Please test all admin API endpoints with appropriate payloads.
-  - agent: "testing"
-    message: |
-      ✅ BACKEND TESTING COMPLETE - ALL TESTS PASSED (13/13)
+      Mobile app feature upgrades complete. Need to test backend APIs:
       
-      TESTED SUCCESSFULLY:
-      1. ✅ Admin Panel Access: /api/admin-panel serves admin.html correctly
-      2. ✅ Star Rating Config: GET/POST endpoints work, config persists in database
-      3. ✅ Ingredients API: Create/Read/Delete with base64 images and tags arrays
-      4. ✅ Meals API: Create/Read/Delete with images, tags, and ingredient references
-      5. ✅ Dashboard Stats: Users and orders endpoints return data correctly
-      6. ✅ User Points Update: Inherent points update and star rating recalculation working
+      1. **Comments System:**
+         - GET /api/posts/{post_id}/comments
+         - POST /api/posts/{post_id}/comments with {content: "test comment"}
       
-      MINOR NOTE: /admin route not accessible via Kubernetes ingress, but /api/admin-panel works correctly.
+      2. **Edit Post:**
+         - PUT /api/posts/{post_id} with {content: "updated content", image: optional}
       
-      All admin panel backend APIs are fully functional for Phase 1 completion.
+      3. **User Profile:**
+         - GET /api/users/{user_id} should return user with posts, fans, idols arrays
+      
+      4. **Fan/Idol Relationships:**
+         - POST /api/users/{user_id}/become-fan (authenticated)
+         - DELETE /api/users/{user_id}/unfan (authenticated)
+      
+      5. **Meals with Images:**
+         - GET /api/meals should return meals with images (array) and tags (array)
+      
+      Please test all these endpoints thoroughly.
