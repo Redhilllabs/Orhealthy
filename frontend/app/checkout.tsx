@@ -5,52 +5,53 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   Alert,
 } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useCart } from '../src/context/CartContext';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCart } from '../src/context/CartContext';
 import axios from 'axios';
 import { storage } from '../src/utils/storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
 export default function CheckoutScreen() {
-  const { cartItems, totalPrice, clearCart } = useCart();
   const router = useRouter();
+  const { cartItems, totalPrice, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
 
-  // Billing Address
-  const [billName, setBillName] = useState('');
-  const [billStreet, setBillStreet] = useState('');
-  const [billCity, setBillCity] = useState('');
-  const [billState, setBillState] = useState('');
-  const [billZip, setBillZip] = useState('');
-  const [billPhone, setBillPhone] = useState('');
+  // Billing address
+  const [billingName, setBillingName] = useState('');
+  const [billingStreet, setBillingStreet] = useState('');
+  const [billingCity, setBillingCity] = useState('');
+  const [billingState, setBillingState] = useState('');
+  const [billingZip, setBillingZip] = useState('');
+  const [billingPhone, setBillingPhone] = useState('');
 
-  // Shipping Address
-  const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [shipName, setShipName] = useState('');
-  const [shipStreet, setShipStreet] = useState('');
-  const [shipCity, setShipCity] = useState('');
-  const [shipState, setShipState] = useState('');
-  const [shipZip, setShipZip] = useState('');
-  const [shipPhone, setShipPhone] = useState('');
+  // Shipping address
+  const [sameAsB illing, setSameAsBilling] = useState(true);
+  const [shippingName, setShippingName] = useState('');
+  const [shippingStreet, setShippingStreet] = useState('');
+  const [shippingCity, setShippingCity] = useState('');
+  const [shippingState, setShippingState] = useState('');
+  const [shippingZip, setShippingZip] = useState('');
+  const [shippingPhone, setShippingPhone] = useState('');
 
   const validateForm = () => {
-    if (!billName || !billStreet || !billCity || !billState || !billZip || !billPhone) {
+    if (!billingName || !billingStreet || !billingCity || !billingState || !billingZip || !billingPhone) {
       Alert.alert('Error', 'Please fill in all billing address fields');
       return false;
     }
 
-    if (!sameAsBilling && (!shipName || !shipStreet || !shipCity || !shipState || !shipZip || !shipPhone)) {
-      Alert.alert('Error', 'Please fill in all shipping address fields');
-      return false;
+    if (!sameAsBilling) {
+      if (!shippingName || !shippingStreet || !shippingCity || !shippingState || !shippingZip || !shippingPhone) {
+        Alert.alert('Error', 'Please fill in all shipping address fields');
+        return false;
+      }
     }
 
     return true;
@@ -61,29 +62,28 @@ export default function CheckoutScreen() {
 
     try {
       setLoading(true);
-      
-      const billingAddress = {
-        name: billName,
-        street: billStreet,
-        city: billCity,
-        state: billState,
-        zip_code: billZip,
-        phone: billPhone,
-      };
-
-      const shippingAddress = sameAsBilling ? billingAddress : {
-        name: shipName,
-        street: shipStreet,
-        city: shipCity,
-        state: shipState,
-        zip_code: shipZip,
-        phone: shipPhone,
-      };
-
       const token = await storage.getItemAsync('session_token');
-      
-      // For now, we'll just create the order without Razorpay integration
-      // You can add Razorpay integration later
+
+      const billingAddress = {
+        name: billingName,
+        street: billingStreet,
+        city: billingCity,
+        state: billingState,
+        zip_code: billingZip,
+        phone: billingPhone,
+      };
+
+      const shippingAddress = sameAsBilling
+        ? billingAddress
+        : {
+            name: shippingName,
+            street: shippingStreet,
+            city: shippingCity,
+            state: shippingState,
+            zip_code: shippingZip,
+            phone: shippingPhone,
+          };
+
       await axios.post(
         `${API_URL}/orders`,
         {
@@ -91,7 +91,7 @@ export default function CheckoutScreen() {
           total_price: totalPrice,
           billing_address: billingAddress,
           shipping_address: shippingAddress,
-          payment_id: 'manual_payment', // TODO: Integrate Razorpay
+          payment_id: paymentMethod === 'cod' ? 'COD' : null,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -100,12 +100,19 @@ export default function CheckoutScreen() {
       
       Alert.alert(
         'Order Placed!',
-        'Your order has been placed successfully. You will receive a confirmation soon.',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+        paymentMethod === 'cod'
+          ? 'Your order has been placed successfully. Pay on delivery.'
+          : 'Your order has been placed successfully.',
+        [
+          {
+            text: 'OK',
+            onPress: () => router.replace('/(tabs)'),
+          },
+        ]
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error placing order:', error);
-      Alert.alert('Error', 'Failed to place order. Please try again.');
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to place order');
     } finally {
       setLoading(false);
     }
@@ -114,83 +121,119 @@ export default function CheckoutScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={28} color="#333" />
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Checkout</Text>
-        <View style={{ width: 28 }} />
+        <View style={{ width: 24 }} />
       </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Order Summary */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Order Summary</Text>
+      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+        {/* Order Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Order Summary</Text>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLabel}>Items ({cartItems.length})</Text>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Items ({cartItems.length})</Text>
-              <Text style={styles.summaryValue}>${totalPrice.toFixed(2)}</Text>
-            </View>
-            <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>${totalPrice.toFixed(2)}</Text>
+              <Text style={styles.summaryText}>Total</Text>
+              <Text style={styles.summaryPrice}>₹{totalPrice.toFixed(2)}</Text>
             </View>
           </View>
+        </View>
 
-          {/* Billing Address */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Billing Address</Text>
-            
+        {/* Payment Method */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Payment Method</Text>
+          <TouchableOpacity
+            style={[
+              styles.paymentOption,
+              paymentMethod === 'cod' && styles.paymentOptionActive,
+            ]}
+            onPress={() => setPaymentMethod('cod')}
+          >
+            <View style={styles.radio}>
+              {paymentMethod === 'cod' && <View style={styles.radioInner} />}
+            </View>
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentTitle}>Cash on Delivery</Text>
+              <Text style={styles.paymentSubtitle}>Pay when you receive</Text>
+            </View>
+            <Ionicons name="cash-outline" size={24} color="#ffd700" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.paymentOption,
+              paymentMethod === 'online' && styles.paymentOptionActive,
+            ]}
+            onPress={() => setPaymentMethod('online')}
+          >
+            <View style={styles.radio}>
+              {paymentMethod === 'online' && <View style={styles.radioInner} />}
+            </View>
+            <View style={styles.paymentInfo}>
+              <Text style={styles.paymentTitle}>Online Payment</Text>
+              <Text style={styles.paymentSubtitle}>Coming soon</Text>
+            </View>
+            <Ionicons name="card-outline" size={24} color="#ccc" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Billing Address */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Billing Address</Text>
+          <View style={styles.form}>
             <TextInput
               style={styles.input}
               placeholder="Full Name *"
-              value={billName}
-              onChangeText={setBillName}
+              value={billingName}
+              onChangeText={setBillingName}
             />
             <TextInput
               style={styles.input}
               placeholder="Street Address *"
-              value={billStreet}
-              onChangeText={setBillStreet}
+              value={billingStreet}
+              onChangeText={setBillingStreet}
             />
             <View style={styles.row}>
               <TextInput
                 style={[styles.input, styles.halfInput]}
                 placeholder="City *"
-                value={billCity}
-                onChangeText={setBillCity}
+                value={billingCity}
+                onChangeText={setBillingCity}
               />
               <TextInput
                 style={[styles.input, styles.halfInput]}
                 placeholder="State *"
-                value={billState}
-                onChangeText={setBillState}
+                value={billingState}
+                onChangeText={setBillingState}
               />
             </View>
             <View style={styles.row}>
               <TextInput
                 style={[styles.input, styles.halfInput]}
                 placeholder="ZIP Code *"
-                value={billZip}
-                onChangeText={setBillZip}
-                keyboardType="number-pad"
+                value={billingZip}
+                onChangeText={setBillingZip}
+                keyboardType="numeric"
               />
               <TextInput
                 style={[styles.input, styles.halfInput]}
                 placeholder="Phone *"
-                value={billPhone}
-                onChangeText={setBillPhone}
+                value={billingPhone}
+                onChangeText={setBillingPhone}
                 keyboardType="phone-pad"
               />
             </View>
           </View>
+        </View>
 
-          {/* Shipping Address */}
-          <View style={styles.section}>
+        {/* Shipping Address */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Shipping Address</Text>
             <TouchableOpacity
-              style={styles.checkboxRow}
+              style={styles.checkbox}
               onPress={() => setSameAsBilling(!sameAsBilling)}
             >
               <Ionicons
@@ -198,86 +241,83 @@ export default function CheckoutScreen() {
                 size={24}
                 color="#ffd700"
               />
-              <Text style={styles.checkboxLabel}>
-                Shipping address same as billing
-              </Text>
+              <Text style={styles.checkboxLabel}>Same as billing</Text>
             </TouchableOpacity>
-
-            {!sameAsBilling && (
-              <>
-                <Text style={styles.sectionTitle}>Shipping Address</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Full Name *"
-                  value={shipName}
-                  onChangeText={setShipName}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Street Address *"
-                  value={shipStreet}
-                  onChangeText={setShipStreet}
-                />
-                <View style={styles.row}>
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="City *"
-                    value={shipCity}
-                    onChangeText={setShipCity}
-                  />
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="State *"
-                    value={shipState}
-                    onChangeText={setShipState}
-                  />
-                </View>
-                <View style={styles.row}>
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="ZIP Code *"
-                    value={shipZip}
-                    onChangeText={setShipZip}
-                    keyboardType="number-pad"
-                  />
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="Phone *"
-                    value={shipPhone}
-                    onChangeText={setShipPhone}
-                    keyboardType="phone-pad"
-                  />
-                </View>
-              </>
-            )}
           </View>
 
-          {/* Payment Note */}
-          <View style={styles.paymentNote}>
-            <Ionicons name="information-circle" size={20} color="#2196F3" />
-            <Text style={styles.paymentNoteText}>
-              Payment gateway integration (Razorpay) will be added soon.
-            </Text>
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.placeOrderButton}
-            onPress={handlePlaceOrder}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <>
-                <Text style={styles.placeOrderButtonText}>Place Order</Text>
-                <Text style={styles.placeOrderPrice}>${totalPrice.toFixed(2)}</Text>
-              </>
-            )}
-          </TouchableOpacity>
+          {!sameAsBilling && (
+            <View style={styles.form}>
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name *"
+                value={shippingName}
+                onChangeText={setShippingName}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Street Address *"
+                value={shippingStreet}
+                onChangeText={setShippingStreet}
+              />
+              <View style={styles.row}>
+                <TextInput
+                  style={[styles.input, styles.halfInput]}
+                  placeholder="City *"
+                  value={shippingCity}
+                  onChangeText={setShippingCity}
+                />
+                <TextInput
+                  style={[styles.input, styles.halfInput]}
+                  placeholder="State *"
+                  value={shippingState}
+                  onChangeText={setShippingState}
+                />
+              </View>
+              <View style={styles.row}>
+                <TextInput
+                  style={[styles.input, styles.halfInput]}
+                  placeholder="ZIP Code *"
+                  value={shippingZip}
+                  onChangeText={setShippingZip}
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={[styles.input, styles.halfInput]}
+                  placeholder="Phone *"
+                  value={shippingPhone}
+                  onChangeText={setShippingPhone}
+                  keyboardType="phone-pad"
+                />
+              </View>
+            </View>
+          )}
         </View>
-      </KeyboardAvoidingView>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Total Amount</Text>
+          <Text style={styles.totalAmount}>₹{totalPrice.toFixed(2)}</Text>
+        </View>
+        <TouchableOpacity
+          style={[styles.placeOrderButton, (loading || paymentMethod === 'online') && styles.placeOrderButtonDisabled]}
+          onPress={handlePlaceOrder}
+          disabled={loading || paymentMethod === 'online'}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <>
+              <Text style={styles.placeOrderButtonText}>
+                {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Coming Soon'}
+              </Text>
+              {paymentMethod === 'cod' && (
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+              )}
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -287,30 +327,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  flex: {
-    flex: 1,
-  },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 8,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
+  content: {
+    flex: 1,
+  },
   scrollContent: {
-    paddingBottom: 32,
+    paddingBottom: 20,
   },
   section: {
     backgroundColor: '#fff',
-    marginTop: 16,
+    marginTop: 12,
     padding: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 18,
@@ -318,36 +367,85 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 16,
   },
+  summaryCard: {
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 8,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    alignItems: 'center',
   },
-  summaryLabel: {
+  summaryText: {
     fontSize: 16,
-    color: '#666',
-  },
-  summaryValue: {
-    fontSize: 16,
+    fontWeight: '600',
     color: '#333',
   },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  totalValue: {
-    fontSize: 20,
+  summaryPrice: {
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#ffd700',
   },
+  paymentOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  paymentOptionActive: {
+    borderColor: '#ffd700',
+    backgroundColor: '#fffef5',
+  },
+  radio: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ffd700',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#ffd700',
+  },
+  paymentInfo: {
+    flex: 1,
+  },
+  paymentTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2,
+  },
+  paymentSubtitle: {
+    fontSize: 12,
+    color: '#666',
+  },
+  form: {
+    gap: 12,
+  },
   input: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
     fontSize: 16,
-    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
   },
   row: {
     flexDirection: 'row',
@@ -356,35 +454,35 @@ const styles = StyleSheet.create({
   halfInput: {
     flex: 1,
   },
-  checkboxRow: {
+  checkbox: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    gap: 8,
   },
   checkboxLabel: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
-  },
-  paymentNote: {
-    flexDirection: 'row',
-    backgroundColor: '#E3F2FD',
-    padding: 16,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 8,
-    gap: 12,
-  },
-  paymentNoteText: {
-    flex: 1,
     fontSize: 14,
-    color: '#1976D2',
+    color: '#666',
   },
   footer: {
     backgroundColor: '#fff',
     padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  totalLabel: {
+    fontSize: 16,
+    color: '#666',
+  },
+  totalAmount: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffd700',
   },
   placeOrderButton: {
     backgroundColor: '#ffd700',
@@ -393,16 +491,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+  },
+  placeOrderButtonDisabled: {
+    backgroundColor: '#ccc',
   },
   placeOrderButtonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
-  },
-  placeOrderPrice: {
-    color: '#fff',
-    fontSize: 20,
     fontWeight: 'bold',
   },
 });
