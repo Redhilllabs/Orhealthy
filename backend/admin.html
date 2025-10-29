@@ -294,10 +294,10 @@
         async function loadDashboard() {
             try {
                 const [users, ingredients, meals, orders] = await Promise.all([
-                    fetch(`₹{API_URL}/admin/users`).then(r => r.json()),
-                    fetch(`₹{API_URL}/ingredients`).then(r => r.json()),
-                    fetch(`₹{API_URL}/meals`).then(r => r.json()),
-                    fetch(`₹{API_URL}/admin/orders`).then(r => r.json())
+                    fetch(`${API_URL}/admin/users`).then(r => r.json()),
+                    fetch(`${API_URL}/ingredients`).then(r => r.json()),
+                    fetch(`${API_URL}/meals`).then(r => r.json()),
+                    fetch(`${API_URL}/admin/orders`).then(r => r.json())
                 ]);
                 document.getElementById('totalUsers').textContent = users.length;
                 document.getElementById('totalIngredients').textContent = ingredients.length;
@@ -310,7 +310,7 @@
 
         async function loadIngredients() {
             try {
-                const ingredients = await fetch(`₹{API_URL}/ingredients`).then(r => r.json());
+                const ingredients = await fetch(`${API_URL}/ingredients`).then(r => r.json());
                 allIngredients = ingredients;
                 const tbody = document.getElementById('ingredientsBody');
                 tbody.innerHTML = ingredients.map(ing => `
@@ -344,7 +344,7 @@
                 description: document.getElementById('ingredientDescription').value
             };
             try {
-                const response = await fetch(`₹{API_URL}/admin/ingredients`, {
+                const response = await fetch(`${API_URL}/admin/ingredients`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
@@ -362,7 +362,7 @@
         async function deleteIngredient(id) {
             if (!confirm('Delete this ingredient?')) return;
             try {
-                await fetch(`₹{API_URL}/admin/ingredients/₹{id}`, { method: 'DELETE' });
+                await fetch(`${API_URL}/admin/ingredients/₹{id}`, { method: 'DELETE' });
                 showAlert('ingredients', 'Deleted successfully', 'success');
                 loadIngredients();
             } catch (error) {
@@ -372,7 +372,7 @@
 
         async function loadMeals() {
             try {
-                const meals = await fetch(`₹{API_URL}/meals`).then(r => r.json());
+                const meals = await fetch(`${API_URL}/meals`).then(r => r.json());
                 const tbody = document.getElementById('mealsBody');
                 tbody.innerHTML = meals.map(meal => `
                     <tr>
@@ -453,7 +453,7 @@
                 created_by: 'admin'
             };
             try {
-                const response = await fetch(`₹{API_URL}/admin/meals`, {
+                const response = await fetch(`${API_URL}/admin/meals`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(data)
@@ -471,7 +471,7 @@
         async function deleteMeal(id) {
             if (!confirm('Delete this meal?')) return;
             try {
-                await fetch(`₹{API_URL}/admin/meals/₹{id}`, { method: 'DELETE' });
+                await fetch(`${API_URL}/admin/meals/₹{id}`, { method: 'DELETE' });
                 showAlert('meals', 'Deleted successfully', 'success');
                 loadMeals();
             } catch (error) {
@@ -481,7 +481,7 @@
 
         async function loadUsers() {
             try {
-                const users = await fetch(`₹{API_URL}/admin/users`).then(r => r.json());
+                const users = await fetch(`${API_URL}/admin/users`).then(r => r.json());
                 const tbody = document.getElementById('usersBody');
                 tbody.innerHTML = users.map(user => `
                     <tr>
@@ -516,7 +516,7 @@
             const userId = document.getElementById('userId').value;
             const inherentPoints = parseInt(document.getElementById('inherentPoints').value);
             try {
-                const response = await fetch(`₹{API_URL}/admin/users/₹{userId}/points`, {
+                const response = await fetch(`${API_URL}/admin/users/₹{userId}/points`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ inherent_points: inherentPoints })
@@ -533,7 +533,7 @@
 
         async function loadOrders() {
             try {
-                const orders = await fetch(`₹{API_URL}/admin/orders`).then(r => r.json());
+                const orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
                 const tbody = document.getElementById('ordersBody');
                 tbody.innerHTML = orders.map(order => `
                     <tr>
@@ -557,7 +557,7 @@
 
         async function updateOrderStatus(orderId, status) {
             try {
-                await fetch(`₹{API_URL}/admin/orders/₹{orderId}`, {
+                await fetch(`${API_URL}/admin/orders/₹{orderId}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ status })
