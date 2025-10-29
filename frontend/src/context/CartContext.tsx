@@ -35,7 +35,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const refreshCart = async () => {
     try {
       setLoading(true);
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (!token) return;
 
       const response = await axios.get(`${API_URL}/cart`, {
@@ -52,7 +52,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addToCart = async (item: CartItem) => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (!token) throw new Error('Not authenticated');
 
       await axios.post(`${API_URL}/cart`, item, {
@@ -68,7 +68,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = async (index: number) => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (!token) throw new Error('Not authenticated');
 
       await axios.delete(`${API_URL}/cart/${index}`, {
@@ -84,7 +84,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const clearCart = async () => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (!token) throw new Error('Not authenticated');
 
       await axios.delete(`${API_URL}/cart`, {
