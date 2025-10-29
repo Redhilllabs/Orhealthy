@@ -776,8 +776,20 @@
         async function deleteMeal(id) {
             if (!confirm('Are you sure you want to delete this meal?')) return;
             
-            // Note: Delete endpoint not implemented in backend
-            showAlert('meals', 'Delete functionality not yet implemented', 'error');
+            try {
+                const response = await fetch(`${API_URL}/admin/meals/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('meals', 'Meal deleted successfully', 'success');
+                    loadMeals();
+                } else {
+                    throw new Error('Failed to delete meal');
+                }
+            } catch (error) {
+                showAlert('meals', 'Error deleting meal', 'error');
+            }
         }
 
         // Users
