@@ -687,6 +687,14 @@ async def admin_panel():
         html_content = f.read()
     return HTMLResponse(content=html_content)
 
+@api_router.get("/admin-panel")
+async def admin_panel_api():
+    """Serve admin panel via API route"""
+    admin_html_path = ROOT_DIR / "admin.html"
+    with open(admin_html_path, "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
+
 app.include_router(api_router)
 
 app.add_middleware(
