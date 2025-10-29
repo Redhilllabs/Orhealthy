@@ -131,17 +131,33 @@ class Config(BaseModel):
     config: dict
 
 # Helper functions
-def calculate_star_rating(points: int) -> int:
+async def get_star_config() -> dict:
+    """Get star rating configuration from database"""
+    config = await db.config.find_one({"type": "star_rating"})
+    if not config:
+        # Default configuration
+        return {
+            "star1": 25,
+            "star2": 100,
+            "star3": 250,
+            "star4": 500,
+            "star5": 1000
+        }
+    return config["config"]
+
+async def calculate_star_rating(points: int) -> int:
     """Calculate star rating based on points"""
-    if points >= 1000:
+    config = await get_star_config()
+    
+    if points >= config["star5"]:
         return 5
-    elif points >= 500:
+    elif points >= config["star4"]:
         return 4
-    elif points >= 250:
+    elif points >= config["star3"]:
         return 3
-    elif points >= 100:
+    elif points >= config["star2"]:
         return 2
-    elif points >= 25:
+    elif points >= config["star1"]:
         return 1
     return 0
 
