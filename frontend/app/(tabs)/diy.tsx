@@ -252,7 +252,7 @@ export default function DIYScreen() {
             <Text style={styles.footerLabel}>
               {selectedIngredients.size} ingredient{selectedIngredients.size !== 1 ? 's' : ''}
             </Text>
-            <Text style={styles.footerTotal}>${calculateTotal().toFixed(2)}</Text>
+            <Text style={styles.footerTotal}>₹{calculateTotal().toFixed(2)}</Text>
           </View>
 
           <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
