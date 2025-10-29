@@ -129,6 +129,7 @@ export default function HomeScreen() {
 
   const renderPost = ({ item }: { item: Post }) => {
     const isVoted = user && item.voted_by?.includes(user._id);
+    const isOwner = user && item.user_id === user._id;
 
     return (
       <View style={styles.postCard}>
@@ -142,7 +143,26 @@ export default function HomeScreen() {
               </Text>
             </View>
           )}
-          <Text style={styles.userName}>{item.user_name}</Text>
+          <View style={styles.userInfo}>
+            <Text style={styles.userName}>{item.user_name}</Text>
+          </View>
+          
+          {isOwner && (
+            <View style={styles.postActions}>
+              <TouchableOpacity
+                style={styles.actionIconButton}
+                onPress={() => handleEditPost(item)}
+              >
+                <Ionicons name="create-outline" size={20} color="#666" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.actionIconButton}
+                onPress={() => handleDeletePost(item._id)}
+              >
+                <Ionicons name="trash-outline" size={20} color="#F44336" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <Text style={styles.postContent}>{item.content}</Text>
@@ -151,7 +171,7 @@ export default function HomeScreen() {
           <Image source={{ uri: item.image }} style={styles.postImage} />
         )}
 
-        <View style={styles.postActions}>
+        <View style={styles.postActionsRow}>
           <TouchableOpacity
             style={styles.voteButton}
             onPress={() => toggleVote(item._id)}
@@ -164,7 +184,10 @@ export default function HomeScreen() {
             <Text style={styles.voteCount}>{item.vote_ups}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.commentButton}>
+          <TouchableOpacity 
+            style={styles.commentButton}
+            onPress={() => handleShowComments(item._id)}
+          >
             <Ionicons name="chatbubble-outline" size={20} color="#666" />
             <Text style={styles.commentText}>Comment</Text>
           </TouchableOpacity>
