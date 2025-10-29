@@ -44,6 +44,8 @@ class User(BaseModel):
     is_guide: bool = False
     guides: List[str] = []
     guidees: List[str] = []
+    idols: List[str] = []  # Users this person follows as idol
+    fans: List[str] = []   # Users who follow this person as idol
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Session(BaseModel):
