@@ -41,6 +41,19 @@ export default function HomeScreen() {
   const [content, setContent] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
+  
+  // Comment modal state
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [comments, setComments] = useState<any[]>([]);
+  const [commentText, setCommentText] = useState('');
+  const [loadingComments, setLoadingComments] = useState(false);
+  
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [editImage, setEditImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPosts();
