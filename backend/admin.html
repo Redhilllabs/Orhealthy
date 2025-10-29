@@ -791,7 +791,19 @@
         }
 
         function loadSettings() {
-            // Settings already loaded with default values
+            // Load star rating configuration from backend
+            fetch(`${API_URL}/admin/star-config`)
+                .then(r => r.json())
+                .then(config => {
+                    document.getElementById('star1').value = config.star1;
+                    document.getElementById('star2').value = config.star2;
+                    document.getElementById('star3').value = config.star3;
+                    document.getElementById('star4').value = config.star4;
+                    document.getElementById('star5').value = config.star5;
+                })
+                .catch(error => {
+                    console.error('Error loading star config:', error);
+                });
         }
 
         async function saveStarConfig() {
@@ -802,8 +814,23 @@
                 star4: parseInt(document.getElementById('star4').value),
                 star5: parseInt(document.getElementById('star5').value)
             };
-            showAlert('settings', 'Configuration saved! (Note: Backend integration pending)', 'success');
-            console.log('Star rating config:', config);
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/star-config`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                if (response.ok) {
+                    showAlert('settings', 'Configuration saved successfully!', 'success');
+                } else {
+                    showAlert('settings', 'Error saving configuration', 'error');
+                }
+            } catch (error) {
+                showAlert('settings', 'Error saving configuration', 'error');
+                console.error('Error saving star config:', error);
+            }
         }
 
         function closeModal(modalId) {
