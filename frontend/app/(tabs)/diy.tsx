@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Image,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +17,7 @@ import { useCart } from '../../src/context/CartContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
+const { width } = Dimensions.get('window');
 
 interface Ingredient {
   _id: string;
@@ -21,6 +25,8 @@ interface Ingredient {
   price_per_unit: number;
   unit: string;
   description?: string;
+  images?: string[];
+  tags?: string[];
 }
 
 export default function DIYScreen() {
