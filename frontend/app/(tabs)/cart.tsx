@@ -66,7 +66,7 @@ export default function CartScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color="#ffd700" />
       </View>
     );
   }
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
   },
   itemQuantity: {
     fontSize: 14,
@@ -225,10 +225,10 @@ const styles = StyleSheet.create({
   totalPrice: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
   },
   checkoutButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingVertical: 16,
     borderRadius: 12,
     flexDirection: 'row',

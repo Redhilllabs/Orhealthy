@@ -196,7 +196,7 @@ export default function CheckoutScreen() {
               <Ionicons
                 name={sameAsBilling ? 'checkbox' : 'square-outline'}
                 size={24}
-                color="#4CAF50"
+                color="#ffd700"
               />
               <Text style={styles.checkboxLabel}>
                 Shipping address same as billing
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
   },
   input: {
     backgroundColor: '#f5f5f5',
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
   },
   placeOrderButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingVertical: 16,
     borderRadius: 12,
     flexDirection: 'row',

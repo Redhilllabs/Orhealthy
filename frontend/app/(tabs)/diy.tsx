@@ -142,7 +142,7 @@ export default function DIYScreen() {
               style={styles.quantityButton}
               onPress={() => updateQuantity(item._id, quantity - 1)}
             >
-              <Ionicons name="remove" size={20} color="#4CAF50" />
+              <Ionicons name="remove" size={20} color="#ffd700" />
             </TouchableOpacity>
 
             <Text style={styles.quantity}>{quantity}</Text>
@@ -151,13 +151,13 @@ export default function DIYScreen() {
               style={styles.quantityButton}
               onPress={() => updateQuantity(item._id, quantity + 1)}
             >
-              <Ionicons name="add" size={20} color="#4CAF50" />
+              <Ionicons name="add" size={20} color="#ffd700" />
             </TouchableOpacity>
           </View>
         )}
 
         {!isSelected && (
-          <Ionicons name="add-circle-outline" size={32} color="#4CAF50" />
+          <Ionicons name="add-circle-outline" size={32} color="#ffd700" />
         )}
       </TouchableOpacity>
     );
@@ -166,7 +166,7 @@ export default function DIYScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color="#ffd700" />
       </View>
     );
   }
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   },
   ingredientCardSelected: {
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: '#ffd700',
   },
   ingredientInfo: {
     flex: 1,
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   },
   ingredientPrice: {
     fontSize: 14,
-    color: '#4CAF50',
+    color: '#ffd700',
     fontWeight: '500',
     marginBottom: 4,
   },
@@ -370,10 +370,10 @@ const styles = StyleSheet.create({
   footerTotal: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
   },
   addButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,

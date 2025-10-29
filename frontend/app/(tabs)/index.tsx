@@ -213,7 +213,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color="#ffd700" />
       </View>
     );
   }
@@ -256,7 +256,7 @@ export default function HomeScreen() {
             />
             <View style={styles.actionsRow}>
               <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-                <Ionicons name="image-outline" size={24} color="#4CAF50" />
+                <Ionicons name="image-outline" size={24} color="#ffd700" />
               </TouchableOpacity>
               
               <TouchableOpacity
@@ -286,7 +286,7 @@ export default function HomeScreen() {
                 setRefreshing(true);
                 fetchPosts();
               }}
-              tintColor="#4CAF50"
+              tintColor="#ffd700"
             />
           }
           ListEmptyComponent={
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
   },
   createPost: {
     backgroundColor: '#fff',
@@ -378,7 +378,7 @@ const styles = StyleSheet.create({
   },
   postButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 20,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   avatarPlaceholder: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -68,7 +68,7 @@ export default function ProfileScreen() {
   if (!user) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color="#ffd700" />
       </View>
     );
   }
@@ -105,7 +105,7 @@ export default function ProfileScreen() {
             <View style={styles.badge}>
               {user.is_guide ? (
                 <View style={styles.guideBadge}>
-                  <Ionicons name="medal" size={20} color="#4CAF50" />
+                  <Ionicons name="medal" size={20} color="#ffd700" />
                   <Text style={styles.guideText}>Guide</Text>
                 </View>
               ) : (
@@ -132,7 +132,7 @@ export default function ProfileScreen() {
               <Text style={styles.sectionTitle}>Profile Details</Text>
               {!editing && (
                 <TouchableOpacity onPress={() => setEditing(true)}>
-                  <Ionicons name="create-outline" size={24} color="#4CAF50" />
+                  <Ionicons name="create-outline" size={24} color="#ffd700" />
                 </TouchableOpacity>
               )}
             </View>
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   avatarPlaceholder: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   guideText: {
-    color: '#4CAF50',
+    color: '#ffd700',
     fontWeight: '600',
     fontSize: 16,
   },
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
     marginBottom: 4,
   },
   statLabel: {
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',

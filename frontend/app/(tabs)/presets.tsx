@@ -137,7 +137,7 @@ export default function PresetsScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
+        <ActivityIndicator size="large" color="#ffd700" />
       </View>
     );
   }
@@ -190,7 +190,7 @@ export default function PresetsScreen() {
                     style={styles.quantityButton}
                     onPress={() => updateIngredient(index, (item.quantity || 0) - 1)}
                   >
-                    <Ionicons name="remove" size={20} color="#4CAF50" />
+                    <Ionicons name="remove" size={20} color="#ffd700" />
                   </TouchableOpacity>
 
                   <Text style={styles.quantity}>{item.quantity || 0}</Text>
@@ -199,7 +199,7 @@ export default function PresetsScreen() {
                     style={styles.quantityButton}
                     onPress={() => updateIngredient(index, (item.quantity || 0) + 1)}
                   >
-                    <Ionicons name="add" size={20} color="#4CAF50" />
+                    <Ionicons name="add" size={20} color="#ffd700" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   mealPrice: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
     marginBottom: 16,
   },
   mealActions: {
@@ -305,16 +305,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#4CAF50',
+    borderColor: '#ffd700',
   },
   customizeButtonText: {
-    color: '#4CAF50',
+    color: '#ffd700',
     fontWeight: '600',
     fontSize: 16,
   },
   addButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingVertical: 12,
     borderRadius: 8,
     flexDirection: 'row',
@@ -414,10 +414,10 @@ const styles = StyleSheet.create({
   totalPrice: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
   },
   addToCartButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
     paddingVertical: 12,
     paddingHorizontal: 32,
     borderRadius: 8,

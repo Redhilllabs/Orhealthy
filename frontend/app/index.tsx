@@ -77,7 +77,7 @@ export default function Index() {
         style={styles.logo}
       />
       <Text style={styles.title}>OrHealthy</Text>
-      <ActivityIndicator size="large" color="#4CAF50" style={styles.loader} />
+      <ActivityIndicator size="large" color="#ffd700" style={styles.loader} />
     </View>
   );
 }
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#4CAF50',
+    color: '#ffd700',
     marginBottom: 16,
   },
   loader: {

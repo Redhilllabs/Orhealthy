@@ -51,7 +51,7 @@ export default function CallbackScreen() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#4CAF50" />
+      <ActivityIndicator size="large" color="#ffd700" />
       <Text style={styles.text}>Processing authentication...</Text>
     </View>
   );
