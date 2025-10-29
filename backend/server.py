@@ -708,6 +708,17 @@ async def create_meal(meal: Meal, request: Request):
     result = await db.meals.insert_one(meal.dict())
     return {"message": "Meal created", "id": str(result.inserted_id)}
 
+@api_router.put("/admin/meals/{meal_id}")
+async def update_meal(meal_id: str, meal: Meal, request: Request):
+    """Update meal (admin only)"""
+    result = await db.meals.update_one(
+        {"_id": ObjectId(meal_id)},
+        {"$set": meal.dict()}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    return {"message": "Meal updated"}
+
 @api_router.delete("/admin/meals/{meal_id}")
 async def delete_meal(meal_id: str, request: Request):
     """Delete meal (admin only)"""
