@@ -526,6 +526,7 @@
                         <td>${ing.unit}</td>
                         <td>${ing.tags ? ing.tags.join(', ') : '-'}</td>
                         <td class="actions">
+                            <button class="btn" onclick="editIngredient('${ing._id}')">Edit</button>
                             <button class="btn btn-danger" onclick="deleteIngredient('${ing._id}')">Delete</button>
                         </td>
                     </tr>
