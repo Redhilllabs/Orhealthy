@@ -39,6 +39,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [content, setContent] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
 
   useEffect(() => {
@@ -57,23 +58,54 @@ export default function HomeScreen() {
     }
   };
 
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant camera roll permissions to upload images');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        setSelectedImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
+
   const createPost = async () => {
-    if (!content.trim()) return;
+    if (!content.trim()) {
+      Alert.alert('Error', 'Please enter some content');
+      return;
+    }
 
     try {
       setPosting(true);
       const token = await storage.getItemAsync('session_token');
       await axios.post(
         `${API_URL}/posts`,
-        { content },
+        { content, image: selectedImage },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setContent('');
+      setSelectedImage(null);
       await fetchPosts();
       await refreshUser();
-    } catch (error) {
+      Alert.alert('Success', 'Post created successfully!');
+    } catch (error: any) {
       console.error('Error creating post:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to create post');
     } finally {
       setPosting(false);
     }
