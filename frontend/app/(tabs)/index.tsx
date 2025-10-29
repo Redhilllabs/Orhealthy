@@ -147,6 +147,10 @@ export default function HomeScreen() {
 
         <Text style={styles.postContent}>{item.content}</Text>
 
+        {item.image && (
+          <Image source={{ uri: item.image }} style={styles.postImage} />
+        )}
+
         <View style={styles.postActions}>
           <TouchableOpacity
             style={styles.voteButton}
