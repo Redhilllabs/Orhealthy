@@ -646,12 +646,45 @@
         }
 
         function showMealModal() {
+            editingMealId = null;
             document.getElementById('mealModal').classList.add('active');
+            document.querySelector('#mealModal .modal-title').textContent = 'Add Preset Meal';
             document.getElementById('mealForm').reset();
             selectedMealIngredients = [];
             mealImages = [];
             document.getElementById('mealIngredients').innerHTML = '';
             document.getElementById('mealImagePreview').innerHTML = '';
+        }
+
+        async function editMeal(id) {
+            editingMealId = id;
+            try {
+                const response = await fetch(`${API_URL}/meals/${id}`);
+                const meal = await response.json();
+                
+                document.getElementById('mealModal').classList.add('active');
+                document.querySelector('#mealModal .modal-title').textContent = 'Edit Preset Meal';
+                document.getElementById('mealName').value = meal.name;
+                document.getElementById('mealDescription').value = meal.description;
+                document.getElementById('mealPrice').value = meal.base_price;
+                document.getElementById('mealTags').value = meal.tags ? meal.tags.join(', ') : '';
+                
+                // Set existing images
+                mealImages = meal.images || [];
+                const preview = document.getElementById('mealImagePreview');
+                preview.innerHTML = mealImages.map((img, index) => `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="Preview">
+                        <button type="button" class="image-remove" onclick="removeMealImage(${index})">×</button>
+                    </div>
+                `).join('');
+                
+                // Set existing ingredients
+                selectedMealIngredients = meal.ingredients || [];
+                renderMealIngredients();
+            } catch (error) {
+                showAlert('meals', 'Error loading meal data', 'error');
+            }
         }
 
         function updateMealIngredientSelect() {
