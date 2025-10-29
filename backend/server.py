@@ -741,7 +741,7 @@ async def update_user_points(user_id: str, points_data: dict, request: Request):
     # Recalculate total points and star rating
     user = await db.users.find_one({"_id": ObjectId(user_id)})
     total_points = user["points"] + user["inherent_points"]
-    new_rating = calculate_star_rating(total_points)
+    new_rating = await calculate_star_rating(total_points)
     is_guide = new_rating >= 1
     
     await db.users.update_one(
@@ -750,6 +750,32 @@ async def update_user_points(user_id: str, points_data: dict, request: Request):
     )
     
     return {"message": "User points updated"}
+
+@api_router.get("/admin/star-config")
+async def get_star_rating_config():
+    """Get star rating configuration"""
+    config = await get_star_config()
+    return config
+
+@api_router.post("/admin/star-config")
+async def save_star_rating_config(config_data: dict, request: Request):
+    """Save star rating configuration (admin only)"""
+    config = {
+        "star1": config_data["star1"],
+        "star2": config_data["star2"],
+        "star3": config_data["star3"],
+        "star4": config_data["star4"],
+        "star5": config_data["star5"]
+    }
+    
+    # Upsert configuration
+    await db.config.update_one(
+        {"type": "star_rating"},
+        {"$set": {"type": "star_rating", "config": config}},
+        upsert=True
+    )
+    
+    return {"message": "Star rating configuration saved"}
 
 @app.get("/admin")
 async def admin_panel():
