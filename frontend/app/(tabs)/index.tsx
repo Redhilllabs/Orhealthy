@@ -14,7 +14,7 @@ import {
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { storage } from '../../src/utils/storage';
 import { useAuth } from '../../src/context/AuthContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
