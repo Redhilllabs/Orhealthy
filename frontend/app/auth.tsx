@@ -22,7 +22,7 @@ export default function AuthScreen() {
         />
         <Text style={styles.title}>Welcome to OrHealthy</Text>
         <Text style={styles.subtitle}>
-          Your complete nutrition and healthy eating ecosystem
+          Adaptive Guided Nutrition
         </Text>
         
         <View style={styles.features}>
