@@ -322,20 +322,37 @@ const styles = StyleSheet.create({
   ingredientCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    overflow: 'hidden',
   },
-  ingredientCardSelected: {
+  imageContainer: {
+    width: '100%',
+    height: 120,
+  },
+  imageScroll: {
+    width: '100%',
+    height: 120,
+  },
+  ingredientImage: {
+    width: width - 32,
+    height: 120,
+  },
+  ingredientContent: {
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  ingredientContentSelected: {
     borderWidth: 2,
     borderColor: '#ffd700',
+    borderRadius: 12,
+    margin: -2,
   },
   ingredientInfo: {
     flex: 1,
@@ -355,6 +372,25 @@ const styles = StyleSheet.create({
   ingredientDescription: {
     fontSize: 12,
     color: '#666',
+    marginBottom: 8,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  tag: {
+    backgroundColor: '#fff3cd',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ffd700',
+  },
+  tagText: {
+    fontSize: 10,
+    color: '#856404',
+    fontWeight: '500',
   },
   quantityControl: {
     flexDirection: 'row',
