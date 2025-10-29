@@ -585,14 +585,26 @@
             };
             
             try {
-                const response = await fetch(`${API_URL}/admin/ingredients`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
+                let response;
+                if (editingIngredientId) {
+                    // Update existing ingredient
+                    response = await fetch(`${API_URL}/admin/ingredients/${editingIngredientId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new ingredient
+                    response = await fetch(`${API_URL}/admin/ingredients`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
+                
                 if (response.ok) {
                     closeModal('ingredientModal');
-                    showAlert('ingredients', 'Ingredient saved successfully', 'success');
+                    showAlert('ingredients', editingIngredientId ? 'Ingredient updated successfully' : 'Ingredient saved successfully', 'success');
                     loadIngredients();
                 }
             } catch (error) {
