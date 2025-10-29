@@ -11,29 +11,40 @@ export default function Index() {
 
   useEffect(() => {
     const init = async () => {
+      console.log('[Index] Starting initialization');
+      console.log('[Index] Params:', params);
+      
       // Check for session_id in URL fragment (from OAuth redirect)
       let sessionId = params.session_id as string | undefined;
       
       // On web, check URL hash for session_id
       if (Platform.OS === 'web' && typeof window !== 'undefined') {
+        console.log('[Index] Platform: web');
+        console.log('[Index] Full URL:', window.location.href);
+        console.log('[Index] Hash:', window.location.hash);
+        
         const hash = window.location.hash;
         const match = hash.match(/session_id=([^&]+)/);
         if (match) {
           sessionId = match[1];
+          console.log('[Index] Extracted session_id from hash:', sessionId);
           // Clean up the URL
           window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+          console.log('[Index] No session_id in hash');
         }
       }
 
       // If session_id found, process it
       if (sessionId) {
-        console.log('Processing session_id:', sessionId);
+        console.log('[Index] Processing session_id:', sessionId);
         setProcessing(true);
         try {
           await processSessionId(sessionId);
+          console.log('[Index] Session processed successfully, navigating to tabs');
           router.replace('/(tabs)');
         } catch (error) {
-          console.error('Error processing session:', error);
+          console.error('[Index] Error processing session:', error);
           router.replace('/auth');
         } finally {
           setProcessing(false);
@@ -41,6 +52,7 @@ export default function Index() {
         return;
       }
 
+      console.log('[Index] No session_id, checking existing session');
       // Check existing session
       await checkSession();
     };
