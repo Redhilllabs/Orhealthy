@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       const { session_token } = response.data;
-      await SecureStore.setItemAsync('session_token', session_token);
+      await storage.setItemAsync('session_token', session_token);
 
       // Get user data
       await checkSession();
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkSession = async () => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (!token) {
         setLoading(false);
         return;
@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(response.data);
     } catch (error) {
       console.error('Error checking session:', error);
-      await SecureStore.deleteItemAsync('session_token');
+      await storage.deleteItemAsync('session_token');
     } finally {
       setLoading(false);
     }
@@ -78,13 +78,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (token) {
         await axios.post(`${API_URL}/auth/logout`, {}, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-      await SecureStore.deleteItemAsync('session_token');
+      await storage.deleteItemAsync('session_token');
       setUser(null);
     } catch (error) {
       console.error('Error logging out:', error);
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = async (profile: any) => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       await axios.put(`${API_URL}/users/profile`, profile, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     try {
-      const token = await SecureStore.getItemAsync('session_token');
+      const token = await storage.getItemAsync('session_token');
       if (token) {
         const response = await axios.get(`${API_URL}/auth/me`, {
           headers: { Authorization: `Bearer ${token}` },
