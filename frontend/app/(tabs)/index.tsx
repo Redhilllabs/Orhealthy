@@ -1434,10 +1434,30 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   commentItem: {
+    flexDirection: 'row',
     marginBottom: 16,
     padding: 12,
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
+    gap: 12,
+  },
+  commentAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+  },
+  commentAvatarPlaceholder: {
+    backgroundColor: '#ffd700',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  commentAvatarText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  commentTextContainer: {
+    flex: 1,
   },
   commentUser: {
     fontSize: 14,
