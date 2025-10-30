@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Image,
   ScrollView,
-  Dimensions,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,7 +16,6 @@ import { useCart } from '../../src/context/CartContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
-const { width } = Dimensions.get('window');
 
 interface Ingredient {
   _id: string;
@@ -31,25 +29,58 @@ interface Ingredient {
 
 export default function DIYScreen() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [filteredIngredients, setFilteredIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
   const [mealName, setMealName] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const { addToCart } = useCart();
 
   useEffect(() => {
     fetchIngredients();
   }, []);
 
+  useEffect(() => {
+    filterIngredients();
+  }, [searchQuery, selectedTag, ingredients]);
+
   const fetchIngredients = async () => {
     try {
       const response = await axios.get(`${API_URL}/ingredients`);
       setIngredients(response.data);
+      setFilteredIngredients(response.data);
+      
+      // Extract unique tags
+      const tags = new Set<string>();
+      response.data.forEach((ingredient: Ingredient) => {
+        ingredient.tags?.forEach(tag => tags.add(tag));
+      });
+      setAllTags(Array.from(tags));
     } catch (error) {
       console.error('Error fetching ingredients:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterIngredients = () => {
+    let filtered = ingredients;
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(ing =>
+        ing.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by tag
+    if (selectedTag) {
+      filtered = filtered.filter(ing => ing.tags?.includes(selectedTag));
+    }
+
+    setFilteredIngredients(filtered);
   };
 
   const toggleIngredient = (ingredientId: string) => {
@@ -117,67 +148,43 @@ export default function DIYScreen() {
     }
   };
 
-  const filteredIngredients = ingredients.filter(ing =>
-    ing.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const renderIngredient = ({ item }: { item: Ingredient }) => {
     const quantity = selectedIngredients.get(item._id) || 0;
     const isSelected = quantity > 0;
 
     return (
-      <View style={styles.ingredientCard}>
-        {item.images && item.images.length > 0 && (
-          <View style={styles.imageContainer}>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              style={styles.imageScroll}
-            >
-              {item.images.map((image, index) => (
-                <Image
-                  key={index}
-                  source={{ uri: image }}
-                  style={styles.ingredientImage}
-                />
-              ))}
-            </ScrollView>
+      <TouchableOpacity
+        style={[styles.ingredientCard, isSelected && styles.ingredientCardSelected]}
+        onPress={() => toggleIngredient(item._id)}
+      >
+        {item.images && item.images.length > 0 ? (
+          <Image source={{ uri: item.images[0] }} style={styles.ingredientImage} />
+        ) : (
+          <View style={styles.ingredientImagePlaceholder}>
+            <Ionicons name="nutrition" size={32} color="#ccc" />
           </View>
         )}
 
-        <TouchableOpacity
-          style={[styles.ingredientContent, isSelected && styles.ingredientContentSelected]}
-          onPress={() => toggleIngredient(item._id)}
-        >
-          <View style={styles.ingredientInfo}>
-            <Text style={styles.ingredientName}>{item.name}</Text>
-            <Text style={styles.ingredientPrice}>
-              ₹{item.price_per_unit.toFixed(2)} / {item.unit}
+        <View style={styles.ingredientInfo}>
+          <Text style={styles.ingredientName}>{item.name}</Text>
+          <Text style={styles.ingredientPrice}>
+            ₹{item.price_per_unit.toFixed(2)} / {item.unit}
+          </Text>
+          {item.description && (
+            <Text style={styles.ingredientDescription} numberOfLines={1}>
+              {item.description}
             </Text>
-            {item.description && (
-              <Text style={styles.ingredientDescription} numberOfLines={1}>
-                {item.description}
-              </Text>
-            )}
-            {item.tags && item.tags.length > 0 && (
-              <View style={styles.tagsContainer}>
-                {item.tags.map((tag, index) => (
-                  <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
+          )}
+        </View>
 
-          {isSelected && (
+        <View style={styles.ingredientActions}>
+          {isSelected ? (
             <View style={styles.quantityControl}>
               <TouchableOpacity
                 style={styles.quantityButton}
                 onPress={() => updateQuantity(item._id, quantity - 1)}
               >
-                <Ionicons name="remove" size={20} color="#ffd700" />
+                <Ionicons name="remove" size={16} color="#ffd700" />
               </TouchableOpacity>
 
               <Text style={styles.quantity}>{quantity}</Text>
@@ -186,16 +193,14 @@ export default function DIYScreen() {
                 style={styles.quantityButton}
                 onPress={() => updateQuantity(item._id, quantity + 1)}
               >
-                <Ionicons name="add" size={20} color="#ffd700" />
+                <Ionicons name="add" size={16} color="#ffd700" />
               </TouchableOpacity>
             </View>
+          ) : (
+            <Ionicons name="add-circle-outline" size={28} color="#ffd700" />
           )}
-
-          {!isSelected && (
-            <Ionicons name="add-circle-outline" size={32} color="#ffd700" />
-          )}
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -232,6 +237,53 @@ export default function DIYScreen() {
           maxLength={50}
         />
       </View>
+
+      {/* Tags Filter */}
+      {allTags.length > 0 && (
+        <View style={styles.tagsFilterContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tagsFilter}
+          >
+            <TouchableOpacity
+              style={[
+                styles.filterTag,
+                !selectedTag && styles.filterTagActive,
+              ]}
+              onPress={() => setSelectedTag(null)}
+            >
+              <Text
+                style={[
+                  styles.filterTagText,
+                  !selectedTag && styles.filterTagTextActive,
+                ]}
+              >
+                All
+              </Text>
+            </TouchableOpacity>
+            {allTags.map((tag) => (
+              <TouchableOpacity
+                key={tag}
+                style={[
+                  styles.filterTag,
+                  selectedTag === tag && styles.filterTagActive,
+                ]}
+                onPress={() => setSelectedTag(tag)}
+              >
+                <Text
+                  style={[
+                    styles.filterTagText,
+                    selectedTag === tag && styles.filterTagTextActive,
+                  ]}
+                >
+                  {tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <FlatList
         data={filteredIngredients}
@@ -316,6 +368,37 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
   },
+  tagsFilterContainer: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  tagsFilter: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  filterTag: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  filterTagActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  filterTagText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  filterTagTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
   listContent: {
     padding: 16,
   },
@@ -323,36 +406,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    overflow: 'hidden',
   },
-  imageContainer: {
-    width: '100%',
-    height: 120,
-  },
-  imageScroll: {
-    width: '100%',
-    height: 120,
-  },
-  ingredientImage: {
-    width: width - 32,
-    height: 120,
-  },
-  ingredientContent: {
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  ingredientContentSelected: {
+  ingredientCardSelected: {
     borderWidth: 2,
     borderColor: '#ffd700',
-    borderRadius: 12,
-    margin: -2,
+  },
+  ingredientImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  ingredientImagePlaceholder: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    marginRight: 12,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   ingredientInfo: {
     flex: 1,
@@ -372,44 +452,28 @@ const styles = StyleSheet.create({
   ingredientDescription: {
     fontSize: 12,
     color: '#666',
-    marginBottom: 8,
   },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  tag: {
-    backgroundColor: '#fff3cd',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ffd700',
-  },
-  tagText: {
-    fontSize: 10,
-    color: '#856404',
-    fontWeight: '500',
+  ingredientActions: {
+    marginLeft: 8,
   },
   quantityControl: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
   },
   quantityButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantity: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    minWidth: 32,
+    minWidth: 24,
     textAlign: 'center',
   },
   emptyContainer: {
