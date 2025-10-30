@@ -155,11 +155,6 @@ export default function DIYScreen() {
 
 
   const handleSaveMeal = async () => {
-    if (!user?.is_guide) {
-      Alert.alert('Guides Only', 'Only guides can save meals');
-      return;
-    }
-
     if (selectedIngredients.size === 0) {
       Alert.alert('No Ingredients', 'Please select at least one ingredient');
       return;
