@@ -967,6 +967,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffd700',
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconButton: {
+    position: 'relative',
+    padding: 8,
+  },
   notificationButton: {
     position: 'relative',
     padding: 8,
