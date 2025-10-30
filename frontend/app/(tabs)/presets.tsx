@@ -404,21 +404,22 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: 14,
     alignItems: 'center',
-    borderBottomWidth: 2,
+    borderBottomWidth: 3,
     borderBottomColor: 'transparent',
   },
   activeTab: {
     borderBottomColor: '#ffd700',
   },
   tabText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
     color: '#666',
   },
   activeTabText: {
     color: '#ffd700',
+    fontWeight: 'bold',
   },
   tagsContainer: {
     backgroundColor: '#fff',
