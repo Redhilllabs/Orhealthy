@@ -81,6 +81,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error('Error removing from cart:', error);
       throw error;
     }
+
+
+  const updateQuantity = async (index: number, quantity: number) => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      if (!token) throw new Error('Not authenticated');
+
+      await axios.put(
+        `${API_URL}/cart/${index}`,
+        { quantity },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      await refreshCart();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      throw error;
+    }
+  };
+
   };
 
   const clearCart = async () => {
