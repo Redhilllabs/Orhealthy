@@ -13,6 +13,7 @@ import {
   Alert,
   Modal,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -24,6 +25,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
+const { width } = Dimensions.get('window');
 
 interface Post {
   _id: string;
@@ -31,7 +33,7 @@ interface Post {
   user_name: string;
   user_picture?: string;
   content: string;
-  image?: string;
+  images?: string[];
   vote_ups: number;
   voted_by: string[];
   created_at: string;
@@ -44,14 +46,33 @@ interface Comment {
   created_at: string;
 }
 
+interface Notification {
+  _id: string;
+  type: 'comment' | 'like' | 'fan' | 'guidee';
+  post_id?: string;
+  from_user: string;
+  from_user_name: string;
+  message: string;
+  created_at: string;
+  read: boolean;
+}
+
 export default function HomeScreen() {
   const { user, refreshUser } = useAuth();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Notifications
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  
+  // Create post modal
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [content, setContent] = useState('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [posting, setPosting] = useState(false);
   
   // Comment modal state
@@ -61,14 +82,19 @@ export default function HomeScreen() {
   const [commentText, setCommentText] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   
+  // Likers modal
+  const [showLikersModal, setShowLikersModal] = useState(false);
+  const [likers, setLikers] = useState<any[]>([]);
+  
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editContent, setEditContent] = useState('');
-  const [editImage, setEditImage] = useState<string | null>(null);
+  const [editImages, setEditImages] = useState<string[]>([]);
 
   useEffect(() => {
     fetchPosts();
+    fetchNotifications();
   }, []);
 
   const fetchPosts = async () => {
@@ -83,32 +109,45 @@ export default function HomeScreen() {
     }
   };
 
-  const pickImage = async () => {
+  const fetchNotifications = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Please grant camera roll permissions');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.5,
-        base64: true,
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!result.canceled && result.assets[0].base64) {
-        setSelectedImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
-      }
+      setNotifications(response.data);
+      setUnreadCount(response.data.filter((n: Notification) => !n.read).length);
     } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      console.error('Error fetching notifications:', error);
     }
   };
 
-  const pickEditImage = async () => {
+  const markNotificationAsRead = async (notificationId: string) => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.put(
+        `${API_URL}/notifications/${notificationId}/read`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchNotifications();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    await markNotificationAsRead(notification._id);
+    setShowNotifications(false);
+    
+    if (notification.post_id) {
+      // Open post comments or details
+      setSelectedPostId(notification.post_id);
+      handleShowComments(notification.post_id);
+    }
+  };
+
+  const pickImages = async () => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
@@ -118,18 +157,25 @@ export default function HomeScreen() {
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
+        allowsMultipleSelection: true,
         quality: 0.5,
         base64: true,
       });
 
-      if (!result.canceled && result.assets[0].base64) {
-        setEditImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
+      if (!result.canceled) {
+        const images = result.assets
+          .filter(asset => asset.base64)
+          .map(asset => `data:image/jpeg;base64,${asset.base64}`);
+        setSelectedImages([...selectedImages, ...images]);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
+      console.error('Error picking images:', error);
+      Alert.alert('Error', 'Failed to pick images');
     }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(selectedImages.filter((_, i) => i !== index));
   };
 
   const createPost = async () => {
@@ -143,12 +189,13 @@ export default function HomeScreen() {
       const token = await storage.getItemAsync('session_token');
       await axios.post(
         `${API_URL}/posts`,
-        { content, image: selectedImage },
+        { content, images: selectedImages },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setContent('');
-      setSelectedImage(null);
+      setSelectedImages([]);
+      setShowCreatePost(false);
       await fetchPosts();
       await refreshUser();
       Alert.alert('Success', 'Post created successfully!');
@@ -203,7 +250,6 @@ export default function HomeScreen() {
       );
 
       setCommentText('');
-      // Refresh comments
       const response = await axios.get(`${API_URL}/posts/${selectedPostId}/comments`);
       setComments(response.data);
     } catch (error) {
@@ -212,11 +258,55 @@ export default function HomeScreen() {
     }
   };
 
+  const showLikersList = async (postId: string, voters: string[]) => {
+    try {
+      // Fetch user details for voters
+      const token = await storage.getItemAsync('session_token');
+      const likersData = await Promise.all(
+        voters.map(async (userId) => {
+          try {
+            const response = await axios.get(`${API_URL}/users/${userId}`);
+            return response.data;
+          } catch {
+            return null;
+          }
+        })
+      );
+      setLikers(likersData.filter(Boolean));
+      setShowLikersModal(true);
+    } catch (error) {
+      console.error('Error fetching likers:', error);
+    }
+  };
+
   const handleEditPost = (post: Post) => {
     setEditingPost(post);
     setEditContent(post.content);
-    setEditImage(post.image || null);
+    setEditImages(post.images || []);
     setShowEditModal(true);
+  };
+
+  const pickEditImages = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') return;
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.5,
+        base64: true,
+      });
+
+      if (!result.canceled) {
+        const images = result.assets
+          .filter(asset => asset.base64)
+          .map(asset => `data:image/jpeg;base64,${asset.base64}`);
+        setEditImages([...editImages, ...images]);
+      }
+    } catch (error) {
+      console.error('Error picking images:', error);
+    }
   };
 
   const saveEditPost = async () => {
@@ -226,7 +316,7 @@ export default function HomeScreen() {
       const token = await storage.getItemAsync('session_token');
       await axios.put(
         `${API_URL}/posts/${editingPost._id}`,
-        { content: editContent, image: editImage },
+        { content: editContent, images: editImages },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -312,8 +402,17 @@ export default function HomeScreen() {
 
         <Text style={styles.postContent}>{item.content}</Text>
 
-        {item.image && (
-          <Image source={{ uri: item.image }} style={styles.postImage} />
+        {item.images && item.images.length > 0 && (
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            style={styles.imagesCarousel}
+          >
+            {item.images.map((image, index) => (
+              <Image key={index} source={{ uri: image }} style={styles.postImage} />
+            ))}
+          </ScrollView>
         )}
 
         <View style={styles.postActionsRow}>
@@ -326,7 +425,10 @@ export default function HomeScreen() {
               size={24}
               color={isVoted ? '#F44336' : '#666'}
             />
-            <Text style={styles.voteCount}>{item.vote_ups}</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={() => showLikersList(item._id, item.voted_by || [])}>
+            <Text style={styles.voteCount}>{item.vote_ups} likes</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -352,83 +454,230 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <Image
-          source={{ uri: 'https://customer-assets.emergentagent.com/job_nutritionhub-1/artifacts/kq74ajf1_Orhealthy%20Favicon.png' }}
-          style={styles.logo}
-        />
-        <Text style={styles.headerTitle}>OrHealthy</Text>
-      </View>
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
-      >
-        <View style={styles.createPost}>
-          {selectedImage && (
-            <View style={styles.imagePreview}>
-              <Image source={{ uri: selectedImage }} style={styles.previewImage} />
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={() => setSelectedImage(null)}
-              >
-                <Ionicons name="close-circle" size={24} color="#F44336" />
-              </TouchableOpacity>
+        <View style={styles.headerLeft}>
+          <Image
+            source={{ uri: 'https://customer-assets.emergentagent.com/job_nutritionhub-1/artifacts/kq74ajf1_Orhealthy%20Favicon.png' }}
+            style={styles.logo}
+          />
+          <Text style={styles.headerTitle}>OrHealthy</Text>
+        </View>
+        
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={() => setShowNotifications(true)}
+        >
+          <Ionicons name="notifications-outline" size={26} color="#333" />
+          {unreadCount > 0 && (
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>{unreadCount}</Text>
             </View>
           )}
-          
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="Share your healthy eating experience..."
-              value={content}
-              onChangeText={setContent}
-              multiline
-              maxLength={500}
-            />
-            <View style={styles.actionsRow}>
-              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-                <Ionicons name="image-outline" size={24} color="#ffd700" />
+        </TouchableOpacity>
+      </View>
+
+      <FlatList
+        data={posts}
+        renderItem={renderPost}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              setRefreshing(true);
+              fetchPosts();
+              fetchNotifications();
+            }}
+            tintColor="#ffd700"
+          />
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
+            <Text style={styles.emptyText}>No posts yet</Text>
+            <Text style={styles.emptySubtext}>Be the first to share!</Text>
+          </View>
+        }
+      />
+
+      {/* Floating Action Button */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => setShowCreatePost(true)}
+      >
+        <Ionicons name="add" size={32} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Create Post Modal */}
+      <Modal
+        visible={showCreatePost}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowCreatePost(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.createPostModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Create Post</Text>
+              <TouchableOpacity onPress={() => setShowCreatePost(false)}>
+                <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
-              
+            </View>
+
+            <ScrollView style={styles.createContent}>
+              {selectedImages.length > 0 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.imagePreviewContainer}
+                >
+                  {selectedImages.map((img, index) => (
+                    <View key={index} style={styles.imagePreview}>
+                      <Image source={{ uri: img }} style={styles.previewImage} />
+                      <TouchableOpacity
+                        style={styles.removeImageButton}
+                        onPress={() => removeImage(index)}
+                      >
+                        <Ionicons name="close-circle" size={24} color="#F44336" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
+              )}
+
+              <TextInput
+                style={styles.createInput}
+                placeholder="What's on your mind?"
+                value={content}
+                onChangeText={setContent}
+                multiline
+                maxLength={500}
+              />
+
+              <TouchableOpacity style={styles.imagePickerButton} onPress={pickImages}>
+                <Ionicons name="images-outline" size={24} color="#ffd700" />
+                <Text style={styles.imagePickerText}>Add Photos</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.createFooter}>
               <TouchableOpacity
-                style={[styles.postButton, (!content.trim() || posting) && styles.postButtonDisabled]}
+                style={[styles.postCreateButton, (!content.trim() || posting) && styles.postButtonDisabled]}
                 onPress={createPost}
                 disabled={!content.trim() || posting}
               >
                 {posting ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.postButtonText}>Post</Text>
+                  <Text style={styles.postCreateButtonText}>Post</Text>
                 )}
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
+      </Modal>
 
-        <FlatList
-          data={posts}
-          renderItem={renderPost}
-          keyExtractor={(item) => item._id}
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                fetchPosts();
-              }}
-              tintColor="#ffd700"
-            />
-          }
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>No posts yet</Text>
-              <Text style={styles.emptySubtext}>Be the first to share!</Text>
+      {/* Notifications Modal */}
+      <Modal
+        visible={showNotifications}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowNotifications(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.notificationsModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Notifications</Text>
+              <TouchableOpacity onPress={() => setShowNotifications(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
             </View>
-          }
-        />
-      </KeyboardAvoidingView>
+
+            <ScrollView style={styles.notificationsList}>
+              {notifications.length === 0 ? (
+                <View style={styles.emptyNotifications}>
+                  <Ionicons name="notifications-off-outline" size={48} color="#ccc" />
+                  <Text style={styles.emptyText}>No notifications</Text>
+                </View>
+              ) : (
+                notifications.map((notification) => (
+                  <TouchableOpacity
+                    key={notification._id}
+                    style={[
+                      styles.notificationItem,
+                      !notification.read && styles.notificationUnread,
+                    ]}
+                    onPress={() => handleNotificationClick(notification)}
+                  >
+                    <Ionicons
+                      name={
+                        notification.type === 'like'
+                          ? 'heart'
+                          : notification.type === 'comment'
+                          ? 'chatbubble'
+                          : 'person-add'
+                      }
+                      size={24}
+                      color={!notification.read ? '#ffd700' : '#666'}
+                    />
+                    <View style={styles.notificationContent}>
+                      <Text style={styles.notificationText}>{notification.message}</Text>
+                      <Text style={styles.notificationTime}>
+                        {new Date(notification.created_at).toLocaleDateString()}
+                      </Text>
+                    </View>
+                    {!notification.read && <View style={styles.unreadDot} />}
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Likers Modal */}
+      <Modal
+        visible={showLikersModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowLikersModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.likersModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Liked by</Text>
+              <TouchableOpacity onPress={() => setShowLikersModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.likersList}>
+              {likers.map((liker) => (
+                <TouchableOpacity
+                  key={liker._id}
+                  style={styles.likerItem}
+                  onPress={() => {
+                    setShowLikersModal(false);
+                    router.push(`/user/${liker._id}`);
+                  }}
+                >
+                  {liker.picture ? (
+                    <Image source={{ uri: liker.picture }} style={styles.likerAvatar} />
+                  ) : (
+                    <View style={[styles.likerAvatar, styles.avatarPlaceholder]}>
+                      <Text style={styles.avatarText}>{liker.name?.charAt(0)}</Text>
+                    </View>
+                  )}
+                  <Text style={styles.likerName}>{liker.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Comments Modal */}
       <Modal
@@ -506,16 +755,24 @@ export default function HomeScreen() {
             </View>
 
             <ScrollView style={styles.editContent}>
-              {editImage && (
-                <View style={styles.imagePreview}>
-                  <Image source={{ uri: editImage }} style={styles.previewImage} />
-                  <TouchableOpacity
-                    style={styles.removeImageButton}
-                    onPress={() => setEditImage(null)}
-                  >
-                    <Ionicons name="close-circle" size={24} color="#F44336" />
-                  </TouchableOpacity>
-                </View>
+              {editImages.length > 0 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.imagePreviewContainer}
+                >
+                  {editImages.map((img, index) => (
+                    <View key={index} style={styles.imagePreview}>
+                      <Image source={{ uri: img }} style={styles.previewImage} />
+                      <TouchableOpacity
+                        style={styles.removeImageButton}
+                        onPress={() => setEditImages(editImages.filter((_, i) => i !== index))}
+                      >
+                        <Ionicons name="close-circle" size={24} color="#F44336" />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
               )}
 
               <TextInput
@@ -527,9 +784,9 @@ export default function HomeScreen() {
                 maxLength={500}
               />
 
-              <TouchableOpacity style={styles.editImageButton} onPress={pickEditImage}>
-                <Ionicons name="image-outline" size={24} color="#ffd700" />
-                <Text style={styles.editImageButtonText}>Change Image</Text>
+              <TouchableOpacity style={styles.editImageButton} onPress={pickEditImages}>
+                <Ionicons name="images-outline" size={24} color="#ffd700" />
+                <Text style={styles.editImageButtonText}>Add More Photos</Text>
               </TouchableOpacity>
             </ScrollView>
 
@@ -560,9 +817,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  flex: {
-    flex: 1,
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -571,10 +825,15 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   logo: {
     width: 36,
@@ -587,66 +846,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffd700',
   },
-  createPost: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  imagePreview: {
+  notificationButton: {
     position: 'relative',
-    marginBottom: 12,
-  },
-  previewImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 12,
-  },
-  removeImageButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-  },
-  inputRow: {
-    gap: 12,
-  },
-  input: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 8,
-    minHeight: 60,
-    fontSize: 16,
-  },
-  actionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  imageButton: {
     padding: 8,
   },
-  postButton: {
-    flex: 1,
-    backgroundColor: '#ffd700',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 20,
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#F44336',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  postButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  postButtonText: {
+  notificationBadgeText: {
     color: '#fff',
+    fontSize: 11,
     fontWeight: 'bold',
-    fontSize: 16,
   },
   listContent: {
     paddingVertical: 8,
+    paddingBottom: 80,
   },
   postCard: {
     backgroundColor: '#fff',
@@ -702,33 +924,36 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 16,
   },
+  imagesCarousel: {
+    marginBottom: 16,
+  },
   postImage: {
-    width: '100%',
+    width: width - 64,
     height: 250,
     borderRadius: 12,
-    marginBottom: 16,
+    marginRight: 8,
   },
   postActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 16,
   },
   voteButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 24,
   },
   voteCount: {
-    marginLeft: 8,
-    fontSize: 16,
+    fontSize: 15,
     color: '#666',
     fontWeight: '500',
   },
   commentButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginLeft: 'auto',
+    gap: 6,
   },
   commentText: {
-    marginLeft: 8,
     fontSize: 14,
     color: '#666',
   },
@@ -748,10 +973,44 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 8,
   },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ffd700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+  },
+  createPostModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '85%',
+  },
+  notificationsModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  likersModal: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
   },
   commentsModal: {
     backgroundColor: '#fff',
@@ -777,6 +1036,131 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#333',
+  },
+  createContent: {
+    padding: 16,
+  },
+  imagePreviewContainer: {
+    marginBottom: 16,
+  },
+  imagePreview: {
+    position: 'relative',
+    marginRight: 8,
+  },
+  previewImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 12,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+  },
+  createInput: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    minHeight: 120,
+    textAlignVertical: 'top',
+    marginBottom: 16,
+  },
+  imagePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    gap: 8,
+  },
+  imagePickerText: {
+    fontSize: 16,
+    color: '#ffd700',
+    fontWeight: '600',
+  },
+  createFooter: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  postCreateButton: {
+    backgroundColor: '#ffd700',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  postButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  postCreateButtonText: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  notificationsList: {
+    padding: 16,
+  },
+  emptyNotifications: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  notificationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    marginBottom: 8,
+    gap: 12,
+  },
+  notificationUnread: {
+    backgroundColor: '#fffbf0',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ffd700',
+  },
+  notificationContent: {
+    flex: 1,
+  },
+  notificationText: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 4,
+  },
+  notificationTime: {
+    fontSize: 12,
+    color: '#999',
+  },
+  unreadDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#ffd700',
+  },
+  likersList: {
+    padding: 16,
+  },
+  likerItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
+    marginBottom: 8,
+    gap: 12,
+  },
+  likerAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  likerName: {
+    fontSize: 16,
+    fontWeight: '600',
     color: '#333',
   },
   commentsScroll: {
