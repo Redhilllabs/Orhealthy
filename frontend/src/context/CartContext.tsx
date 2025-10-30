@@ -128,6 +128,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         loading,
         addToCart,
         removeFromCart,
+        updateQuantity,
         clearCart,
         refreshCart,
         totalPrice,
