@@ -117,6 +117,32 @@ class Conversation(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class SavedMeal(BaseModel):
+    guide_id: str
+    meal_name: str
+    ingredients: List[dict]  # [{ingredient_id, ingredient_name, quantity, unit, price}]
+    total_price: float
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Coupon(BaseModel):
+    code: str
+    discount_type: str  # 'flat' or 'percentage'
+    discount_value: float
+    min_order_value: float
+    usage_limit_type: str  # 'one_time' or 'recurring'
+    expiry_date: datetime
+    active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class WithdrawalRequest(BaseModel):
+    guide_id: str
+    guide_name: str
+    amount: float
+    status: str = 'pending'  # pending, approved, rejected
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    processed_at: Optional[datetime] = None
+
+
 class Ingredient(BaseModel):
     name: str
     price_per_unit: float
