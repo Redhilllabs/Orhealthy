@@ -1419,10 +1419,32 @@ async def delete_meal(meal_id: str, request: Request):
 
 @api_router.get("/admin/orders")
 async def get_all_orders(request: Request):
-    """Get all orders (admin only)"""
+    """Get all orders (admin only) with user details"""
     orders = await db.orders.find().sort("created_at", -1).to_list(1000)
+    
     for order in orders:
         order["_id"] = str(order["_id"])
+        
+        # Fetch user details
+        user = await db.users.find_one({"_id": ObjectId(order["user_id"])})
+        if user:
+            order["user_name"] = user.get("name", "Unknown")
+            order["user_email"] = user.get("email", "")
+        else:
+            order["user_name"] = "Unknown User"
+            order["user_email"] = ""
+        
+        # If ordered by guide for guidee, add those details
+        if order.get("ordered_by_guide_id"):
+            guide = await db.users.find_one({"_id": ObjectId(order["ordered_by_guide_id"])})
+            if guide:
+                order["guide_name"] = guide.get("name", "Unknown")
+        
+        if order.get("ordered_for_guidee_id"):
+            guidee = await db.users.find_one({"_id": ObjectId(order["ordered_for_guidee_id"])})
+            if guidee:
+                order["guidee_name"] = guidee.get("name", "Unknown")
+    
     return orders
 
 @api_router.put("/admin/orders/{order_id}")
