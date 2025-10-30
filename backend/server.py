@@ -193,10 +193,17 @@ class Order(BaseModel):
     user_id: str
     items: List[CartItem]
     total_price: float
+    discount_amount: float = 0.0
+    coupon_code: Optional[str] = None
+    final_price: float
     status: str = "pending"  # pending, confirmed, delivered
     billing_address: Address
     shipping_address: Address
     payment_id: Optional[str] = None
+    ordered_by_guide_id: Optional[str] = None  # If guide ordered for guidee
+    ordered_for_guidee_id: Optional[str] = None  # The guidee this order is for
+    commission_earned: float = 0.0  # Commission earned by guide
+    commission_rate: float = 0.0  # Rate at which commission was calculated
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Config(BaseModel):
