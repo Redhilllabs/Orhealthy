@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +25,7 @@ export default function CheckoutScreen() {
   const { cartItems, totalPrice, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
+  const [showThankYou, setShowThankYou] = useState(false);
 
   // Billing address
   const [billingName, setBillingName] = useState('');
@@ -97,19 +100,12 @@ export default function CheckoutScreen() {
       );
 
       await clearCart();
+      setShowThankYou(true);
       
-      Alert.alert(
-        'Order Placed!',
-        paymentMethod === 'cod'
-          ? 'Your order has been placed successfully. Pay on delivery.'
-          : 'Your order has been placed successfully.',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.replace('/(tabs)'),
-          },
-        ]
-      );
+      // Redirect to home after 3 seconds
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 3000);
     } catch (error: any) {
       console.error('Error placing order:', error);
       Alert.alert('Error', error.response?.data?.detail || 'Failed to place order');
@@ -117,6 +113,31 @@ export default function CheckoutScreen() {
       setLoading(false);
     }
   };
+
+  if (showThankYou) {
+    return (
+      <SafeAreaView style={styles.thankYouContainer}>
+        <View style={styles.thankYouContent}>
+          <View style={styles.checkmarkContainer}>
+            <Ionicons name="checkmark-circle" size={100} color="#4CAF50" />
+          </View>
+          <Text style={styles.thankYouTitle}>Thank You!</Text>
+          <Text style={styles.thankYouMessage}>
+            Your order has been placed successfully.
+          </Text>
+          {paymentMethod === 'cod' && (
+            <Text style={styles.paymentInfo}>
+              Payment Method: Cash on Delivery
+            </Text>
+          )}
+          <Text style={styles.redirectMessage}>
+            Redirecting to home...
+          </Text>
+          <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -128,196 +149,201 @@ export default function CheckoutScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
-        {/* Order Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Order Summary</Text>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Items ({cartItems.length})</Text>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryText}>Total</Text>
-              <Text style={styles.summaryPrice}>₹{totalPrice.toFixed(2)}</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+          {/* Order Summary */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Order Summary</Text>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>Items ({cartItems.length})</Text>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryText}>Total</Text>
+                <Text style={styles.summaryPrice}>₹{totalPrice.toFixed(2)}</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Payment Method */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Payment Method</Text>
-          <TouchableOpacity
-            style={[
-              styles.paymentOption,
-              paymentMethod === 'cod' && styles.paymentOptionActive,
-            ]}
-            onPress={() => setPaymentMethod('cod')}
-          >
-            <View style={styles.radio}>
-              {paymentMethod === 'cod' && <View style={styles.radioInner} />}
-            </View>
-            <View style={styles.paymentInfo}>
-              <Text style={styles.paymentTitle}>Cash on Delivery</Text>
-              <Text style={styles.paymentSubtitle}>Pay when you receive</Text>
-            </View>
-            <Ionicons name="cash-outline" size={24} color="#ffd700" />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.paymentOption,
-              paymentMethod === 'online' && styles.paymentOptionActive,
-            ]}
-            onPress={() => setPaymentMethod('online')}
-          >
-            <View style={styles.radio}>
-              {paymentMethod === 'online' && <View style={styles.radioInner} />}
-            </View>
-            <View style={styles.paymentInfo}>
-              <Text style={styles.paymentTitle}>Online Payment</Text>
-              <Text style={styles.paymentSubtitle}>Coming soon</Text>
-            </View>
-            <Ionicons name="card-outline" size={24} color="#ccc" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Billing Address */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Billing Address</Text>
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name *"
-              value={billingName}
-              onChangeText={setBillingName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Street Address *"
-              value={billingStreet}
-              onChangeText={setBillingStreet}
-            />
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="City *"
-                value={billingCity}
-                onChangeText={setBillingCity}
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="State *"
-                value={billingState}
-                onChangeText={setBillingState}
-              />
-            </View>
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="ZIP Code *"
-                value={billingZip}
-                onChangeText={setBillingZip}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="Phone *"
-                value={billingPhone}
-                onChangeText={setBillingPhone}
-                keyboardType="phone-pad"
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* Shipping Address */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Shipping Address</Text>
+          {/* Payment Method */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Payment Method</Text>
             <TouchableOpacity
-              style={styles.checkbox}
-              onPress={() => setSameAsBilling(!sameAsBilling)}
+              style={[
+                styles.paymentOption,
+                paymentMethod === 'cod' && styles.paymentOptionActive,
+              ]}
+              onPress={() => setPaymentMethod('cod')}
             >
-              <Ionicons
-                name={sameAsBilling ? 'checkbox' : 'square-outline'}
-                size={24}
-                color="#ffd700"
-              />
-              <Text style={styles.checkboxLabel}>Same as billing</Text>
+              <View style={styles.radio}>
+                {paymentMethod === 'cod' && <View style={styles.radioInner} />}
+              </View>
+              <View style={styles.paymentInfo}>
+                <Text style={styles.paymentTitle}>Cash on Delivery</Text>
+                <Text style={styles.paymentSubtitle}>Pay when you receive</Text>
+              </View>
+              <Ionicons name="cash-outline" size={24} color="#ffd700" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.paymentOption,
+                paymentMethod === 'online' && styles.paymentOptionActive,
+              ]}
+              onPress={() => setPaymentMethod('online')}
+            >
+              <View style={styles.radio}>
+                {paymentMethod === 'online' && <View style={styles.radioInner} />}
+              </View>
+              <View style={styles.paymentInfo}>
+                <Text style={styles.paymentTitle}>Online Payment</Text>
+                <Text style={styles.paymentSubtitle}>Coming soon</Text>
+              </View>
+              <Ionicons name="card-outline" size={24} color="#ccc" />
             </TouchableOpacity>
           </View>
 
-          {!sameAsBilling && (
+          {/* Billing Address */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Billing Address</Text>
             <View style={styles.form}>
               <TextInput
                 style={styles.input}
                 placeholder="Full Name *"
-                value={shippingName}
-                onChangeText={setShippingName}
+                value={billingName}
+                onChangeText={setBillingName}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Street Address *"
-                value={shippingStreet}
-                onChangeText={setShippingStreet}
+                value={billingStreet}
+                onChangeText={setBillingStreet}
               />
               <View style={styles.row}>
                 <TextInput
                   style={[styles.input, styles.halfInput]}
                   placeholder="City *"
-                  value={shippingCity}
-                  onChangeText={setShippingCity}
+                  value={billingCity}
+                  onChangeText={setBillingCity}
                 />
                 <TextInput
                   style={[styles.input, styles.halfInput]}
                   placeholder="State *"
-                  value={shippingState}
-                  onChangeText={setShippingState}
+                  value={billingState}
+                  onChangeText={setBillingState}
                 />
               </View>
               <View style={styles.row}>
                 <TextInput
                   style={[styles.input, styles.halfInput]}
                   placeholder="ZIP Code *"
-                  value={shippingZip}
-                  onChangeText={setShippingZip}
+                  value={billingZip}
+                  onChangeText={setBillingZip}
                   keyboardType="numeric"
                 />
                 <TextInput
                   style={[styles.input, styles.halfInput]}
                   placeholder="Phone *"
-                  value={shippingPhone}
-                  onChangeText={setShippingPhone}
+                  value={billingPhone}
+                  onChangeText={setBillingPhone}
                   keyboardType="phone-pad"
                 />
               </View>
             </View>
-          )}
-        </View>
-      </ScrollView>
+          </View>
 
-      <View style={styles.footer}>
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total Amount</Text>
-          <Text style={styles.totalAmount}>₹{totalPrice.toFixed(2)}</Text>
+          {/* Shipping Address */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Shipping Address</Text>
+              <TouchableOpacity
+                style={styles.checkbox}
+                onPress={() => setSameAsBilling(!sameAsBilling)}
+              >
+                <Ionicons
+                  name={sameAsBilling ? 'checkbox' : 'square-outline'}
+                  size={24}
+                  color="#ffd700"
+                />
+                <Text style={styles.checkboxLabel}>Same as billing</Text>
+              </TouchableOpacity>
+            </View>
+
+            {!sameAsBilling && (
+              <View style={styles.form}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Full Name *"
+                  value={shippingName}
+                  onChangeText={setShippingName}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Street Address *"
+                  value={shippingStreet}
+                  onChangeText={setShippingStreet}
+                />
+                <View style={styles.row}>
+                  <TextInput
+                    style={[styles.input, styles.halfInput]}
+                    placeholder="City *"
+                    value={shippingCity}
+                    onChangeText={setShippingCity}
+                  />
+                  <TextInput
+                    style={[styles.input, styles.halfInput]}
+                    placeholder="State *"
+                    value={shippingState}
+                    onChangeText={setShippingState}
+                  />
+                </View>
+                <View style={styles.row}>
+                  <TextInput
+                    style={[styles.input, styles.halfInput]}
+                    placeholder="ZIP Code *"
+                    value={shippingZip}
+                    onChangeText={setShippingZip}
+                    keyboardType="numeric"
+                  />
+                  <TextInput
+                    style={[styles.input, styles.halfInput]}
+                    placeholder="Phone *"
+                    value={shippingPhone}
+                    onChangeText={setShippingPhone}
+                    keyboardType="phone-pad"
+                  />
+                </View>
+              </View>
+            )}
+          </View>
+        </ScrollView>
+
+        <View style={styles.footer}>
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total Amount</Text>
+            <Text style={styles.totalAmount}>₹{totalPrice.toFixed(2)}</Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.placeOrderButton, (loading || paymentMethod === 'online') && styles.placeOrderButtonDisabled]}
+            onPress={handlePlaceOrder}
+            disabled={loading || paymentMethod === 'online'}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.placeOrderButtonText}>
+                  {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Coming Soon'}
+                </Text>
+                {paymentMethod === 'cod' && (
+                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                )}
+              </>
+            )}
+          </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={[styles.placeOrderButton, (loading || paymentMethod === 'online') && styles.placeOrderButtonDisabled]}
-          onPress={handlePlaceOrder}
-          disabled={loading || paymentMethod === 'online'}
-        >
-          {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <>
-              <Text style={styles.placeOrderButtonText}>
-                {paymentMethod === 'cod' ? 'Place Order (COD)' : 'Coming Soon'}
-              </Text>
-              {paymentMethod === 'cod' && (
-                <Ionicons name="arrow-forward" size={20} color="#fff" />
-              )}
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -326,6 +352,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  thankYouContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  thankYouContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  checkmarkContainer: {
+    marginBottom: 32,
+  },
+  thankYouTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  thankYouMessage: {
+    fontSize: 18,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  paymentInfo: {
+    fontSize: 16,
+    color: '#999',
+    marginBottom: 24,
+  },
+  redirectMessage: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 32,
   },
   header: {
     flexDirection: 'row',
