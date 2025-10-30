@@ -310,6 +310,66 @@ backend:
 
 
 frontend:
+  - task: "Comment avatars with profile links"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/index.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added user avatars (36x36) to comment display with clickable profile navigation. Shows user picture or initials placeholder"
+  
+  - task: "Address form with apartment field"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/checkout.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added apartment/suite field above street address in modal. Combines apartment + street for full_address. Improved error handling"
+  
+  - task: "Bottom navigation padding fix"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/_layout.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Increased height to 65, paddingBottom to 8, paddingTop to 8, removed marginTop from labels to prevent cutoff"
+  
+  - task: "FAB position adjustment"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/index.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Moved floating action button (new post) from bottom: 75 to bottom: 90 for better positioning near bottom nav"
+  
+  - task: "Presets tabs elongation fix"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/presets.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed tab styling: increased paddingVertical to 14, borderBottomWidth to 3, made active tab bold to prevent elongation"
+  
   - task: "Home screen - Comments modal"
     implemented: true
     working: "NA"
