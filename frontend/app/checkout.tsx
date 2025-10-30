@@ -9,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,14 +22,28 @@ import { storage } from '../src/utils/storage';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
+interface Address {
+  label: string;
+  full_address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  is_default: boolean;
+}
+
 export default function CheckoutScreen() {
   const router = useRouter();
   const { cartItems, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online'>('cod');
   const [showThankYou, setShowThankYou] = useState(false);
   const [itemsExpanded, setItemsExpanded] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [guideeAddresses, setGuideeAddresses] = useState<Address[]>([]);
+  const [selectedAddressIndex, setSelectedAddressIndex] = useState<number | null>(null);
+  const [selectedGuideeAddressIndex, setSelectedGuideeAddressIndex] = useState<number | null>(null);
 
   // Coupon state
   const [couponCode, setCouponCode] = useState('');
@@ -39,37 +54,66 @@ export default function CheckoutScreen() {
   // Guide ordering state
   const [orderingForGuidee, setOrderingForGuidee] = useState(false);
   const [guidees, setGuidees] = useState<any[]>([]);
-  const [selectedGuidee, setSelectedGuidee] = useState<string | null>(null);
+  const [selectedGuidee, setSelectedGuidee] = useState<any | null>(null);
   const [commissionRate, setCommissionRate] = useState(0);
   const [commissionAmount, setCommissionAmount] = useState(0);
 
-  // Address state
-  const [billingName, setBillingName] = useState('');
-  const [billingStreet, setBillingStreet] = useState('');
-  const [billingCity, setBillingCity] = useState('');
-  const [billingState, setBillingState] = useState('');
-  const [billingZip, setBillingZip] = useState('');
-  const [billingPhone, setBillingPhone] = useState('');
-
-  const [sameAsBilling, setSameAsBilling] = useState(true);
-  const [shippingName, setShippingName] = useState('');
-  const [shippingStreet, setShippingStreet] = useState('');
-  const [shippingCity, setShippingCity] = useState('');
-  const [shippingState, setShippingState] = useState('');
-  const [shippingZip, setShippingZip] = useState('');
-  const [shippingPhone, setShippingPhone] = useState('');
+  // New address form
+  const [newAddressLabel, setNewAddressLabel] = useState('');
+  const [newAddressStreet, setNewAddressStreet] = useState('');
+  const [newAddressCity, setNewAddressCity] = useState('');
+  const [newAddressState, setNewAddressState] = useState('');
+  const [newAddressZip, setNewAddressZip] = useState('');
+  const [newAddressPhone, setNewAddressPhone] = useState('');
 
   useEffect(() => {
+    fetchAddresses();
     if (user?.is_guide) {
       fetchGuidees();
     }
   }, [user]);
 
   useEffect(() => {
+    if (selectedGuidee) {
+      fetchGuideeAddresses(selectedGuidee._id);
+    }
+  }, [selectedGuidee]);
+
+  useEffect(() => {
     if (user?.is_guide && orderingForGuidee) {
       calculateCommission();
     }
   }, [orderingForGuidee, couponDiscount, totalPrice]);
+
+  const fetchAddresses = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/addresses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAddresses(response.data);
+      // Auto-select default address
+      const defaultIndex = response.data.findIndex((addr: Address) => addr.is_default);
+      if (defaultIndex !== -1) {
+        setSelectedAddressIndex(defaultIndex);
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+    }
+  };
+
+  const fetchGuideeAddresses = async (guideeId: string) => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/users/${guideeId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setGuideeAddresses(response.data.addresses || []);
+    } catch (error) {
+      console.error('Error fetching guidee addresses:', error);
+      setGuideeAddresses([]);
+    }
+  };
 
   const fetchGuidees = async () => {
     try {
@@ -83,11 +127,48 @@ export default function CheckoutScreen() {
     }
   };
 
+  const saveNewAddress = async () => {
+    if (!newAddressLabel || !newAddressStreet || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
+      Alert.alert('Error', 'Please fill all address fields');
+      return;
+    }
+
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.post(
+        `${API_URL}/addresses`,
+        {
+          label: newAddressLabel,
+          full_address: newAddressStreet,
+          city: newAddressCity,
+          state: newAddressState,
+          pincode: newAddressZip,
+          phone: newAddressPhone,
+          is_default: addresses.length === 0,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      Alert.alert('Success', 'Address saved successfully');
+      await fetchAddresses();
+      setShowAddressModal(false);
+      // Clear form
+      setNewAddressLabel('');
+      setNewAddressStreet('');
+      setNewAddressCity('');
+      setNewAddressState('');
+      setNewAddressZip('');
+      setNewAddressPhone('');
+    } catch (error) {
+      console.error('Error saving address:', error);
+      Alert.alert('Error', 'Failed to save address');
+    }
+  };
+
   const calculateCommission = async () => {
     if (!user?.star_rating) return;
     
     try {
-      const token = await storage.getItemAsync('session_token');
       const response = await axios.get(`${API_URL}/admin/commission-rates`);
       const rates = response.data;
       const rate = rates[`star${user.star_rating}`] || 0;
@@ -131,55 +212,30 @@ export default function CheckoutScreen() {
     setCouponDiscount(0);
   };
 
-  const validateForm = () => {
-    if (!billingName || !billingStreet || !billingCity || !billingState || !billingZip || !billingPhone) {
-      Alert.alert('Error', 'Please fill in all billing address fields');
-      return false;
-    }
-
-    if (!sameAsBilling) {
-      if (!shippingName || !shippingStreet || !shippingCity || !shippingState || !shippingZip || !shippingPhone) {
-        Alert.alert('Error', 'Please fill in all shipping address fields');
-        return false;
-      }
-    }
-
-    if (orderingForGuidee && !selectedGuidee) {
-      Alert.alert('Error', 'Please select a guidee');
-      return false;
-    }
-
-    return true;
-  };
-
   const handlePlaceOrder = async () => {
-    if (!validateForm()) return;
+    let deliveryAddress: Address;
+
+    if (orderingForGuidee) {
+      if (!selectedGuidee) {
+        Alert.alert('Error', 'Please select a guidee');
+        return;
+      }
+      if (selectedGuideeAddressIndex === null) {
+        Alert.alert('Error', 'Please select a delivery address for the guidee');
+        return;
+      }
+      deliveryAddress = guideeAddresses[selectedGuideeAddressIndex];
+    } else {
+      if (selectedAddressIndex === null) {
+        Alert.alert('Error', 'Please select or add a delivery address');
+        return;
+      }
+      deliveryAddress = addresses[selectedAddressIndex];
+    }
 
     try {
       setLoading(true);
       const token = await storage.getItemAsync('session_token');
-
-      const billingAddress = {
-        label: 'Billing',
-        full_address: `${billingStreet}, ${billingCity}`,
-        city: billingCity,
-        state: billingState,
-        pincode: billingZip,
-        phone: billingPhone,
-        is_default: false,
-      };
-
-      const shippingAddress = sameAsBilling
-        ? billingAddress
-        : {
-            label: 'Shipping',
-            full_address: `${shippingStreet}, ${shippingCity}`,
-            city: shippingCity,
-            state: shippingState,
-            pincode: shippingZip,
-            phone: shippingPhone,
-            is_default: false,
-          };
 
       const orderData: any = {
         items: cartItems,
@@ -187,14 +243,14 @@ export default function CheckoutScreen() {
         discount_amount: couponDiscount,
         coupon_code: couponApplied ? couponCode : null,
         final_price: totalPrice - couponDiscount,
-        billing_address: billingAddress,
-        shipping_address: shippingAddress,
-        payment_id: paymentMethod === 'cod' ? 'COD' : null,
+        billing_address: deliveryAddress,
+        shipping_address: deliveryAddress,
+        payment_id: 'COD',
       };
 
       if (orderingForGuidee && selectedGuidee) {
         orderData.ordered_by_guide_id = user?._id;
-        orderData.ordered_for_guidee_id = selectedGuidee;
+        orderData.ordered_for_guidee_id = selectedGuidee._id;
       }
 
       await axios.post(`${API_URL}/orders`, orderData, {
@@ -327,7 +383,13 @@ export default function CheckoutScreen() {
               <Text style={styles.sectionTitle}>Order For Guidee</Text>
               <TouchableOpacity
                 style={styles.checkboxContainer}
-                onPress={() => setOrderingForGuidee(!orderingForGuidee)}
+                onPress={() => {
+                  setOrderingForGuidee(!orderingForGuidee);
+                  if (orderingForGuidee) {
+                    setSelectedGuidee(null);
+                    setSelectedGuideeAddressIndex(null);
+                  }
+                }}
               >
                 <Ionicons
                   name={orderingForGuidee ? 'checkbox' : 'square-outline'}
@@ -345,14 +407,14 @@ export default function CheckoutScreen() {
                       key={guidee._id}
                       style={[
                         styles.guideeOption,
-                        selectedGuidee === guidee._id && styles.guideeOptionSelected,
+                        selectedGuidee?._id === guidee._id && styles.guideeOptionSelected,
                       ]}
-                      onPress={() => setSelectedGuidee(guidee._id)}
+                      onPress={() => setSelectedGuidee(guidee)}
                     >
                       <Text
                         style={[
                           styles.guideeName,
-                          selectedGuidee === guidee._id && styles.guideeNameSelected,
+                          selectedGuidee?._id === guidee._id && styles.guideeNameSelected,
                         ]}
                       >
                         {guidee.name}
@@ -377,133 +439,78 @@ export default function CheckoutScreen() {
             </View>
           )}
 
-          {/* Billing Address */}
+          {/* Address Selection */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Billing Address</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name *"
-              value={billingName}
-              onChangeText={setBillingName}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Street Address *"
-              value={billingStreet}
-              onChangeText={setBillingStreet}
-            />
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="City *"
-                value={billingCity}
-                onChangeText={setBillingCity}
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="State *"
-                value={billingState}
-                onChangeText={setBillingState}
-              />
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>
+                {orderingForGuidee ? 'Guidee Delivery Address' : 'Delivery Address'}
+              </Text>
+              {!orderingForGuidee && (
+                <TouchableOpacity onPress={() => setShowAddressModal(true)}>
+                  <Text style={styles.addAddressButton}>+ Add New</Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="ZIP Code *"
-                value={billingZip}
-                onChangeText={setBillingZip}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder="Phone *"
-                value={billingPhone}
-                onChangeText={setBillingPhone}
-                keyboardType="phone-pad"
-              />
-            </View>
-          </View>
 
-          {/* Shipping Address */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Shipping Address</Text>
-            <TouchableOpacity
-              style={styles.checkboxContainer}
-              onPress={() => setSameAsBilling(!sameAsBilling)}
-            >
-              <Ionicons
-                name={sameAsBilling ? 'checkbox' : 'square-outline'}
-                size={24}
-                color="#ffd700"
-              />
-              <Text style={styles.checkboxLabel}>Same as billing address</Text>
-            </TouchableOpacity>
-
-            {!sameAsBilling && (
-              <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Full Name *"
-                  value={shippingName}
-                  onChangeText={setShippingName}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Street Address *"
-                  value={shippingStreet}
-                  onChangeText={setShippingStreet}
-                />
-                <View style={styles.row}>
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="City *"
-                    value={shippingCity}
-                    onChangeText={setShippingCity}
-                  />
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="State *"
-                    value={shippingState}
-                    onChangeText={setShippingState}
-                  />
-                </View>
-                <View style={styles.row}>
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="ZIP Code *"
-                    value={shippingZip}
-                    onChangeText={setShippingZip}
-                    keyboardType="numeric"
-                  />
-                  <TextInput
-                    style={[styles.input, styles.halfInput]}
-                    placeholder="Phone *"
-                    value={shippingPhone}
-                    onChangeText={setShippingPhone}
-                    keyboardType="phone-pad"
-                  />
-                </View>
-              </>
+            {orderingForGuidee ? (
+              guideeAddresses.length > 0 ? (
+                guideeAddresses.map((addr, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.addressCard,
+                      selectedGuideeAddressIndex === index && styles.addressCardSelected,
+                    ]}
+                    onPress={() => setSelectedGuideeAddressIndex(index)}
+                  >
+                    <View style={styles.addressHeader}>
+                      <Text style={styles.addressLabel}>{addr.label}</Text>
+                      {selectedGuideeAddressIndex === index && (
+                        <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+                      )}
+                    </View>
+                    <Text style={styles.addressText}>{addr.full_address}</Text>
+                    <Text style={styles.addressText}>
+                      {addr.city}, {addr.state} - {addr.pincode}
+                    </Text>
+                    <Text style={styles.addressText}>☎ {addr.phone}</Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.noAddressText}>
+                  Guidee has no saved addresses. Please ask them to add addresses in their profile.
+                </Text>
+              )
+            ) : (
+              addresses.length > 0 ? (
+                addresses.map((addr, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.addressCard,
+                      selectedAddressIndex === index && styles.addressCardSelected,
+                    ]}
+                    onPress={() => setSelectedAddressIndex(index)}
+                  >
+                    <View style={styles.addressHeader}>
+                      <Text style={styles.addressLabel}>{addr.label}</Text>
+                      {selectedAddressIndex === index && (
+                        <Ionicons name="checkmark-circle" size={24} color="#10b981" />
+                      )}
+                    </View>
+                    <Text style={styles.addressText}>{addr.full_address}</Text>
+                    <Text style={styles.addressText}>
+                      {addr.city}, {addr.state} - {addr.pincode}
+                    </Text>
+                    <Text style={styles.addressText}>☎ {addr.phone}</Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.noAddressText}>
+                  No saved addresses. Please add an address to continue.
+                </Text>
+              )
             )}
-          </View>
-
-          {/* Payment Method */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Payment Method</Text>
-            <TouchableOpacity
-              style={[
-                styles.paymentOption,
-                paymentMethod === 'cod' && styles.paymentOptionSelected,
-              ]}
-              onPress={() => setPaymentMethod('cod')}
-            >
-              <Ionicons
-                name={paymentMethod === 'cod' ? 'radio-button-on' : 'radio-button-off'}
-                size={24}
-                color="#ffd700"
-              />
-              <Text style={styles.paymentLabel}>Cash on Delivery</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Price Summary */}
@@ -545,6 +552,65 @@ export default function CheckoutScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* Add Address Modal */}
+      <Modal visible={showAddressModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add New Address</Text>
+              <TouchableOpacity onPress={() => setShowAddressModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              <TextInput
+                style={styles.input}
+                placeholder="Label (e.g., Home, Office) *"
+                value={newAddressLabel}
+                onChangeText={setNewAddressLabel}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Street Address *"
+                value={newAddressStreet}
+                onChangeText={setNewAddressStreet}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="City *"
+                value={newAddressCity}
+                onChangeText={setNewAddressCity}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="State *"
+                value={newAddressState}
+                onChangeText={setNewAddressState}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="PIN Code *"
+                value={newAddressZip}
+                onChangeText={setNewAddressZip}
+                keyboardType="numeric"
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Phone *"
+                value={newAddressPhone}
+                onChangeText={setNewAddressPhone}
+                keyboardType="phone-pad"
+              />
+            </ScrollView>
+            <View style={styles.modalFooter}>
+              <TouchableOpacity style={styles.saveAddressButton} onPress={saveNewAddress}>
+                <Text style={styles.saveAddressButtonText}>Save Address</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -586,6 +652,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 12,
+  },
+  addAddressButton: {
+    color: '#3b82f6',
+    fontSize: 14,
+    fontWeight: '600',
   },
   itemsList: {
     marginTop: 12,
@@ -727,30 +798,39 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
   },
-  row: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  halfInput: {
-    flex: 1,
-  },
-  paymentOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  addressCard: {
     padding: 12,
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+    marginBottom: 12,
+  },
+  addressCardSelected: {
+    borderColor: '#10b981',
+    backgroundColor: '#ecfdf5',
+  },
+  addressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
-  paymentOptionSelected: {
-    borderColor: '#ffd700',
-    backgroundColor: '#fffbeb',
-  },
-  paymentLabel: {
-    fontSize: 14,
+  addressLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#333',
+  },
+  addressText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  noAddressText: {
+    fontSize: 14,
+    color: '#999',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    paddingVertical: 20,
   },
   priceSection: {
     backgroundColor: '#fff',
@@ -852,5 +932,48 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1e40af',
     marginTop: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalFooter: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  saveAddressButton: {
+    backgroundColor: '#ffd700',
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveAddressButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
