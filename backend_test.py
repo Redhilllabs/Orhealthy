@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for OrHealthy Mobile App
-Tests all mobile app feature backend APIs as specified in test_result.md
-Including Chat System endpoints
+Backend API Testing Suite for OrHealthy Mobile App - NEW FEATURES
+Tests the new backend API changes:
+1. GET /api/posts/{post_id}/comments - Updated to include user_picture field
+2. GET /api/saved-meals - Now generates images array from ingredient images
+3. POST /api/addresses - Now accepts apartment field
 """
 
 import requests
