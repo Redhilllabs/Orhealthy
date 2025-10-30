@@ -371,40 +371,57 @@ export default function HomeScreen() {
 
     return (
       <View style={styles.postCard}>
-        <TouchableOpacity 
-          style={styles.postHeader}
-          onPress={() => router.push(`/user/${item.user_id}`)}
-        >
-          {item.user_picture ? (
-            <Image source={{ uri: item.user_picture }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarText}>
-                {item.user_name?.charAt(0).toUpperCase()}
-              </Text>
+        <View style={styles.postHeader}>
+          <TouchableOpacity 
+            style={styles.userSection}
+            onPress={() => router.push(`/user/${item.user_id}`)}
+          >
+            {item.user_picture ? (
+              <Image source={{ uri: item.user_picture }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>
+                  {item.user_name?.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+            <View style={styles.userInfo}>
+              <View style={styles.userNameRow}>
+                <Text style={styles.userName}>{item.user_name}</Text>
+                {item.star_rating && item.star_rating > 0 && (
+                  <View style={styles.starRating}>
+                    {Array.from({ length: item.star_rating }).map((_, i) => (
+                      <Ionicons key={i} name="star" size={12} color="#ffd700" />
+                    ))}
+                  </View>
+                )}
+              </View>
             </View>
-          )}
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.user_name}</Text>
-          </View>
+          </TouchableOpacity>
           
           {isOwner && (
             <View style={styles.postActions}>
               <TouchableOpacity
                 style={styles.actionIconButton}
-                onPress={() => handleEditPost(item)}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleEditPost(item);
+                }}
               >
                 <Ionicons name="create-outline" size={20} color="#666" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionIconButton}
-                onPress={() => handleDeletePost(item._id)}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleDeletePost(item._id);
+                }}
               >
                 <Ionicons name="trash-outline" size={20} color="#F44336" />
               </TouchableOpacity>
             </View>
           )}
-        </TouchableOpacity>
+        </View>
 
         <Text style={styles.postContent}>{item.content}</Text>
 
