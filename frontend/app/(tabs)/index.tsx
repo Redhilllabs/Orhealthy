@@ -999,6 +999,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  starRatingText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffd700',
+  },
   starRating: {
     flexDirection: 'row',
     alignItems: 'center',
