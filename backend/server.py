@@ -575,6 +575,90 @@ async def get_comments(post_id: str):
         comment["_id"] = str(comment["_id"])
     return comments
 
+# Notification endpoints
+@api_router.get("/notifications")
+async def get_notifications(request: Request):
+    """Get user's notifications"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    notifications = await db.notifications.find({"user_id": user["_id"]}).sort("created_at", -1).to_list(100)
+    for notification in notifications:
+        notification["_id"] = str(notification["_id"])
+    return notifications
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, request: Request):
+    """Mark notification as read"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    await db.notifications.update_one(
+        {"_id": ObjectId(notification_id), "user_id": user["_id"]},
+        {"$set": {"read": True}}
+    )
+    return {"message": "Notification marked as read"}
+
+# Guidee/Guide relationship endpoints
+@api_router.post("/users/{user_id}/add-guidee")
+async def add_guidee(user_id: str, request: Request):
+    """Add current user as guidee of the target user (guide)"""
+    current_user = await get_current_user(request)
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Check if target user is a guide
+    target_user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not target_user or not target_user.get("is_guide"):
+        raise HTTPException(status_code=400, detail="Target user is not a guide")
+    
+    # Add current user to target's guidees
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$addToSet": {"guidees": current_user["_id"]}}
+    )
+    
+    # Add target to current user's guides
+    await db.users.update_one(
+        {"_id": ObjectId(current_user["_id"])},
+        {"$addToSet": {"guides": user_id}}
+    )
+    
+    # Create notification
+    notification = Notification(
+        user_id=user_id,
+        type="guidee",
+        from_user=current_user["_id"],
+        from_user_name=current_user["name"],
+        message=f"{current_user['name']} is now your guidee"
+    )
+    await db.notifications.insert_one(notification.dict())
+    
+    return {"message": "Added as guidee"}
+
+@api_router.delete("/users/{user_id}/remove-guidee")
+async def remove_guidee(user_id: str, request: Request):
+    """Remove current user as guidee of the target user"""
+    current_user = await get_current_user(request)
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Remove current user from target's guidees
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$pull": {"guidees": current_user["_id"]}}
+    )
+    
+    # Remove target from current user's guides
+    await db.users.update_one(
+        {"_id": ObjectId(current_user["_id"])},
+        {"$pull": {"guides": user_id}}
+    )
+    
+    return {"message": "Removed as guidee"}
+
 # Meal & Ingredient endpoints
 @api_router.get("/ingredients")
 async def get_ingredients():
