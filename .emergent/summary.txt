@@ -1,16 +1,32 @@
 <analysis>
-The AI engineer successfully built the OrHealthy application from scratch, covering both Expo (React Native) frontend and FastAPI backend with MongoDB. Key development phases included establishing core mobile app navigation and Google authentication, which required specific handling for Expo Router's OAuth redirects. The admin panel, initially a source of persistent UI issues, was systematically stabilized, and enhanced with features like star rating configuration, edit functionalities for meals/ingredients, and dynamic point settings. Crucially, the delete post functionality was debugged and fixed, identifying and resolving a tricky nested  event bubbling problem. Image handling was integrated across posts, meals, and ingredients, and currency was standardized to Rupees. Recent efforts focused on community features, including notifications, idol/fan relationships, and the initial implementation of a one-to-one chat system, with its backend and initial frontend screens now completed.
+The AI engineer commenced work on the OrHealthy application, focusing on incremental feature additions and UI/UX refinements. Initial efforts centered on integrating a one-to-one chat system, which involved creating backend models and endpoints () and developing corresponding frontend screens (, ). This phase also included fixing the chat route and adding a Message button to user profiles.
+
+Subsequently, the user requested significant UI/UX improvements, including relocating the message icon to the Home screen header with an unread count, filtering message notifications, and adding image uploads to chats. This led to updates in  for the message icon and notification logic, and  and  for image support. Further refinements involved repositioning the profile icon, reordering bottom navigation tabs, fixing navigation label visibility, and moving the New Post button. A  was introduced to manage unread chat counts. The DIY screen () was restructured to prioritize the tag carousel and improve search bar aesthetics.
+
+The project then moved into a major feature expansion: enabling users to save DIY meals, managing addresses, implementing a guide-ordering flow for guidees, commission tracking for guides, and a discount coupon system. The backend () was extensively updated with new models (, , ) and API endpoints, and the  model was enhanced for commission. The admin panel () was significantly modified to manage commission rates, coupons, and withdrawal requests, and to display detailed order information.
+
+Frontend work progressed with universal Save Meal functionality, fixing a critical  bug in  that prevented the app from opening, and implementing quantity controls in the cart (). The checkout screen () was revamped to include coupon input, an expandable item summary, guide ordering options with address selection for guidees, and commission display. Finally, the profile screen () was overhauled with horizontal tabs for Posts, Guides, Guidees, Idols, and Fans, saved addresses, commission balance display, and a withdraw request feature for guides. The development was iterative, with continuous frontend restarts and backend testing after major changes.
 </analysis>
 
 <product_requirements>
-OrHealthy is a full-stack nutrition app for web and mobile (Android/iOS) with a community for Guides and Guidees. Users authenticate via Google. Guides earn status via points (posts, votes, guidees, admin-assigned), reflected in a star-rating system. An admin panel manages users, meals, ingredients, and rating criteria. The mobile app features a Home page (user posts, comments, votes, images, star ratings, notifications, floating post creator), sticky bottom navigation (Home, Presets, DIY, My Profile, Cart), Presets screen (customizable meals, images, Rupee pricing), DIY screen (custom meals from ingredients, images, tags, Rupee pricing), My Profile (details, profile photo), Cart/Checkout (Razorpay, Cash on Delivery, Thank You screen), and Community (view profiles, fan/idol relations, be a guidee button, one-to-one chat). Design adheres to a #ffd700 gold scheme and specific UX patterns.
+OrHealthy is a full-stack nutrition app (web/mobile) for Guides and Guidees, using Google authentication. Guides earn star ratings through points (posts, votes, guidees, admin-assigned). An admin panel manages users, meals, ingredients, rating criteria, commission rates, coupons, and withdrawal requests.
+
+The mobile app features:
+- **Home Page**: User posts, comments, votes, images, star ratings, notification bell, floating post creator, and a message icon with unread chat count in the header.
+- **Sticky Bottom Navigation**: Tabs for Presets, DIY, Home, Messages (with unread count), Cart.
+- **Presets Screen**: Customizable meals, images, Rupee pricing, and a My Meals tab for logged-in users' saved DIY meals.
+- **DIY Screen**: Custom meal creation from ingredients (images, tags, Rupee pricing), tag-based filtering carousel at the top, and a Save Meal button for all users.
+- **My Profile**: User details, profile photo, horizontal scrollable tabs for Posts, Guides, Guidees, Idols, Fans, saved addresses with add option, commission balance, and a withdraw request button for guides.
+- **Cart/Checkout**: Razorpay, Cash on Delivery, Thank You screen, quantity change buttons in cart, coupon application, expandable item summary, guide ordering for guidees with address selection, and commission display.
+- **Community**: View other user profiles, fan/idol relations, be a guidee button, and one-to-one chat with image upload.
+- **Design**: #ffd700 gold scheme, thumb-friendly, contextual, gesture-driven interfaces, responsive, and accessible.
 </product_requirements>
 
 <key_technical_concepts>
--   **Frontend**: Expo (React Native for iOS/Android/Web), Expo Router, Zustand (state management),  (wrapped), .
--   **Backend**: FastAPI, MongoDB (via ), Google OAuth.
--   **UI/UX**: React Native components, StyleSheet, KeyboardAvoidingView, SafeAreaView, Modals for user interaction.
--   **Styling**: Global color scheme change (green to gold).
+- **Frontend**: Expo (React Native for iOS/Android/Web), Expo Router (file-based routing), Zustand (state management, initially suggested), React Context (for messages/cart), , .
+- **Backend**: FastAPI, MongoDB (via ), Google OAuth, .
+- **UI/UX**: React Native components, StyleSheet, KeyboardAvoidingView, SafeAreaView, Modals, horizontal scrollable tabs.
+- **Styling**: Global color scheme (#ffd700 gold), Flexbox layout with 8pt grid.
 </key_technical_concepts>
 
 <code_architecture>
@@ -18,54 +34,62 @@ OrHealthy is a full-stack nutrition app for web and mobile (Android/iOS) with a 
 
 -   **/app/backend/server.py**: The FastAPI backend.
     -   **Purpose**: Central API for all application logic.
-    -   **Changes**: Added models and endpoints for chat (, ), notifications, guidee/idol relationships, admin-configurable star ratings and points, and updated , ,  models to support image arrays.  was updated to include .
+    -   **Changes**: Added chat models (, ), notification logic, image array support for posts/meals/ingredients, updated . New models for , , . Updated  model for commission and . Added many new API endpoints for CRUD on saved meals, coupons, withdrawals, and updated existing endpoints for order creation (commission calculation, guidee orders) and admin panel management.
+-   **/app/backend/api_extensions.py**: (NEW) A file created to manage new API endpoints to avoid  becoming too large.
+    -   **Purpose**: Modularize and extend the FastAPI backend.
+    -   **Changes**: Contains bulk implementations of API endpoints for saved meals, coupons, withdrawal requests, and related functionalities.
 -   **/app/backend/admin.html**: The web-based admin panel.
     -   **Purpose**: Management interface for app data and settings.
-    -   **Changes**: Implemented left-panel navigation, image pickers for meals/ingredients, editable star rating thresholds with dynamic tiers, edit/delete functionality for meals/ingredients, and point configuration settings for user actions. Star ratings now display as N⭐.
+    -   **Changes**: Enhanced navigation with new sections for Coupons and Withdrawals. Integrated commission rate configuration into star rating settings. Updated Orders section to show full, expandable order details including user and item information. Implemented full JavaScript CRUD operations for Coupons and Withdrawal requests.
 -   **/app/frontend/app/_layout.tsx**: Root layout for Expo Router navigation.
     -   **Purpose**: Sets up global navigation and tab bar.
-    -   **Changes**: Integrated a cart counter badge, fixed bottom navigation label truncation, and updated to include the new  route.
+    -   **Changes**: Updated to include the  provider, and adjustments for bottom tab bar padding.
+-   **/app/frontend/app/(tabs)/_layout.tsx**: Tabs layout for bottom navigation.
+    -   **Purpose**: Defines the bottom navigation bar.
+    -   **Changes**: Added Messages tab. Reordered tabs to Presets, DIY, Home, Messages, Cart. Adjusted styles for tab label visibility and reduced bottom navigation width. Integrated  to display unread count badges.
 -   **/app/frontend/app/(tabs)/index.tsx**: Home/feed screen.
     -   **Purpose**: Main user feed with posts, comments, and notifications.
-    -   **Changes**: Fixed delete post (nested  issue), implemented full comment/edit/delete functionality, added notification bell and bottom sheet, floating action button for new posts with multi-image picker, instant likers list modal, and displays user star ratings as N⭐.
+    -   **Changes**: Message icon moved to header beside notification bell, with unread chat count badge. Notification fetching updated to filter out message-related notifications. Profile icon with user avatar (placeholder if none) added to top right. Replaced favicon/logo with a new OrHealthy Logo.png. Floating action button for new posts moved closer to the bottom navigation.
 -   **/app/frontend/app/(tabs)/presets.tsx**: Lists customizable meal presets.
     -   **Purpose**: Display preset meals for users.
-    -   **Changes**: Incorporated image display for meals and updated prices to Rupee currency.
+    -   **Changes**: Implemented horizontal tabs (My Meals, All Meals) to display saved DIY meals for the logged-in user in the My Meals tab.
 -   **/app/frontend/app/(tabs)/diy.tsx**: Allows users to create custom meals.
     -   **Purpose**: User-generated meal creation.
-    -   **Changes**: Fetches and displays ingredient images, uses Rupee currency, implemented tag-based filtering with a horizontal carousel, and updated ingredient display layout.
+    -   **Changes**: Added a Save Meal button accessible to all users. Reordered sections to place tag carousel at the very top, followed by the ingredient search bar. The ingredient search bar's styling was fixed to improve aesthetics.
 -   **/app/frontend/app/(tabs)/profile.tsx**: User's personal details.
     -   **Purpose**: User profile management.
-    -   **Changes**: Updated star rating display format to N⭐. Backend support for profile photo uploads is in place.
+    -   **Changes**: Overhauled with horizontal scrollable tabs for Posts, Guides, Guidees, Idols, and Fans. Removed the Following tab. Added a Saved Addresses section with an Add New Address button. Included a commission balance display and a Withdraw button for guides.
+-   **/app/frontend/app/(tabs)/messages.tsx**: Chat Inbox.
+    -   **Purpose**: To display a list of one-to-one conversations.
+    -   **Changes**: Integrated into bottom navigation. The route was fixed to point to .
+-   **/app/frontend/app/chat/[id].tsx**: Individual Chat Conversation.
+    -   **Purpose**: To display messages within a specific chat with a guide/guidee.
+    -   **Changes**: Added image upload capability, including image picker, preview, and displaying sent images within messages. Logic to mark chats as read and refresh unread count on opening.
 -   **/app/frontend/app/checkout.tsx**: Screen for order details and payment.
     -   **Purpose**: Handles order finalization.
-    -   **Changes**: Added cash on delivery, a thank you screen post-order, and redirect to home. Fixed a syntax error ().
--   **/app/frontend/app/user/[userId].tsx**: Dynamic route for viewing other user profiles.
-    -   **Purpose**: View and interact with other users.
-    -   **Changes**: Added Be a Fan and Be a Guidee buttons. Designed to display posts by default.
--   **/app/frontend/app/(tabs)/messages.tsx**: (NEW) Chat Inbox.
-    -   **Purpose**: To display a list of one-to-one conversations.
-    -   **Changes**: Newly created as part of the chat system frontend.
--   **/app/frontend/app/chat/[id].tsx**: (NEW) Individual Chat Conversation.
-    -   **Purpose**: To display messages within a specific chat with a guide/guidee.
-    -   **Changes**: Newly created as part of the chat system frontend.
+    -   **Changes**: Incorporated a coupon input field with real-time validation. Implemented an expandable item summary. Added a guide ordering option with a guidee dropdown and address selection for guidees. Commission display for guides was added, and user address input fields are hidden when ordering for guidees. User address management (saving addresses with tags) functionality was integrated.
+-   **/app/frontend/src/context/CartContext.tsx**: React Context for shopping cart state.
+    -   **Purpose**: Manages cart items, additions, removals, and quantity updates.
+    -   **Changes**: Added  function and fixed a critical bug related to its export causing the app to crash.
+-   **/app/frontend/src/context/MessagesContext.tsx**: (NEW) React Context for chat messages state.
+    -   **Purpose**: Manages unread chat message count across the application.
+    -   **Changes**: Newly created to provide and consume the count of unread *chats* (conversations with unread messages), rather than total unread messages.
 </code_architecture>
 
 <pending_tasks>
--   **Frontend Chat Integration**:
-    -   Add Messages tab to the bottom navigation.
-    -   Add a Message button on user profiles.
--   **Admin Panel Order Details**:
-    -   Enhance order list to show complete order details and customer information.
--   **Frontend User Profile**:
-    -   Implement user avatar display in post comments.
-    -   Ensure comprehensive display of posts, guides, guidees, idols, and fans in user profiles.
+- Implement user avatar display in post comments.
 </pending_tasks>
 
 <current_work>
-Immediately preceding this summary, the AI engineer completed the backend implementation of a one-to-one chat system between guides and guidees. This involved creating  and  models in  and establishing corresponding API endpoints for creating chats, retrieving messages, and sending messages. Following this, the initial frontend screens for the chat feature were developed:  to serve as the chat inbox, and  for displaying individual chat conversations. The very last action taken was the AI planning to integrate these new chat screens into the main application navigation flow by adding a Messages tab to the bottom navigation bar and incorporating a Message button on user profiles.
+Immediately preceding this summary, the AI engineer completed a comprehensive overhaul of the  screen. This involved transforming the profile view to incorporate horizontal scrollable tabs, enabling users to easily navigate between sections displaying their Posts, Guides, Guidees, Idols, and Fans. The outdated Following tab was removed as per user request.
+
+Crucially, new functional sections were integrated:
+-   **Saved Addresses**: A dedicated section was added to allow users to view their saved addresses and provided a button to Add New Address.
+-   **Commission Balance & Withdraw**: For guide users, a display for their current commission balance was implemented, alongside a Withdraw button, facilitating withdrawal requests that are trackable in the admin panel.
+
+This final set of changes consolidates several previously requested features related to user profile management and guide-specific functionalities. The frontend application was restarted after these changes to ensure they are applied.
 </current_work>
 
 <optional_next_step>
-Update the tab layout in  to include the new Messages tab.
+Present the completed Profile screen updates for user review and ask for further feedback or testing.
 </optional_next_step>
