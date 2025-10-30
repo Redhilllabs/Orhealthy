@@ -60,6 +60,7 @@ export default function CheckoutScreen() {
 
   // New address form
   const [newAddressLabel, setNewAddressLabel] = useState('');
+  const [newAddressApartment, setNewAddressApartment] = useState('');
   const [newAddressStreet, setNewAddressStreet] = useState('');
   const [newAddressCity, setNewAddressCity] = useState('');
   const [newAddressState, setNewAddressState] = useState('');
