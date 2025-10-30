@@ -860,7 +860,8 @@ async def send_message(conversation_id: str, message_data: dict, request: Reques
         sender_id=user["_id"],
         sender_name=user["name"],
         sender_picture=user.get("picture"),
-        content=message_data["content"]
+        content=message_data.get("content", ""),
+        image=message_data.get("image")
     )
     
     result = await db.messages.insert_one(message.dict())
@@ -869,11 +870,16 @@ async def send_message(conversation_id: str, message_data: dict, request: Reques
     receiver_id = conversation["user2_id"] if conversation["user1_id"] == user["_id"] else conversation["user1_id"]
     unread_field = "unread_count_user2" if conversation["user1_id"] == user["_id"] else "unread_count_user1"
     
+    # Determine last message text
+    last_msg_text = message_data.get("content", "")
+    if not last_msg_text and message_data.get("image"):
+        last_msg_text = "📷 Image"
+    
     await db.conversations.update_one(
         {"_id": ObjectId(conversation_id)},
         {
             "$set": {
-                "last_message": message_data["content"][:100],
+                "last_message": last_msg_text[:100],
                 "last_message_at": datetime.now(timezone.utc)
             },
             "$inc": {unread_field: 1}
