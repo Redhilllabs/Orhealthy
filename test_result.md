@@ -558,7 +558,15 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "User avatars in comments API"
+    - "Saved meals image generation"
+    - "Address saving with apartment field"
+    - "Comment avatars with profile links"
+    - "Address form with apartment field"
+    - "Bottom navigation padding fix"
+    - "FAB position adjustment"
+    - "Presets tabs elongation fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
