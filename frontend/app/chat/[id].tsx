@@ -89,8 +89,22 @@ export default function ChatScreen() {
     }
   };
 
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0].base64) {
+      setSelectedImage(`data:image/jpeg;base64,${result.assets[0].base64}`);
+    }
+  };
+
   const sendMessage = async () => {
-    if (!messageText.trim() || sending) return;
+    if ((!messageText.trim() && !selectedImage) || sending) return;
 
     try {
       setSending(true);
@@ -98,7 +112,10 @@ export default function ChatScreen() {
       
       await axios.post(
         `${API_URL}/conversations/${conversationId}/messages`,
-        { content: messageText.trim() },
+        { 
+          content: messageText.trim(),
+          image: selectedImage 
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -110,12 +127,14 @@ export default function ChatScreen() {
         sender_name: user?.name || '',
         sender_picture: user?.picture,
         content: messageText.trim(),
+        image: selectedImage || undefined,
         created_at: new Date().toISOString(),
         read: true,
       };
       
       setMessages([...messages, newMessage]);
       setMessageText('');
+      setSelectedImage(null);
       
       // Scroll to bottom
       setTimeout(() => {
