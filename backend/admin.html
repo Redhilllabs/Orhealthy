@@ -908,12 +908,11 @@
             
             container.innerHTML = sortedKeys.map((key, index) => {
                 const starNum = parseInt(key.replace('star', ''));
-                const stars = '⭐'.repeat(starNum);
                 const isFirst = index === 0;
                 return `
                     <div class="config-item">
                         <div style="min-width: 150px;">
-                            <span class="config-label">${stars} ${starNum} Star${starNum > 1 ? 's' : ''}</span>
+                            <span class="config-label">${starNum}⭐</span>
                         </div>
                         <input type="number" class="config-input" id="${key}" value="${starRatings[key]}" min="0" style="width: 150px;">
                         <span style="color: #64748b; font-size: 13px; min-width: 180px;">${isFirst ? 'points (Becomes Guide)' : 'points'}</span>
