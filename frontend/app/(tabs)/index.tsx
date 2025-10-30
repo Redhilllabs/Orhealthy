@@ -522,17 +522,31 @@ export default function HomeScreen() {
           <Text style={styles.headerTitle}>OrHealthy</Text>
         </View>
         
-        <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={() => setShowNotifications(true)}
-        >
-          <Ionicons name="notifications-outline" size={26} color="#333" />
-          {unreadCount > 0 && (
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationBadgeText}>{unreadCount}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => router.push('/messages')}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={26} color="#333" />
+            {unreadMessagesCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>{unreadMessagesCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => setShowNotifications(true)}
+          >
+            <Ionicons name="notifications-outline" size={26} color="#333" />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>{unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
