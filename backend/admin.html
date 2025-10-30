@@ -923,23 +923,115 @@
             try {
                 const orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
                 const tbody = document.getElementById('ordersBody');
-                tbody.innerHTML = orders.map(order => `
-                    <tr>
-                        <td>${order._id.substring(0, 8)}...</td>
-                        <td>₹${order.total_price.toFixed(2)}</td>
-                        <td>
-                            <select onchange="updateOrderStatus('${order._id}', this.value)">
-                                <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                                <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                                <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                            </select>
-                        </td>
-                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
-                        <td>${order.items.length}</td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = orders.map(order => {
+                    const orderId = order._id;
+                    const billingAddress = order.billing_address || {};
+                    const shippingAddress = order.shipping_address || {};
+                    const isGuideOrder = order.ordered_by_guide_id && order.ordered_for_guidee_id;
+                    
+                    return `
+                        <tr style="cursor: pointer;" onclick="toggleOrderDetails('${orderId}')">
+                            <td>${orderId.substring(0, 8)}...</td>
+                            <td>${order.user_name || 'Unknown'}</td>
+                            <td>₹${(order.final_price || order.total_price).toFixed(2)}${order.discount_amount > 0 ? ` <span style="color: #10b981; font-size: 11px;">(${order.discount_amount.toFixed(0)} off)</span>` : ''}</td>
+                            <td>
+                                <select onclick="event.stopPropagation()" onchange="updateOrderStatus('${orderId}', this.value)">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                </select>
+                            </td>
+                            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                            <td>
+                                <button onclick="event.stopPropagation(); toggleOrderDetails('${orderId}')" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    View Details
+                                </button>
+                            </td>
+                        </tr>
+                        <tr id="details-${orderId}" style="display: none;">
+                            <td colspan="6" style="background: #f8fafc; padding: 20px;">
+                                <div style="display: grid; gap: 16px;">
+                                    ${isGuideOrder ? `
+                                        <div style="background: #eff6ff; padding: 12px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+                                            <strong style="color: #1e40af;">Guide Order</strong>
+                                            <p style="margin: 4px 0; color: #475569;">Guide: ${order.guide_name || 'Unknown'}</p>
+                                            <p style="margin: 4px 0; color: #475569;">Ordered for Guidee: ${order.guidee_name || 'Unknown'}</p>
+                                            <p style="margin: 4px 0; color: #059669;">Commission: ₹${(order.commission_earned || 0).toFixed(2)} (${(order.commission_rate || 0)}%)</p>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                        <div>
+                                            <h4 style="margin: 0 0 8px 0; color: #1e293b;">Billing Address</h4>
+                                            <p style="margin: 4px 0; color: #475569;"><strong>${billingAddress.label || 'N/A'}</strong></p>
+                                            <p style="margin: 4px 0; color: #64748b;">${billingAddress.full_address || 'N/A'}</p>
+                                            <p style="margin: 4px 0; color: #64748b;">${billingAddress.city || ''}, ${billingAddress.state || ''} - ${billingAddress.pincode || ''}</p>
+                                            <p style="margin: 4px 0; color: #64748b;">📞 ${billingAddress.phone || 'N/A'}</p>
+                                        </div>
+                                        
+                                        <div>
+                                            <h4 style="margin: 0 0 8px 0; color: #1e293b;">Shipping Address</h4>
+                                            <p style="margin: 4px 0; color: #475569;"><strong>${shippingAddress.label || 'N/A'}</strong></p>
+                                            <p style="margin: 4px 0; color: #64748b;">${shippingAddress.full_address || 'N/A'}</p>
+                                            <p style="margin: 4px 0; color: #64748b;">${shippingAddress.city || ''}, ${shippingAddress.state || ''} - ${shippingAddress.pincode || ''}</p>
+                                            <p style="margin: 4px 0; color: #64748b;">📞 ${shippingAddress.phone || 'N/A'}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <h4 style="margin: 0 0 8px 0; color: #1e293b;">Items (${order.items.length})</h4>
+                                        <table style="width: 100%; border-collapse: collapse;">
+                                            <thead style="background: #e2e8f0;">
+                                                <tr>
+                                                    <th style="padding: 8px; text-align: left;">Item</th>
+                                                    <th style="padding: 8px; text-align: center;">Quantity</th>
+                                                    <th style="padding: 8px; text-align: right;">Price</th>
+                                                    <th style="padding: 8px; text-align: right;">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${order.items.map(item => `
+                                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                                        <td style="padding: 8px;">${item.name || 'Unknown Item'}</td>
+                                                        <td style="padding: 8px; text-align: center;">${item.quantity || 1}</td>
+                                                        <td style="padding: 8px; text-align: right;">₹${(item.price || 0).toFixed(2)}</td>
+                                                        <td style="padding: 8px; text-align: right;">₹${((item.price || 0) * (item.quantity || 1)).toFixed(2)}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                            <tfoot style="background: #f1f5f9; font-weight: bold;">
+                                                <tr>
+                                                    <td colspan="3" style="padding: 8px; text-align: right;">Subtotal:</td>
+                                                    <td style="padding: 8px; text-align: right;">₹${(order.total_price || 0).toFixed(2)}</td>
+                                                </tr>
+                                                ${order.discount_amount > 0 ? `
+                                                    <tr style="color: #10b981;">
+                                                        <td colspan="3" style="padding: 8px; text-align: right;">Discount ${order.coupon_code ? `(${order.coupon_code})` : ''}:</td>
+                                                        <td style="padding: 8px; text-align: right;">-₹${(order.discount_amount || 0).toFixed(2)}</td>
+                                                    </tr>
+                                                ` : ''}
+                                                <tr style="font-size: 16px;">
+                                                    <td colspan="3" style="padding: 8px; text-align: right;">Final Total:</td>
+                                                    <td style="padding: 8px; text-align: right;">₹${(order.final_price || order.total_price).toFixed(2)}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             } catch (error) {
+                console.error('Error loading orders:', error);
                 showAlert('orders', 'Error loading orders', 'error');
+            }
+        }
+        
+        function toggleOrderDetails(orderId) {
+            const detailsRow = document.getElementById(`details-${orderId}`);
+            if (detailsRow) {
+                detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
             }
         }
 
