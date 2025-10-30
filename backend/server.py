@@ -1514,6 +1514,152 @@ async def save_points_config(config_data: dict, request: Request):
     
     return {"message": "Points configuration saved"}
 
+
+# Commission rates admin endpoints
+@api_router.get("/admin/commission-rates")
+async def get_commission_rates():
+    """Get commission rates configuration"""
+    config = await get_commission_config()
+    return config
+
+@api_router.post("/admin/commission-rates")
+async def save_commission_rates(config_data: dict):
+    """Save commission rates configuration (admin only)"""
+    config = {
+        "star1": config_data.get("star1", 3.0),
+        "star2": config_data.get("star2", 6.0),
+        "star3": config_data.get("star3", 9.0),
+        "star4": config_data.get("star4", 12.0),
+        "star5": config_data.get("star5", 15.0)
+    }
+    
+    # Upsert configuration
+    await db.config.update_one(
+        {"type": "commission_rates"},
+        {"$set": {"type": "commission_rates", "config": config}},
+        upsert=True
+    )
+    
+    return {"message": "Commission rates saved"}
+
+# Coupon admin endpoints
+@api_router.get("/admin/coupons")
+async def get_all_coupons():
+    """Get all coupons (admin only)"""
+    coupons = await db.coupons.find().to_list(1000)
+    for coupon in coupons:
+        coupon["_id"] = str(coupon["_id"])
+    return coupons
+
+@api_router.post("/admin/coupons")
+async def create_coupon(coupon_data: dict):
+    """Create a coupon (admin only)"""
+    coupon = {
+        "code": coupon_data["code"].upper(),
+        "discount_type": coupon_data["discount_type"],
+        "discount_value": coupon_data["discount_value"],
+        "min_order_value": coupon_data["min_order_value"],
+        "usage_limit_type": coupon_data["usage_limit_type"],
+        "expiry_date": datetime.fromisoformat(coupon_data["expiry_date"].replace("Z", "+00:00")),
+        "active": coupon_data.get("active", True),
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.coupons.insert_one(coupon)
+    return {"message": "Coupon created", "id": str(result.inserted_id)}
+
+@api_router.put("/admin/coupons/{coupon_id}")
+async def update_coupon(coupon_id: str, coupon_data: dict):
+    """Update a coupon (admin only)"""
+    update_data = {
+        "code": coupon_data["code"].upper(),
+        "discount_type": coupon_data["discount_type"],
+        "discount_value": coupon_data["discount_value"],
+        "min_order_value": coupon_data["min_order_value"],
+        "usage_limit_type": coupon_data["usage_limit_type"],
+        "expiry_date": datetime.fromisoformat(coupon_data["expiry_date"].replace("Z", "+00:00")),
+        "active": coupon_data.get("active", True)
+    }
+    
+    result = await db.coupons.update_one(
+        {"_id": ObjectId(coupon_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    
+    return {"message": "Coupon updated"}
+
+@api_router.delete("/admin/coupons/{coupon_id}")
+async def delete_coupon(coupon_id: str):
+    """Delete a coupon (admin only)"""
+    result = await db.coupons.delete_one({"_id": ObjectId(coupon_id)})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    
+    return {"message": "Coupon deleted"}
+
+# Withdrawal requests admin endpoints
+@api_router.get("/admin/withdrawals")
+async def get_all_withdrawal_requests():
+    """Get all withdrawal requests (admin only)"""
+    withdrawals = await db.withdrawal_requests.find().sort("created_at", -1).to_list(1000)
+    for w in withdrawals:
+        w["_id"] = str(w["_id"])
+    return withdrawals
+
+@api_router.put("/admin/withdrawals/{withdrawal_id}/approve")
+async def approve_withdrawal(withdrawal_id: str):
+    """Approve a withdrawal request (admin only)"""
+    withdrawal = await db.withdrawal_requests.find_one({"_id": ObjectId(withdrawal_id)})
+    
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Withdrawal request not found")
+    
+    if withdrawal["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Withdrawal already processed")
+    
+    # Deduct from guide's balance
+    await db.users.update_one(
+        {"_id": ObjectId(withdrawal["guide_id"])},
+        {"$inc": {"commission_balance": -withdrawal["amount"]}}
+    )
+    
+    # Update withdrawal status
+    await db.withdrawal_requests.update_one(
+        {"_id": ObjectId(withdrawal_id)},
+        {"$set": {
+            "status": "approved",
+            "processed_at": datetime.now(timezone.utc)
+        }}
+    )
+    
+    return {"message": "Withdrawal approved"}
+
+@api_router.put("/admin/withdrawals/{withdrawal_id}/reject")
+async def reject_withdrawal(withdrawal_id: str):
+    """Reject a withdrawal request (admin only)"""
+    withdrawal = await db.withdrawal_requests.find_one({"_id": ObjectId(withdrawal_id)})
+    
+    if not withdrawal:
+        raise HTTPException(status_code=404, detail="Withdrawal request not found")
+    
+    if withdrawal["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Withdrawal already processed")
+    
+    # Update withdrawal status
+    await db.withdrawal_requests.update_one(
+        {"_id": ObjectId(withdrawal_id)},
+        {"$set": {
+            "status": "rejected",
+            "processed_at": datetime.now(timezone.utc)
+        }}
+    )
+    
+    return {"message": "Withdrawal rejected"}
+
 @app.get("/admin")
 async def admin_panel():
     """Serve admin panel"""
