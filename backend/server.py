@@ -471,6 +471,18 @@ async def vote_post(post_id: str, request: Request):
             {"$set": {"star_rating": new_rating, "is_guide": is_guide}}
         )
         
+        # Create notification for post owner (if not voting own post)
+        if post["user_id"] != user["_id"]:
+            notification = Notification(
+                user_id=post["user_id"],
+                type="like",
+                from_user=user["_id"],
+                from_user_name=user["name"],
+                post_id=post_id,
+                message=f"{user['name']} liked your post"
+            )
+            await db.notifications.insert_one(notification.dict())
+        
         return {"message": "Voted", "voted": True}
 
 @api_router.delete("/posts/{post_id}")
