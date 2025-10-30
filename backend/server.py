@@ -994,16 +994,16 @@ async def get_meal(meal_id: str):
     return meal
 
 
-# Saved Meals endpoints (for Guides)
+# Saved Meals endpoints (for all users)
 @api_router.post("/saved-meals")
 async def save_meal(meal_data: dict, request: Request):
-    """Save a DIY meal (guides only)"""
+    """Save a DIY meal (all users)"""
     user = await get_current_user(request)
-    if not user or not user.get("is_guide"):
-        raise HTTPException(status_code=403, detail="Only guides can save meals")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     
     saved_meal = {
-        "guide_id": user["_id"],
+        "guide_id": user["_id"],  # Can be any user, not just guides
         "meal_name": meal_data["meal_name"],
         "ingredients": meal_data["ingredients"],
         "total_price": meal_data["total_price"],
@@ -1015,10 +1015,10 @@ async def save_meal(meal_data: dict, request: Request):
 
 @api_router.get("/saved-meals")
 async def get_saved_meals(request: Request):
-    """Get guide's saved meals"""
+    """Get user's saved meals"""
     user = await get_current_user(request)
-    if not user or not user.get("is_guide"):
-        raise HTTPException(status_code=403, detail="Only guides can view saved meals")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     
     meals = await db.saved_meals.find({"guide_id": user["_id"]}).to_list(100)
     for meal in meals:
@@ -1029,8 +1029,8 @@ async def get_saved_meals(request: Request):
 async def delete_saved_meal(meal_id: str, request: Request):
     """Delete a saved meal"""
     user = await get_current_user(request)
-    if not user or not user.get("is_guide"):
-        raise HTTPException(status_code=403, detail="Only guides can delete saved meals")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     
     result = await db.saved_meals.delete_one({
         "_id": ObjectId(meal_id),
