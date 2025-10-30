@@ -362,22 +362,20 @@ export default function DIYScreen() {
           </View>
 
           <View style={styles.buttonRow}>
-            {user?.is_guide && (
-              <TouchableOpacity 
-                style={[styles.actionButton, styles.saveButton]} 
-                onPress={handleSaveMeal}
-                disabled={saving}
-              >
-                {saving ? (
-                  <ActivityIndicator size="small" color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="bookmark" size={20} color="#fff" />
-                    <Text style={styles.actionButtonText}>Save</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.saveButton]} 
+              onPress={handleSaveMeal}
+              disabled={saving}
+            >
+              {saving ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <Ionicons name="bookmark" size={20} color="#fff" />
+                  <Text style={styles.actionButtonText}>Save</Text>
+                </>
+              )}
+            </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.actionButton, styles.addButton]} 
