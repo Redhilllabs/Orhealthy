@@ -394,6 +394,55 @@ frontend:
         agent: "main"
         comment: "Red badge on cart icon showing item count"
 
+  - task: "Messages tab in bottom navigation"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/_layout.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Messages tab with chatbubbles icon in bottom navigation bar"
+
+  - task: "Chat inbox screen"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/messages.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Messages inbox screen showing all conversations with avatars, last message, unread counts"
+
+  - task: "Individual chat conversation screen"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/chat/[id].tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Chat screen with message bubbles, input field, send button, keyboard handling"
+
+  - task: "Message button on user profiles"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/user/[userId].tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Message button on user profiles that creates/opens conversation with user"
+
+
 metadata:
   created_by: "main_agent"
   version: "2.0"
