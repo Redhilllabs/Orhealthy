@@ -211,6 +211,55 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/meals working perfectly. Found 1/1 meals with proper images and tags arrays. Sample meal 'Dal Moth Kala Chan Bowl' has 1 image and 2 tags. Array structure correctly implemented."
+  
+  - task: "Chat system - Get conversations endpoint"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/conversations returns all conversations for logged-in user"
+
+  - task: "Chat system - Get or create conversation endpoint"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/conversations/{other_user_id} gets existing or creates new conversation between users"
+
+  - task: "Chat system - Get messages endpoint"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/conversations/{conversation_id}/messages returns messages for a conversation, marks as read"
+
+  - task: "Chat system - Send message endpoint"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "POST /api/conversations/{conversation_id}/messages sends a new message and creates notification"
+
 
 frontend:
   - task: "Home screen - Comments modal"
