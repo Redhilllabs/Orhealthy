@@ -1081,12 +1081,32 @@
                     renderStarRatings();
                 });
             
+            // Load commission rates configuration
+            fetch(`${API_URL}/admin/commission-rates`)
+                .then(r => r.json())
+                .then(config => {
+                    commissionRates = config;
+                    renderStarRatings();
+                })
+                .catch(error => {
+                    console.error('Error loading commission rates:', error);
+                    // Default commission rates
+                    commissionRates = {
+                        star1: 3,
+                        star2: 6,
+                        star3: 9,
+                        star4: 12,
+                        star5: 15
+                    };
+                    renderStarRatings();
+                });
+            
             // Load points configuration
             loadPointsConfig();
         }
 
         async function saveStarConfig() {
-            // Update values from inputs
+            // Update star rating values from inputs
             Object.keys(starRatings).forEach(key => {
                 const input = document.getElementById(key);
                 if (input) {
@@ -1094,14 +1114,30 @@
                 }
             });
             
+            // Update commission rate values from inputs
+            Object.keys(starRatings).forEach(key => {
+                const commissionInput = document.getElementById(`commission_${key}`);
+                if (commissionInput) {
+                    commissionRates[key] = parseFloat(commissionInput.value);
+                }
+            });
+            
             try {
-                const response = await fetch(`${API_URL}/admin/star-config`, {
+                // Save star ratings
+                const starResponse = await fetch(`${API_URL}/admin/star-config`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(starRatings)
                 });
                 
-                if (response.ok) {
+                // Save commission rates
+                const commissionResponse = await fetch(`${API_URL}/admin/commission-rates`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(commissionRates)
+                });
+                
+                if (starResponse.ok && commissionResponse.ok) {
                     showAlert('settings', 'Configuration saved successfully!', 'success');
                 } else {
                     showAlert('settings', 'Error saving configuration', 'error');
