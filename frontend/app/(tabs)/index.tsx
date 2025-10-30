@@ -103,6 +103,7 @@ export default function HomeScreen() {
   useEffect(() => {
     fetchPosts();
     fetchNotifications();
+    fetchUnreadMessagesCount();
   }, []);
 
   const fetchPosts = async () => {
