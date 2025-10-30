@@ -71,6 +71,16 @@ class Comment(BaseModel):
     content: str
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Notification(BaseModel):
+    user_id: str  # User who will receive the notification
+    type: str  # 'comment', 'like', 'fan', 'guidee'
+    from_user: str  # User who triggered the notification
+    from_user_name: str
+    post_id: Optional[str] = None
+    message: str
+    read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class Ingredient(BaseModel):
     name: str
     price_per_unit: float
