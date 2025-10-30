@@ -87,7 +87,7 @@ export default function MessagesScreen() {
     return (
       <TouchableOpacity
         style={styles.conversationCard}
-        onPress={() => router.push(`/conversation/${item._id}?otherUserId=${otherUser.id}&otherUserName=${otherUser.name}`)}
+        onPress={() => router.push(`/chat/${item._id}`)}
       >
         {otherUser.picture ? (
           <Image source={{ uri: otherUser.picture }} style={styles.avatar} />
