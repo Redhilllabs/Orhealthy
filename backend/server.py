@@ -370,12 +370,21 @@ async def create_post(post_data: dict, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
+    # Handle both single image and images array
+    images = post_data.get("images", [])
+    single_image = post_data.get("image")
+    
+    # Backward compatibility: if single image provided, add to images array
+    if single_image and single_image not in images:
+        images = [single_image] + images
+    
     post = Post(
         user_id=user["_id"],
         user_name=user["name"],
         user_picture=user.get("picture"),
         content=post_data["content"],
-        image=post_data.get("image")
+        image=images[0] if images else None,  # Keep first image for backward compatibility
+        images=images
     )
     
     result = await db.posts.insert_one(post.dict())
