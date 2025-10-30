@@ -133,6 +133,28 @@ export default function UserProfileScreen() {
     }
   };
 
+  const handleMessageUser = async () => {
+    if (!currentUser || isProcessing) return;
+
+    try {
+      setIsProcessing(true);
+      const token = await storage.getItemAsync('session_token');
+      
+      // Get or create conversation
+      const response = await axios.get(`${API_URL}/conversations/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      // Navigate to chat screen
+      router.push(`/chat/${response.data._id}`);
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      Alert.alert('Error', 'Failed to start conversation');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const renderStars = (rating: number) => {
     return (
       <View style={styles.starsContainer}>
