@@ -97,6 +97,9 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
+  chatIconContainer: {
+    position: 'relative',
+  },
   cartIconContainer: {
     position: 'relative',
   },
