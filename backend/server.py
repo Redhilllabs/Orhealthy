@@ -87,6 +87,7 @@ class Message(BaseModel):
     sender_name: str
     sender_picture: Optional[str] = None
     content: str
+    image: Optional[str] = None
     read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
