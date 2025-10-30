@@ -514,27 +514,13 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Image
-            source={{ uri: 'https://customer-assets.emergentagent.com/job_nutritionhub-1/artifacts/kq74ajf1_Orhealthy%20Favicon.png' }}
-            style={styles.logo}
-          />
-          <Text style={styles.headerTitle}>OrHealthy</Text>
-        </View>
+        <Image
+          source={{ uri: 'https://customer-assets.emergentagent.com/job_eac51adb-b3bf-494b-8ad4-0ad0c1bb3b30/artifacts/0v3dlfur_Orhealthy%20Logo.png' }}
+          style={styles.headerLogo}
+          resizeMode="contain"
+        />
         
         <View style={styles.headerRight}>
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={() => router.push('/messages')}
-          >
-            <Ionicons name="chatbubble-ellipses-outline" size={26} color="#333" />
-            {unreadMessagesCount > 0 && (
-              <View style={styles.notificationBadge}>
-                <Text style={styles.notificationBadgeText}>{unreadMessagesCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => setShowNotifications(true)}
@@ -543,6 +529,21 @@ export default function HomeScreen() {
             {unreadCount > 0 && (
               <View style={styles.notificationBadge}>
                 <Text style={styles.notificationBadgeText}>{unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => router.push('/profile')}
+          >
+            {user?.picture ? (
+              <Image source={{ uri: user.picture }} style={styles.profileAvatar} />
+            ) : (
+              <View style={styles.profileAvatarPlaceholder}>
+                <Text style={styles.profileAvatarText}>
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
