@@ -81,6 +81,29 @@ class Notification(BaseModel):
     read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Message(BaseModel):
+    conversation_id: str
+    sender_id: str
+    sender_name: str
+    sender_picture: Optional[str] = None
+    content: str
+    read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Conversation(BaseModel):
+    user1_id: str
+    user1_name: str
+    user1_picture: Optional[str] = None
+    user2_id: str
+    user2_name: str
+    user2_picture: Optional[str] = None
+    last_message: Optional[str] = None
+    last_message_at: Optional[datetime] = None
+    unread_count_user1: int = 0
+    unread_count_user2: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class Ingredient(BaseModel):
     name: str
     price_per_unit: float
