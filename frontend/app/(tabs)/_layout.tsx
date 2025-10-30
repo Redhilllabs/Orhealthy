@@ -18,17 +18,17 @@ export default function TabsLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: 80,
-          paddingBottom: 20,
-          paddingTop: 10,
+          height: 65,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
-          marginTop: 4,
+          fontSize: 11,
           fontWeight: '500',
+          marginTop: 2,
         },
         tabBarItemStyle: {
-          paddingVertical: 4,
+          paddingVertical: 2,
         },
         headerShown: false,
       }}
