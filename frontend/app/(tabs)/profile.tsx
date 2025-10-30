@@ -23,6 +23,7 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
 interface Address {
   label: string;
+  apartment?: string;
   full_address: string;
   city: string;
   state: string;
@@ -31,10 +32,20 @@ interface Address {
   is_default: boolean;
 }
 
+interface HabitLog {
+  _id: string;
+  date: string;
+  habit_type: string;
+  description: string;
+  value?: number;
+  unit?: string;
+  created_at: string;
+}
+
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'posts' | 'guides' | 'guidees' | 'idols' | 'fans'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'guides' | 'guidees' | 'idols' | 'fans' | 'addresses' | 'habits'>('posts');
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [guides, setGuides] = useState<any[]>([]);
@@ -42,16 +53,25 @@ export default function ProfileScreen() {
   const [idols, setIdols] = useState<any[]>([]);
   const [fans, setFans] = useState<any[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
+  const [habits, setHabits] = useState<HabitLog[]>([]);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [newAddressLabel, setNewAddressLabel] = useState('');
+  const [newAddressApartment, setNewAddressApartment] = useState('');
   const [newAddressStreet, setNewAddressStreet] = useState('');
   const [newAddressCity, setNewAddressCity] = useState('');
   const [newAddressState, setNewAddressState] = useState('');
   const [newAddressZip, setNewAddressZip] = useState('');
   const [newAddressPhone, setNewAddressPhone] = useState('');
+
+  // Habit modal
+  const [showHabitModal, setShowHabitModal] = useState(false);
+  const [habitType, setHabitType] = useState('meals');
+  const [habitDescription, setHabitDescription] = useState('');
+  const [habitValue, setHabitValue] = useState('');
+  const [habitUnit, setHabitUnit] = useState('servings');
 
   // Withdrawal modal
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
@@ -71,6 +91,8 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (activeTab === 'posts') {
       fetchPosts();
+    } else if (activeTab === 'habits') {
+      fetchHabits();
     }
   }, [activeTab]);
 
@@ -105,7 +127,7 @@ export default function ProfileScreen() {
         setGuidees(guideeResponses.map(r => r.data));
       }
 
-      // Fetch idols
+      // Fetch idols (people user follows)
       if (data.idols && data.idols.length > 0) {
         const idolPromises = data.idols.map((id: string) =>
           axios.get(`${API_URL}/users/${id}`, {
@@ -116,7 +138,7 @@ export default function ProfileScreen() {
         setIdols(idolResponses.map(r => r.data));
       }
 
-      // Fetch fans
+      // Fetch fans (people who follow user)
       if (data.fans && data.fans.length > 0) {
         const fanPromises = data.fans.map((id: string) =>
           axios.get(`${API_URL}/users/${id}`, {
@@ -133,15 +155,14 @@ export default function ProfileScreen() {
 
   const fetchPosts = async () => {
     try {
-      const token = await storage.getItemAsync('session_token');
-      const response = await axios.get(`${API_URL}/posts`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      // Filter user's posts
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/posts`);
       const userPosts = response.data.filter((post: any) => post.user_id === user?._id);
       setPosts(userPosts);
     } catch (error) {
       console.error('Error fetching posts:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -151,19 +172,36 @@ export default function ProfileScreen() {
       const response = await axios.get(`${API_URL}/addresses`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAddresses(response.data);
+      setAddresses(response.data || []);
     } catch (error) {
       console.error('Error fetching addresses:', error);
+      setAddresses([]);
+    }
+  };
+
+  const fetchHabits = async () => {
+    try {
+      setLoading(true);
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/habits`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setHabits(response.data || []);
+    } catch (error) {
+      console.error('Error fetching habits:', error);
+      setHabits([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchWithdrawals = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
-      const response = await axios.get(`${API_URL}/withdrawals`, {
+      const response = await axios.get(`${API_URL}/withdrawal-requests/my`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setWithdrawalRequests(response.data);
+      setWithdrawalRequests(response.data || []);
     } catch (error) {
       console.error('Error fetching withdrawals:', error);
     }
@@ -171,17 +209,23 @@ export default function ProfileScreen() {
 
   const saveNewAddress = async () => {
     if (!newAddressLabel || !newAddressStreet || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
-      Alert.alert('Error', 'Please fill all address fields');
+      Alert.alert('Error', 'Please fill all required address fields');
       return;
     }
 
     try {
       const token = await storage.getItemAsync('session_token');
+      
+      const fullAddress = newAddressApartment 
+        ? `${newAddressApartment}, ${newAddressStreet}`
+        : newAddressStreet;
+      
       await axios.post(
         `${API_URL}/addresses`,
         {
           label: newAddressLabel,
-          full_address: newAddressStreet,
+          apartment: newAddressApartment,
+          full_address: fullAddress,
           city: newAddressCity,
           state: newAddressState,
           pincode: newAddressZip,
@@ -196,14 +240,15 @@ export default function ProfileScreen() {
       setShowAddressModal(false);
       // Clear form
       setNewAddressLabel('');
+      setNewAddressApartment('');
       setNewAddressStreet('');
       setNewAddressCity('');
       setNewAddressState('');
       setNewAddressZip('');
       setNewAddressPhone('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving address:', error);
-      Alert.alert('Error', 'Failed to save address');
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to save address');
     }
   };
 
@@ -214,37 +259,66 @@ export default function ProfileScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
       Alert.alert('Success', 'Address deleted');
-      await fetchAddresses();
+      fetchAddresses();
     } catch (error) {
       console.error('Error deleting address:', error);
       Alert.alert('Error', 'Failed to delete address');
     }
   };
 
-  const setDefaultAddress = async (index: number) => {
+  const logHabit = async () => {
+    if (!habitDescription.trim()) {
+      Alert.alert('Error', 'Please enter habit details');
+      return;
+    }
+
     try {
       const token = await storage.getItemAsync('session_token');
-      await axios.put(
-        `${API_URL}/addresses/${index}/default`,
-        {},
+      await axios.post(
+        `${API_URL}/habits`,
+        {
+          date: new Date().toISOString(),
+          habit_type: habitType,
+          description: habitDescription,
+          value: habitValue ? parseFloat(habitValue) : undefined,
+          unit: habitValue ? habitUnit : undefined,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      await fetchAddresses();
+
+      Alert.alert('Success', 'Habit logged successfully');
+      setShowHabitModal(false);
+      setHabitDescription('');
+      setHabitValue('');
+      fetchHabits();
+    } catch (error: any) {
+      console.error('Error logging habit:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to log habit');
+    }
+  };
+
+  const deleteHabit = async (habitId: string) => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.delete(`${API_URL}/habits/${habitId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      Alert.alert('Success', 'Habit deleted');
+      fetchHabits();
     } catch (error) {
-      console.error('Error setting default address:', error);
+      console.error('Error deleting habit:', error);
+      Alert.alert('Error', 'Failed to delete habit');
     }
   };
 
   const requestWithdrawal = async () => {
-    const amount = parseFloat(withdrawAmount);
-    
-    if (!amount || amount <= 0) {
+    if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
       Alert.alert('Error', 'Please enter a valid amount');
       return;
     }
 
-    if (amount > (user?.commission_balance || 0)) {
-      Alert.alert('Error', 'Insufficient balance');
+    if (parseFloat(withdrawAmount) > (user?.commission_balance || 0)) {
+      Alert.alert('Error', 'Insufficient commission balance');
       return;
     }
 
@@ -252,359 +326,370 @@ export default function ProfileScreen() {
       setRequesting(true);
       const token = await storage.getItemAsync('session_token');
       await axios.post(
-        `${API_URL}/withdrawals`,
-        { amount },
+        `${API_URL}/withdrawal-requests`,
+        { amount: parseFloat(withdrawAmount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert('Success', 'Withdrawal request submitted successfully');
+      Alert.alert('Success', 'Withdrawal request submitted');
       setShowWithdrawModal(false);
       setWithdrawAmount('');
-      await fetchWithdrawals();
+      fetchWithdrawals();
     } catch (error: any) {
       console.error('Error requesting withdrawal:', error);
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to submit withdrawal request');
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to submit request');
     } finally {
       setRequesting(false);
     }
   };
 
-  const renderPost = ({ item }: { item: any }) => (
-    <View style={styles.postCard}>
-      <Text style={styles.postContent}>{item.content}</Text>
-      {item.images && item.images.length > 0 && (
-        <Image source={{ uri: item.images[0] }} style={styles.postImage} />
-      )}
-      <View style={styles.postStats}>
-        <View style={styles.statItem}>
-          <Ionicons name="heart" size={16} color="#ef4444" />
-          <Text style={styles.statText}>{item.likes?.length || 0}</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Ionicons name="chatbubble" size={16} color="#3b82f6" />
-          <Text style={styles.statText}>{item.comments_count || 0}</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderUser = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      style={styles.userCard}
-      onPress={() => router.push(`/user/${item._id}`)}
-    >
-      {item.picture ? (
-        <Image source={{ uri: item.picture }} style={styles.userAvatar} />
-      ) : (
-        <View style={styles.userAvatarPlaceholder}>
-          <Text style={styles.userAvatarText}>{item.name?.charAt(0).toUpperCase()}</Text>
-        </View>
-      )}
-      <View style={styles.userInfo}>
-        <Text style={styles.userName}>{item.name}</Text>
-        <Text style={styles.userEmail}>{item.email}</Text>
-        {item.star_rating > 0 && (
-          <Text style={styles.userRating}>{item.star_rating}⭐</Text>
-        )}
-      </View>
-      <Ionicons name="chevron-forward" size={24} color="#999" />
-    </TouchableOpacity>
-  );
+  const tabs = [
+    { key: 'posts', label: 'Posts', icon: 'list' },
+    { key: 'guides', label: 'Guides', icon: 'star' },
+    { key: 'guidees', label: 'Guidees', icon: 'people' },
+    { key: 'idols', label: 'Idols', icon: 'heart' },
+    { key: 'fans', label: 'Fans', icon: 'trophy' },
+    { key: 'addresses', label: 'Addresses', icon: 'location' },
+    { key: 'habits', label: 'Habits', icon: 'fitness' },
+  ];
 
   const renderTabContent = () => {
+    if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#ffd700" />
+        </View>
+      );
+    }
+
     switch (activeTab) {
       case 'posts':
         return (
           <FlatList
             data={posts}
-            renderItem={renderPost}
             keyExtractor={(item) => item._id}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="document-text-outline" size={64} color="#ccc" />
-                <Text style={styles.emptyText}>No posts yet</Text>
+            renderItem={({ item }) => (
+              <View style={styles.postCard}>
+                <Text style={styles.postContent}>{item.content}</Text>
+                <Text style={styles.postDate}>
+                  {new Date(item.created_at).toLocaleDateString()}
+                </Text>
               </View>
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No posts yet</Text>
             }
           />
         );
+
       case 'guides':
         return (
           <FlatList
             data={guides}
-            renderItem={renderUser}
             keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.userCard}
+                onPress={() => router.push(`/user/${item._id}`)}
+              >
+                {item.picture ? (
+                  <Image source={{ uri: item.picture }} style={styles.userAvatar} />
+                ) : (
+                  <View style={[styles.userAvatar, styles.avatarPlaceholder]}>
+                    <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
+                  </View>
+                )}
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{item.name}</Text>
+                  <Text style={styles.userRating}>{item.star_rating}⭐</Text>
+                </View>
+              </TouchableOpacity>
+            )}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={64} color="#ccc" />
-                <Text style={styles.emptyText}>No guides yet</Text>
-              </View>
+              <Text style={styles.emptyText}>No guides yet</Text>
             }
           />
         );
+
       case 'guidees':
         return (
           <FlatList
             data={guidees}
-            renderItem={renderUser}
             keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.userCard}
+                onPress={() => router.push(`/user/${item._id}`)}
+              >
+                {item.picture ? (
+                  <Image source={{ uri: item.picture }} style={styles.userAvatar} />
+                ) : (
+                  <View style={[styles.userAvatar, styles.avatarPlaceholder]}>
+                    <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
+                  </View>
+                )}
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{item.name}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={64} color="#ccc" />
-                <Text style={styles.emptyText}>No guidees yet</Text>
-              </View>
+              <Text style={styles.emptyText}>No guidees yet</Text>
             }
           />
         );
+
       case 'idols':
         return (
           <FlatList
             data={idols}
-            renderItem={renderUser}
             keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.userCard}
+                onPress={() => router.push(`/user/${item._id}`)}
+              >
+                {item.picture ? (
+                  <Image source={{ uri: item.picture }} style={styles.userAvatar} />
+                ) : (
+                  <View style={[styles.userAvatar, styles.avatarPlaceholder]}>
+                    <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
+                  </View>
+                )}
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{item.name}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="star-outline" size={64} color="#ccc" />
-                <Text style={styles.emptyText}>Not following anyone</Text>
-              </View>
+              <Text style={styles.emptyText}>Not following anyone yet</Text>
             }
           />
         );
+
       case 'fans':
         return (
           <FlatList
             data={fans}
-            renderItem={renderUser}
             keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.userCard}
+                onPress={() => router.push(`/user/${item._id}`)}
+              >
+                {item.picture ? (
+                  <Image source={{ uri: item.picture }} style={styles.userAvatar} />
+                ) : (
+                  <View style={[styles.userAvatar, styles.avatarPlaceholder]}>
+                    <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
+                  </View>
+                )}
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName}>{item.name}</Text>
+                </View>
+              </TouchableOpacity>
+            )}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="heart-outline" size={64} color="#ccc" />
-                <Text style={styles.emptyText}>No followers yet</Text>
-              </View>
+              <Text style={styles.emptyText}>No fans yet</Text>
             }
           />
         );
+
+      case 'addresses':
+        return (
+          <View style={styles.addressesContainer}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => setShowAddressModal(true)}
+            >
+              <Ionicons name="add-circle" size={24} color="#ffd700" />
+              <Text style={styles.addButtonText}>Add New Address</Text>
+            </TouchableOpacity>
+
+            {addresses.length === 0 ? (
+              <Text style={styles.emptyText}>No saved addresses</Text>
+            ) : (
+              addresses.map((addr, index) => (
+                <View key={index} style={styles.addressCard}>
+                  <View style={styles.addressHeader}>
+                    <Text style={styles.addressLabel}>{addr.label}</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        Alert.alert(
+                          'Delete Address',
+                          'Are you sure you want to delete this address?',
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            { text: 'Delete', style: 'destructive', onPress: () => deleteAddress(index) },
+                          ]
+                        );
+                      }}
+                    >
+                      <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.addressText}>{addr.full_address}</Text>
+                  <Text style={styles.addressText}>
+                    {addr.city}, {addr.state} - {addr.pincode}
+                  </Text>
+                  <Text style={styles.addressText}>☎ {addr.phone}</Text>
+                </View>
+              ))
+            )}
+          </View>
+        );
+
+      case 'habits':
+        return (
+          <View style={styles.habitsContainer}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => setShowHabitModal(true)}
+            >
+              <Ionicons name="add-circle" size={24} color="#ffd700" />
+              <Text style={styles.addButtonText}>Log Habit</Text>
+            </TouchableOpacity>
+
+            {habits.length === 0 ? (
+              <Text style={styles.emptyText}>No habits logged yet</Text>
+            ) : (
+              <FlatList
+                data={habits}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                  <View style={styles.habitCard}>
+                    <View style={styles.habitHeader}>
+                      <View style={styles.habitTypeContainer}>
+                        <Ionicons
+                          name={
+                            item.habit_type === 'meals' ? 'restaurant' :
+                            item.habit_type === 'exercise' ? 'fitness' :
+                            item.habit_type === 'water' ? 'water' :
+                            item.habit_type === 'sleep' ? 'moon' : 'document-text'
+                          }
+                          size={24}
+                          color="#ffd700"
+                        />
+                        <Text style={styles.habitType}>{item.habit_type}</Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => {
+                          Alert.alert(
+                            'Delete Habit',
+                            'Are you sure you want to delete this habit log?',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              { text: 'Delete', style: 'destructive', onPress: () => deleteHabit(item._id) },
+                            ]
+                          );
+                        }}
+                      >
+                        <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.habitDescription}>{item.description}</Text>
+                    {item.value && (
+                      <Text style={styles.habitValue}>
+                        {item.value} {item.unit}
+                      </Text>
+                    )}
+                    <Text style={styles.habitDate}>
+                      {new Date(item.date).toLocaleDateString()} at {new Date(item.date).toLocaleTimeString()}
+                    </Text>
+                  </View>
+                )}
+              />
+            )}
+          </View>
+        );
+
+      default:
+        return null;
     }
   };
 
   if (!user) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#ffd700" />
+      <View style={styles.container}>
+        <Text>Not logged in</Text>
       </View>
     );
   }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView>
-        {/* Profile Header */}
-        <View style={styles.profileHeader}>
+      <View style={styles.header}>
+        <View style={styles.profileSection}>
           {user.picture ? (
-            <Image source={{ uri: user.picture }} style={styles.profileImage} />
+            <Image source={{ uri: user.picture }} style={styles.profilePicture} />
           ) : (
-            <View style={styles.profileImagePlaceholder}>
-              <Text style={styles.profileImageText}>{user.name?.charAt(0).toUpperCase()}</Text>
+            <View style={[styles.profilePicture, styles.avatarPlaceholder]}>
+              <Text style={styles.avatarText}>{user.name?.charAt(0)}</Text>
             </View>
           )}
-          <Text style={styles.profileName}>{user.name}</Text>
-          <Text style={styles.profileEmail}>{user.email}</Text>
-          {user.star_rating > 0 && (
-            <Text style={styles.starRating}>{user.star_rating}⭐</Text>
-          )}
-          <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-            <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{user.name}</Text>
+            <Text style={styles.profileEmail}>{user.email}</Text>
+            {user.is_guide && (
+              <Text style={styles.starRating}>{user.star_rating}⭐ Guide</Text>
+            )}
+          </View>
         </View>
 
-        {/* Commission Card (Guides Only) */}
-        {user.is_guide && (
-          <View style={styles.commissionCard}>
-            <View style={styles.commissionHeader}>
-              <Text style={styles.commissionTitle}>Commission Balance</Text>
-              <TouchableOpacity
-                style={styles.withdrawButton}
-                onPress={() => setShowWithdrawModal(true)}
-              >
-                <Ionicons name="cash-outline" size={20} color="#fff" />
-                <Text style={styles.withdrawButtonText}>Withdraw</Text>
-              </TouchableOpacity>
-            </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
+          <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Commission Section for Guides */}
+      {user.is_guide && (
+        <View style={styles.commissionSection}>
+          <View style={styles.commissionInfo}>
+            <Text style={styles.commissionLabel}>Commission Balance</Text>
             <Text style={styles.commissionAmount}>
               ₹{(user.commission_balance || 0).toFixed(2)}
             </Text>
-            
-            {withdrawalRequests.length > 0 && (
-              <View style={styles.withdrawalsList}>
-                <Text style={styles.withdrawalsTitle}>Recent Requests</Text>
-                {withdrawalRequests.slice(0, 3).map((req: any) => (
-                  <View key={req._id} style={styles.withdrawalItem}>
-                    <View>
-                      <Text style={styles.withdrawalAmount}>₹{req.amount.toFixed(2)}</Text>
-                      <Text style={styles.withdrawalDate}>
-                        {new Date(req.created_at).toLocaleDateString()}
-                      </Text>
-                    </View>
-                    <View
-                      style={[
-                        styles.statusBadge,
-                        req.status === 'approved' && styles.statusApproved,
-                        req.status === 'rejected' && styles.statusRejected,
-                      ]}
-                    >
-                      <Text style={styles.statusText}>{req.status}</Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            )}
           </View>
-        )}
-
-        {/* Horizontal Tabs */}
-        <View style={styles.tabsContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'posts' && styles.activeTab]}
-              onPress={() => setActiveTab('posts')}
-            >
-              <Ionicons
-                name="document-text"
-                size={20}
-                color={activeTab === 'posts' ? '#ffd700' : '#666'}
-              />
-              <Text style={[styles.tabText, activeTab === 'posts' && styles.activeTabText]}>
-                Posts ({posts.length})
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'guides' && styles.activeTab]}
-              onPress={() => setActiveTab('guides')}
-            >
-              <Ionicons
-                name="people"
-                size={20}
-                color={activeTab === 'guides' ? '#ffd700' : '#666'}
-              />
-              <Text style={[styles.tabText, activeTab === 'guides' && styles.activeTabText]}>
-                Guides ({guides.length})
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'guidees' && styles.activeTab]}
-              onPress={() => setActiveTab('guidees')}
-            >
-              <Ionicons
-                name="school"
-                size={20}
-                color={activeTab === 'guidees' ? '#ffd700' : '#666'}
-              />
-              <Text style={[styles.tabText, activeTab === 'guidees' && styles.activeTabText]}>
-                Guidees ({guidees.length})
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'idols' && styles.activeTab]}
-              onPress={() => setActiveTab('idols')}
-            >
-              <Ionicons
-                name="star"
-                size={20}
-                color={activeTab === 'idols' ? '#ffd700' : '#666'}
-              />
-              <Text style={[styles.tabText, activeTab === 'idols' && styles.activeTabText]}>
-                Idols ({idols.length})
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.tab, activeTab === 'fans' && styles.activeTab]}
-              onPress={() => setActiveTab('fans')}
-            >
-              <Ionicons
-                name="heart"
-                size={20}
-                color={activeTab === 'fans' ? '#ffd700' : '#666'}
-              />
-              <Text style={[styles.tabText, activeTab === 'fans' && styles.activeTabText]}>
-                Fans ({fans.length})
-              </Text>
-            </TouchableOpacity>
-          </ScrollView>
+          <TouchableOpacity
+            style={styles.withdrawButton}
+            onPress={() => setShowWithdrawModal(true)}
+          >
+            <Text style={styles.withdrawButtonText}>Withdraw</Text>
+          </TouchableOpacity>
         </View>
+      )}
 
-        {/* Tab Content */}
-        <View style={styles.tabContent}>{renderTabContent()}</View>
-
-        {/* Saved Addresses Section */}
-        <View style={styles.addressesSection}>
-          <View style={styles.addressesHeader}>
-            <Text style={styles.sectionTitle}>Saved Addresses</Text>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => setShowAddressModal(true)}
-            >
-              <Ionicons name="add-circle" size={24} color="#ffd700" />
-              <Text style={styles.addButtonText}>Add New</Text>
-            </TouchableOpacity>
-          </View>
-
-          {addresses.length > 0 ? (
-            addresses.map((addr, index) => (
-              <View key={index} style={styles.addressCard}>
-                <View style={styles.addressHeader}>
-                  <Text style={styles.addressLabel}>{addr.label}</Text>
-                  {addr.is_default && (
-                    <View style={styles.defaultBadge}>
-                      <Text style={styles.defaultText}>Default</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.addressText}>{addr.full_address}</Text>
-                <Text style={styles.addressText}>
-                  {addr.city}, {addr.state} - {addr.pincode}
-                </Text>
-                <Text style={styles.addressText}>☎ {addr.phone}</Text>
-                <View style={styles.addressActions}>
-                  {!addr.is_default && (
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => setDefaultAddress(index)}
-                    >
-                      <Text style={styles.actionButtonText}>Set as Default</Text>
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.deleteButton]}
-                    onPress={() => {
-                      Alert.alert(
-                        'Delete Address',
-                        'Are you sure you want to delete this address?',
-                        [
-                          { text: 'Cancel', style: 'cancel' },
-                          { text: 'Delete', style: 'destructive', onPress: () => deleteAddress(index) },
-                        ]
-                      );
-                    }}
-                  >
-                    <Text style={styles.deleteButtonText}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons name="location-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>No saved addresses</Text>
-            </View>
-          )}
-        </View>
+      {/* Horizontal Tabs */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabsContainer}
+        contentContainerStyle={styles.tabsContent}
+      >
+        {tabs.map((tab) => (
+          <TouchableOpacity
+            key={tab.key}
+            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+            onPress={() => setActiveTab(tab.key as any)}
+          >
+            <Ionicons
+              name={tab.icon as any}
+              size={18}
+              color={activeTab === tab.key ? '#ffd700' : '#666'}
+            />
+            <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </ScrollView>
 
-      {/* Add Address Modal */}
+      {/* Tab Content */}
+      <View style={styles.content}>
+        {renderTabContent()}
+      </View>
+
+      {/* Address Modal */}
       <Modal visible={showAddressModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -620,6 +705,12 @@ export default function ProfileScreen() {
                 placeholder="Label (e.g., Home, Office) *"
                 value={newAddressLabel}
                 onChangeText={setNewAddressLabel}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Apartment / Suite (optional)"
+                value={newAddressApartment}
+                onChangeText={setNewAddressApartment}
               />
               <TextInput
                 style={styles.input}
@@ -663,6 +754,89 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
+      {/* Habit Modal */}
+      <Modal visible={showHabitModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Log Habit</Text>
+              <TouchableOpacity onPress={() => setShowHabitModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.label}>Habit Type</Text>
+              <View style={styles.habitTypeSelector}>
+                {['meals', 'exercise', 'water', 'sleep', 'notes'].map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.habitTypeButton,
+                      habitType === type && styles.habitTypeButtonActive
+                    ]}
+                    onPress={() => setHabitType(type)}
+                  >
+                    <Text style={[
+                      styles.habitTypeButtonText,
+                      habitType === type && styles.habitTypeButtonTextActive
+                    ]}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Description *"
+                value={habitDescription}
+                onChangeText={setHabitDescription}
+                multiline
+                numberOfLines={4}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Value (optional)"
+                value={habitValue}
+                onChangeText={setHabitValue}
+                keyboardType="numeric"
+              />
+
+              {habitValue && (
+                <>
+                  <Text style={styles.label}>Unit</Text>
+                  <View style={styles.unitSelector}>
+                    {['servings', 'cups', 'hours', 'minutes', 'reps', 'km'].map((unit) => (
+                      <TouchableOpacity
+                        key={unit}
+                        style={[
+                          styles.unitButton,
+                          habitUnit === unit && styles.unitButtonActive
+                        ]}
+                        onPress={() => setHabitUnit(unit)}
+                      >
+                        <Text style={[
+                          styles.unitButtonText,
+                          habitUnit === unit && styles.unitButtonTextActive
+                        ]}>
+                          {unit}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+            </ScrollView>
+            <View style={styles.modalFooter}>
+              <TouchableOpacity style={styles.saveButton} onPress={logHabit}>
+                <Text style={styles.saveButtonText}>Log Habit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Withdrawal Modal */}
       <Modal visible={showWithdrawModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
@@ -674,19 +848,34 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.modalBody}>
-              <Text style={styles.balanceText}>
-                Available Balance: ₹{(user.commission_balance || 0).toFixed(2)}
+              <Text style={styles.label}>
+                Available Balance: ₹{(user?.commission_balance || 0).toFixed(2)}
               </Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter amount to withdraw"
+                placeholder="Amount to withdraw"
                 value={withdrawAmount}
                 onChangeText={setWithdrawAmount}
-                keyboardType="decimal-pad"
+                keyboardType="numeric"
               />
-              <Text style={styles.noteText}>
-                Note: Withdrawal requests will be processed manually by admin.
-              </Text>
+
+              {withdrawalRequests.length > 0 && (
+                <View style={styles.requestsSection}>
+                  <Text style={styles.label}>Recent Requests:</Text>
+                  {withdrawalRequests.slice(0, 3).map((req) => (
+                    <View key={req._id} style={styles.requestCard}>
+                      <Text style={styles.requestAmount}>₹{req.amount.toFixed(2)}</Text>
+                      <Text style={[
+                        styles.requestStatus,
+                        req.status === 'approved' && styles.statusApproved,
+                        req.status === 'rejected' && styles.statusRejected
+                      ]}>
+                        {req.status}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
             <View style={styles.modalFooter}>
               <TouchableOpacity
@@ -713,40 +902,41 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileHeader: {
+  header: {
     backgroundColor: '#fff',
-    padding: 24,
+    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 12,
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  profileImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+  profilePicture: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 16,
+  },
+  avatarPlaceholder: {
     backgroundColor: '#ffd700',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  profileImageText: {
-    fontSize: 40,
-    fontWeight: 'bold',
+  avatarText: {
     color: '#fff',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  profileInfo: {
+    flex: 1,
   },
   profileName: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 4,
@@ -754,196 +944,138 @@ const styles = StyleSheet.create({
   profileEmail: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   starRating: {
-    fontSize: 20,
-    marginBottom: 12,
-  },
-  signOutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ef4444',
-  },
-  signOutText: {
-    color: '#ef4444',
+    fontSize: 16,
     fontWeight: '600',
+    color: '#ffd700',
   },
-  commissionCard: {
+  logoutButton: {
+    padding: 8,
+  },
+  commissionSection: {
     backgroundColor: '#eff6ff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#3b82f6',
-  },
-  commissionHeader: {
+    padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e7ff',
   },
-  commissionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+  commissionInfo: {
+    flex: 1,
+  },
+  commissionLabel: {
+    fontSize: 14,
+    color: '#1e40af',
+    marginBottom: 4,
+  },
+  commissionAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: '#1e40af',
   },
   withdrawButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#3b82f6',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
+    backgroundColor: '#ffd700',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   withdrawButtonText: {
     color: '#fff',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  commissionAmount: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#1e40af',
-    marginBottom: 16,
-  },
-  withdrawalsList: {
-    borderTopWidth: 1,
-    borderTopColor: '#93c5fd',
-    paddingTop: 12,
-  },
-  withdrawalsTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1e40af',
-    marginBottom: 8,
-  },
-  withdrawalItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  withdrawalAmount: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1e40af',
-  },
-  withdrawalDate: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-  statusBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: '#fbbf24',
-  },
-  statusApproved: {
-    backgroundColor: '#10b981',
-  },
-  statusRejected: {
-    backgroundColor: '#ef4444',
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
+    fontWeight: 'bold',
   },
   tabsContainer: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    maxHeight: 60,
+  },
+  tabsContent: {
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 8,
   },
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    gap: 6,
+    marginRight: 8,
   },
   activeTab: {
-    borderBottomColor: '#ffd700',
+    backgroundColor: '#fffbeb',
+    borderWidth: 2,
+    borderColor: '#ffd700',
   },
-  tabText: {
+  tabLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: '#666',
   },
-  activeTabText: {
+  activeTabLabel: {
     color: '#ffd700',
+    fontWeight: 'bold',
   },
-  tabContent: {
-    minHeight: 300,
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#999',
+    marginTop: 32,
   },
   postCard: {
     backgroundColor: '#fff',
     padding: 16,
-    marginHorizontal: 16,
-    marginTop: 16,
     borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   postContent: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#333',
-    marginBottom: 12,
+    lineHeight: 24,
+    marginBottom: 8,
   },
-  postImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  postStats: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statText: {
-    fontSize: 14,
-    color: '#666',
+  postDate: {
+    fontSize: 12,
+    color: '#999',
   },
   userCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
     padding: 16,
-    marginHorizontal: 16,
-    marginTop: 12,
     borderRadius: 12,
+    marginBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userAvatar: {
     width: 50,
     height: 50,
     borderRadius: 25,
     marginRight: 12,
-  },
-  userAvatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#ffd700',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  userAvatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   userInfo: {
     flex: 1,
@@ -952,48 +1084,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-  },
-  userEmail: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 2,
+    marginBottom: 4,
   },
   userRating: {
     fontSize: 14,
-    marginTop: 4,
+    color: '#ffd700',
+    fontWeight: '600',
   },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
+  addressesContainer: {
+    flex: 1,
   },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-    marginTop: 12,
-  },
-  addressesSection: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  addressesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+  habitsContainer: {
+    flex: 1,
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    gap: 8,
+    borderWidth: 2,
+    borderColor: '#ffd700',
+    borderStyle: 'dashed',
   },
   addButtonText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#ffd700',
   },
@@ -1002,6 +1120,11 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   addressHeader: {
     flexDirection: 'row',
@@ -1014,46 +1137,54 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  defaultBadge: {
-    backgroundColor: '#10b981',
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  defaultText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
   addressText: {
     fontSize: 14,
     color: '#666',
     marginBottom: 4,
   },
-  addressActions: {
+  habitCard: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  habitHeader: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  actionButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#ffd700',
+  habitTypeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  actionButtonText: {
+  habitType: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    textTransform: 'capitalize',
+  },
+  habitDescription: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  habitValue: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#ffd700',
-    fontSize: 14,
-    fontWeight: '600',
+    marginBottom: 8,
   },
-  deleteButton: {
-    borderColor: '#ef4444',
-  },
-  deleteButtonText: {
-    color: '#ef4444',
-    fontSize: 14,
-    fontWeight: '600',
+  habitDate: {
+    fontSize: 12,
+    color: '#999',
   },
   modalOverlay: {
     flex: 1,
@@ -1064,7 +1195,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '80%',
+    maxHeight: '85%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -1081,6 +1212,12 @@ const styles = StyleSheet.create({
   },
   modalBody: {
     padding: 20,
+    maxHeight: 400,
+  },
+  modalFooter: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
   input: {
     borderWidth: 1,
@@ -1091,22 +1228,69 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginBottom: 12,
   },
-  balanceText: {
-    fontSize: 16,
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  label: {
+    fontSize: 14,
     fontWeight: '600',
-    color: '#1e40af',
+    color: '#333',
+    marginBottom: 8,
+  },
+  habitTypeSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     marginBottom: 16,
   },
-  noteText: {
+  habitTypeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  habitTypeButtonActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  habitTypeButtonText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  habitTypeButtonTextActive: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  unitSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  unitButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  unitButtonActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  unitButtonText: {
     fontSize: 12,
     color: '#666',
-    fontStyle: 'italic',
-    marginTop: 8,
+    fontWeight: '500',
   },
-  modalFooter: {
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+  unitButtonTextActive: {
+    color: '#fff',
+    fontWeight: '600',
   },
   saveButton: {
     backgroundColor: '#ffd700',
@@ -1118,5 +1302,34 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  requestsSection: {
+    marginTop: 16,
+  },
+  requestCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  requestAmount: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  requestStatus: {
+    fontSize: 14,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+    color: '#f59e0b',
+  },
+  statusApproved: {
+    color: '#10b981',
+  },
+  statusRejected: {
+    color: '#ef4444',
   },
 });
