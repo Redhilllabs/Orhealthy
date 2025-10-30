@@ -56,7 +56,7 @@ export default function ChatScreen() {
     try {
       const token = await storage.getItemAsync('session_token');
       
-      // Fetch messages
+      // Fetch messages - this also marks them as read on backend
       const messagesResponse = await axios.get(
         `${API_URL}/conversations/${conversationId}/messages`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -79,6 +79,9 @@ export default function ChatScreen() {
           : conversation.user1_name;
         setOtherUserName(otherUser);
       }
+      
+      // Refresh unread count in context
+      await refreshUnreadCount();
       
       // Scroll to bottom after loading messages
       setTimeout(() => {
