@@ -67,7 +67,11 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <View style={styles.chatIconContainer}>
               <Ionicons name="chatbubbles" size={size} color={color} />
-              {/* Badge will be shown here when implemented */}
+              {messagesUnreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{messagesUnreadCount}</Text>
+                </View>
+              )}
             </View>
           ),
         }}
