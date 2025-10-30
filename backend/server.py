@@ -518,8 +518,16 @@ async def update_post(post_id: str, post_data: dict, request: Request):
     update_data = {}
     if "content" in post_data:
         update_data["content"] = post_data["content"]
-    if "image" in post_data:
+    
+    # Handle both single image and images array
+    if "images" in post_data:
+        images = post_data["images"]
+        update_data["images"] = images
+        update_data["image"] = images[0] if images else None  # Keep first image for backward compatibility
+    elif "image" in post_data:
+        # Backward compatibility for single image
         update_data["image"] = post_data["image"]
+        update_data["images"] = [post_data["image"]] if post_data["image"] else []
     
     await db.posts.update_one(
         {"_id": ObjectId(post_id)},
