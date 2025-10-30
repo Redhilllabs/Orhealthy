@@ -256,6 +256,48 @@
                     <button class="btn btn-secondary" style="margin-top: 16px; margin-right: 12px;" onclick="addStarRating()">+ Add Rating Level</button>
                     <button class="btn" style="margin-top: 16px;" onclick="saveStarConfig()">Save Configuration</button>
                 </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h2 class="card-title" style="margin-bottom: 20px;">Points Configuration</h2>
+                    <p style="color: #64748b; margin-bottom: 24px;">Configure points earned for different actions.</p>
+                    <div id="alert-points"></div>
+                    
+                    <div style="display: grid; gap: 16px;">
+                        <div class="config-item">
+                            <div style="min-width: 200px;">
+                                <span class="config-label">📝 Per Post</span>
+                            </div>
+                            <input type="number" class="config-input" id="pointsPerPost" value="5" min="0" style="width: 150px;">
+                            <span style="color: #64748b; font-size: 13px;">points</span>
+                        </div>
+
+                        <div class="config-item">
+                            <div style="min-width: 200px;">
+                                <span class="config-label">❤️ Per Like Received</span>
+                            </div>
+                            <input type="number" class="config-input" id="pointsPerLike" value="2" min="0" style="width: 150px;">
+                            <span style="color: #64748b; font-size: 13px;">points</span>
+                        </div>
+
+                        <div class="config-item">
+                            <div style="min-width: 200px;">
+                                <span class="config-label">👥 Per New Fan</span>
+                            </div>
+                            <input type="number" class="config-input" id="pointsPerFan" value="3" min="0" style="width: 150px;">
+                            <span style="color: #64748b; font-size: 13px;">points</span>
+                        </div>
+
+                        <div class="config-item">
+                            <div style="min-width: 200px;">
+                                <span class="config-label">🎓 Per New Guidee</span>
+                            </div>
+                            <input type="number" class="config-input" id="pointsPerGuidee" value="5" min="0" style="width: 150px;">
+                            <span style="color: #64748b; font-size: 13px;">points</span>
+                        </div>
+                    </div>
+                    
+                    <button class="btn" style="margin-top: 24px;" onclick="savePointsConfig()">Save Points Configuration</button>
+                </div>
             </div>
         </div>
     </div>
