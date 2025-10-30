@@ -1065,6 +1065,72 @@ async def delete_saved_meal(meal_id: str, request: Request):
     
     return {"message": "Meal deleted"}
 
+# Habit Logging endpoints
+@api_router.post("/habits")
+async def log_habit(habit_data: dict, request: Request):
+    """Log a habit entry"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    habit = {
+        "user_id": user["_id"],
+        "date": habit_data.get("date", datetime.now(timezone.utc).isoformat()),
+        "habit_type": habit_data["habit_type"],  # meals, exercise, water, sleep, notes
+        "description": habit_data.get("description", ""),
+        "value": habit_data.get("value"),  # numeric value if applicable
+        "unit": habit_data.get("unit"),  # cups, hours, servings, etc.
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.habits.insert_one(habit)
+    return {"message": "Habit logged", "id": str(result.inserted_id)}
+
+@api_router.get("/habits")
+async def get_habits(request: Request, user_id: Optional[str] = None):
+    """Get habit logs for a user. If user_id provided, check if requester is their guide"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # If requesting own habits
+    if not user_id or user_id == user["_id"]:
+        target_user_id = user["_id"]
+    else:
+        # Check if requester is a guide of the target user
+        target_user = await db.users.find_one({"_id": ObjectId(user_id)})
+        if not target_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Check if requester is in target user's guides list
+        if user["_id"] not in target_user.get("guides", []):
+            raise HTTPException(status_code=403, detail="Not authorized to view this user's habits")
+        
+        target_user_id = user_id
+    
+    habits = await db.habits.find({"user_id": target_user_id}).sort("date", -1).to_list(200)
+    for habit in habits:
+        habit["_id"] = str(habit["_id"])
+    
+    return habits
+
+@api_router.delete("/habits/{habit_id}")
+async def delete_habit(habit_id: str, request: Request):
+    """Delete a habit entry"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    result = await db.habits.delete_one({
+        "_id": ObjectId(habit_id),
+        "user_id": user["_id"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Habit not found")
+    
+    return {"message": "Habit deleted"}
+
 # Address endpoints
 @api_router.post("/addresses")
 async def add_address(address_data: dict, request: Request):
