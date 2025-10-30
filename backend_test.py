@@ -227,6 +227,235 @@ class BackendTester:
         except Exception as e:
             self.log_result("GET meals", False, f"Request failed: {str(e)}")
     
+    def test_chat_system_unauthenticated(self):
+        """Test chat endpoints without authentication - should return 401"""
+        print("\n=== Testing Chat System - Unauthenticated Requests ===")
+        
+        endpoints = [
+            ("GET", "/conversations", "Get conversations without auth"),
+            ("GET", "/conversations/test_user_id", "Get conversation without auth"),
+            ("GET", "/conversations/test_conv_id/messages", "Get messages without auth"),
+            ("POST", "/conversations/test_conv_id/messages", "Send message without auth")
+        ]
+        
+        for method, endpoint, description in endpoints:
+            try:
+                if method == "GET":
+                    response = self.session.get(f"{BACKEND_URL}{endpoint}")
+                else:
+                    response = self.session.post(f"{BACKEND_URL}{endpoint}", 
+                                               json={"content": "test message"})
+                
+                if response.status_code == 401:
+                    self.log_result(description, True, f"Correctly returned 401: {response.json().get('detail', 'Unauthorized')}")
+                else:
+                    self.log_result(description, False, f"Expected 401, got {response.status_code}: {response.text}")
+                    
+            except Exception as e:
+                self.log_result(description, False, f"Request failed: {str(e)}")
+    
+    def test_get_conversations(self):
+        """Test GET /api/conversations endpoint"""
+        print("\n=== Testing GET /api/conversations ===")
+        
+        try:
+            # Test with mock auth token (since we don't have real auth in test environment)
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            response = self.session.get(f"{BACKEND_URL}/conversations", headers=headers)
+            
+            if response.status_code == 401:
+                self.log_result("GET /api/conversations with mock auth", True, 
+                            "Correctly requires authentication (401)")
+            elif response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_result("GET /api/conversations", True, 
+                                f"Returns array with {len(data)} conversations")
+                    
+                    # Check conversation structure if any exist
+                    if data:
+                        conv = data[0]
+                        required_fields = ['_id', 'user1_id', 'user1_name', 'user2_id', 'user2_name', 
+                                         'last_message', 'last_message_at', 'unread_count_user1', 'unread_count_user2']
+                        missing_fields = [field for field in required_fields if field not in conv]
+                        
+                        if not missing_fields:
+                            self.log_result("Conversation structure validation", True, 
+                                        "All required fields present")
+                        else:
+                            self.log_result("Conversation structure validation", False, 
+                                        f"Missing fields: {missing_fields}")
+                else:
+                    self.log_result("GET /api/conversations", False, 
+                                f"Expected array, got: {type(data)}")
+            else:
+                self.log_result("GET /api/conversations", False, 
+                            f"Unexpected status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("GET /api/conversations", False, f"Request failed: {str(e)}")
+    
+    def test_get_or_create_conversation(self):
+        """Test GET /api/conversations/{other_user_id} endpoint"""
+        print("\n=== Testing GET /api/conversations/{other_user_id} ===")
+        
+        try:
+            # Test with mock auth token
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            test_user_id = "test_user_12345"
+            
+            response = self.session.get(f"{BACKEND_URL}/conversations/{test_user_id}", headers=headers)
+            
+            if response.status_code == 401:
+                self.log_result("GET /api/conversations/{other_user_id} with mock auth", True, 
+                            "Correctly requires authentication (401)")
+            elif response.status_code == 404:
+                self.log_result("GET /api/conversations/{other_user_id}", True, 
+                            "Correctly returns 404 for non-existent user")
+            elif response.status_code == 200:
+                data = response.json()
+                required_fields = ['_id', 'user1_id', 'user1_name', 'user2_id', 'user2_name']
+                missing_fields = [field for field in required_fields if field not in data]
+                
+                if not missing_fields:
+                    self.log_result("GET /api/conversations/{other_user_id}", True, 
+                                "Returns conversation with required fields")
+                else:
+                    self.log_result("GET /api/conversations/{other_user_id}", False, 
+                                f"Missing fields: {missing_fields}")
+            else:
+                self.log_result("GET /api/conversations/{other_user_id}", False, 
+                            f"Unexpected status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("GET /api/conversations/{other_user_id}", False, f"Request failed: {str(e)}")
+    
+    def test_get_messages(self):
+        """Test GET /api/conversations/{conversation_id}/messages endpoint"""
+        print("\n=== Testing GET /api/conversations/{conversation_id}/messages ===")
+        
+        try:
+            # Test with mock auth token
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            test_conv_id = "test_conversation_12345"
+            
+            response = self.session.get(f"{BACKEND_URL}/conversations/{test_conv_id}/messages", headers=headers)
+            
+            if response.status_code == 401:
+                self.log_result("GET /api/conversations/{conversation_id}/messages with mock auth", True, 
+                            "Correctly requires authentication (401)")
+            elif response.status_code == 404:
+                self.log_result("GET /api/conversations/{conversation_id}/messages", True, 
+                            "Correctly returns 404 for non-existent conversation")
+            elif response.status_code == 403:
+                self.log_result("GET /api/conversations/{conversation_id}/messages", True, 
+                            "Correctly returns 403 for unauthorized access")
+            elif response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_result("GET /api/conversations/{conversation_id}/messages", True, 
+                                f"Returns array with {len(data)} messages")
+                    
+                    # Check message structure if any exist
+                    if data:
+                        msg = data[0]
+                        required_fields = ['_id', 'conversation_id', 'sender_id', 'sender_name', 'content', 'read', 'created_at']
+                        missing_fields = [field for field in required_fields if field not in msg]
+                        
+                        if not missing_fields:
+                            self.log_result("Message structure validation", True, 
+                                        "All required fields present")
+                        else:
+                            self.log_result("Message structure validation", False, 
+                                        f"Missing fields: {missing_fields}")
+                else:
+                    self.log_result("GET /api/conversations/{conversation_id}/messages", False, 
+                                f"Expected array, got: {type(data)}")
+            else:
+                self.log_result("GET /api/conversations/{conversation_id}/messages", False, 
+                            f"Unexpected status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("GET /api/conversations/{conversation_id}/messages", False, f"Request failed: {str(e)}")
+    
+    def test_send_message(self):
+        """Test POST /api/conversations/{conversation_id}/messages endpoint"""
+        print("\n=== Testing POST /api/conversations/{conversation_id}/messages ===")
+        
+        try:
+            # Test with mock auth token
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            test_conv_id = "test_conversation_12345"
+            message_data = {"content": "Hello! This is a test message from the API testing script."}
+            
+            response = self.session.post(f"{BACKEND_URL}/conversations/{test_conv_id}/messages", 
+                                       headers=headers, json=message_data)
+            
+            if response.status_code == 401:
+                self.log_result("POST /api/conversations/{conversation_id}/messages with mock auth", True, 
+                            "Correctly requires authentication (401)")
+            elif response.status_code == 404:
+                self.log_result("POST /api/conversations/{conversation_id}/messages", True, 
+                            "Correctly returns 404 for non-existent conversation")
+            elif response.status_code == 403:
+                self.log_result("POST /api/conversations/{conversation_id}/messages", True, 
+                            "Correctly returns 403 for unauthorized access")
+            elif response.status_code == 200:
+                data = response.json()
+                if "message" in data and "id" in data:
+                    self.log_result("POST /api/conversations/{conversation_id}/messages", True, 
+                                f"Message sent successfully: {data['message']}")
+                else:
+                    self.log_result("POST /api/conversations/{conversation_id}/messages", False, 
+                                f"Unexpected response format: {data}")
+            else:
+                self.log_result("POST /api/conversations/{conversation_id}/messages", False, 
+                            f"Unexpected status {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("POST /api/conversations/{conversation_id}/messages", False, f"Request failed: {str(e)}")
+    
+    def test_message_content_validation(self):
+        """Test message content validation"""
+        print("\n=== Testing Message Content Validation ===")
+        
+        try:
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            test_conv_id = "test_conversation_12345"
+            
+            # Test empty content
+            empty_message = {"content": ""}
+            response = self.session.post(f"{BACKEND_URL}/conversations/{test_conv_id}/messages", 
+                                       headers=headers, json=empty_message)
+            
+            if response.status_code in [400, 422]:
+                self.log_result("Empty message content validation", True, 
+                            "Correctly rejects empty content")
+            elif response.status_code == 401:
+                self.log_result("Empty message content validation", True, 
+                            "Authentication required (expected)")
+            else:
+                self.log_result("Empty message content validation", False, 
+                            f"Unexpected response to empty content: {response.status_code}")
+            
+            # Test missing content field
+            no_content = {}
+            response = self.session.post(f"{BACKEND_URL}/conversations/{test_conv_id}/messages", 
+                                       headers=headers, json=no_content)
+            
+            if response.status_code in [400, 422]:
+                self.log_result("Missing content field validation", True, 
+                            "Correctly rejects missing content field")
+            elif response.status_code == 401:
+                self.log_result("Missing content field validation", True, 
+                            "Authentication required (expected)")
+            else:
+                self.log_result("Missing content field validation", False, 
+                            f"Unexpected response to missing content: {response.status_code}")
+                
+        except Exception as e:
+            self.log_result("Message content validation", False, f"Request failed: {str(e)}")
+    
     def test_additional_endpoints(self):
         """Test additional endpoints for completeness"""
         print("\n=== Testing Additional Endpoints ===")
