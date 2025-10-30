@@ -13,9 +13,10 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function CartScreen() {
-  const { cartItems, loading, removeFromCart, totalPrice } = useCart();
+  const { cartItems, loading, removeFromCart, updateQuantity, totalPrice } = useCart();
   const router = useRouter();
   const [removing, setRemoving] = useState<number | null>(null);
+  const [updating, setUpdating] = useState<number | null>(null);
 
   const handleRemove = async (index: number) => {
     setRemoving(index);
@@ -25,6 +26,18 @@ export default function CartScreen() {
       console.error('Error removing item:', error);
     } finally {
       setRemoving(null);
+    }
+  };
+
+  const handleQuantityChange = async (index: number, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    setUpdating(index);
+    try {
+      await updateQuantity(index, newQuantity);
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    } finally {
+      setUpdating(null);
     }
   };
 
@@ -45,7 +58,26 @@ export default function CartScreen() {
 
         <View style={styles.itemFooter}>
           <Text style={styles.itemPrice}>₹{item.price.toFixed(2)}</Text>
-          <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
+          
+          <View style={styles.quantityControl}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => handleQuantityChange(index, item.quantity - 1)}
+              disabled={item.quantity <= 1 || updating === index}
+            >
+              <Ionicons name="remove" size={20} color={item.quantity <= 1 ? "#ccc" : "#ffd700"} />
+            </TouchableOpacity>
+            
+            <Text style={styles.quantityText}>{item.quantity}</Text>
+            
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => handleQuantityChange(index, item.quantity + 1)}
+              disabled={updating === index}
+            >
+              <Ionicons name="add" size={20} color="#ffd700" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
