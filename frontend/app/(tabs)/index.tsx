@@ -688,27 +688,74 @@ export default function HomeScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.likersList}>
-              {likers.map((liker) => (
-                <TouchableOpacity
-                  key={liker._id}
-                  style={styles.likerItem}
-                  onPress={() => {
-                    setShowLikersModal(false);
-                    router.push(`/user/${liker._id}`);
-                  }}
-                >
-                  {liker.picture ? (
-                    <Image source={{ uri: liker.picture }} style={styles.likerAvatar} />
-                  ) : (
-                    <View style={[styles.likerAvatar, styles.avatarPlaceholder]}>
-                      <Text style={styles.avatarText}>{liker.name?.charAt(0)}</Text>
-                    </View>
-                  )}
-                  <Text style={styles.likerName}>{liker.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            {loadingLikers ? (
+              <View style={styles.loadingLikers}>
+                <ActivityIndicator size="large" color="#ffd700" />
+                <Text style={styles.loadingText}>Loading...</Text>
+              </View>
+            ) : (
+              <ScrollView style={styles.likersList}>
+                {likers.map((liker) => (
+                  <TouchableOpacity
+                    key={liker._id}
+                    style={styles.likerItem}
+                    onPress={() => {
+                      setShowLikersModal(false);
+                      router.push(`/user/${liker._id}`);
+                    }}
+                  >
+                    {liker.picture ? (
+                      <Image source={{ uri: liker.picture }} style={styles.likerAvatar} />
+                    ) : (
+                      <View style={[styles.likerAvatar, styles.avatarPlaceholder]}>
+                        <Text style={styles.avatarText}>{liker.name?.charAt(0)}</Text>
+                      </View>
+                    )}
+                    <Text style={styles.likerName}>{liker.name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <View style={styles.deleteIconContainer}>
+              <Ionicons name="trash-outline" size={48} color="#F44336" />
+            </View>
+            
+            <Text style={styles.deleteModalTitle}>Delete Post?</Text>
+            <Text style={styles.deleteModalMessage}>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </Text>
+
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={styles.deleteCancelButton}
+                onPress={() => {
+                  setShowDeleteModal(false);
+                  setPostToDelete(null);
+                }}
+              >
+                <Text style={styles.deleteCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.deleteConfirmButton}
+                onPress={confirmDelete}
+              >
+                <Text style={styles.deleteConfirmText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
