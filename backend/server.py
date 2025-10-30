@@ -557,6 +557,11 @@ async def create_comment(post_id: str, comment_data: dict, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
+    # Get the post to find the owner
+    post = await db.posts.find_one({"_id": ObjectId(post_id)})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
     comment = Comment(
         post_id=post_id,
         user_id=user["_id"],
@@ -565,6 +570,19 @@ async def create_comment(post_id: str, comment_data: dict, request: Request):
     )
     
     result = await db.comments.insert_one(comment.dict())
+    
+    # Create notification for post owner (if not commenting on own post)
+    if post["user_id"] != user["_id"]:
+        notification = Notification(
+            user_id=post["user_id"],
+            type="comment",
+            from_user=user["_id"],
+            from_user_name=user["name"],
+            post_id=post_id,
+            message=f"{user['name']} commented on your post"
+        )
+        await db.notifications.insert_one(notification.dict())
+    
     return {"message": "Comment created", "id": str(result.inserted_id)}
 
 @api_router.get("/posts/{post_id}/comments")
