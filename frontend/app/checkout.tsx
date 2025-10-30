@@ -581,6 +581,12 @@ export default function CheckoutScreen() {
               />
               <TextInput
                 style={styles.input}
+                placeholder="Apartment / Suite (optional)"
+                value={newAddressApartment}
+                onChangeText={setNewAddressApartment}
+              />
+              <TextInput
+                style={styles.input}
                 placeholder="Street Address *"
                 value={newAddressStreet}
                 onChangeText={setNewAddressStreet}
