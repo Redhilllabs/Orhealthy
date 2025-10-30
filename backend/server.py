@@ -728,6 +728,172 @@ async def remove_guidee(user_id: str, request: Request):
     
     return {"message": "Removed as guidee"}
 
+# Chat endpoints
+@api_router.get("/conversations")
+async def get_conversations(request: Request):
+    """Get all conversations for the current user"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Find conversations where user is either user1 or user2
+    conversations = await db.conversations.find({
+        "$or": [
+            {"user1_id": user["_id"]},
+            {"user2_id": user["_id"]}
+        ]
+    }).sort("last_message_at", -1).to_list(100)
+    
+    for conv in conversations:
+        conv["_id"] = str(conv["_id"])
+    
+    return conversations
+
+@api_router.get("/conversations/{other_user_id}")
+async def get_or_create_conversation(other_user_id: str, request: Request):
+    """Get or create a conversation with another user"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Check if conversation exists (either direction)
+    conversation = await db.conversations.find_one({
+        "$or": [
+            {"user1_id": user["_id"], "user2_id": other_user_id},
+            {"user1_id": other_user_id, "user2_id": user["_id"]}
+        ]
+    })
+    
+    if conversation:
+        conversation["_id"] = str(conversation["_id"])
+        return conversation
+    
+    # Create new conversation
+    other_user = await db.users.find_one({"_id": ObjectId(other_user_id)})
+    if not other_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    new_conversation = Conversation(
+        user1_id=user["_id"],
+        user1_name=user["name"],
+        user1_picture=user.get("picture"),
+        user2_id=other_user_id,
+        user2_name=other_user["name"],
+        user2_picture=other_user.get("picture")
+    )
+    
+    result = await db.conversations.insert_one(new_conversation.dict())
+    conversation = await db.conversations.find_one({"_id": result.inserted_id})
+    conversation["_id"] = str(conversation["_id"])
+    
+    return conversation
+
+@api_router.get("/conversations/{conversation_id}/messages")
+async def get_messages(conversation_id: str, request: Request, skip: int = 0, limit: int = 50):
+    """Get messages for a conversation"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Verify user is part of the conversation
+    conversation = await db.conversations.find_one({"_id": ObjectId(conversation_id)})
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    if conversation["user1_id"] != user["_id"] and conversation["user2_id"] != user["_id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Get messages
+    messages = await db.messages.find(
+        {"conversation_id": conversation_id}
+    ).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Reverse to show oldest first
+    messages.reverse()
+    
+    for msg in messages:
+        msg["_id"] = str(msg["_id"])
+    
+    # Mark messages as read for current user
+    await db.messages.update_many(
+        {
+            "conversation_id": conversation_id,
+            "sender_id": {"$ne": user["_id"]},
+            "read": False
+        },
+        {"$set": {"read": True}}
+    )
+    
+    # Reset unread count for current user
+    if conversation["user1_id"] == user["_id"]:
+        await db.conversations.update_one(
+            {"_id": ObjectId(conversation_id)},
+            {"$set": {"unread_count_user1": 0}}
+        )
+    else:
+        await db.conversations.update_one(
+            {"_id": ObjectId(conversation_id)},
+            {"$set": {"unread_count_user2": 0}}
+        )
+    
+    return messages
+
+@api_router.post("/conversations/{conversation_id}/messages")
+async def send_message(conversation_id: str, message_data: dict, request: Request):
+    """Send a message in a conversation"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Verify conversation exists and user is part of it
+    conversation = await db.conversations.find_one({"_id": ObjectId(conversation_id)})
+    if not conversation:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    if conversation["user1_id"] != user["_id"] and conversation["user2_id"] != user["_id"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Create message
+    message = Message(
+        conversation_id=conversation_id,
+        sender_id=user["_id"],
+        sender_name=user["name"],
+        sender_picture=user.get("picture"),
+        content=message_data["content"]
+    )
+    
+    result = await db.messages.insert_one(message.dict())
+    
+    # Update conversation
+    receiver_id = conversation["user2_id"] if conversation["user1_id"] == user["_id"] else conversation["user1_id"]
+    unread_field = "unread_count_user2" if conversation["user1_id"] == user["_id"] else "unread_count_user1"
+    
+    await db.conversations.update_one(
+        {"_id": ObjectId(conversation_id)},
+        {
+            "$set": {
+                "last_message": message_data["content"][:100],
+                "last_message_at": datetime.now(timezone.utc)
+            },
+            "$inc": {unread_field: 1}
+        }
+    )
+    
+    # Create notification for receiver
+    receiver = await db.users.find_one({"_id": ObjectId(receiver_id)})
+    if receiver:
+        notification = Notification(
+            user_id=receiver_id,
+            type="message",
+            from_user=user["_id"],
+            from_user_name=user["name"],
+            message=f"{user['name']} sent you a message"
+        )
+        await db.notifications.insert_one(notification.dict())
+    
+    return {"message": "Message sent", "id": str(result.inserted_id)}
+
+
 # Meal & Ingredient endpoints
 @api_router.get("/ingredients")
 async def get_ingredients():
