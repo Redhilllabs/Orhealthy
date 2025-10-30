@@ -253,6 +253,57 @@
             </div>
 
             <!-- Settings -->
+
+            <!-- Coupons -->
+            <div id="coupons" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Discount Coupons</h2>
+                        <button class="btn" onclick="showAddCouponModal()">+ Add Coupon</button>
+                    </div>
+                    <div id="alert-coupons"></div>
+                    <table class="table" id="couponsTable">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Min Order</th>
+                                <th>Usage</th>
+                                <th>Expiry</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="couponsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Withdrawals -->
+            <div id="withdrawals" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Withdrawal Requests</h2>
+                    </div>
+                    <div id="alert-withdrawals"></div>
+                    <table class="table" id="withdrawalsTable">
+                        <thead>
+                            <tr>
+                                <th>Guide</th>
+                                <th>Amount</th>
+                                <th>Requested On</th>
+                                <th>Status</th>
+                                <th>Processed On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+
             <div id="settings" class="section">
                 <div class="card">
                     <h2 class="card-title" style="margin-bottom: 20px;">Star Rating Configuration</h2>
