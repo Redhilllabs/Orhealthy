@@ -433,6 +433,10 @@ async def get_posts(skip: int = 0, limit: int = 20):
     posts = await db.posts.find().sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     for post in posts:
         post["_id"] = str(post["_id"])
+        # Fetch user's star rating
+        user = await db.users.find_one({"_id": ObjectId(post["user_id"])})
+        if user:
+            post["star_rating"] = user.get("star_rating", 0)
     return posts
 
 @api_router.post("/posts/{post_id}/vote")
