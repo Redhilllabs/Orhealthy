@@ -2,9 +2,11 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, Text, StyleSheet } from 'react-native';
 import { useCart } from '../../src/context/CartContext';
+import { useMessages } from '../../src/context/MessagesContext';
 
 export default function TabsLayout() {
   const { cartItems } = useCart();
+  const { unreadCount: messagesUnreadCount } = useMessages();
   const cartCount = cartItems.length;
 
   return (
