@@ -124,10 +124,36 @@ export default function HomeScreen() {
       const response = await axios.get(`${API_URL}/notifications`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setNotifications(response.data);
-      setUnreadCount(response.data.filter((n: Notification) => !n.read).length);
+      // Filter out message notifications - those are shown in messages tab
+      const filteredNotifications = response.data.filter((n: Notification) => n.type !== 'message');
+      setNotifications(filteredNotifications);
+      setUnreadCount(filteredNotifications.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('Error fetching notifications:', error);
+    }
+  };
+
+  const fetchUnreadMessagesCount = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/conversations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      // Calculate total unread messages
+      const conversations = response.data;
+      let totalUnread = 0;
+      conversations.forEach((conv: any) => {
+        if (conv.user1_id === user?._id) {
+          totalUnread += conv.unread_count_user1 || 0;
+        } else {
+          totalUnread += conv.unread_count_user2 || 0;
+        }
+      });
+      
+      setUnreadMessagesCount(totalUnread);
+    } catch (error) {
+      console.error('Error fetching unread messages count:', error);
     }
   };
 
