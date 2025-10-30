@@ -157,19 +157,18 @@ async def get_star_config() -> dict:
     return config["config"]
 
 async def calculate_star_rating(points: int) -> int:
-    """Calculate star rating based on points"""
+    """Calculate star rating based on total points (earned + inherent)"""
     config = await get_star_config()
     
-    if points >= config["star5"]:
-        return 5
-    elif points >= config["star4"]:
-        return 4
-    elif points >= config["star3"]:
-        return 3
-    elif points >= config["star2"]:
-        return 2
-    elif points >= config["star1"]:
-        return 1
+    # Check if we have dynamic star levels (star1, star2, etc.) or just 5 fixed levels
+    star_levels = sorted([int(k.replace('star', '')) for k in config.keys() if k.startswith('star')])
+    
+    # Sort by points descending to check highest first
+    for level in reversed(star_levels):
+        key = f"star{level}"
+        if points >= config[key]:
+            return level
+    
     return 0
 
 async def get_current_user(request: Request) -> Optional[dict]:
