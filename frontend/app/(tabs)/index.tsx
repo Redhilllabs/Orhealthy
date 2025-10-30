@@ -32,6 +32,7 @@ interface Post {
   user_id: string;
   user_name: string;
   user_picture?: string;
+  star_rating?: number;
   content: string;
   images?: string[];
   vote_ups: number;
