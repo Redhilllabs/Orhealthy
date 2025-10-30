@@ -366,10 +366,32 @@ export default function DIYScreen() {
             <Text style={styles.footerTotal}>₹{calculateTotal().toFixed(2)}</Text>
           </View>
 
-          <TouchableOpacity style={styles.addButton} onPress={handleAddToCart}>
-            <Ionicons name="cart" size={20} color="#fff" />
-            <Text style={styles.addButtonText}>Add to Cart</Text>
-          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            {user?.is_guide && (
+              <TouchableOpacity 
+                style={[styles.actionButton, styles.saveButton]} 
+                onPress={handleSaveMeal}
+                disabled={saving}
+              >
+                {saving ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="bookmark" size={20} color="#fff" />
+                    <Text style={styles.actionButtonText}>Save</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )}
+
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.addButton]} 
+              onPress={handleAddToCart}
+            >
+              <Ionicons name="cart" size={20} color="#fff" />
+              <Text style={styles.actionButtonText}>Add to Cart</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </SafeAreaView>
