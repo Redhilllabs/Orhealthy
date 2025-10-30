@@ -404,31 +404,38 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     alignItems: 'center',
-    borderBottomWidth: 3,
+    justifyContent: 'center',
+    borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+    minHeight: 48,
   },
   activeTab: {
     borderBottomColor: '#ffd700',
   },
   tabText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#666',
+    textAlign: 'center',
   },
   activeTabText: {
     color: '#ffd700',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
   tagsContainer: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    maxHeight: 60,
   },
   tagsContent: {
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     gap: 8,
+    alignItems: 'center',
   },
   tagChip: {
     paddingHorizontal: 16,
