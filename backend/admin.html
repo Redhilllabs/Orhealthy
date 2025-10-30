@@ -1297,6 +1297,213 @@
         // Initialize
         loadDashboard();
         loadIngredients();
+
+
+        // Coupons Management
+        async function loadCoupons() {
+            try {
+                const coupons = await fetch(`${API_URL}/admin/coupons`).then(r => r.json());
+                const tbody = document.getElementById('couponsTableBody');
+                tbody.innerHTML = coupons.map(coupon => {
+                    const isExpired = new Date(coupon.expiry_date) < new Date();
+                    const statusBadge = coupon.active && !isExpired 
+                        ? '<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Active</span>'
+                        : '<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">' + (isExpired ? 'Expired' : 'Inactive') + '</span>';
+                    
+                    return `
+                        <tr>
+                            <td><strong>${coupon.code}</strong></td>
+                            <td>${coupon.discount_type === 'percentage' ? 'Percentage' : 'Flat'}</td>
+                            <td>${coupon.discount_type === 'percentage' ? coupon.discount_value + '%' : '₹' + coupon.discount_value}</td>
+                            <td>₹${coupon.min_order_value}</td>
+                            <td>${coupon.usage_limit_type === 'one_time' ? 'One Time' : 'Recurring'}</td>
+                            <td>${new Date(coupon.expiry_date).toLocaleDateString()}</td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <button onclick="editCoupon('${coupon._id}')" style="padding: 6px 12px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px;">Edit</button>
+                                <button onclick="deleteCoupon('${coupon._id}')" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading coupons:', error);
+                showAlert('coupons', 'Error loading coupons', 'error');
+            }
+        }
+
+        function showAddCouponModal() {
+            editingCouponId = null;
+            document.getElementById('couponModalTitle').textContent = 'Add Coupon';
+            document.getElementById('couponForm').reset();
+            document.getElementById('couponActive').checked = true;
+            // Set default expiry to 30 days from now
+            const futureDate = new Date();
+            futureDate.setDate(futureDate.getDate() + 30);
+            document.getElementById('couponExpiryDate').value = futureDate.toISOString().slice(0, 16);
+            openModal('couponModal');
+        }
+
+        async function editCoupon(couponId) {
+            try {
+                const coupons = await fetch(`${API_URL}/admin/coupons`).then(r => r.json());
+                const coupon = coupons.find(c => c._id === couponId);
+                
+                if (coupon) {
+                    editingCouponId = couponId;
+                    document.getElementById('couponModalTitle').textContent = 'Edit Coupon';
+                    document.getElementById('couponCode').value = coupon.code;
+                    document.getElementById('couponDiscountType').value = coupon.discount_type;
+                    document.getElementById('couponDiscountValue').value = coupon.discount_value;
+                    document.getElementById('couponMinOrder').value = coupon.min_order_value;
+                    document.getElementById('couponUsageLimitType').value = coupon.usage_limit_type;
+                    document.getElementById('couponExpiryDate').value = new Date(coupon.expiry_date).toISOString().slice(0, 16);
+                    document.getElementById('couponActive').checked = coupon.active;
+                    updateDiscountLabel();
+                    openModal('couponModal');
+                }
+            } catch (error) {
+                showAlert('coupons', 'Error loading coupon', 'error');
+            }
+        }
+
+        async function saveCoupon(event) {
+            event.preventDefault();
+            
+            const couponData = {
+                code: document.getElementById('couponCode').value.toUpperCase(),
+                discount_type: document.getElementById('couponDiscountType').value,
+                discount_value: parseFloat(document.getElementById('couponDiscountValue').value),
+                min_order_value: parseFloat(document.getElementById('couponMinOrder').value),
+                usage_limit_type: document.getElementById('couponUsageLimitType').value,
+                expiry_date: new Date(document.getElementById('couponExpiryDate').value).toISOString(),
+                active: document.getElementById('couponActive').checked
+            };
+
+            try {
+                const url = editingCouponId 
+                    ? `${API_URL}/admin/coupons/${editingCouponId}`
+                    : `${API_URL}/admin/coupons`;
+                
+                const method = editingCouponId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(couponData)
+                });
+
+                if (response.ok) {
+                    showAlert('coupons', editingCouponId ? 'Coupon updated successfully!' : 'Coupon created successfully!', 'success');
+                    closeModal('couponModal');
+                    loadCoupons();
+                } else {
+                    showAlert('coupons', 'Error saving coupon', 'error');
+                }
+            } catch (error) {
+                showAlert('coupons', 'Error saving coupon', 'error');
+            }
+        }
+
+        async function deleteCoupon(couponId) {
+            if (!confirm('Are you sure you want to delete this coupon?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/coupons/${couponId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('coupons', 'Coupon deleted successfully!', 'success');
+                    loadCoupons();
+                } else {
+                    showAlert('coupons', 'Error deleting coupon', 'error');
+                }
+            } catch (error) {
+                showAlert('coupons', 'Error deleting coupon', 'error');
+            }
+        }
+
+        function updateDiscountLabel() {
+            const type = document.getElementById('couponDiscountType').value;
+            const label = document.getElementById('discountValueLabel');
+            label.textContent = type === 'percentage' ? 'Discount Percentage (%) *' : 'Discount Amount (₹) *';
+        }
+
+        // Withdrawals Management
+        async function loadWithdrawals() {
+            try {
+                const withdrawals = await fetch(`${API_URL}/admin/withdrawals`).then(r => r.json());
+                const tbody = document.getElementById('withdrawalsTableBody');
+                tbody.innerHTML = withdrawals.map(withdrawal => {
+                    const statusBadge = 
+                        withdrawal.status === 'approved' 
+                            ? '<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Approved</span>'
+                        : withdrawal.status === 'rejected'
+                            ? '<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Rejected</span>'
+                            : '<span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">Pending</span>';
+                    
+                    return `
+                        <tr>
+                            <td>${withdrawal.guide_name}</td>
+                            <td><strong>₹${withdrawal.amount.toFixed(2)}</strong></td>
+                            <td>${new Date(withdrawal.created_at).toLocaleDateString()}</td>
+                            <td>${statusBadge}</td>
+                            <td>${withdrawal.processed_at ? new Date(withdrawal.processed_at).toLocaleDateString() : '-'}</td>
+                            <td>
+                                ${withdrawal.status === 'pending' ? `
+                                    <button onclick="approveWithdrawal('${withdrawal._id}')" style="padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 8px;">Approve</button>
+                                    <button onclick="rejectWithdrawal('${withdrawal._id}')" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Reject</button>
+                                ` : '-'}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading withdrawals:', error);
+                showAlert('withdrawals', 'Error loading withdrawal requests', 'error');
+            }
+        }
+
+        async function approveWithdrawal(withdrawalId) {
+            if (!confirm('Are you sure you want to approve this withdrawal request?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/withdrawals/${withdrawalId}/approve`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    showAlert('withdrawals', 'Withdrawal approved successfully!', 'success');
+                    loadWithdrawals();
+                } else {
+                    const error = await response.json();
+                    showAlert('withdrawals', error.detail || 'Error approving withdrawal', 'error');
+                }
+            } catch (error) {
+                showAlert('withdrawals', 'Error approving withdrawal', 'error');
+            }
+        }
+
+        async function rejectWithdrawal(withdrawalId) {
+            if (!confirm('Are you sure you want to reject this withdrawal request?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/withdrawals/${withdrawalId}/reject`, {
+                    method: 'PUT'
+                });
+
+                if (response.ok) {
+                    showAlert('withdrawals', 'Withdrawal rejected successfully!', 'success');
+                    loadWithdrawals();
+                } else {
+                    showAlert('withdrawals', 'Error rejecting withdrawal', 'error');
+                }
+            } catch (error) {
+                showAlert('withdrawals', 'Error rejecting withdrawal', 'error');
+            }
+        }
+
     </script>
 </body>
 </html>
