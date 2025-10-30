@@ -42,7 +42,9 @@ interface Post {
 
 interface Comment {
   _id: string;
+  user_id: string;
   user_name: string;
+  user_picture?: string;
   content: string;
   created_at: string;
 }
