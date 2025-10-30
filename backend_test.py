@@ -497,6 +497,15 @@ class BackendTester:
         self.test_user_profile_api()
         self.test_fan_idol_relationships()
         self.test_meals_with_images_tags()
+        
+        # Chat System Tests (NEW)
+        self.test_chat_system_unauthenticated()
+        self.test_get_conversations()
+        self.test_get_or_create_conversation()
+        self.test_get_messages()
+        self.test_send_message()
+        self.test_message_content_validation()
+        
         self.test_additional_endpoints()
         
         # Summary
