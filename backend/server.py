@@ -1022,14 +1022,30 @@ async def save_meal(meal_data: dict, request: Request):
 
 @api_router.get("/saved-meals")
 async def get_saved_meals(request: Request):
-    """Get user's saved meals"""
+    """Get user's saved meals with generated images from ingredients"""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     meals = await db.saved_meals.find({"guide_id": user["_id"]}).to_list(100)
+    
+    # Enrich each meal with images from ingredients
     for meal in meals:
         meal["_id"] = str(meal["_id"])
+        
+        # Generate images array from ingredient images
+        images = []
+        for ingredient in meal.get("ingredients", []):
+            ing_id = ingredient.get("ingredient_id")
+            if ing_id:
+                ing_data = await db.ingredients.find_one({"_id": ObjectId(ing_id)})
+                if ing_data and ing_data.get("images"):
+                    images.extend(ing_data["images"][:1])  # Take first image from each ingredient
+                    if len(images) >= 4:  # Limit to 4 images
+                        break
+        
+        meal["images"] = images if images else []
+    
     return meals
 
 @api_router.delete("/saved-meals/{meal_id}")
