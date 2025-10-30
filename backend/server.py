@@ -478,6 +478,9 @@ async def delete_post(post_id: str, request: Request):
     if post["user_id"] != user["_id"]:
         raise HTTPException(status_code=403, detail="Not authorized to delete this post")
     
+    # Delete all comments associated with this post
+    await db.comments.delete_many({"post_id": post_id})
+    
     # Delete the post
     await db.posts.delete_one({"_id": ObjectId(post_id)})
     
