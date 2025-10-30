@@ -416,7 +416,8 @@ async def create_post(post_data: dict, request: Request):
     
     # Update star rating
     updated_user = await db.users.find_one({"_id": ObjectId(user["_id"])})
-    new_rating = await calculate_star_rating(updated_user["points"])
+    total_points = updated_user.get("points", 0) + updated_user.get("inherent_points", 0)
+    new_rating = await calculate_star_rating(total_points)
     is_guide = new_rating >= 1
     
     await db.users.update_one(
