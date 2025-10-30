@@ -831,8 +831,31 @@ export default function HomeScreen() {
                 ) : (
                   comments.map((comment) => (
                     <View key={comment._id} style={styles.commentItem}>
-                      <Text style={styles.commentUser}>{comment.user_name}</Text>
-                      <Text style={styles.commentContent}>{comment.content}</Text>
+                      <TouchableOpacity 
+                        onPress={() => {
+                          if (comment.user_id) {
+                            setShowCommentsModal(false);
+                            router.push(`/user/${comment.user_id}`);
+                          }
+                        }}
+                      >
+                        {comment.user_picture ? (
+                          <Image 
+                            source={{ uri: comment.user_picture }} 
+                            style={styles.commentAvatar} 
+                          />
+                        ) : (
+                          <View style={[styles.commentAvatar, styles.commentAvatarPlaceholder]}>
+                            <Text style={styles.commentAvatarText}>
+                              {comment.user_name?.charAt(0).toUpperCase() || 'U'}
+                            </Text>
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                      <View style={styles.commentTextContainer}>
+                        <Text style={styles.commentUser}>{comment.user_name}</Text>
+                        <Text style={styles.commentContent}>{comment.content}</Text>
+                      </View>
                     </View>
                   ))
                 )}
