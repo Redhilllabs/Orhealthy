@@ -218,27 +218,7 @@ export default function DIYScreen() {
         <Text style={styles.headerTitle}>DIY Your Meal</Text>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search ingredients..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      <View style={styles.mealNameContainer}>
-        <TextInput
-          style={styles.mealNameInput}
-          placeholder="Name your meal (optional)"
-          value={mealName}
-          onChangeText={setMealName}
-          maxLength={50}
-        />
-      </View>
-
-      {/* Tags Filter */}
+      {/* Tags Filter - moved to top */}
       {allTags.length > 0 && (
         <View style={styles.tagsFilterContainer}>
           <ScrollView
@@ -278,6 +258,32 @@ export default function DIYScreen() {
                   ]}
                 >
                   {tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
+
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search ingredients..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
+
+      <View style={styles.mealNameContainer}>
+        <TextInput
+          style={styles.mealNameInput}
+          placeholder="Name your meal (optional)"
+          value={mealName}
+          onChangeText={setMealName}
+          maxLength={50}
+        />
+      </View>
                 </Text>
               </TouchableOpacity>
             ))}
