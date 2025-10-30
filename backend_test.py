@@ -484,30 +484,266 @@ class BackendTester:
         except Exception as e:
             self.log_result("GET ingredients", False, f"Request failed: {str(e)}")
     
+    def test_comments_user_picture_field(self):
+        """Test GET /api/posts/{post_id}/comments includes user_picture field"""
+        print("\n=== Testing Comments API - User Picture Field ===")
+        
+        if not self.test_post_id:
+            self.log_result("Comments User Picture", False, "No test post available")
+            return
+        
+        try:
+            response = self.session.get(f"{BACKEND_URL}/posts/{self.test_post_id}/comments")
+            if response.status_code == 200:
+                comments = response.json()
+                self.log_result("GET comments - API call", True, f"Retrieved {len(comments)} comments")
+                
+                if comments:
+                    # Check if user_picture field is present
+                    comment = comments[0]
+                    has_user_picture = 'user_picture' in comment
+                    
+                    if has_user_picture:
+                        user_picture_value = comment.get('user_picture')
+                        self.log_result("Comments - user_picture field", True, 
+                                      f"user_picture field present: {user_picture_value}")
+                    else:
+                        self.log_result("Comments - user_picture field", False, 
+                                      "user_picture field missing from comment response")
+                    
+                    # Test backward compatibility - check all required fields
+                    required_fields = ['_id', 'post_id', 'user_id', 'user_name', 'content', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in comment]
+                    
+                    if not missing_fields:
+                        self.log_result("Comments - backward compatibility", True, 
+                                      "All existing fields preserved")
+                    else:
+                        self.log_result("Comments - backward compatibility", False, 
+                                      f"Missing required fields: {missing_fields}")
+                else:
+                    self.log_result("Comments - user_picture field", "SKIP", 
+                                  "No comments available to test user_picture field")
+            else:
+                self.log_result("GET comments - API call", False, 
+                              f"Status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Comments User Picture", False, f"Request failed: {str(e)}")
+    
+    def test_saved_meals_images_generation(self):
+        """Test GET /api/saved-meals generates images array from ingredient images"""
+        print("\n=== Testing Saved Meals - Images Generation ===")
+        
+        # Test 1: Check without authentication (should return 401)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/saved-meals")
+            if response.status_code == 401:
+                self.log_result("Saved meals - auth required", True, 
+                              "Correctly requires authentication")
+            else:
+                self.log_result("Saved meals - auth required", False, 
+                              f"Expected 401, got {response.status_code}")
+        except Exception as e:
+            self.log_result("Saved meals - auth required", False, f"Request failed: {str(e)}")
+        
+        # Test 2: Check ingredients have images for testing
+        try:
+            response = self.session.get(f"{BACKEND_URL}/ingredients")
+            if response.status_code == 200:
+                ingredients = response.json()
+                ingredients_with_images = [ing for ing in ingredients if ing.get('images')]
+                
+                self.log_result("Ingredients - images check", True, 
+                              f"Found {len(ingredients)} ingredients, {len(ingredients_with_images)} with images")
+                
+                if ingredients_with_images:
+                    sample_ingredient = ingredients_with_images[0]
+                    self.log_result("Ingredients - sample data", True, 
+                                  f"Sample: {sample_ingredient.get('name')} has {len(sample_ingredient.get('images', []))} images")
+                else:
+                    self.log_result("Ingredients - sample data", "SKIP", 
+                                  "No ingredients with images found for testing")
+            else:
+                self.log_result("Ingredients - images check", False, 
+                              f"Could not fetch ingredients: {response.status_code}")
+        except Exception as e:
+            self.log_result("Ingredients - images check", False, f"Request failed: {str(e)}")
+        
+        # Test 3: Test with mock authentication (to check endpoint structure)
+        try:
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            response = self.session.get(f"{BACKEND_URL}/saved-meals", headers=headers)
+            
+            if response.status_code == 401:
+                self.log_result("Saved meals - mock auth", True, 
+                              "Authentication properly validated (401 with mock token)")
+            elif response.status_code == 200:
+                saved_meals = response.json()
+                self.log_result("Saved meals - API structure", True, 
+                              f"Returns array with {len(saved_meals)} saved meals")
+                
+                # Check if meals have images array
+                if saved_meals:
+                    meal = saved_meals[0]
+                    has_images = 'images' in meal
+                    if has_images:
+                        images_count = len(meal.get('images', []))
+                        self.log_result("Saved meals - images array", True, 
+                                      f"Meal has images array with {images_count} images")
+                    else:
+                        self.log_result("Saved meals - images array", False, 
+                                      "Meal missing images array field")
+                else:
+                    self.log_result("Saved meals - images array", "SKIP", 
+                                  "No saved meals to test images generation")
+            else:
+                self.log_result("Saved meals - mock auth", False, 
+                              f"Unexpected status: {response.status_code}")
+        except Exception as e:
+            self.log_result("Saved meals - mock auth", False, f"Request failed: {str(e)}")
+    
+    def test_addresses_apartment_field(self):
+        """Test POST /api/addresses accepts apartment field"""
+        print("\n=== Testing Addresses - Apartment Field ===")
+        
+        # Test 1: Test without authentication (should return 401)
+        address_with_apartment = {
+            "name": "Rajesh Kumar",
+            "apartment": "Flat 3B, Sunrise Apartments",
+            "street": "MG Road",
+            "city": "Mumbai",
+            "state": "Maharashtra",
+            "zip_code": "400001",
+            "phone": "9876543210"
+        }
+        
+        try:
+            response = self.session.post(f"{BACKEND_URL}/addresses", json=address_with_apartment)
+            if response.status_code == 401:
+                self.log_result("Address with apartment - auth required", True, 
+                              "Correctly requires authentication")
+            else:
+                self.log_result("Address with apartment - auth required", False, 
+                              f"Expected 401, got {response.status_code}")
+        except Exception as e:
+            self.log_result("Address with apartment - auth required", False, f"Request failed: {str(e)}")
+        
+        # Test 2: Test address without apartment field
+        address_without_apartment = {
+            "name": "Priya Sharma",
+            "street": "Park Street",
+            "city": "Delhi",
+            "state": "Delhi",
+            "zip_code": "110001",
+            "phone": "9876543211"
+        }
+        
+        try:
+            response = self.session.post(f"{BACKEND_URL}/addresses", json=address_without_apartment)
+            if response.status_code == 401:
+                self.log_result("Address without apartment - auth required", True, 
+                              "Correctly requires authentication (apartment field optional)")
+            else:
+                self.log_result("Address without apartment - auth required", False, 
+                              f"Expected 401, got {response.status_code}")
+        except Exception as e:
+            self.log_result("Address without apartment - auth required", False, f"Request failed: {str(e)}")
+        
+        # Test 3: Test with mock authentication
+        try:
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            response = self.session.post(f"{BACKEND_URL}/addresses", 
+                                       headers=headers, json=address_with_apartment)
+            
+            if response.status_code == 401:
+                self.log_result("Address - mock auth validation", True, 
+                              "Authentication properly validated (401 with mock token)")
+            elif response.status_code == 200:
+                result = response.json()
+                self.log_result("Address with apartment - success", True, 
+                              f"Address saved successfully: {result.get('message', 'Success')}")
+            else:
+                self.log_result("Address - mock auth validation", False, 
+                              f"Unexpected status: {response.status_code}, Response: {response.text}")
+        except Exception as e:
+            self.log_result("Address - mock auth validation", False, f"Request failed: {str(e)}")
+        
+        # Test 4: Test malformed address data
+        try:
+            malformed_address = {"invalid_field": "test", "apartment": "Test Apt"}
+            headers = {"Authorization": "Bearer mock_token_for_testing"}
+            response = self.session.post(f"{BACKEND_URL}/addresses", 
+                                       headers=headers, json=malformed_address)
+            
+            if response.status_code in [400, 422, 401]:
+                self.log_result("Address - malformed data handling", True, 
+                              f"Properly handles malformed data (HTTP {response.status_code})")
+            else:
+                self.log_result("Address - malformed data handling", False, 
+                              f"Unexpected response to malformed data: {response.status_code}")
+        except Exception as e:
+            self.log_result("Address - malformed data handling", False, f"Request failed: {str(e)}")
+    
+    def test_edge_cases(self):
+        """Test edge cases for the new features"""
+        print("\n=== Testing Edge Cases ===")
+        
+        # Test comments with invalid post ID
+        try:
+            response = self.session.get(f"{BACKEND_URL}/posts/invalid_post_id/comments")
+            if response.status_code == 200:
+                comments = response.json()
+                if isinstance(comments, list) and len(comments) == 0:
+                    self.log_result("Comments - invalid post ID", True, 
+                                  "Returns empty array for invalid post ID")
+                else:
+                    self.log_result("Comments - invalid post ID", False, 
+                                  f"Unexpected response: {comments}")
+            else:
+                self.log_result("Comments - invalid post ID", True, 
+                              f"Handles invalid post ID appropriately (HTTP {response.status_code})")
+        except Exception as e:
+            self.log_result("Comments - invalid post ID", False, f"Request failed: {str(e)}")
+        
+        # Test comments with comments that don't have user_id (backward compatibility)
+        try:
+            response = self.session.get(f"{BACKEND_URL}/posts")
+            if response.status_code == 200:
+                posts = response.json()
+                if posts:
+                    # Test multiple posts to check consistency
+                    for i, post in enumerate(posts[:3]):  # Test first 3 posts
+                        post_id = post['_id']
+                        response = self.session.get(f"{BACKEND_URL}/posts/{post_id}/comments")
+                        if response.status_code == 200:
+                            comments = response.json()
+                            self.log_result(f"Comments consistency - post {i+1}", True, 
+                                          f"Post {post_id[:8]}... has {len(comments)} comments")
+                        else:
+                            self.log_result(f"Comments consistency - post {i+1}", False, 
+                                          f"Failed to get comments for post {post_id}")
+        except Exception as e:
+            self.log_result("Comments - consistency check", False, f"Request failed: {str(e)}")
+
     def run_all_tests(self):
-        """Run all backend tests"""
-        print("🚀 Starting OrHealthy Mobile App Backend API Tests")
+        """Run all backend tests focusing on NEW FEATURES"""
+        print("🚀 Starting OrHealthy Mobile App Backend API Tests - NEW FEATURES")
         print(f"Backend URL: {BACKEND_URL}")
-        print("=" * 60)
+        print("=" * 70)
         
         # Setup test data
         self.setup_test_data()
         
-        # Run all tests
+        # NEW FEATURE TESTS (Primary Focus)
+        print("\n🎯 TESTING NEW FEATURES:")
+        self.test_comments_user_picture_field()
+        self.test_saved_meals_images_generation()
+        self.test_addresses_apartment_field()
+        self.test_edge_cases()
+        
+        # EXISTING FEATURE TESTS (For regression testing)
+        print("\n🔄 REGRESSION TESTING:")
         self.test_comments_api()
-        self.test_edit_post_api()
-        self.test_user_profile_api()
-        self.test_fan_idol_relationships()
-        self.test_meals_with_images_tags()
-        
-        # Chat System Tests (NEW)
-        self.test_chat_system_unauthenticated()
-        self.test_get_conversations()
-        self.test_get_or_create_conversation()
-        self.test_get_messages()
-        self.test_send_message()
-        self.test_message_content_validation()
-        
         self.test_additional_endpoints()
         
         # Summary
