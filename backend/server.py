@@ -31,6 +31,15 @@ class UserProfile(BaseModel):
     allergies: List[str] = []
     expertise: Optional[str] = None
 
+class Address(BaseModel):
+    label: str  # Home, Work, etc.
+    full_address: str
+    city: str
+    state: str
+    pincode: str
+    phone: str
+    is_default: bool = False
+
 class User(BaseModel):
     email: str
     name: str
@@ -38,10 +47,13 @@ class User(BaseModel):
     google_id: str
     profile_picture: Optional[str] = None
     profile: UserProfile = UserProfile()
+    addresses: List[Address] = []
+    contact_phone: Optional[str] = None
     points: int = 0
     inherent_points: int = 0
     star_rating: int = 0
     is_guide: bool = False
+    commission_balance: float = 0.0
     guides: List[str] = []
     guidees: List[str] = []
     idols: List[str] = []  # Users this person follows as idol
