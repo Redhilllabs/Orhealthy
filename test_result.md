@@ -450,7 +450,11 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Chat system - Get conversations endpoint"
+    - "Chat system - Get or create conversation endpoint"
+    - "Chat system - Get messages endpoint"
+    - "Chat system - Send message endpoint"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -493,3 +497,25 @@ agent_communication:
       - User Profile API: Missing fans/idols fields in existing database records (database migration needed, not code issue)
       
       **All core mobile app backend features are functional and ready for frontend integration.**
+  - agent: "main"
+    message: |
+      🔧 **Phase 1: Chat Feature Integration Complete**
+      
+      **Backend Testing Required:**
+      1. **GET /api/conversations** - Get all conversations for authenticated user
+      2. **GET /api/conversations/{other_user_id}** - Get or create conversation with specific user
+      3. **GET /api/conversations/{conversation_id}/messages** - Get messages for a conversation
+      4. **POST /api/conversations/{conversation_id}/messages** - Send message with {content: "message text"}
+      
+      **Frontend Changes Implemented:**
+      - Added "Messages" tab to bottom navigation (with chatbubbles icon)
+      - Created chat inbox screen at /app/(tabs)/messages.tsx
+      - Created individual chat screen at /app/chat/[id].tsx
+      - Added "Message" button on user profiles
+      
+      Please test all chat endpoints thoroughly. Focus on:
+      - Authentication requirements
+      - Conversation creation and retrieval
+      - Message sending and fetching
+      - Notification creation on new messages
+      - Unread count updates
