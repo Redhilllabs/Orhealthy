@@ -137,6 +137,42 @@ user_problem_statement: |
   - Fixed label truncation
 
 backend:
+  - task: "User avatars in comments API"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated GET /api/posts/{post_id}/comments to include user_picture by fetching from users collection"
+  
+  - task: "Saved meals image generation"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated GET /api/saved-meals to generate images array from ingredient images (up to 4 images)"
+  
+  - task: "Address saving with apartment field"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "POST /api/addresses endpoint now accepts apartment field and combines with street address. Backend already accepts generic dict so no code changes needed"
+  
   - task: "Comments API endpoints"
     implemented: true
     working: true
