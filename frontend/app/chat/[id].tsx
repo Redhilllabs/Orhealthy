@@ -37,6 +37,7 @@ interface Message {
 export default function ChatScreen() {
   const { id: conversationId } = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
+  const { refreshUnreadCount } = useMessages();
   const router = useRouter();
   const flatListRef = useRef<FlatList>(null);
   
