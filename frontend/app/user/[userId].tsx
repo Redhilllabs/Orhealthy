@@ -231,6 +231,21 @@ export default function UserProfileScreen() {
                 )}
               </TouchableOpacity>
 
+              <TouchableOpacity
+                style={styles.messageButton}
+                onPress={handleMessageUser}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="chatbubble" size={18} color="#fff" />
+                    <Text style={styles.messageButtonText}>Message</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
               {userData.is_guide && (
                 <TouchableOpacity
                   style={[styles.guideeButton, isGuidee && styles.guideeButtonActive]}
