@@ -993,6 +993,237 @@ async def get_meal(meal_id: str):
     meal["_id"] = str(meal["_id"])
     return meal
 
+
+# Saved Meals endpoints (for Guides)
+@api_router.post("/saved-meals")
+async def save_meal(meal_data: dict, request: Request):
+    """Save a DIY meal (guides only)"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can save meals")
+    
+    saved_meal = {
+        "guide_id": user["_id"],
+        "meal_name": meal_data["meal_name"],
+        "ingredients": meal_data["ingredients"],
+        "total_price": meal_data["total_price"],
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.saved_meals.insert_one(saved_meal)
+    return {"message": "Meal saved", "id": str(result.inserted_id)}
+
+@api_router.get("/saved-meals")
+async def get_saved_meals(request: Request):
+    """Get guide's saved meals"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can view saved meals")
+    
+    meals = await db.saved_meals.find({"guide_id": user["_id"]}).to_list(100)
+    for meal in meals:
+        meal["_id"] = str(meal["_id"])
+    return meals
+
+@api_router.delete("/saved-meals/{meal_id}")
+async def delete_saved_meal(meal_id: str, request: Request):
+    """Delete a saved meal"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can delete saved meals")
+    
+    result = await db.saved_meals.delete_one({
+        "_id": ObjectId(meal_id),
+        "guide_id": user["_id"]
+    })
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    
+    return {"message": "Meal deleted"}
+
+# Address endpoints
+@api_router.post("/addresses")
+async def add_address(address_data: dict, request: Request):
+    """Add a new address"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # If this is set as default, unset other defaults
+    if address_data.get("is_default"):
+        await db.users.update_one(
+            {"_id": ObjectId(user["_id"])},
+            {"$set": {"addresses.$[].is_default": False}}
+        )
+    
+    result = await db.users.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$push": {"addresses": address_data}}
+    )
+    
+    return {"message": "Address added"}
+
+@api_router.get("/addresses")
+async def get_addresses(request: Request):
+    """Get user's addresses"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user_data = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    return user_data.get("addresses", [])
+
+@api_router.delete("/addresses/{address_index}")
+async def delete_address(address_index: int, request: Request):
+    """Delete an address"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user_data = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    addresses = user_data.get("addresses", [])
+    
+    if address_index >= len(addresses):
+        raise HTTPException(status_code=404, detail="Address not found")
+    
+    addresses.pop(address_index)
+    
+    await db.users.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$set": {"addresses": addresses}}
+    )
+    
+    return {"message": "Address deleted"}
+
+@api_router.put("/addresses/{address_index}/default")
+async def set_default_address(address_index: int, request: Request):
+    """Set an address as default"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user_data = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    addresses = user_data.get("addresses", [])
+    
+    if address_index >= len(addresses):
+        raise HTTPException(status_code=404, detail="Address not found")
+    
+    # Unset all defaults
+    for addr in addresses:
+        addr["is_default"] = False
+    
+    # Set new default
+    addresses[address_index]["is_default"] = True
+    
+    await db.users.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$set": {"addresses": addresses}}
+    )
+    
+    return {"message": "Default address updated"}
+
+# Coupon endpoints
+@api_router.post("/coupons/validate")
+async def validate_coupon(coupon_data: dict):
+    """Validate a coupon code"""
+    coupon_code = coupon_data.get("code", "").upper()
+    order_value = coupon_data.get("order_value", 0)
+    
+    coupon = await db.coupons.find_one({
+        "code": coupon_code,
+        "active": True
+    })
+    
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Invalid coupon code")
+    
+    # Check expiry
+    if coupon["expiry_date"] < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Coupon has expired")
+    
+    # Check minimum order value
+    if order_value < coupon["min_order_value"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Minimum order value of ₹{coupon['min_order_value']} required"
+        )
+    
+    # Calculate discount
+    if coupon["discount_type"] == "flat":
+        discount = coupon["discount_value"]
+    else:  # percentage
+        discount = (order_value * coupon["discount_value"]) / 100
+    
+    return {
+        "valid": True,
+        "discount_amount": discount,
+        "discount_type": coupon["discount_type"],
+        "final_price": max(0, order_value - discount),
+        "coupon_code": coupon_code
+    }
+
+# Withdrawal request endpoints
+@api_router.post("/withdrawals")
+async def create_withdrawal_request(withdrawal_data: dict, request: Request):
+    """Create a withdrawal request (guides only)"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can request withdrawals")
+    
+    amount = withdrawal_data.get("amount", 0)
+    
+    # Check if user has sufficient balance
+    if user.get("commission_balance", 0) < amount:
+        raise HTTPException(status_code=400, detail="Insufficient balance")
+    
+    withdrawal = {
+        "guide_id": user["_id"],
+        "guide_name": user["name"],
+        "amount": amount,
+        "status": "pending",
+        "created_at": datetime.now(timezone.utc),
+        "processed_at": None
+    }
+    
+    result = await db.withdrawal_requests.insert_one(withdrawal)
+    return {"message": "Withdrawal request submitted", "id": str(result.inserted_id)}
+
+@api_router.get("/withdrawals")
+async def get_my_withdrawals(request: Request):
+    """Get guide's withdrawal requests"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can view withdrawals")
+    
+    withdrawals = await db.withdrawal_requests.find({"guide_id": user["_id"]}).to_list(100)
+    for w in withdrawals:
+        w["_id"] = str(w["_id"])
+    return withdrawals
+
+# Guide ordering for guidees
+@api_router.get("/my-guidees")
+async def get_my_guidees(request: Request):
+    """Get list of guide's guidees"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can view guidees")
+    
+    guidee_ids = user.get("guidees", [])
+    guidees = []
+    
+    for guidee_id in guidee_ids:
+        guidee = await db.users.find_one({"_id": ObjectId(guidee_id)})
+        if guidee:
+            guidees.append({
+                "_id": str(guidee["_id"]),
+                "name": guidee["name"],
+                "email": guidee["email"],
+                "picture": guidee.get("picture")
+            })
+    
+    return guidees
+
 # Cart endpoints
 @api_router.get("/cart")
 async def get_cart(request: Request):
