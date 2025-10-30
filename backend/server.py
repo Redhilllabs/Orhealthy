@@ -240,6 +240,27 @@ async def calculate_star_rating(points: int) -> int:
     
     return 0
 
+
+async def get_commission_config() -> dict:
+    """Get commission rate configuration from database"""
+    config = await db.config.find_one({"type": "commission_rates"})
+    if not config:
+        # Default commission rates
+        return {
+            "star1": 3.0,
+            "star2": 6.0,
+            "star3": 9.0,
+            "star4": 12.0,
+            "star5": 15.0
+        }
+    return config["config"]
+
+async def calculate_commission_rate(star_rating: int) -> float:
+    """Get commission rate for a given star rating"""
+    config = await get_commission_config()
+    key = f"star{star_rating}"
+    return config.get(key, 0.0)
+
 async def get_current_user(request: Request) -> Optional[dict]:
     """Get current user from session token"""
     session_token = request.cookies.get("session_token")
