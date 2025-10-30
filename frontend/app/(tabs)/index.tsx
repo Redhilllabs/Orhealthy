@@ -83,9 +83,13 @@ export default function HomeScreen() {
   const [commentText, setCommentText] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
   
-  // Likers modal
   const [showLikersModal, setShowLikersModal] = useState(false);
   const [likers, setLikers] = useState<any[]>([]);
+  const [loadingLikers, setLoadingLikers] = useState(false);
+  
+  // Delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
   
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
