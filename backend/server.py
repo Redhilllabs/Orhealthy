@@ -58,7 +58,8 @@ class Post(BaseModel):
     user_name: str
     user_picture: Optional[str] = None
     content: str
-    image: Optional[str] = None
+    image: Optional[str] = None  # Kept for backward compatibility
+    images: Optional[List[str]] = []
     vote_ups: int = 0
     voted_by: List[str] = []
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
