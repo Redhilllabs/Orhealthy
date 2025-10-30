@@ -17,6 +17,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { storage } from '../../src/utils/storage';
 import { useAuth } from '../../src/context/AuthContext';
+import { useMessages } from '../../src/context/MessagesContext';
 import * as ImagePicker from 'expo-image-picker';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
