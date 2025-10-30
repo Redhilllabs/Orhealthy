@@ -16,12 +16,12 @@ export default function TabsLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: 70,
-          paddingBottom: 10,
-          paddingTop: 8,
+          height: 80,
+          paddingBottom: 20,
+          paddingTop: 10,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 12,
           marginTop: 4,
           fontWeight: '500',
         },
@@ -31,15 +31,6 @@ export default function TabsLayout() {
         headerShown: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-      />
       <Tabs.Screen
         name="presets"
         options={{
@@ -59,11 +50,23 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="messages"
         options={{
-          title: 'Messages',
+          title: 'Chats',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles" size={size} color={color} />
+            <View style={styles.chatIconContainer}>
+              <Ionicons name="chatbubbles" size={size} color={color} />
+              {/* Badge will be shown here when implemented */}
+            </View>
           ),
         }}
       />
@@ -86,10 +89,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
+          href: null,
         }}
       />
     </Tabs>
