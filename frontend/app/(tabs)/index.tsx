@@ -264,9 +264,17 @@ export default function HomeScreen() {
   };
 
   const showLikersList = async (postId: string, voters: string[]) => {
+    if (voters.length === 0) {
+      Alert.alert('No likes', 'This post has no likes yet');
+      return;
+    }
+    
+    setShowLikersModal(true);
+    setLoadingLikers(true);
+    setLikers([]);
+    
     try {
       // Fetch user details for voters
-      const token = await storage.getItemAsync('session_token');
       const likersData = await Promise.all(
         voters.map(async (userId) => {
           try {
@@ -278,9 +286,11 @@ export default function HomeScreen() {
         })
       );
       setLikers(likersData.filter(Boolean));
-      setShowLikersModal(true);
     } catch (error) {
       console.error('Error fetching likers:', error);
+      Alert.alert('Error', 'Failed to load likers');
+    } finally {
+      setLoadingLikers(false);
     }
   };
 
