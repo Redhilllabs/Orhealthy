@@ -130,17 +130,24 @@ export default function CheckoutScreen() {
 
   const saveNewAddress = async () => {
     if (!newAddressLabel || !newAddressStreet || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
-      Alert.alert('Error', 'Please fill all address fields');
+      Alert.alert('Error', 'Please fill all required address fields');
       return;
     }
 
     try {
       const token = await storage.getItemAsync('session_token');
+      
+      // Combine apartment and street address
+      const fullAddress = newAddressApartment 
+        ? `${newAddressApartment}, ${newAddressStreet}`
+        : newAddressStreet;
+      
       await axios.post(
         `${API_URL}/addresses`,
         {
           label: newAddressLabel,
-          full_address: newAddressStreet,
+          apartment: newAddressApartment,
+          full_address: fullAddress,
           city: newAddressCity,
           state: newAddressState,
           pincode: newAddressZip,
@@ -155,14 +162,15 @@ export default function CheckoutScreen() {
       setShowAddressModal(false);
       // Clear form
       setNewAddressLabel('');
+      setNewAddressApartment('');
       setNewAddressStreet('');
       setNewAddressCity('');
       setNewAddressState('');
       setNewAddressZip('');
       setNewAddressPhone('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving address:', error);
-      Alert.alert('Error', 'Failed to save address');
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to save address');
     }
   };
 
