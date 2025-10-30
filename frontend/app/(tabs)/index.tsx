@@ -909,7 +909,13 @@ const styles = StyleSheet.create({
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  userSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   avatar: {
     width: 40,
@@ -930,10 +936,20 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
   },
+  userNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   userName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+  },
+  starRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
   postActions: {
     flexDirection: 'row',
