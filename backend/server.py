@@ -1139,6 +1139,16 @@ async def add_address(address_data: dict, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
+    # Get current user document
+    user_doc = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    
+    # Initialize addresses array if it doesn't exist
+    if "addresses" not in user_doc or user_doc["addresses"] is None:
+        await db.users.update_one(
+            {"_id": ObjectId(user["_id"])},
+            {"$set": {"addresses": []}}
+        )
+    
     # If this is set as default, unset other defaults
     if address_data.get("is_default"):
         await db.users.update_one(
@@ -1146,6 +1156,7 @@ async def add_address(address_data: dict, request: Request):
             {"$set": {"addresses.$[].is_default": False}}
         )
     
+    # Add the new address
     result = await db.users.update_one(
         {"_id": ObjectId(user["_id"])},
         {"$push": {"addresses": address_data}}
