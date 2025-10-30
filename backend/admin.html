@@ -1008,6 +1008,7 @@
         }
 
         let starRatings = {};
+        let commissionRates = {};
 
         function renderStarRatings() {
             const container = document.getElementById('starRatingsList');
@@ -1020,14 +1021,21 @@
             container.innerHTML = sortedKeys.map((key, index) => {
                 const starNum = parseInt(key.replace('star', ''));
                 const isFirst = index === 0;
+                const commissionValue = commissionRates[key] || 0;
                 return `
                     <div class="config-item">
                         <div style="min-width: 150px;">
                             <span class="config-label">${starNum}⭐</span>
                         </div>
-                        <input type="number" class="config-input" id="${key}" value="${starRatings[key]}" min="0" style="width: 150px;">
-                        <span style="color: #64748b; font-size: 13px; min-width: 180px;">${isFirst ? 'points (Becomes Guide)' : 'points'}</span>
-                        ${!isFirst ? `<button class="btn-danger" style="padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px;" onclick="removeStarRating('${key}')">Remove</button>` : ''}
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <input type="number" class="config-input" id="${key}" value="${starRatings[key]}" min="0" style="width: 150px;">
+                            <span style="color: #64748b; font-size: 13px; min-width: 180px;">${isFirst ? 'points (Becomes Guide)' : 'points'}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <input type="number" class="config-input" id="commission_${key}" value="${commissionValue}" min="0" max="100" step="0.5" style="width: 120px;">
+                            <span style="color: #64748b; font-size: 13px; min-width: 140px;">% commission</span>
+                        </div>
+                        ${!isFirst ? `<button class="btn-danger" style="padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px;" onclick="removeStarRating('${key}')">Remove</button>` : '<div style="width: 90px;"></div>'}
                     </div>
                 `;
             }).join('');
@@ -1037,7 +1045,9 @@
             const maxStar = Math.max(...Object.keys(starRatings).map(k => parseInt(k.replace('star', ''))));
             const newStarNum = maxStar + 1;
             const prevPoints = starRatings[`star${maxStar}`] || 0;
+            const prevCommission = commissionRates[`star${maxStar}`] || 0;
             starRatings[`star${newStarNum}`] = Math.ceil(prevPoints * 1.5);
+            commissionRates[`star${newStarNum}`] = Math.min(prevCommission + 3, 100);
             renderStarRatings();
         }
 
@@ -1046,6 +1056,7 @@
                 return alert('You must have at least one star rating level');
             }
             delete starRatings[key];
+            delete commissionRates[key];
             renderStarRatings();
         }
 
