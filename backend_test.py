@@ -2,6 +2,7 @@
 """
 Backend API Testing for OrHealthy Mobile App
 Tests all mobile app feature backend APIs as specified in test_result.md
+Including Chat System endpoints
 """
 
 import requests
