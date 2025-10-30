@@ -153,6 +153,60 @@ export default function DIYScreen() {
     }
   };
 
+
+  const handleSaveMeal = async () => {
+    if (!user?.is_guide) {
+      Alert.alert('Guides Only', 'Only guides can save meals');
+      return;
+    }
+
+    if (selectedIngredients.size === 0) {
+      Alert.alert('No Ingredients', 'Please select at least one ingredient');
+      return;
+    }
+
+    if (!mealName.trim()) {
+      Alert.alert('Name Required', 'Please enter a name for your meal');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const token = await storage.getItemAsync('session_token');
+
+      const ingredientsList = Array.from(selectedIngredients.entries()).map(([ingredientId, quantity]) => {
+        const ingredient = ingredients.find(ing => ing._id === ingredientId);
+        return {
+          ingredient_id: ingredientId,
+          ingredient_name: ingredient?.name || '',
+          quantity,
+          unit: ingredient?.unit || '',
+          price: ingredient?.price_per_unit || 0,
+        };
+      });
+
+      await axios.post(
+        `${API_URL}/saved-meals`,
+        {
+          meal_name: mealName.trim(),
+          ingredients: ingredientsList,
+          total_price: calculateTotal(),
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      Alert.alert('Success', 'Meal saved successfully!');
+      setMealName('');
+      setSelectedIngredients(new Map());
+    } catch (error) {
+      console.error('Error saving meal:', error);
+      Alert.alert('Error', 'Failed to save meal');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+
   const renderIngredient = ({ item }: { item: Ingredient }) => {
     const quantity = selectedIngredients.get(item._id) || 0;
     const isSelected = quantity > 0;
