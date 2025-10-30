@@ -335,47 +335,35 @@ export default function HomeScreen() {
     }
   };
 
-  const handleDeletePost = async (postId: string) => {
+  const handleDeletePost = (postId: string) => {
     console.log('=== DELETE POST CALLED ===');
     console.log('Post ID:', postId);
+    setPostToDelete(postId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!postToDelete) return;
     
-    Alert.alert(
-      'Delete Post',
-      'Are you sure you want to delete this post?',
-      [
-        { 
-          text: 'Cancel', 
-          style: 'cancel',
-          onPress: () => console.log('Delete cancelled')
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            console.log('Delete confirmed, executing...');
-            try {
-              const token = await storage.getItemAsync('session_token');
-              console.log('Deleting post:', postId);
-              console.log('Token:', token ? 'exists' : 'missing');
-              
-              const response = await axios.delete(`${API_URL}/posts/${postId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              
-              console.log('Delete response:', response.data);
-              await fetchPosts();
-              await refreshUser();
-              Alert.alert('Success', 'Post deleted successfully');
-            } catch (error: any) {
-              console.error('Error deleting post:', error);
-              console.error('Error response:', error.response?.data);
-              console.error('Error status:', error.response?.status);
-              Alert.alert('Error', error.response?.data?.detail || 'Failed to delete post');
-            }
-          },
-        },
-      ]
-    );
+    console.log('Delete confirmed, executing...');
+    try {
+      const token = await storage.getItemAsync('session_token');
+      console.log('Deleting post:', postToDelete);
+      
+      const response = await axios.delete(`${API_URL}/posts/${postToDelete}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      console.log('Delete response:', response.data);
+      setShowDeleteModal(false);
+      setPostToDelete(null);
+      await fetchPosts();
+      await refreshUser();
+      Alert.alert('Success', 'Post deleted successfully');
+    } catch (error: any) {
+      console.error('Error deleting post:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to delete post');
+    }
   };
 
   const renderPost = ({ item }: { item: Post }) => {
