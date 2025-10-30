@@ -943,22 +943,47 @@ async def get_star_rating_config():
 @api_router.post("/admin/star-config")
 async def save_star_rating_config(config_data: dict, request: Request):
     """Save star rating configuration (admin only)"""
-    config = {
-        "star1": config_data["star1"],
-        "star2": config_data["star2"],
-        "star3": config_data["star3"],
-        "star4": config_data["star4"],
-        "star5": config_data["star5"]
-    }
-    
-    # Upsert configuration
+    # Upsert configuration with all provided star levels
     await db.config.update_one(
         {"type": "star_rating"},
-        {"$set": {"type": "star_rating", "config": config}},
+        {"$set": {"type": "star_rating", "config": config_data}},
         upsert=True
     )
     
     return {"message": "Star rating configuration saved"}
+
+@api_router.get("/admin/points-config")
+async def get_points_config():
+    """Get points configuration"""
+    config = await db.config.find_one({"type": "points"})
+    if not config:
+        # Default configuration
+        return {
+            "post": 5,
+            "like": 2,
+            "fan": 3,
+            "guidee": 5
+        }
+    return config["config"]
+
+@api_router.post("/admin/points-config")
+async def save_points_config(config_data: dict, request: Request):
+    """Save points configuration (admin only)"""
+    config = {
+        "post": config_data["post"],
+        "like": config_data["like"],
+        "fan": config_data["fan"],
+        "guidee": config_data["guidee"]
+    }
+    
+    # Upsert configuration
+    await db.config.update_one(
+        {"type": "points"},
+        {"$set": {"type": "points", "config": config}},
+        upsert=True
+    )
+    
+    return {"message": "Points configuration saved"}
 
 @app.get("/admin")
 async def admin_panel():
