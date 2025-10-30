@@ -11,7 +11,7 @@ from datetime import datetime
 import base64
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://nutrition-guide-9.preview.emergentagent.com/api"
+BACKEND_URL = "https://guidee-connect.preview.emergentagent.com/api"
 
 class BackendTester:
     def __init__(self):

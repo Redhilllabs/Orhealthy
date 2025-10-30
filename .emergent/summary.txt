@@ -1,109 +1,71 @@
 <analysis>
-The previous AI engineer initiated development of OrHealthy, a nutrition ecosystem app, from scratch, focusing on a full-stack Expo (React Native), FastAPI, and MongoDB architecture. Initially, the core mobile app with Google authentication, main navigation, and basic screens (Home, Presets, DIY, Cart, Profile, Checkout) was established. Authentication proved challenging due to Expo Router's handling of OAuth redirects, requiring a dedicated callback route and robust storage solution ( wrapper). The admin panel, a web-based HTML file served by FastAPI, faced persistent UI and routing issues. Significant effort was dedicated to fixing navigation, styling (changing green to gold), and integrating image uploads for posts. Recent efforts involved implementing community features (comments, edit/delete posts), user profile views, and a complex idol/fan relationship, alongside currency changes and admin panel fixes, which repeatedly introduced new UI issues in the admin panel due to string replacement complexities and structural corruption. The current state reflects ongoing debugging of the admin panel and integration of advanced features.
+The AI engineer successfully built the OrHealthy application from scratch, covering both Expo (React Native) frontend and FastAPI backend with MongoDB. Key development phases included establishing core mobile app navigation and Google authentication, which required specific handling for Expo Router's OAuth redirects. The admin panel, initially a source of persistent UI issues, was systematically stabilized, and enhanced with features like star rating configuration, edit functionalities for meals/ingredients, and dynamic point settings. Crucially, the delete post functionality was debugged and fixed, identifying and resolving a tricky nested  event bubbling problem. Image handling was integrated across posts, meals, and ingredients, and currency was standardized to Rupees. Recent efforts focused on community features, including notifications, idol/fan relationships, and the initial implementation of a one-to-one chat system, with its backend and initial frontend screens now completed.
 </analysis>
 
 <product_requirements>
-The user aims to build OrHealthy, a comprehensive nutrition web and mobile (Android/iOS) application. It will serve as a one-stop ecosystem for healthy eating, featuring a community with Guides and Guidees. Users log in via Google. Guides achieve status through points from posts, vote-ups, and guidees, plus inherent admin-provided points, with a star-rating system determining guide status (1-star). An admin panel will manage users, meals, and ingredients.
-
-Key app features include:
--   **Landing/Home Page**: User posts with comment/vote-up functionality, user star ratings displayed.
--   **Sticky Bottom Navigation**: To Home, Presets, DIY, My Profile, Cart.
--   **Presets Screen**: Lists admin-provided preset meals with customizable ingredients and variable pricing, option to add to cart or customize.
--   **DIY Screen**: Allows users to create meals from scratch by mixing ingredients.
--   **My Profile Screen**: Users input height, weight, allergies, expertise.
--   **Cart Page**: Shows overall additions, leading to a checkout page for billing/shipping.
--   **Payment Gateway**: Razorpay integration.
--   **Community**: Users can view other profiles, become a fan of an idol, and ask for guidance. Fans can see lists of their idols, guides, guidees.
--   **Image/Media Handling**: For meal presets, user profiles, and posts.
--   **Admin Panel**: To manage users, log meals, ingredients, score-to-rating mapping, and image pickers for meals/ingredients.
--   **Design**: Green color scheme replaced with #ffd700 golden color; bottom navigation labels fixed.
+OrHealthy is a full-stack nutrition app for web and mobile (Android/iOS) with a community for Guides and Guidees. Users authenticate via Google. Guides earn status via points (posts, votes, guidees, admin-assigned), reflected in a star-rating system. An admin panel manages users, meals, ingredients, and rating criteria. The mobile app features a Home page (user posts, comments, votes, images, star ratings, notifications, floating post creator), sticky bottom navigation (Home, Presets, DIY, My Profile, Cart), Presets screen (customizable meals, images, Rupee pricing), DIY screen (custom meals from ingredients, images, tags, Rupee pricing), My Profile (details, profile photo), Cart/Checkout (Razorpay, Cash on Delivery, Thank You screen), and Community (view profiles, fan/idol relations, be a guidee button, one-to-one chat). Design adheres to a #ffd700 gold scheme and specific UX patterns.
 </product_requirements>
 
 <key_technical_concepts>
--   **Frontend**: Expo (React Native, iOS/Android/Web), Expo Router for file-based navigation, Zustand for state management,  (wrapped with  for web),  for media.
--   **Backend**: FastAPI, MongoDB (via  ODM), Google OAuth with Emergent integrations.
--   **UI/UX**: React Native components, StyleSheet, KeyboardAvoidingView, SafeAreaView, custom storage wrapper for cross-platform persistence.
+-   **Frontend**: Expo (React Native for iOS/Android/Web), Expo Router, Zustand (state management),  (wrapped), .
+-   **Backend**: FastAPI, MongoDB (via ), Google OAuth.
+-   **UI/UX**: React Native components, StyleSheet, KeyboardAvoidingView, SafeAreaView, Modals for user interaction.
 -   **Styling**: Global color scheme change (green to gold).
 </key_technical_concepts>
 
 <code_architecture>
-The application follows a full-stack architecture: Expo for the frontend, FastAPI for the backend, and MongoDB for the database.
-
 
 
 -   **/app/backend/server.py**: The FastAPI backend.
-    -   **Purpose**: Handles API endpoints for user authentication, posts, meals, ingredients, cart, orders, and serves the admin panel.
-    -   **Changes**:
-        -   Initial setup with basic CRUD for various models.
-        -   Google OAuth integration endpoints (session, callback).
-        -   MongoDB interactions using .
-        -   Error handling for datetime comparison in posts.
-        -   Endpoints for / relationships.
-        -   Endpoints for deleting ingredients and meals.
-        -   Serves .
-        -   Updated models to include image arrays and tags for ingredients/meals.
+    -   **Purpose**: Central API for all application logic.
+    -   **Changes**: Added models and endpoints for chat (, ), notifications, guidee/idol relationships, admin-configurable star ratings and points, and updated , ,  models to support image arrays.  was updated to include .
 -   **/app/backend/admin.html**: The web-based admin panel.
-    -   **Purpose**: Provides an interface for managing users, meals, ingredients, and potentially guide configurations.
-    -   **Changes**: Multiple attempts at fixing structural issues, adding basic HTML for management, and integrating delete functionalities. Was repeatedly broken by global string replacements and structural issues.
--   **/app/backend/seed.py**: A script to populate the database with sample data.
+    -   **Purpose**: Management interface for app data and settings.
+    -   **Changes**: Implemented left-panel navigation, image pickers for meals/ingredients, editable star rating thresholds with dynamic tiers, edit/delete functionality for meals/ingredients, and point configuration settings for user actions. Star ratings now display as N⭐.
 -   **/app/frontend/app/_layout.tsx**: Root layout for Expo Router navigation.
-    -   **Purpose**: Sets up the overall navigation structure, including the main tab navigator and authentication flow.
-    -   **Changes**: Integrated  and , defined the tab bar, and ensured navigation guard for authenticated routes.
--   **/app/frontend/app/(tabs)/**: Directory for bottom tab navigation screens.
-    -   **index.tsx (Home)**: Displays user posts.
-        -   **Purpose**: Main feed for community posts.
-        -   **Changes**: Added image attachment button, display of images, comment functionality (modal), and planned edit/delete post features. Displays user star ratings.
-    -   **presets.tsx**: Lists customizable meal presets.
-    -   **diy.tsx**: Allows users to create custom meals.
-    -   **cart.tsx**: Displays cart items and leads to checkout.
-    -   **profile.tsx**: User's personal details.
--   **/app/frontend/app/auth.tsx**: Authentication screen.
-    -   **Purpose**: User login via Google.
-    -   **Changes**: Updated subtitle to Adaptive Guided Nutrition. Modified logic to redirect to  after Google OAuth to handle session ID.
--   **/app/frontend/app/callback.tsx**: Dedicated handler for OAuth redirects.
-    -   **Purpose**: To correctly parse session IDs from URL fragments after Google authentication.
+    -   **Purpose**: Sets up global navigation and tab bar.
+    -   **Changes**: Integrated a cart counter badge, fixed bottom navigation label truncation, and updated to include the new  route.
+-   **/app/frontend/app/(tabs)/index.tsx**: Home/feed screen.
+    -   **Purpose**: Main user feed with posts, comments, and notifications.
+    -   **Changes**: Fixed delete post (nested  issue), implemented full comment/edit/delete functionality, added notification bell and bottom sheet, floating action button for new posts with multi-image picker, instant likers list modal, and displays user star ratings as N⭐.
+-   **/app/frontend/app/(tabs)/presets.tsx**: Lists customizable meal presets.
+    -   **Purpose**: Display preset meals for users.
+    -   **Changes**: Incorporated image display for meals and updated prices to Rupee currency.
+-   **/app/frontend/app/(tabs)/diy.tsx**: Allows users to create custom meals.
+    -   **Purpose**: User-generated meal creation.
+    -   **Changes**: Fetches and displays ingredient images, uses Rupee currency, implemented tag-based filtering with a horizontal carousel, and updated ingredient display layout.
+-   **/app/frontend/app/(tabs)/profile.tsx**: User's personal details.
+    -   **Purpose**: User profile management.
+    -   **Changes**: Updated star rating display format to N⭐. Backend support for profile photo uploads is in place.
 -   **/app/frontend/app/checkout.tsx**: Screen for order details and payment.
+    -   **Purpose**: Handles order finalization.
+    -   **Changes**: Added cash on delivery, a thank you screen post-order, and redirect to home. Fixed a syntax error ().
 -   **/app/frontend/app/user/[userId].tsx**: Dynamic route for viewing other user profiles.
-    -   **Purpose**: Displays another user's details, posts, and interaction options (fan/guidance).
-    -   **Changes**: Initial creation.
--   **/app/frontend/src/context/AuthContext.tsx**: Manages user authentication state.
-    -   **Purpose**: Provides user authentication status, login, logout functionalities across the app.
-    -   **Changes**: Updated to use the custom  wrapper instead of  directly. Added logging for debugging auth flow.
--   **/app/frontend/src/context/CartContext.tsx**: Manages the user's shopping cart state.
-    -   **Purpose**: Manages adding/removing items from cart, calculating total, and persisting cart data.
-    -   **Changes**: Updated to use the custom  wrapper.
--   **/app/frontend/src/utils/storage.ts**: Cross-platform storage utility.
-    -   **Purpose**: Abstracts storage logic to use  for mobile and  for web.
--   **/app/frontend/tsconfig.json**: Configures TypeScript compilation.
-    -   **Changes**: Updated to include  directory for module resolution.
+    -   **Purpose**: View and interact with other users.
+    -   **Changes**: Added Be a Fan and Be a Guidee buttons. Designed to display posts by default.
+-   **/app/frontend/app/(tabs)/messages.tsx**: (NEW) Chat Inbox.
+    -   **Purpose**: To display a list of one-to-one conversations.
+    -   **Changes**: Newly created as part of the chat system frontend.
+-   **/app/frontend/app/chat/[id].tsx**: (NEW) Individual Chat Conversation.
+    -   **Purpose**: To display messages within a specific chat with a guide/guidee.
+    -   **Changes**: Newly created as part of the chat system frontend.
 </code_architecture>
 
 <pending_tasks>
--   **Admin Panel UI/Features**:
-    -   Fix broken admin panel UI (CSS string, layout issues).
-    -   Implement left-panel navigation.
-    -   Add image pickers for ingredients and preset meals (admin side).
-    -   Implement score-to-star-rating mapping criteria in admin panel.
--   **Mobile App Features**:
-    -   Display images for recipes and ingredients in-app with horizontal scroll.
-    -   Integrate Razorpay payment gateway.
-    -   Implement tags for recipes and ingredients with horizontal carousels and filtering.
-    -   Full frontend integration of comment, edit, and delete post functionality (including UI placement).
-    -   Fully integrate idol and fan relationships (profile buttons, lists).
-    -   Fix sticky bottom navigation labels getting cut out.
+-   **Frontend Chat Integration**:
+    -   Add Messages tab to the bottom navigation.
+    -   Add a Message button on user profiles.
+-   **Admin Panel Order Details**:
+    -   Enhance order list to show complete order details and customer information.
+-   **Frontend User Profile**:
+    -   Implement user avatar display in post comments.
+    -   Ensure comprehensive display of posts, guides, guidees, idols, and fans in user profiles.
 </pending_tasks>
 
 <current_work>
-Immediately before this summary request, the AI engineer was attempting to resolve persistent UI breakage in the admin panel () which was introduced by prior attempts at global currency string replacement and other structural issues. The  file repeatedly showed raw CSS at the top or had duplicate HTML tags. The AI engineer attempted to fix this by restoring from backups and recreating simpler versions of the  file.
-
-Concurrently, the backend models () were updated to support image arrays and tags for ingredients and preset meals, which is a prerequisite for implementing image pickers and tag filtering in both the admin panel and the mobile app.
-
-The user's last explicit request (Chat Message 302) outlined a multitude of pending tasks, including: fixing the admin panel UI, adding image pickers there, showing images in the app, changing currency from '$' to '₹' (though this caused issues in admin panel), implementing Razorpay, adding a cart counter badge, fixing bottom nav labels, implementing tags with filtering, adding score-to-rating mapping in admin, and enabling fan/guidance buttons on user profiles. The AI responded by globally replacing '$' with '₹' and then immediately tried to update the star rating logic in the backend, followed by an attempt to fix the cart badge and bottom navigation, which led to further admin panel currency issues. The last successful action was updating backend models for images and tags.
+Immediately preceding this summary, the AI engineer completed the backend implementation of a one-to-one chat system between guides and guidees. This involved creating  and  models in  and establishing corresponding API endpoints for creating chats, retrieving messages, and sending messages. Following this, the initial frontend screens for the chat feature were developed:  to serve as the chat inbox, and  for displaying individual chat conversations. The very last action taken was the AI planning to integrate these new chat screens into the main application navigation flow by adding a Messages tab to the bottom navigation bar and incorporating a Message button on user profiles.
 </current_work>
 
 <optional_next_step>
-The next logical step is to continue fixing the admin panel UI and implementing the requested image pickers for ingredients and preset meals within the admin panel.
-
-Let me restore the clean admin panel and add the features properly: (Chat Message 322)
-Now let me update the backend models to support images and tags arrays: (Chat Message 324)
+Update the tab layout in  to include the new Messages tab.
 </optional_next_step>
