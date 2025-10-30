@@ -8,11 +8,14 @@ import {
   ActivityIndicator,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useCart } from '../../src/context/CartContext';
+import { useAuth } from '../../src/context/AuthContext';
+import { storage } from '../../src/utils/storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
@@ -36,7 +39,9 @@ export default function DIYScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
   const { addToCart } = useCart();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchIngredients();
