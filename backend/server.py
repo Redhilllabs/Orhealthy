@@ -349,6 +349,16 @@ async def become_fan(user_id: str, request: Request):
         {"$addToSet": {"fans": current_user["_id"]}}
     )
     
+    # Create notification for the idol
+    notification = Notification(
+        user_id=user_id,
+        type="fan",
+        from_user=current_user["_id"],
+        from_user_name=current_user["name"],
+        message=f"{current_user['name']} is now your fan"
+    )
+    await db.notifications.insert_one(notification.dict())
+    
     return {"message": "Successfully became a fan"}
 
 @api_router.delete("/users/{user_id}/unfan")
