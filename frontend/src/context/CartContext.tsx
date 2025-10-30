@@ -17,6 +17,7 @@ interface CartContextType {
   loading: boolean;
   addToCart: (item: CartItem) => Promise<void>;
   removeFromCart: (index: number) => Promise<void>;
+  updateQuantity: (index: number, quantity: number) => Promise<void>;
   clearCart: () => Promise<void>;
   refreshCart: () => Promise<void>;
   totalPrice: number;
