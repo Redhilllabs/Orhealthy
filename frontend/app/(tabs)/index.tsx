@@ -332,15 +332,23 @@ export default function HomeScreen() {
   };
 
   const handleDeletePost = async (postId: string) => {
+    console.log('=== DELETE POST CALLED ===');
+    console.log('Post ID:', postId);
+    
     Alert.alert(
       'Delete Post',
       'Are you sure you want to delete this post?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Cancel', 
+          style: 'cancel',
+          onPress: () => console.log('Delete cancelled')
+        },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            console.log('Delete confirmed, executing...');
             try {
               const token = await storage.getItemAsync('session_token');
               console.log('Deleting post:', postId);
