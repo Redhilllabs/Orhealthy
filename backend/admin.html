@@ -484,6 +484,56 @@
         </div>
     </div>
 
+    <!-- Coupon Modal -->
+    <div id="couponModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="couponModalTitle">Add Coupon</h2>
+                <span class="close" onclick="closeModal('couponModal')">&times;</span>
+            </div>
+            <form id="couponForm" onsubmit="saveCoupon(event)">
+                <div class="form-group">
+                    <label>Coupon Code *</label>
+                    <input type="text" id="couponCode" required style="text-transform: uppercase;" placeholder="e.g. WELCOME10">
+                </div>
+                <div class="form-group">
+                    <label>Discount Type *</label>
+                    <select id="couponDiscountType" required onchange="updateDiscountLabel()">
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="flat">Flat Amount (₹)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="discountValueLabel">Discount Percentage (%) *</label>
+                    <input type="number" step="0.01" id="couponDiscountValue" required min="0">
+                </div>
+                <div class="form-group">
+                    <label>Minimum Order Value (₹) *</label>
+                    <input type="number" step="0.01" id="couponMinOrder" required min="0">
+                </div>
+                <div class="form-group">
+                    <label>Usage Limit Type *</label>
+                    <select id="couponUsageLimitType" required>
+                        <option value="one_time">One Time Per User</option>
+                        <option value="recurring">Recurring</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date *</label>
+                    <input type="datetime-local" id="couponExpiryDate" required>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="couponActive" checked>
+                        Active
+                    </label>
+                </div>
+                <button type="submit" class="btn">Save Coupon</button>
+            </form>
+        </div>
+    </div>
+
+
     <script>
         const API_URL = '/api';
         let selectedMealIngredients = [];
