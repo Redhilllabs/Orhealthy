@@ -988,6 +988,47 @@
             }
         }
 
+        function loadPointsConfig() {
+            fetch(`${API_URL}/admin/points-config`)
+                .then(r => r.json())
+                .then(config => {
+                    document.getElementById('pointsPerPost').value = config.post || 5;
+                    document.getElementById('pointsPerLike').value = config.like || 2;
+                    document.getElementById('pointsPerFan').value = config.fan || 3;
+                    document.getElementById('pointsPerGuidee').value = config.guidee || 5;
+                })
+                .catch(error => {
+                    console.error('Error loading points config:', error);
+                });
+        }
+
+        async function savePointsConfig() {
+            const config = {
+                post: parseInt(document.getElementById('pointsPerPost').value),
+                like: parseInt(document.getElementById('pointsPerLike').value),
+                fan: parseInt(document.getElementById('pointsPerFan').value),
+                guidee: parseInt(document.getElementById('pointsPerGuidee').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/points-config`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                if (response.ok) {
+                    showAlert('points', 'Points configuration saved successfully!', 'success');
+                } else {
+                    showAlert('points', 'Error saving points configuration', 'error');
+                }
+            } catch (error) {
+                showAlert('points', 'Error saving points configuration', 'error');
+                console.error('Error saving points config:', error);
+            }
+        }
+
+
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
