@@ -1277,6 +1277,30 @@ async def remove_from_cart(item_index: int, request: Request):
     
     return {"message": "Item removed from cart"}
 
+
+@api_router.put("/cart/{item_index}")
+async def update_cart_quantity(item_index: int, quantity_data: dict, request: Request):
+    """Update item quantity in cart"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    quantity = quantity_data.get("quantity", 1)
+    if quantity < 1:
+        raise HTTPException(status_code=400, detail="Quantity must be at least 1")
+    
+    cart = await db.carts.find_one({"user_id": user["_id"]})
+    if cart and len(cart.get("items", [])) > item_index:
+        items = cart["items"]
+        items[item_index]["quantity"] = quantity
+        await db.carts.update_one(
+            {"user_id": user["_id"]},
+            {"$set": {"items": items, "updated_at": datetime.now(timezone.utc)}}
+        )
+        return {"message": "Quantity updated"}
+    
+    raise HTTPException(status_code=404, detail="Item not found in cart")
+
 @api_router.delete("/cart")
 async def clear_cart(request: Request):
     """Clear cart"""
