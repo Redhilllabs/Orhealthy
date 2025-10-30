@@ -6,8 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  FlatList,
-  Dimensions,
+  Alert,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,9 +15,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { storage } from '../../src/utils/storage';
 import { useAuth } from '../../src/context/AuthContext';
+import * as ImagePicker from 'expo-image-picker';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
-const { width } = Dimensions.get('window');
 
 interface UserData {
   _id: string;
@@ -48,8 +47,9 @@ export default function UserProfileScreen() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFan, setIsFan] = useState(false);
+  const [isGuidee, setIsGuidee] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'posts' | 'idols' | 'fans'>('posts');
+  const [activeModal, setActiveModal] = useState<'posts' | 'following' | 'fans' | null>(null);
 
   useEffect(() => {
     fetchUserData();
@@ -60,9 +60,9 @@ export default function UserProfileScreen() {
       const response = await axios.get(`${API_URL}/users/${userId}`);
       setUserData(response.data);
       
-      // Check if current user is a fan of this user
       if (currentUser) {
         setIsFan(response.data.fans?.includes(currentUser._id) || false);
+        setIsGuidee(response.data.guidees?.includes(currentUser._id) || false);
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -82,18 +82,52 @@ export default function UserProfileScreen() {
         await axios.delete(`${API_URL}/users/${userId}/unfan`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setIsFan(false);
       } else {
         await axios.post(
           `${API_URL}/users/${userId}/become-fan`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
+        setIsFan(true);
       }
 
-      setIsFan(!isFan);
       await fetchUserData();
     } catch (error) {
       console.error('Error toggling fan status:', error);
+      Alert.alert('Error', 'Failed to update relationship');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleGuideeToggle = async () => {
+    if (!currentUser || isProcessing || !userData?.is_guide) return;
+
+    try {
+      setIsProcessing(true);
+      const token = await storage.getItemAsync('session_token');
+      
+      if (isGuidee) {
+        // Remove from guidees
+        await axios.delete(`${API_URL}/users/${userId}/remove-guidee`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setIsGuidee(false);
+      } else {
+        // Add as guidee
+        await axios.post(
+          `${API_URL}/users/${userId}/add-guidee`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setIsGuidee(true);
+      }
+
+      await fetchUserData();
+    } catch (error) {
+      console.error('Error toggling guidee status:', error);
+      Alert.alert('Error', 'Failed to update guidance relationship');
     } finally {
       setIsProcessing(false);
     }
@@ -107,85 +141,6 @@ export default function UserProfileScreen() {
         ))}
       </View>
     );
-  };
-
-  const renderPost = ({ item }: { item: any }) => (
-    <View style={styles.postCard}>
-      <Text style={styles.postContent} numberOfLines={3}>{item.content}</Text>
-      {item.image && (
-        <Image source={{ uri: item.image }} style={styles.postImage} />
-      )}
-      <View style={styles.postFooter}>
-        <View style={styles.postStat}>
-          <Ionicons name="heart" size={16} color="#F44336" />
-          <Text style={styles.postStatText}>{item.vote_ups}</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderIdol = ({ item }: { item: string }) => (
-    <TouchableOpacity
-      style={styles.userListItem}
-      onPress={() => router.push(`/user/${item}`)}
-    >
-      <View style={[styles.avatar, styles.avatarPlaceholder]}>
-        <Ionicons name="person" size={24} color="#fff" />
-      </View>
-      <Text style={styles.userListText}>User</Text>
-    </TouchableOpacity>
-  );
-
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'posts':
-        return (
-          <FlatList
-            data={userData?.posts || []}
-            renderItem={renderPost}
-            keyExtractor={(item) => item._id}
-            numColumns={2}
-            columnWrapperStyle={styles.postGrid}
-            contentContainerStyle={styles.postsContent}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="document-text-outline" size={48} color="#ccc" />
-                <Text style={styles.emptyText}>No posts yet</Text>
-              </View>
-            }
-          />
-        );
-      case 'idols':
-        return (
-          <FlatList
-            data={userData?.idols || []}
-            renderItem={renderIdol}
-            keyExtractor={(item) => item}
-            contentContainerStyle={styles.listContent}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={48} color="#ccc" />
-                <Text style={styles.emptyText}>No idols yet</Text>
-              </View>
-            }
-          />
-        );
-      case 'fans':
-        return (
-          <FlatList
-            data={userData?.fans || []}
-            renderItem={renderIdol}
-            keyExtractor={(item) => item}
-            contentContainerStyle={styles.listContent}
-            ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Ionicons name="people-outline" size={48} color="#ccc" />
-                <Text style={styles.emptyText}>No fans yet</Text>
-              </View>
-            }
-          />
-        );
-    }
   };
 
   if (loading) {
@@ -267,8 +222,7 @@ export default function UserProfileScreen() {
                   <>
                     <Ionicons
                       name={isFan ? 'heart' : 'heart-outline'}
-                      size={20}
-                      color="#fff"
+                      size={18} color="#fff"
                     />
                     <Text style={styles.fanButtonText}>
                       {isFan ? 'Unfollow' : 'Follow'}
@@ -276,53 +230,144 @@ export default function UserProfileScreen() {
                   </>
                 )}
               </TouchableOpacity>
+
+              {userData.is_guide && (
+                <TouchableOpacity
+                  style={[styles.guideeButton, isGuidee && styles.guideeButtonActive]}
+                  onPress={handleGuideeToggle}
+                  disabled={isProcessing}
+                >
+                  {isProcessing ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name={isGuidee ? 'people' : 'people-outline'}
+                        size={18}
+                        color="#fff"
+                      />
+                      <Text style={styles.guideeButtonText}>
+                        {isGuidee ? 'Stop Guidance' : 'Be a Guidee'}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
 
+        {/* Clickable Stats Cards */}
         <View style={styles.statsCards}>
-          <View style={styles.statsCard}>
-            <Text style={styles.statsCardValue}>{userData.fans?.length || 0}</Text>
-            <Text style={styles.statsCardLabel}>Fans</Text>
-          </View>
-          <View style={styles.statsCard}>
-            <Text style={styles.statsCardValue}>{userData.idols?.length || 0}</Text>
-            <Text style={styles.statsCardLabel}>Following</Text>
-          </View>
-          <View style={styles.statsCard}>
+          <TouchableOpacity
+            style={styles.statsCard}
+            onPress={() => setActiveModal('posts')}
+          >
             <Text style={styles.statsCardValue}>{userData.posts?.length || 0}</Text>
             <Text style={styles.statsCardLabel}>Posts</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.statsCard}
+            onPress={() => setActiveModal('following')}
+          >
+            <Text style={styles.statsCardValue}>{userData.idols?.length || 0}</Text>
+            <Text style={styles.statsCardLabel}>Following</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.statsCard}
+            onPress={() => setActiveModal('fans')}
+          >
+            <Text style={styles.statsCardValue}>{userData.fans?.length || 0}</Text>
+            <Text style={styles.statsCardLabel}>Fans</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Modal Content based on activeModal */}
+        {activeModal && (
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {activeModal === 'posts' && 'Posts'}
+                {activeModal === 'following' && 'Following'}
+                {activeModal === 'fans' && 'Fans'}
+              </Text>
+              <TouchableOpacity onPress={() => setActiveModal(null)}>
+                <Ionicons name="close-circle" size={28} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalScroll}>
+              {activeModal === 'posts' && (
+                <View style={styles.postsGrid}>
+                  {userData.posts && userData.posts.length > 0 ? (
+                    userData.posts.map((post) => (
+                      <View key={post._id} style={styles.postCard}>
+                        <Text style={styles.postContent} numberOfLines={3}>
+                          {post.content}
+                        </Text>
+                        {post.image && (
+                          <Image source={{ uri: post.image }} style={styles.postImage} />
+                        )}
+                        <View style={styles.postFooter}>
+                          <Ionicons name="heart" size={14} color="#F44336" />
+                          <Text style={styles.postStat}>{post.vote_ups}</Text>
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>No posts yet</Text>
+                  )}
+                </View>
+              )}
+
+              {activeModal === 'following' && (
+                <View style={styles.usersList}>
+                  {userData.idols && userData.idols.length > 0 ? (
+                    userData.idols.map((userId) => (
+                      <TouchableOpacity
+                        key={userId}
+                        style={styles.userItem}
+                        onPress={() => {
+                          setActiveModal(null);
+                          router.push(`/user/${userId}`);
+                        }}
+                      >
+                        <Ionicons name="person-circle" size={40} color="#ffd700" />
+                        <Text style={styles.userItemText}>View Profile</Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>Not following anyone</Text>
+                  )}
+                </View>
+              )}
+
+              {activeModal === 'fans' && (
+                <View style={styles.usersList}>
+                  {userData.fans && userData.fans.length > 0 ? (
+                    userData.fans.map((userId) => (
+                      <TouchableOpacity
+                        key={userId}
+                        style={styles.userItem}
+                        onPress={() => {
+                          setActiveModal(null);
+                          router.push(`/user/${userId}`);
+                        }}
+                      >
+                        <Ionicons name="person-circle" size={40} color="#ffd700" />
+                        <Text style={styles.userItemText}>View Profile</Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>No fans yet</Text>
+                  )}
+                </View>
+              )}
+            </ScrollView>
           </View>
-        </View>
-
-        <View style={styles.tabsContainer}>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'posts' && styles.tabActive]}
-            onPress={() => setActiveTab('posts')}
-          >
-            <Text style={[styles.tabText, activeTab === 'posts' && styles.tabTextActive]}>
-              Posts
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'idols' && styles.tabActive]}
-            onPress={() => setActiveTab('idols')}
-          >
-            <Text style={[styles.tabText, activeTab === 'idols' && styles.tabTextActive]}>
-              Following
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'fans' && styles.tabActive]}
-            onPress={() => setActiveTab('fans')}
-          >
-            <Text style={[styles.tabText, activeTab === 'fans' && styles.tabTextActive]}>
-              Fans
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {renderTabContent()}
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -453,14 +498,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 6,
   },
   fanButtonActive: {
     backgroundColor: '#666',
   },
   fanButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  guideeButton: {
+    flex: 1,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  guideeButtonActive: {
+    backgroundColor: '#F44336',
+  },
+  guideeButtonText: {
+    color: '#fff',
+    fontSize: 14,
     fontWeight: '600',
   },
   statsCards: {
@@ -490,104 +553,82 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
-  tabsContainer: {
-    flexDirection: 'row',
+  modalContent: {
     backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginVertical: 8,
+    margin: 16,
     borderRadius: 12,
-    padding: 4,
+    padding: 16,
+    minHeight: 300,
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    borderRadius: 8,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  tabActive: {
-    backgroundColor: '#ffd700',
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
+  modalScroll: {
+    maxHeight: 400,
   },
-  tabTextActive: {
-    color: '#fff',
-  },
-  postsContent: {
-    padding: 8,
-  },
-  postGrid: {
+  postsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
-    paddingHorizontal: 8,
   },
   postCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    width: '48%',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
     padding: 12,
     marginBottom: 8,
-    maxWidth: (width - 40) / 2,
   },
   postContent: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#333',
     marginBottom: 8,
   },
   postImage: {
     width: '100%',
-    height: 120,
-    borderRadius: 8,
+    height: 100,
+    borderRadius: 6,
     marginBottom: 8,
   },
   postFooter: {
     flexDirection: 'row',
-  },
-  postStat: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  postStatText: {
+  postStat: {
     fontSize: 12,
     color: '#666',
   },
-  listContent: {
-    padding: 16,
-  },
-  userListItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 8,
+  usersList: {
     gap: 12,
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  avatarPlaceholder: {
-    backgroundColor: '#ffd700',
-    justifyContent: 'center',
+  userItem: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
   },
-  userListText: {
-    fontSize: 16,
+  userItemText: {
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
   },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 64,
-  },
   emptyText: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 16,
+    textAlign: 'center',
+    color: '#999',
+    fontSize: 14,
+    paddingVertical: 32,
   },
 });
