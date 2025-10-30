@@ -70,6 +70,9 @@ export default function HomeScreen() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   
+  // Messages
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  
   // Create post modal
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [content, setContent] = useState('');
