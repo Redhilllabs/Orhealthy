@@ -49,7 +49,7 @@ interface Comment {
 
 interface Notification {
   _id: string;
-  type: 'comment' | 'like' | 'fan' | 'guidee';
+  type: 'comment' | 'like' | 'fan' | 'guidee' | 'message';
   post_id?: string;
   from_user: string;
   from_user_name: string;
