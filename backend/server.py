@@ -705,10 +705,17 @@ async def create_comment(post_id: str, comment_data: dict, request: Request):
 
 @api_router.get("/posts/{post_id}/comments")
 async def get_comments(post_id: str):
-    """Get comments for a post"""
+    """Get comments for a post with user information"""
     comments = await db.comments.find({"post_id": post_id}).sort("created_at", -1).to_list(100)
+    
+    # Enrich comments with user picture
     for comment in comments:
         comment["_id"] = str(comment["_id"])
+        if comment.get("user_id"):
+            user = await db.users.find_one({"_id": ObjectId(comment["user_id"])})
+            if user:
+                comment["user_picture"] = user.get("picture")
+    
     return comments
 
 # Notification endpoints
