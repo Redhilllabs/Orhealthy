@@ -1299,13 +1299,45 @@ async def create_order(order_data: dict, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
+    # Calculate final price with discount
+    total_price = order_data["total_price"]
+    discount_amount = order_data.get("discount_amount", 0.0)
+    final_price = total_price - discount_amount
+    
+    # Check if guide is ordering for guidee
+    ordered_by_guide_id = order_data.get("ordered_by_guide_id")
+    ordered_for_guidee_id = order_data.get("ordered_for_guidee_id")
+    commission_earned = 0.0
+    commission_rate = 0.0
+    
+    # Calculate commission if guide is ordering for guidee
+    if ordered_by_guide_id and ordered_for_guidee_id:
+        guide = await db.users.find_one({"_id": ObjectId(ordered_by_guide_id)})
+        if guide and guide.get("is_guide"):
+            star_rating = guide.get("star_rating", 0)
+            commission_rate = await calculate_commission_rate(star_rating)
+            commission_earned = (final_price * commission_rate) / 100
+            
+            # Update guide's commission balance
+            await db.users.update_one(
+                {"_id": ObjectId(ordered_by_guide_id)},
+                {"$inc": {"commission_balance": commission_earned}}
+            )
+    
     order = Order(
-        user_id=user["_id"],
+        user_id=ordered_for_guidee_id if ordered_for_guidee_id else user["_id"],
         items=order_data["items"],
-        total_price=order_data["total_price"],
+        total_price=total_price,
+        discount_amount=discount_amount,
+        coupon_code=order_data.get("coupon_code"),
+        final_price=final_price,
         billing_address=order_data["billing_address"],
         shipping_address=order_data["shipping_address"],
-        payment_id=order_data.get("payment_id")
+        payment_id=order_data.get("payment_id"),
+        ordered_by_guide_id=ordered_by_guide_id,
+        ordered_for_guidee_id=ordered_for_guidee_id,
+        commission_earned=commission_earned,
+        commission_rate=commission_rate
     )
     
     result = await db.orders.insert_one(order.dict())
@@ -1316,7 +1348,11 @@ async def create_order(order_data: dict, request: Request):
         {"$set": {"items": []}}
     )
     
-    return {"message": "Order created", "id": str(result.inserted_id)}
+    return {
+        "message": "Order created",
+        "id": str(result.inserted_id),
+        "commission_earned": commission_earned if commission_earned > 0 else None
+    }
 
 @api_router.get("/orders")
 async def get_orders(request: Request):
