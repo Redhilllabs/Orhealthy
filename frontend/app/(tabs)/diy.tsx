@@ -594,16 +594,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffd700',
   },
-  addButton: {
-    backgroundColor: '#ffd700',
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
     paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
-  addButtonText: {
+  saveButton: {
+    backgroundColor: '#3b82f6',
+  },
+  addButton: {
+    backgroundColor: '#ffd700',
+  },
+  actionButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
