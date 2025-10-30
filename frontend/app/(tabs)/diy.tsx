@@ -284,12 +284,6 @@ export default function DIYScreen() {
           maxLength={50}
         />
       </View>
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
 
       <FlatList
         data={filteredIngredients}
