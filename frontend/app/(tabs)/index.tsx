@@ -400,11 +400,7 @@ export default function HomeScreen() {
               <View style={styles.userNameRow}>
                 <Text style={styles.userName}>{item.user_name}</Text>
                 {item.star_rating && item.star_rating > 0 && (
-                  <View style={styles.starRating}>
-                    {Array.from({ length: item.star_rating }).map((_, i) => (
-                      <Ionicons key={i} name="star" size={12} color="#ffd700" />
-                    ))}
-                  </View>
+                  <Text style={styles.starRatingText}>{item.star_rating}⭐</Text>
                 )}
               </View>
             </View>
