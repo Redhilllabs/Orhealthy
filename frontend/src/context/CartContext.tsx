@@ -81,7 +81,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error('Error removing from cart:', error);
       throw error;
     }
-
+  };
 
   const updateQuantity = async (index: number, quantity: number) => {
     try {
@@ -99,8 +99,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error('Error updating quantity:', error);
       throw error;
     }
-  };
-
   };
 
   const clearCart = async () => {
