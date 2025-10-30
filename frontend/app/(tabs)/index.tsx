@@ -342,16 +342,22 @@ export default function HomeScreen() {
           onPress: async () => {
             try {
               const token = await storage.getItemAsync('session_token');
-              await axios.delete(`${API_URL}/posts/${postId}`, {
+              console.log('Deleting post:', postId);
+              console.log('Token:', token ? 'exists' : 'missing');
+              
+              const response = await axios.delete(`${API_URL}/posts/${postId}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });
-
+              
+              console.log('Delete response:', response.data);
               await fetchPosts();
               await refreshUser();
               Alert.alert('Success', 'Post deleted successfully');
-            } catch (error) {
+            } catch (error: any) {
               console.error('Error deleting post:', error);
-              Alert.alert('Error', 'Failed to delete post');
+              console.error('Error response:', error.response?.data);
+              console.error('Error status:', error.response?.status);
+              Alert.alert('Error', error.response?.data?.detail || 'Failed to delete post');
             }
           },
         },
