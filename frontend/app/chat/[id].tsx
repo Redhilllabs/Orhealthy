@@ -163,14 +163,19 @@ export default function ChatScreen() {
             isOwnMessage ? styles.ownMessageBubble : styles.otherMessageBubble,
           ]}
         >
-          <Text
-            style={[
-              styles.messageText,
-              isOwnMessage ? styles.ownMessageText : styles.otherMessageText,
-            ]}
-          >
-            {item.content}
-          </Text>
+          {item.image && (
+            <Image source={{ uri: item.image }} style={styles.messageImage} />
+          )}
+          {item.content ? (
+            <Text
+              style={[
+                styles.messageText,
+                isOwnMessage ? styles.ownMessageText : styles.otherMessageText,
+              ]}
+            >
+              {item.content}
+            </Text>
+          ) : null}
           <Text
             style={[
               styles.timestamp,
