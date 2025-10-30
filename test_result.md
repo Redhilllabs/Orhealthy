@@ -470,6 +470,35 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
+      🔧 **New Feature Implementations & Fixes Complete**
+      
+      **Implemented:**
+      1. ✅ User avatar display in post comments - Added avatars with clickable profile links
+      2. ✅ Fixed address saving issue - Added apartment/suite field above street address
+      3. ✅ Removed white padding bar from sticky bottom navigation
+      4. ✅ Moved FAB (new post button) closer to bottom navigation (bottom: 90)
+      5. ✅ Fixed tabs elongation in Presets screen (adjusted padding and font weight)
+      6. ✅ Generated composite images for saved meals from ingredient images
+      
+      **Backend Changes:**
+      - Updated GET /api/posts/{post_id}/comments to include user_picture
+      - Updated GET /api/saved-meals to generate images array from ingredient images
+      - POST /api/addresses now accepts apartment field and combines it with street address
+      
+      **Frontend Changes:**
+      - checkout.tsx: Added apartment field, improved address saving with error handling
+      - index.tsx: Added avatar display in comments with clickable profile navigation
+      - _layout.tsx: Adjusted bottom nav height and padding for better label visibility
+      - presets.tsx: Fixed tab styling to prevent elongation when selected
+      
+      **Testing Required:**
+      - Address saving with new apartment field
+      - Comment display with user avatars
+      - Saved meals image generation from ingredients
+      - Bottom navigation label visibility
+      - Tab behavior in presets screen
+  - agent: "main"
+    message: |
       Mobile app feature upgrades complete. Need to test backend APIs:
       
       1. **Comments System:**
