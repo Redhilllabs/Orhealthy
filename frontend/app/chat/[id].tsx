@@ -357,13 +357,37 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'left',
   },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 12,
+  inputWrapper: {
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#eee',
+  },
+  imagePreviewContainer: {
+    padding: 12,
+    paddingBottom: 0,
+  },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 12,
     alignItems: 'flex-end',
+  },
+  imageButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
   input: {
     flex: 1,
@@ -375,6 +399,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     maxHeight: 100,
     color: '#333',
+  },
+  messageImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   sendButton: {
     width: 44,
