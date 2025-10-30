@@ -224,15 +224,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginTop: 8,
   },
   itemPrice: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#ffd700',
   },
-  itemQuantity: {
-    fontSize: 14,
-    color: '#666',
+  quantityControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 20,
+    paddingHorizontal: 8,
+  },
+  quantityButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginHorizontal: 12,
+    minWidth: 24,
+    textAlign: 'center',
   },
   removeButton: {
     width: 40,
