@@ -41,6 +41,7 @@ export default function ChatScreen() {
   
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState('');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [otherUserName, setOtherUserName] = useState('');
