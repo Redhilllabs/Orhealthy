@@ -231,27 +231,48 @@ export default function ChatScreen() {
           }
         />
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={messageText}
-            onChangeText={setMessageText}
-            placeholder="Type a message..."
-            placeholderTextColor="#999"
-            multiline
-            maxLength={500}
-          />
-          <TouchableOpacity
-            style={[styles.sendButton, !messageText.trim() && styles.sendButtonDisabled]}
-            onPress={sendMessage}
-            disabled={!messageText.trim() || sending}
-          >
-            {sending ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Ionicons name="send" size={20} color="#fff" />
-            )}
-          </TouchableOpacity>
+        <View style={styles.inputWrapper}>
+          {selectedImage && (
+            <View style={styles.imagePreviewContainer}>
+              <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
+              <TouchableOpacity
+                style={styles.removeImageButton}
+                onPress={() => setSelectedImage(null)}
+              >
+                <Ionicons name="close-circle" size={24} color="#F44336" />
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <View style={styles.inputContainer}>
+            <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+              <Ionicons name="image-outline" size={24} color="#ffd700" />
+            </TouchableOpacity>
+
+            <TextInput
+              style={styles.input}
+              value={messageText}
+              onChangeText={setMessageText}
+              placeholder="Type a message..."
+              placeholderTextColor="#999"
+              multiline
+              maxLength={500}
+            />
+            <TouchableOpacity
+              style={[
+                styles.sendButton,
+                !messageText.trim() && !selectedImage && styles.sendButtonDisabled,
+              ]}
+              onPress={sendMessage}
+              disabled={(!messageText.trim() && !selectedImage) || sending}
+            >
+              {sending ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="send" size={20} color="#fff" />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
