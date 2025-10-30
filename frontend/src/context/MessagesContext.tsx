@@ -34,16 +34,16 @@ export const MessagesProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       });
       
       const conversations = response.data;
-      let totalUnread = 0;
+      // Count number of conversations with unread messages (not total unread count)
+      let unreadChatsCount = 0;
       conversations.forEach((conv: any) => {
-        if (conv.user1_id === user._id) {
-          totalUnread += conv.unread_count_user1 || 0;
-        } else {
-          totalUnread += conv.unread_count_user2 || 0;
-        }
+        const hasUnread = conv.user1_id === user._id 
+          ? (conv.unread_count_user1 || 0) > 0
+          : (conv.unread_count_user2 || 0) > 0;
+        if (hasUnread) unreadChatsCount++;
       });
       
-      setUnreadCount(totalUnread);
+      setUnreadCount(unreadChatsCount);
     } catch (error) {
       console.error('Error fetching unread messages count:', error);
     }
