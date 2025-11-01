@@ -632,8 +632,11 @@ export default function ProfileScreen() {
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{user.name}</Text>
             <Text style={styles.profileEmail}>{user.email}</Text>
-            {user.is_guide && (
+            {user.is_guide && user.star_rating && user.star_rating > 0 && (
               <Text style={styles.starRating}>{user.star_rating}⭐ Guide</Text>
+            )}
+            {user.is_guide && (!user.star_rating || user.star_rating === 0) && (
+              <Text style={styles.starRating}>Guide</Text>
             )}
           </View>
         </View>
