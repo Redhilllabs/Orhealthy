@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useCart } from '../../src/context/CartContext';
 import { useMessages } from '../../src/context/MessagesContext';
 
@@ -13,22 +13,27 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#ffd700',
-        tabBarInactiveTintColor: '#999',
+        tabBarInactiveTintColor: '#666',
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: 70,
-          paddingBottom: 10,
-          paddingTop: 10,
+          height: Platform.OS === 'ios' ? 85 : 75,
+          paddingBottom: Platform.OS === 'ios' ? 25 : 12,
+          paddingTop: 8,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '500',
-          marginBottom: 2,
+          fontWeight: '600',
+          marginTop: 4,
         },
-        tabBarItemStyle: {
-          paddingVertical: 4,
+        tabBarIconStyle: {
+          marginTop: 4,
         },
         headerShown: false,
       }}
@@ -38,7 +43,7 @@ export default function TabsLayout() {
         options={{
           title: 'Presets',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="restaurant" size={size} color={color} />
+            <Ionicons name="restaurant" size={22} color={color} />
           ),
         }}
       />
@@ -47,7 +52,7 @@ export default function TabsLayout() {
         options={{
           title: 'DIY',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="create" size={size} color={color} />
+            <Ionicons name="create" size={22} color={color} />
           ),
         }}
       />
@@ -56,7 +61,7 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home" size={22} color={color} />
           ),
         }}
       />
@@ -65,8 +70,8 @@ export default function TabsLayout() {
         options={{
           title: 'Chats',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.chatIconContainer}>
-              <Ionicons name="chatbubbles" size={size} color={color} />
+            <View style={styles.iconContainer}>
+              <Ionicons name="chatbubbles" size={22} color={color} />
               {messagesUnreadCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{messagesUnreadCount}</Text>
@@ -81,8 +86,8 @@ export default function TabsLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.cartIconContainer}>
-              <Ionicons name="cart" size={size} color={color} />
+            <View style={styles.iconContainer}>
+              <Ionicons name="cart" size={22} color={color} />
               {cartCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{cartCount}</Text>
@@ -96,6 +101,7 @@ export default function TabsLayout() {
         name="profile"
         options={{
           href: null,
+          tabBarButton: () => null,
         }}
       />
     </Tabs>
@@ -103,27 +109,30 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  chatIconContainer: {
+  iconContainer: {
     position: 'relative',
-  },
-  cartIconContainer: {
-    position: 'relative',
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   badge: {
     position: 'absolute',
-    top: -8,
-    right: -12,
+    top: -6,
+    right: -10,
     backgroundColor: '#ef4444',
     borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    minWidth: 18,
+    height: 18,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   badgeText: {
     color: '#fff',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 'bold',
   },
 });
