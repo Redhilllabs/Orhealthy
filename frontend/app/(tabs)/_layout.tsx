@@ -21,24 +21,18 @@ export default function TabsLayout() {
           right: 0,
           backgroundColor: '#fff',
           borderTopWidth: 1,
-          borderTopColor: '#eee',
-          height: Platform.OS === 'ios' ? 88 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
-          paddingTop: 8,
-          elevation: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
+          borderTopColor: '#ddd',
+          height: 65,
+          paddingBottom: 8,
+          paddingTop: 5,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: 10,
           fontWeight: '600',
-          marginTop: 2,
-          marginBottom: 0,
+          paddingBottom: 3,
         },
         tabBarIconStyle: {
-          marginTop: 2,
+          marginTop: 0,
         },
         headerShown: false,
       }}
@@ -48,7 +42,7 @@ export default function TabsLayout() {
         options={{
           title: 'Presets',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="restaurant" size={22} color={color} />
+            <Ionicons name="restaurant" size={24} color={color} />
           ),
         }}
       />
@@ -57,7 +51,7 @@ export default function TabsLayout() {
         options={{
           title: 'DIY',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="create" size={22} color={color} />
+            <Ionicons name="create" size={24} color={color} />
           ),
         }}
       />
@@ -66,7 +60,7 @@ export default function TabsLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={22} color={color} />
+            <Ionicons name="home" size={24} color={color} />
           ),
         }}
       />
@@ -75,11 +69,13 @@ export default function TabsLayout() {
         options={{
           title: 'Chats',
           tabBarIcon: ({ color }) => (
-            <View style={styles.iconContainer}>
-              <Ionicons name="chatbubbles" size={22} color={color} />
+            <View style={styles.iconWrapper}>
+              <Ionicons name="chatbubbles" size={24} color={color} />
               {messagesUnreadCount > 0 && (
                 <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{messagesUnreadCount}</Text>
+                  <Text style={styles.badgeText}>
+                    {messagesUnreadCount > 9 ? '9+' : messagesUnreadCount}
+                  </Text>
                 </View>
               )}
             </View>
@@ -91,11 +87,13 @@ export default function TabsLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ color }) => (
-            <View style={styles.iconContainer}>
-              <Ionicons name="cart" size={22} color={color} />
+            <View style={styles.iconWrapper}>
+              <Ionicons name="cart" size={24} color={color} />
               {cartCount > 0 && (
                 <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{cartCount}</Text>
+                  <Text style={styles.badgeText}>
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </Text>
                 </View>
               )}
             </View>
@@ -113,26 +111,24 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  iconContainer: {
+  iconWrapper: {
     position: 'relative',
-    width: 30,
-    height: 30,
+    width: 24,
+    height: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   badge: {
     position: 'absolute',
-    top: -6,
-    right: -10,
+    top: -8,
+    right: -12,
     backgroundColor: '#ef4444',
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
+    borderRadius: 12,
+    minWidth: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: '#fff',
+    paddingHorizontal: 5,
   },
   badgeText: {
     color: '#fff',
