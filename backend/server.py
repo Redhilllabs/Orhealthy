@@ -523,10 +523,13 @@ async def get_posts(skip: int = 0, limit: int = 20):
     posts = await db.posts.find().sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     for post in posts:
         post["_id"] = str(post["_id"])
-        # Fetch user's star rating
+        # Fetch user's star rating only if they're a guide with rating > 0
         user = await db.users.find_one({"_id": ObjectId(post["user_id"])})
         if user:
-            post["star_rating"] = user.get("star_rating", 0)
+            star_rating = user.get("star_rating", 0)
+            if star_rating and star_rating > 0:
+                post["star_rating"] = star_rating
+            # If star_rating is 0 or None, don't add it to the post
     return posts
 
 @api_router.post("/posts/{post_id}/vote")
