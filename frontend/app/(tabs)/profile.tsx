@@ -401,7 +401,9 @@ export default function ProfileScreen() {
                 )}
                 <View style={styles.userInfo}>
                   <Text style={styles.userName}>{item.name}</Text>
-                  <Text style={styles.userRating}>{item.star_rating}⭐</Text>
+                  {item.star_rating && item.star_rating > 0 && (
+                    <Text style={styles.userRating}>{item.star_rating}⭐</Text>
+                  )}
                 </View>
               </TouchableOpacity>
             )}
