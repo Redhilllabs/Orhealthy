@@ -431,7 +431,7 @@ export default function HomeScreen() {
             <View style={styles.userInfo}>
               <View style={styles.userNameRow}>
                 <Text style={styles.userName}>{item.user_name}</Text>
-                {item.star_rating && item.star_rating > 0 && (
+                {(item.star_rating !== undefined && item.star_rating !== null && item.star_rating > 0) && (
                   <Text style={styles.starRatingText}>{item.star_rating}⭐</Text>
                 )}
               </View>
