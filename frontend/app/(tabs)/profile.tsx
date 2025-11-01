@@ -371,6 +371,13 @@ export default function ProfileScreen() {
             renderItem={({ item }) => (
               <View style={styles.postCard}>
                 <Text style={styles.postContent}>{item.content}</Text>
+                {item.images && item.images.length > 0 && (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.postImagesScroll}>
+                    {item.images.map((img: string, idx: number) => (
+                      <Image key={idx} source={{ uri: img }} style={styles.postImage} />
+                    ))}
+                  </ScrollView>
+                )}
                 <Text style={styles.postDate}>
                   {new Date(item.created_at).toLocaleDateString()}
                 </Text>
