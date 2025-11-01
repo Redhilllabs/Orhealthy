@@ -1066,6 +1066,15 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 8,
   },
+  postImagesScroll: {
+    marginVertical: 12,
+  },
+  postImage: {
+    width: 280,
+    height: 280,
+    borderRadius: 12,
+    marginRight: 12,
+  },
   postDate: {
     fontSize: 12,
     color: '#999',
