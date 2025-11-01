@@ -15,11 +15,15 @@ export default function TabsLayout() {
         tabBarActiveTintColor: '#ffd700',
         tabBarInactiveTintColor: '#666',
         tabBarStyle: {
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#eee',
-          height: Platform.OS === 'ios' ? 85 : 75,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 12,
+          height: Platform.OS === 'ios' ? 88 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 10,
           paddingTop: 8,
           elevation: 8,
           shadowColor: '#000',
@@ -30,10 +34,11 @@ export default function TabsLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '600',
-          marginTop: 4,
+          marginTop: 2,
+          marginBottom: 0,
         },
         tabBarIconStyle: {
-          marginTop: 4,
+          marginTop: 2,
         },
         headerShown: false,
       }}
@@ -42,7 +47,7 @@ export default function TabsLayout() {
         name="presets"
         options={{
           title: 'Presets',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons name="restaurant" size={22} color={color} />
           ),
         }}
@@ -51,7 +56,7 @@ export default function TabsLayout() {
         name="diy"
         options={{
           title: 'DIY',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons name="create" size={22} color={color} />
           ),
         }}
@@ -60,7 +65,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <Ionicons name="home" size={22} color={color} />
           ),
         }}
@@ -69,7 +74,7 @@ export default function TabsLayout() {
         name="messages"
         options={{
           title: 'Chats',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <View style={styles.iconContainer}>
               <Ionicons name="chatbubbles" size={22} color={color} />
               {messagesUnreadCount > 0 && (
@@ -85,7 +90,7 @@ export default function TabsLayout() {
         name="cart"
         options={{
           title: 'Cart',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color }) => (
             <View style={styles.iconContainer}>
               <Ionicons name="cart" size={22} color={color} />
               {cartCount > 0 && (
@@ -100,7 +105,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarButton: () => null,
+          href: null,
         }}
       />
     </Tabs>
