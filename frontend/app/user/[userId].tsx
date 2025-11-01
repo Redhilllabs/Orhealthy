@@ -211,13 +211,17 @@ export default function UserProfileScreen() {
           <Text style={styles.userName}>{userData.name}</Text>
           
           <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              {renderStars(userData.star_rating)}
-              <Text style={styles.statLabel}>
-                {userData.star_rating} Star{userData.star_rating !== 1 ? 's' : ''}
-              </Text>
-            </View>
-            <View style={styles.statDivider} />
+            {userData.star_rating && userData.star_rating > 0 ? (
+              <>
+                <View style={styles.statItem}>
+                  {renderStars(userData.star_rating)}
+                  <Text style={styles.statLabel}>
+                    {userData.star_rating} Star{userData.star_rating !== 1 ? 's' : ''}
+                  </Text>
+                </View>
+                <View style={styles.statDivider} />
+              </>
+            ) : null}
             <View style={styles.statItem}>
               <Text style={styles.statValue}>{userData.points}</Text>
               <Text style={styles.statLabel}>Points</Text>
