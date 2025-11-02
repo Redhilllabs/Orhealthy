@@ -1217,19 +1217,33 @@
             };
             
             try {
-                const response = await fetch(`${API_URL}/source-ingredients`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
+                let response;
+                if (editingSourceId) {
+                    // Update existing source ingredient
+                    response = await fetch(`${API_URL}/source-ingredients/${editingSourceId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new source ingredient
+                    response = await fetch(`${API_URL}/source-ingredients`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
                 
                 if (response.ok) {
                     closeModal('sourceIngredientModal');
-                    showAlert('source-ingredients', 'Source ingredient created successfully', 'success');
+                    showAlert('source-ingredients', editingSourceId ? 'Source ingredient updated successfully' : 'Source ingredient created successfully', 'success');
                     loadSourceIngredients();
+                } else {
+                    const error = await response.json();
+                    showAlert('source-ingredients', error.detail || 'Error saving source ingredient', 'error');
                 }
             } catch (error) {
-                showAlert('source-ingredients', 'Error creating source ingredient', 'error');
+                showAlert('source-ingredients', 'Error saving source ingredient', 'error');
             }
         }
 
