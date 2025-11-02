@@ -360,9 +360,14 @@ export default function DeliveryModeScreen() {
               </Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.exitButton} onPress={switchToUserMode}>
-            <Ionicons name="log-out-outline" size={24} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity style={styles.refreshButton} onPress={onRefresh}>
+              <Ionicons name="refresh-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.exitButton} onPress={switchToUserMode}>
+              <Ionicons name="log-out-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
         
         {/* Status Toggle */}
