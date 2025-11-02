@@ -370,12 +370,20 @@ export default function PresetsScreen() {
                 {/* Allow editing for both All Meals and My Meals */}
                 <View style={styles.quantityControl}>
                   <TouchableOpacity
-                    onPress={() => updateCustomization(index, Math.max(0, ing.quantity - 1))}
+                    onPress={() => {
+                      const stepSize = ing.step_size || 1;
+                      updateCustomization(index, Math.max(0, ing.quantity - stepSize));
+                    }}
                   >
                     <Ionicons name="remove-circle" size={28} color="#ffd700" />
                   </TouchableOpacity>
                   <Text style={styles.quantity}>{ing.quantity || ing.default_quantity || 1}</Text>
-                  <TouchableOpacity onPress={() => updateCustomization(index, ing.quantity + 1)}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      const stepSize = ing.step_size || 1;
+                      updateCustomization(index, ing.quantity + stepSize);
+                    }}
+                  >
                     <Ionicons name="add-circle" size={28} color="#ffd700" />
                   </TouchableOpacity>
                 </View>
