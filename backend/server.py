@@ -385,18 +385,6 @@ async def verify_admin_token(token: str) -> Optional[dict]:
     admin = await db.admin_users.find_one({"email": session["email"]})
     return admin
 
-    # Convert expires_at to timezone-aware datetime if it isn't already
-    expires_at = session["expires_at"]
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    
-    if expires_at < datetime.now(timezone.utc):
-        return None
-    
-    user = await db.users.find_one({"_id": ObjectId(session["user_id"])})
-    if user:
-        user["_id"] = str(user["_id"])
-    return user
 
 # Authentication endpoints
 @api_router.get("/auth/session-data")
