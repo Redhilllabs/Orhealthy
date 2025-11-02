@@ -612,6 +612,18 @@ backend:
         comment: "✅ All Meal CRUD endpoints working perfectly (100% success rate). Tested: POST /api/meals (create), GET /api/meals (list with calculated_price), GET /api/meals/{id} (single with calculated_price & nutrition_profile), PUT /api/meals/{id} (update), DELETE /api/meals/{id} (delete). Error handling for invalid IDs returns proper 404 responses. Fixed ObjectId validation issues and meal price calculation from recipes."
 
 admin:
+  - task: "Source Ingredient Edit functionality"
+    implemented: true
+    working: "NA"
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Edit button, editSourceIngredient() function, and updated saveSourceIngredient() to handle both create and update operations"
+  
   - task: "Recipe management UI"
     implemented: true
     working: "NA"
