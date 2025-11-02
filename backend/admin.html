@@ -1386,7 +1386,7 @@
                         </td>
                         <td style="max-width: 300px;">
                             <div style="margin-bottom: 8px;"><strong>Items:</strong> ${itemsList}</div>
-                            <div><strong>Address:</strong> ${order.shipping_address?.full_address || 'N/A'}, ${order.shipping_address?.city || ''}, ${order.shipping_address?.state || ''}</div>
+                            <div><strong>Address:</strong> ${order.shipping_address?.street || order.shipping_address?.full_address || 'N/A'}, ${order.shipping_address?.city || ''}, ${order.shipping_address?.state || ''}</div>
                         </td>
                         <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
                         <td>${order.agent_name || '-'}</td>
