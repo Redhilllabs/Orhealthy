@@ -1557,7 +1557,10 @@ async def update_meal(meal_id: str, meal_data: dict):
 @api_router.delete("/meals/{meal_id}")
 async def delete_meal(meal_id: str):
     """Delete a meal (admin)"""
-    result = await db.preset_meals.delete_one({"_id": ObjectId(meal_id)})
+    try:
+        result = await db.preset_meals.delete_one({"_id": ObjectId(meal_id)})
+    except Exception:
+        raise HTTPException(status_code=404, detail="Meal not found")
     
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Meal not found")
