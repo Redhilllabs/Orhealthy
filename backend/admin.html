@@ -762,7 +762,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Add Meal</h2>
-                <span class="close" onclick="closeModal('recipeModal')">&times;</span>
+                <span class="close" onclick="closeModal('mealModal')">&times;</span>
             </div>
             <form id="recipeForm" onsubmit="saveMeal(event)">
                 <div class="form-group">
@@ -810,7 +810,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2 class="modal-title">Add Combo</h2>
-                <span class="close" onclick="closeModal('mealModal')">&times;</span>
+                <span class="close" onclick="closeModal('comboModal')">&times;</span>
             </div>
             <form id="mealForm" onsubmit="saveCombo(event)">
                 <div class="form-group">
@@ -2419,7 +2419,7 @@
 
         function showComboModal() {
             editingMealId = null;
-            document.getElementById('mealModal').classList.add('active');
+            document.getElementById('comboModal').classList.add('active');
             document.querySelector('#mealModal .modal-title').textContent = 'Add Combo';
             document.getElementById('mealForm').reset();
             selectedMealRecipes = [];
@@ -2436,7 +2436,7 @@
                 const response = await fetch(`${API_URL}/meals/${id}`);
                 const meal = await response.json();
                 
-                document.getElementById('mealModal').classList.add('active');
+                document.getElementById('comboModal').classList.add('active');
                 document.querySelector('#mealModal .modal-title').textContent = 'Edit Combo';
                 document.getElementById('mealName').value = meal.name;
                 document.getElementById('mealDescription').value = meal.description;
