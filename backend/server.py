@@ -1028,8 +1028,17 @@ async def get_ingredients():
     ingredients = await db.ingredients.find().to_list(1000)
     for ingredient in ingredients:
         ingredient["_id"] = str(ingredient["_id"])
-        # Calculate price if linked to source ingredient
-        if ingredient.get("source_ingredient_id") and ingredient.get("source_quantity"):
+        # Calculate price if linked to source ingredients (multiple sources support)
+        if ingredient.get("source_ingredients") and len(ingredient["source_ingredients"]) > 0:
+            total_price = 0
+            for source_ref in ingredient["source_ingredients"]:
+                source = await db.source_ingredients.find_one({"_id": ObjectId(source_ref["source_ingredient_id"])})
+                if source and source.get("purchases"):
+                    latest_purchase = source["purchases"][-1]
+                    total_price += (source_ref["source_quantity"] * latest_purchase["unit_price"])
+            ingredient["price_per_unit"] = total_price
+        # Backward compatibility: handle old single source format
+        elif ingredient.get("source_ingredient_id") and ingredient.get("source_quantity"):
             source = await db.source_ingredients.find_one({"_id": ObjectId(ingredient["source_ingredient_id"])})
             if source and source.get("purchases"):
                 latest_purchase = source["purchases"][-1]
