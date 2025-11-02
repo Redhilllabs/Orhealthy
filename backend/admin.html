@@ -1343,7 +1343,7 @@
             const showAgent = (status === 'out_for_delivery' || status === 'delivered' || status === 'all');
             
             if (status === 'all') {
-                // All orders: show status column, no actions
+                // All orders: show status column AND actions (delete)
                 thead.innerHTML = `
                     <th>Order ID</th>
                     <th>Customer</th>
@@ -1352,6 +1352,7 @@
                     <th>Agent</th>
                     <th>Date</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 `;
             } else {
                 // Specific status tabs: show actions, no status column
