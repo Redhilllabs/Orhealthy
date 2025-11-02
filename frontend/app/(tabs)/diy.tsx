@@ -492,17 +492,13 @@ export default function DIYScreen() {
 
       {/* Sub-tabs for DIY Combos */}
       {activeTab === 'diy-combos' && (
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.subTabContainer}
-        >
+        <View style={styles.subTabContainer}>
           <TouchableOpacity
             style={[styles.subTab, combosSubTab === 'all-meals' && styles.activeSubTab]}
             onPress={() => setCombosSubTab('all-meals')}
           >
             <Text style={[styles.subTabText, combosSubTab === 'all-meals' && styles.activeSubTabText]}>
-              All Meals ({allMeals.length})
+              All Meals
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -510,10 +506,10 @@ export default function DIYScreen() {
             onPress={() => setCombosSubTab('my-meals')}
           >
             <Text style={[styles.subTabText, combosSubTab === 'my-meals' && styles.activeSubTabText]}>
-              My Meals ({myMeals.length})
+              My Meals
             </Text>
           </TouchableOpacity>
-        </ScrollView>
+        </View>
       )}
 
       {/* Search and filters */}
