@@ -263,7 +263,7 @@ export default function DIYScreen() {
       return;
     }
 
-    if (activeTab === 'ingredients' && selectedIngredients.size === 0) {
+    if (activeTab === 'diy-meals' && selectedIngredients.size === 0) {
       Alert.alert('Error', 'Please select at least one ingredient');
       return;
     }
@@ -279,7 +279,7 @@ export default function DIYScreen() {
       
       let mealData: any;
       
-      if (activeTab === 'ingredients') {
+      if (activeTab === 'diy-meals') {
         // Creating meal from ingredients
         const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
           const ingredient = ingredients.find(i => i._id === id);
@@ -341,7 +341,7 @@ export default function DIYScreen() {
   };
 
   const addToCartDirect = async () => {
-    if (activeTab === 'ingredients' && selectedIngredients.size === 0) {
+    if (activeTab === 'diy-meals' && selectedIngredients.size === 0) {
       Alert.alert('Error', 'Please select at least one ingredient');
       return;
     }
@@ -354,7 +354,7 @@ export default function DIYScreen() {
     try {
       let cartData: any;
       
-      if (activeTab === 'ingredients') {
+      if (activeTab === 'diy-meals') {
         const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
           const ingredient = ingredients.find(i => i._id === id);
           return {
@@ -526,7 +526,7 @@ export default function DIYScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder={`Search ${activeTab === 'ingredients' ? 'ingredients' : 'recipes'}...`}
+            placeholder={`Search ${activeTab === 'diy-meals' ? 'ingredients' : 'recipes'}...`}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -563,8 +563,8 @@ export default function DIYScreen() {
 
       {/* Items List */}
       <FlatList
-        data={activeTab === 'ingredients' ? filteredIngredients : filteredRecipes}
-        renderItem={activeTab === 'ingredients' ? renderIngredientItem : renderRecipeItem}
+        data={activeTab === 'diy-meals' ? filteredIngredients : filteredRecipes}
+        renderItem={activeTab === 'diy-meals' ? renderIngredientItem : renderRecipeItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         numColumns={2}
@@ -572,11 +572,11 @@ export default function DIYScreen() {
       />
 
       {/* Selected Items Panel */}
-      {((activeTab === 'ingredients' && selectedIngredients.size > 0) || 
+      {((activeTab === 'diy-meals' && selectedIngredients.size > 0) || 
         (activeTab !== 'ingredients' && selectedMeals.size > 0)) && (
         <View style={styles.selectedPanel}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectedScroll}>
-            {activeTab === 'ingredients'
+            {activeTab === 'diy-meals'
               ? Array.from(selectedIngredients.entries()).map(([id, qty]) => {
                   const ingredient = ingredients.find(i => i._id === id);
                   if (!ingredient) return null;
