@@ -99,6 +99,16 @@ export default function ProfileScreen() {
     }
   }, [activeTab]);
 
+  // Re-check delivery agent status when screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      if (user) {
+        checkDeliveryAgent();
+      }
+    }, [user])
+  );
+
+
   const fetchProfileData = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
