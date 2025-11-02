@@ -193,7 +193,7 @@ export default function PresetsScreen() {
 
   const updateCustomization = (index: number, quantity: number) => {
     const updated = [...customizations];
-    updated[index] = { ...updated[index], quantity };
+    updated[index] = { ...updated[index], quantity: Math.max(0, quantity) };
     setCustomizations(updated);
   };
 
