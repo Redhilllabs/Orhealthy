@@ -714,6 +714,33 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   subTabContainer: {
+    backgroundColor: '#f9f9f9',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    marginTop: 0,
+  },
+  subTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+    height: 32,
+  },
+  activeSubTab: {
+    borderBottomColor: '#ffd700',
+  },
+  subTabText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#666',
+  },
+  activeSubTabText: {
+    color: '#ffd700',
+    fontWeight: '600',
+  },
+  subTabContainer: {
     backgroundColor: '#f8f8f8',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
