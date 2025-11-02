@@ -73,7 +73,7 @@ export default function DeliveryModeScreen() {
     }, 10000);
     
     return () => clearInterval(refreshInterval);
-  }, []);
+  }, [loading]);
 
   const loadData = async () => {
     try {
