@@ -231,7 +231,7 @@ export default function DIYScreen() {
   };
 
   const calculateTotal = () => {
-    if (activeTab === 'ingredients') {
+    if (activeTab === 'diy-meals') {
       let total = 0;
       selectedIngredients.forEach((qty, id) => {
         const ingredient = ingredients.find(i => i._id === id);
@@ -243,7 +243,7 @@ export default function DIYScreen() {
     } else {
       let total = 0;
       selectedMeals.forEach((qty, id) => {
-        const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+        const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
         if (recipe) {
           total += (recipe.calculated_price || 0) * qty;
         }
