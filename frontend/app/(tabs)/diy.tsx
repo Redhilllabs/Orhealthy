@@ -470,37 +470,55 @@ export default function DIYScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Tabs */}
+      {/* 2 Main Tabs */}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         style={styles.tabContainer}
       >
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'ingredients' && styles.activeTab]}
-          onPress={() => setActiveTab('ingredients')}
+          style={[styles.tab, activeTab === 'diy-meals' && styles.activeTab]}
+          onPress={() => setActiveTab('diy-meals')}
         >
-          <Text style={[styles.tabText, activeTab === 'ingredients' && styles.activeTabText]}>
-            From Ingredients
+          <Text style={[styles.tabText, activeTab === 'diy-meals' && styles.activeTabText]}>
+            DIY Meals
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-meals' && styles.activeTab]}
-          onPress={() => setActiveTab('all-meals')}
+          style={[styles.tab, activeTab === 'diy-combos' && styles.activeTab]}
+          onPress={() => setActiveTab('diy-combos')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-meals' && styles.activeTabText]}>
-            From All Meals ({allMeals.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-meals' && styles.activeTab]}
-          onPress={() => setActiveTab('my-meals')}
-        >
-          <Text style={[styles.tabText, activeTab === 'my-meals' && styles.activeTabText]}>
-            From My Meals ({myMeals.length})
+          <Text style={[styles.tabText, activeTab === 'diy-combos' && styles.activeTabText]}>
+            DIY Combos
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Sub-tabs for DIY Combos */}
+      {activeTab === 'diy-combos' && (
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.subTabContainer}
+        >
+          <TouchableOpacity
+            style={[styles.subTab, combosSubTab === 'all-meals' && styles.activeSubTab]}
+            onPress={() => setCombosSubTab('all-meals')}
+          >
+            <Text style={[styles.subTabText, combosSubTab === 'all-meals' && styles.activeSubTabText]}>
+              All Meals ({allMeals.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.subTab, combosSubTab === 'my-meals' && styles.activeSubTab]}
+            onPress={() => setCombosSubTab('my-meals')}
+          >
+            <Text style={[styles.subTabText, combosSubTab === 'my-meals' && styles.activeSubTabText]}>
+              My Meals ({myMeals.length})
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
 
       {/* Search and filters */}
       <View style={styles.searchContainer}>
