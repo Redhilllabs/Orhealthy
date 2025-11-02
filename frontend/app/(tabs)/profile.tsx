@@ -209,6 +209,19 @@ export default function ProfileScreen() {
     }
   };
 
+  const checkDeliveryAgent = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/delivery-agents/check`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setIsDeliveryAgent(response.data.is_delivery_agent || false);
+    } catch (error) {
+      console.error('Error checking delivery agent status:', error);
+    }
+  };
+
+
   const saveNewAddress = async () => {
     if (!newAddressLabel || !newAddressStreet || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
       Alert.alert('Error', 'Please fill all required address fields');
