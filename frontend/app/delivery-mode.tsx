@@ -330,19 +330,49 @@ export default function DeliveryModeScreen() {
               activeOrders.map((order: Order) => (
                 <View key={order._id} style={styles.orderCard}>
                   <View style={styles.orderHeader}>
-                    <Text style={styles.orderIdgreen}>#{order.order_id}</Text>
-                    <Text style={styles.orderPrice}>₹{order.final_price}</Text>
+                    <Text style={styles.orderIdgreen}>#{order.order_id || order._id.slice(-8)}</Text>
+                    <Text style={styles.orderPrice}>₹{order.final_price?.toFixed(2)}</Text>
                   </View>
                   
-                  <Text style={styles.orderItems}>
-                    {order.items?.length || 0} item(s)
-                  </Text>
+                  {/* Customer Info */}
+                  <View style={styles.customerSection}>
+                    <View style={styles.customerRow}>
+                      <Ionicons name="person" size={16} color="#666" />
+                      <Text style={styles.customerName}>{order.user_name || 'Customer'}</Text>
+                    </View>
+                    <View style={styles.paymentBadge}>
+                      <Ionicons 
+                        name={order.payment_id ? "card" : "cash"} 
+                        size={14} 
+                        color={order.payment_id ? "#4caf50" : "#ff9800"} 
+                      />
+                      <Text style={[styles.paymentText, {color: order.payment_id ? "#4caf50" : "#ff9800"}]}>
+                        {order.payment_id ? 'Online' : 'COD'}
+                      </Text>
+                    </View>
+                  </View>
                   
+                  {/* Order Items */}
+                  <View style={styles.itemsSection}>
+                    <Text style={styles.itemsLabel}>Order Items:</Text>
+                    {order.items?.map((item: any, index: number) => (
+                      <Text key={index} style={styles.itemText}>
+                        • {item.meal_name} x {item.quantity} - ₹{(item.price * item.quantity).toFixed(2)}
+                      </Text>
+                    ))}
+                  </View>
+                  
+                  {/* Delivery Address */}
                   <View style={styles.addressSection}>
-                    <Text style={styles.addressLabel}>Delivery Address:</Text>
+                    <View style={styles.addressHeader}>
+                      <Ionicons name="location" size={16} color="#666" />
+                      <Text style={styles.addressLabel}>Delivery Address:</Text>
+                    </View>
                     <Text style={styles.addressText}>
-                      {order.shipping_address?.street}, {order.shipping_address?.apartment && `${order.shipping_address.apartment}, `}
-                      {order.shipping_address?.city}, {order.shipping_address?.state} {order.shipping_address?.zip}
+                      {order.shipping_address?.street}
+                      {order.shipping_address?.apartment && `, ${order.shipping_address.apartment}`}
+                      {'\n'}{order.shipping_address?.city}, {order.shipping_address?.state} - {order.shipping_address?.zip_code}
+                      {'\n'}📞 {order.shipping_address?.phone}
                     </Text>
                   </View>
                   
@@ -350,12 +380,14 @@ export default function DeliveryModeScreen() {
                     style={styles.deliveredButton}
                     onPress={() => markAsDelivered(order._id)}
                   >
+                    <Ionicons name="checkmark-circle" size={20} color="#fff" />
                     <Text style={styles.deliveredButtonText}>Mark as Delivered</Text>
                   </TouchableOpacity>
                 </View>
               ))
             ) : (
               <View style={styles.emptyState}>
+                <Ionicons name="cube-outline" size={64} color="#ccc" />
                 <Text style={styles.emptyText}>No assigned orders</Text>
               </View>
             )}
