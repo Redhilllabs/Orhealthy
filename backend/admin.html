@@ -1221,6 +1221,7 @@
             document.getElementById('agentName').value = agent.name;
             document.getElementById('agentEmail').value = agent.email;
             document.getElementById('agentEmail').disabled = true; // Can't change email
+            document.getElementById('agentContactNumber').value = agent.contact_number || '';
             document.getElementById('agentVehicle').value = agent.vehicle;
             document.getElementById('agentVehicleNumber').value = agent.vehicle_number || '';
             document.getElementById('agentPaymentPerDelivery').value = agent.payment_per_delivery || 0;
