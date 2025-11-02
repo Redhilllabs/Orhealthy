@@ -1089,11 +1089,17 @@
 
         function showIngredientModal() {
             editingIngredientId = null;
+            nutritionEntries = [];
             document.getElementById('ingredientModal').classList.add('active');
-            document.querySelector('#ingredientModal .modal-title').textContent = 'Add Ingredient';
+            document.querySelector('#ingredientModal .modal-title').textContent = 'Add Processed Ingredient';
             document.getElementById('ingredientForm').reset();
+            document.getElementById('stepSize').value = '1';
             ingredientImages = [];
             document.getElementById('ingredientImagePreview').innerHTML = '';
+            document.getElementById('priceCalculationInfo').style.display = 'none';
+            document.getElementById('ingredientPrice').readOnly = false;
+            renderNutritionEntries();
+            populateSourceIngredientDropdown();
         }
 
         function editIngredient(id) {
@@ -1102,12 +1108,25 @@
             if (!ingredient) return;
             
             document.getElementById('ingredientModal').classList.add('active');
-            document.querySelector('#ingredientModal .modal-title').textContent = 'Edit Ingredient';
+            document.querySelector('#ingredientModal .modal-title').textContent = 'Edit Processed Ingredient';
             document.getElementById('ingredientName').value = ingredient.name;
             document.getElementById('ingredientPrice').value = ingredient.price_per_unit;
             document.getElementById('ingredientUnit').value = ingredient.unit;
             document.getElementById('ingredientDescription').value = ingredient.description || '';
             document.getElementById('ingredientTags').value = ingredient.tags ? ingredient.tags.join(', ') : '';
+            document.getElementById('stepSize').value = ingredient.step_size || 1;
+            
+            // Source ingredient fields
+            document.getElementById('sourceIngredientId').value = ingredient.source_ingredient_id || '';
+            document.getElementById('sourceQuantity').value = ingredient.source_quantity || '';
+            
+            // Nutrition profile
+            nutritionEntries = (ingredient.nutrition_profile || []).map((entry, idx) => ({
+                id: Date.now() + idx,
+                name: entry.name,
+                value: entry.value,
+                unit: entry.unit
+            }));
             
             // Set existing images
             ingredientImages = ingredient.images || [];
@@ -1118,6 +1137,12 @@
                     <button type="button" class="image-remove" onclick="removeIngredientImage(${index})">×</button>
                 </div>
             `).join('');
+            
+            populateSourceIngredientDropdown();
+            renderNutritionEntries();
+            if (ingredient.source_ingredient_id && ingredient.source_quantity) {
+                calculateIngredientPrice();
+            }
         }
 
         async function saveIngredient(e) {
