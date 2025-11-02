@@ -742,7 +742,8 @@ const styles = StyleSheet.create({
   },
   // Duplicate styles removed
   searchContainer: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     backgroundColor: '#fff',
   },
   searchBar: {
