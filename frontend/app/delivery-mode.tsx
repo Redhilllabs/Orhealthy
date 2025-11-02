@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
+import { storage } from '@/src/utils/storage';
 import Constants from 'expo-constants';
 
 // Use process.env instead of Constants for web
