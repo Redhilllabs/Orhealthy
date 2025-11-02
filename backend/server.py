@@ -1260,10 +1260,15 @@ async def get_ingredients():
     ingredients = await db.ingredients.find().to_list(1000)
     for ingredient in ingredients:
         ingredient["_id"] = str(ingredient["_id"])
-        # Calculate price using helper function
-        calculated_price = await calculate_processed_ingredient_price(ingredient)
-        ingredient["calculated_price"] = calculated_price
-        ingredient["price_per_unit"] = calculated_price  # Backward compatibility
+        # Calculate price using helper function with error handling
+        try:
+            calculated_price = await calculate_processed_ingredient_price(ingredient)
+            ingredient["calculated_price"] = calculated_price
+            ingredient["price_per_unit"] = calculated_price  # Backward compatibility
+        except Exception as e:
+            # If calculation fails, set to 0 or use existing price_per_unit
+            ingredient["calculated_price"] = ingredient.get("price_per_unit", 0)
+            ingredient["price_per_unit"] = ingredient.get("price_per_unit", 0)
     return ingredients
 
 # Source Ingredients endpoints
