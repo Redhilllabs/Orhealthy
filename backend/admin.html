@@ -2481,6 +2481,11 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
+            // Clear auto-refresh when closing assign agent modal
+            if (modalId === 'assignAgentModal' && agentRefreshInterval) {
+                clearInterval(agentRefreshInterval);
+                agentRefreshInterval = null;
+            }
         }
 
         function showAlert(section, message, type) {
