@@ -1118,6 +1118,7 @@
                         <td>₹${source.highest_unit_price.toFixed(2)}</td>
                         <td class="actions">
                             <button class="btn" style="font-size: 12px;" onclick="togglePurchaseHistory('${source._id}')">📜 History</button>
+                            <button class="btn" onclick="editSourceIngredient('${source._id}')">Edit</button>
                             <button class="btn" onclick="showAddPurchaseModal('${source._id}')">+ Purchase</button>
                             <button class="btn btn-danger" onclick="deleteSourceIngredient('${source._id}')">Delete</button>
                         </td>
