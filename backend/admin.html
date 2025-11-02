@@ -2342,15 +2342,20 @@
             }
         }
 
+        // Meal Management Functions (working with recipes)
+        let selectedMealRecipes = [];
+
         function showMealModal() {
             editingMealId = null;
             document.getElementById('mealModal').classList.add('active');
-            document.querySelector('#mealModal .modal-title').textContent = 'Add Preset Meal';
+            document.querySelector('#mealModal .modal-title').textContent = 'Add Meal';
             document.getElementById('mealForm').reset();
-            selectedMealIngredients = [];
+            selectedMealRecipes = [];
             mealImages = [];
-            document.getElementById('mealIngredients').innerHTML = '';
+            document.getElementById('mealRecipes').innerHTML = '';
             document.getElementById('mealImagePreview').innerHTML = '';
+            document.getElementById('mealPrice').value = '0.00';
+            updateMealRecipeSelect();
         }
 
         async function editMeal(id) {
@@ -2360,10 +2365,10 @@
                 const meal = await response.json();
                 
                 document.getElementById('mealModal').classList.add('active');
-                document.querySelector('#mealModal .modal-title').textContent = 'Edit Preset Meal';
+                document.querySelector('#mealModal .modal-title').textContent = 'Edit Meal';
                 document.getElementById('mealName').value = meal.name;
                 document.getElementById('mealDescription').value = meal.description;
-                document.getElementById('mealPrice').value = meal.base_price;
+                document.getElementById('mealPrice').value = meal.calculated_price || 0;
                 document.getElementById('mealTags').value = meal.tags ? meal.tags.join(', ') : '';
                 
                 // Set existing images
@@ -2376,56 +2381,74 @@
                     </div>
                 `).join('');
                 
-                // Set existing ingredients
-                selectedMealIngredients = meal.ingredients || [];
-                renderMealIngredients();
+                // Set existing recipes
+                selectedMealRecipes = meal.recipes || [];
+                updateMealRecipeSelect();
+                renderMealRecipes();
+                updateMealPrice();
             } catch (error) {
                 showAlert('meals', 'Error loading meal data', 'error');
             }
         }
 
-        function updateMealIngredientSelect() {
-            const select = document.getElementById('mealIngredientSelect');
-            select.innerHTML = '<option value="">-- Select ingredient --</option>' +
-                allIngredients.map(ing => `<option value="${ing._id}">${ing.name} (₹${ing.price_per_unit}/${ing.unit})</option>`).join('');
+        function updateMealRecipeSelect() {
+            const select = document.getElementById('mealRecipeSelect');
+            select.innerHTML = '<option value="">-- Select recipe --</option>' +
+                allRecipes.map(recipe => `<option value="${recipe._id}">${recipe.name} (₹${recipe.calculated_price ? recipe.calculated_price.toFixed(2) : '0.00'})</option>`).join('');
         }
 
-        function addIngredientToMeal() {
-            const select = document.getElementById('mealIngredientSelect');
-            const ingredientId = select.value;
-            if (!ingredientId) return alert('Please select an ingredient');
-            const ingredient = allIngredients.find(i => i._id === ingredientId);
-            if (!ingredient) return;
-            if (selectedMealIngredients.find(i => i.ingredient_id === ingredientId)) {
-                return alert('Ingredient already added');
+        function addRecipeToMeal() {
+            const select = document.getElementById('mealRecipeSelect');
+            const recipeId = select.value;
+            if (!recipeId) return alert('Please select a recipe');
+            
+            const recipe = allRecipes.find(r => r._id === recipeId);
+            if (!recipe) return;
+            
+            if (selectedMealRecipes.find(r => r.recipe_id === recipeId)) {
+                return alert('Recipe already added');
             }
-            selectedMealIngredients.push({
-                ingredient_id: ingredientId,
-                name: ingredient.name,
-                price: ingredient.price_per_unit,
-                default_quantity: 1
+            
+            selectedMealRecipes.push({
+                recipe_id: recipeId,
+                name: recipe.name,
+                quantity: 1.0,
+                step_size: 0.5,
+                price: recipe.calculated_price || 0
             });
-            renderMealIngredients();
+            
+            renderMealRecipes();
+            updateMealPrice();
         }
 
-        function renderMealIngredients() {
-            document.getElementById('mealIngredients').innerHTML = selectedMealIngredients.map((ing, idx) => `
+        function renderMealRecipes() {
+            document.getElementById('mealRecipes').innerHTML = selectedMealRecipes.map((recipe, idx) => `
                 <div class="ingredient-item">
-                    <span>${ing.name}</span>
-                    <input type="number" min="0.1" step="0.1" value="${ing.default_quantity}" 
-                           onchange="updateIngredientQuantity(${idx}, this.value)">
-                    <button type="button" onclick="removeIngredientFromMeal(${idx})">×</button>
+                    <span>${recipe.name}</span>
+                    <input type="number" min="0.5" step="${recipe.step_size || 0.5}" value="${recipe.quantity}" 
+                           onchange="updateMealRecipeQuantity(${idx}, this.value)">
+                    <span>x</span>
+                    <span>₹${(recipe.price * recipe.quantity).toFixed(2)}</span>
+                    <button type="button" onclick="removeRecipeFromMeal(${idx})">×</button>
                 </div>
             `).join('');
         }
 
-        function updateIngredientQuantity(index, quantity) {
-            selectedMealIngredients[index].default_quantity = parseFloat(quantity);
+        function updateMealRecipeQuantity(index, quantity) {
+            selectedMealRecipes[index].quantity = parseFloat(quantity);
+            renderMealRecipes();
+            updateMealPrice();
         }
 
-        function removeIngredientFromMeal(index) {
-            selectedMealIngredients.splice(index, 1);
-            renderMealIngredients();
+        function removeRecipeFromMeal(index) {
+            selectedMealRecipes.splice(index, 1);
+            renderMealRecipes();
+            updateMealPrice();
+        }
+
+        function updateMealPrice() {
+            const total = selectedMealRecipes.reduce((sum, recipe) => sum + (recipe.price * recipe.quantity), 0);
+            document.getElementById('mealPrice').value = total.toFixed(2);
         }
 
         async function saveMeal(e) {
