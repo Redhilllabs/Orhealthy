@@ -1382,7 +1382,7 @@
         
         function updateOrderTableHeaders(status) {
             const thead = document.querySelector('#ordersBody').parentElement.querySelector('thead tr');
-            const showAgent = (status === 'out_for_delivery' || status === 'delivered' || status === 'all');
+            const showAgent = (status === 'ready' || status === 'out_for_delivery' || status === 'delivered' || status === 'all');
             
             if (status === 'all') {
                 // All orders: show status column AND actions (delete)
