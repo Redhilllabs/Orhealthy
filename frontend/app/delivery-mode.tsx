@@ -232,19 +232,28 @@ export default function DeliveryModeScreen() {
       {/* Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'orders' && styles.tabActive]}
-          onPress={() => setActiveTab('orders')}
+          style={[styles.tab, activeTab === 'assigned' && styles.tabActive]}
+          onPress={() => setActiveTab('assigned')}
         >
-          <Text style={[styles.tabText, activeTab === 'orders' && styles.tabTextActive]}>
-            Orders ({activeOrders.length})
+          <Text style={[styles.tabText, activeTab === 'assigned' && styles.tabTextActive]}>
+            Assigned ({activeOrders.length})
           </Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
-          style={[styles.tab, activeTab === 'credits' && styles.tabActive]}
-          onPress={() => setActiveTab('credits')}
+          style={[styles.tab, activeTab === 'delivered' && styles.tabActive]}
+          onPress={() => setActiveTab('delivered')}
         >
-          <Text style={[styles.tabText, activeTab === 'credits' && styles.tabTextActive]}>
+          <Text style={[styles.tabText, activeTab === 'delivered' && styles.tabTextActive]}>
+            Delivered ({deliveredOrders.length})
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'history' && styles.tabActive]}
+          onPress={() => setActiveTab('history')}
+        >
+          <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>
             Credit History
           </Text>
         </TouchableOpacity>
