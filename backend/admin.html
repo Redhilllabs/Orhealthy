@@ -489,6 +489,37 @@
                     
                     <button class="btn" style="margin-top: 24px;" onclick="savePointsConfig()">Save Points Configuration</button>
                 </div>
+
+                <div class="card" style="margin-top: 24px;">
+                    <h2 class="card-title" style="margin-bottom: 20px;">🔐 Admin Credentials</h2>
+                    <p style="color: #64748b; margin-bottom: 24px;">Change your admin email and password.</p>
+                    <div id="alert-credentials"></div>
+                    
+                    <form id="credentialsForm" onsubmit="changeAdminCredentials(event)">
+                        <div class="form-group">
+                            <label>Current Password *</label>
+                            <input type="password" id="currentPassword" required placeholder="Enter current password">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>New Email (optional)</label>
+                            <input type="email" id="newEmail" placeholder="Leave blank to keep current">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>New Password (optional)</label>
+                            <input type="password" id="newPassword" placeholder="Leave blank to keep current">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Confirm New Password</label>
+                            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+                        </div>
+                        
+                        <button type="submit" class="btn">Update Credentials</button>
+                        <button type="button" class="btn btn-danger" style="margin-left: 12px;" onclick="adminLogout()">Logout</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
