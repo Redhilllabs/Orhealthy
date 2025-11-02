@@ -559,8 +559,6 @@ export default function DIYScreen() {
         renderItem={activeTab === 'diy-meals' ? renderIngredientItem : renderRecipeItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
       />
 
       {/* Selected Items Panel */}
