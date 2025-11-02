@@ -426,16 +426,18 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
-  switchButton: {
+  exitButton: {
     backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  switchButtonText: {
+  exitButtonText: {
     color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   walletCard: {
     backgroundColor: '#fff',
