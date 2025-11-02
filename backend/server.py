@@ -1369,6 +1369,30 @@ async def create_delivery_agent(agent_data: dict):
     
     return {"message": "Delivery agent created", "id": str(result.inserted_id)}
 
+@api_router.put("/delivery-agents/{agent_id}/status")
+async def update_delivery_agent_status(agent_id: str, status_data: dict, request: Request):
+    """Update delivery agent status (mobile app endpoint)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Verify the agent belongs to the logged-in user
+    agent = await db.delivery_agents.find_one({"_id": ObjectId(agent_id)})
+    if not agent or agent["email"] != user["email"]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    new_status = status_data.get("status")
+    if new_status not in ["available", "busy", "offline"]:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    
+    await db.delivery_agents.update_one(
+        {"_id": ObjectId(agent_id)},
+        {"$set": {"status": new_status}}
+    )
+    
+    return {"message": "Status updated", "status": new_status}
+
+
 @api_router.put("/delivery-agents/{agent_id}")
 async def update_delivery_agent(agent_id: str, agent_data: dict):
     """Update delivery agent details (admin endpoint)"""
