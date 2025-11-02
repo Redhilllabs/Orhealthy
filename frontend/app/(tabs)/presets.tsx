@@ -161,10 +161,10 @@ export default function PresetsScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
       Alert.alert('Success', 'Item deleted successfully');
-      // Refresh the appropriate list
-      if (activeTab === 'my-meals') {
+      // Refresh the appropriate list based on active tab and sub-tab
+      if (activeTab === 'meals') {
         fetchMyMeals();
-      } else if (activeTab === 'my-combos') {
+      } else {
         fetchMyCombos();
       }
     } catch (error) {
