@@ -1237,14 +1237,46 @@
                     orders = await fetch(`${API_URL}/orders/by-status/${status}`).then(r => r.json());
                 }
                 
+                updateOrderTableHeaders(status);
                 renderOrders(orders);
             } catch (error) {
+                console.error('Error loading orders:', error);
                 showAlert('orders', 'Error loading orders', 'error');
+            }
+        }
+        
+        function updateOrderTableHeaders(status) {
+            const thead = document.querySelector('#ordersBody').parentElement.querySelector('thead tr');
+            const showAgent = (status === 'out_for_delivery' || status === 'delivered' || status === 'all');
+            
+            if (status === 'all') {
+                // All orders: show status column, no actions
+                thead.innerHTML = `
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Details</th>
+                    <th>Total</th>
+                    <th>Agent</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                `;
+            } else {
+                // Specific status tabs: show actions, no status column
+                thead.innerHTML = `
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Details</th>
+                    <th>Total</th>
+                    ${showAgent ? '<th>Agent</th>' : ''}
+                    <th>Date</th>
+                    <th>Actions</th>
+                `;
             }
         }
 
         function renderOrders(orders) {
             const tbody = document.getElementById('ordersBody');
+            const showAgent = (currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
             
             if (currentOrderStatusFilter === 'all') {
                 // All orders tab - show full info with status column, NO actions
@@ -1264,7 +1296,7 @@
                         <td>₹${order.final_price.toFixed(2)}</td>
                         <td>${order.agent_name || '-'}</td>
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
-                        <td><span class="status-badge status-${order.status}">${order.status.replace('_', ' ')}</span></td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
                     </tr>
                 `;
                 }).join('');
@@ -1299,7 +1331,7 @@
                             </div>
                         </td>
                         <td>₹${order.final_price.toFixed(2)}</td>
-                        <td>${order.agent_name || '-'}</td>
+                        ${showAgent ? `<td>${order.agent_name || '-'}</td>` : ''}
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
                         <td class="actions">
                             ${order.status === 'ready' && !order.assigned_agent_id ? `
@@ -1307,10 +1339,12 @@
                             ` : ''}
                             ${nextStatus ? `
                                 <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="moveOrderForward('${order._id}', '${nextStatus}')">
-                                    Move to ${nextStatus.replace('_', ' ')}
+                                    Move to ${nextStatus.replace(/_/g, ' ')}
                                 </button>
                             ` : ''}
-                            <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px; margin-top: 4px;" onclick="cancelOrder('${order._id}')">Cancel</button>
+                            ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+                                <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px; margin-top: 4px;" onclick="cancelOrder('${order._id}')">Cancel</button>
+                            ` : ''}
                         </td>
                     </tr>
                 `;
