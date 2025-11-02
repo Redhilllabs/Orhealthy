@@ -1021,11 +1021,131 @@ async def send_message(conversation_id: str, message_data: dict, request: Reques
 # Meal & Ingredient endpoints
 @api_router.get("/ingredients")
 async def get_ingredients():
-    """Get all ingredients"""
+    """Get all processed ingredients"""
     ingredients = await db.ingredients.find().to_list(1000)
     for ingredient in ingredients:
         ingredient["_id"] = str(ingredient["_id"])
+        # Calculate price if linked to source ingredient
+        if ingredient.get("source_ingredient_id") and ingredient.get("source_quantity"):
+            source = await db.source_ingredients.find_one({"_id": ObjectId(ingredient["source_ingredient_id"])})
+            if source and source.get("purchases"):
+                latest_purchase = source["purchases"][-1]
+                ingredient["price_per_unit"] = (ingredient["source_quantity"] * latest_purchase["unit_price"])
     return ingredients
+
+# Source Ingredients endpoints
+@api_router.get("/source-ingredients")
+async def get_source_ingredients():
+    """Get all source ingredients with purchase history"""
+    sources = await db.source_ingredients.find().to_list(1000)
+    for source in sources:
+        source["_id"] = str(source["_id"])
+        # Calculate stats
+        if source.get("purchases"):
+            unit_prices = [p["unit_price"] for p in source["purchases"]]
+            source["latest_unit_price"] = source["purchases"][-1]["unit_price"]
+            source["lowest_unit_price"] = min(unit_prices)
+            source["highest_unit_price"] = max(unit_prices)
+            source["latest_purchase"] = source["purchases"][-1]
+        else:
+            source["latest_unit_price"] = 0
+            source["lowest_unit_price"] = 0
+            source["highest_unit_price"] = 0
+            source["latest_purchase"] = None
+    return sources
+
+@api_router.post("/source-ingredients")
+async def create_source_ingredient(source_data: dict):
+    """Create a new source ingredient"""
+    source = {
+        "name": source_data["name"],
+        "image": source_data.get("image"),
+        "unit": source_data["unit"],
+        "purchases": []
+    }
+    result = await db.source_ingredients.insert_one(source)
+    return {"message": "Source ingredient created", "id": str(result.inserted_id)}
+
+@api_router.post("/source-ingredients/{source_id}/purchase")
+async def add_purchase(source_id: str, purchase_data: dict):
+    """Add a purchase entry to source ingredient"""
+    unit_price = purchase_data["purchase_price"] / purchase_data["purchase_quantity"]
+    
+    purchase = {
+        "purchase_quantity": purchase_data["purchase_quantity"],
+        "purchase_price": purchase_data["purchase_price"],
+        "unit_price": unit_price,
+        "purchase_date": datetime.now(timezone.utc)
+    }
+    
+    await db.source_ingredients.update_one(
+        {"_id": ObjectId(source_id)},
+        {"$push": {"purchases": purchase}}
+    )
+    
+    # Update all processed ingredients linked to this source
+    processed_ingredients = await db.ingredients.find({"source_ingredient_id": source_id}).to_list(1000)
+    for ing in processed_ingredients:
+        if ing.get("source_quantity"):
+            new_price = ing["source_quantity"] * unit_price
+            await db.ingredients.update_one(
+                {"_id": ing["_id"]},
+                {"$set": {"price_per_unit": new_price}}
+            )
+    
+    return {"message": "Purchase added", "unit_price": unit_price}
+
+@api_router.delete("/source-ingredients/{source_id}/purchase/{purchase_index}")
+async def delete_purchase(source_id: str, purchase_index: int):
+    """Delete a purchase entry from source ingredient history"""
+    source = await db.source_ingredients.find_one({"_id": ObjectId(source_id)})
+    if not source:
+        raise HTTPException(status_code=404, detail="Source ingredient not found")
+    
+    purchases = source.get("purchases", [])
+    if purchase_index < 0 or purchase_index >= len(purchases):
+        raise HTTPException(status_code=400, detail="Invalid purchase index")
+    
+    purchases.pop(purchase_index)
+    
+    await db.source_ingredients.update_one(
+        {"_id": ObjectId(source_id)},
+        {"$set": {"purchases": purchases}}
+    )
+    
+    return {"message": "Purchase deleted"}
+
+@api_router.put("/source-ingredients/{source_id}")
+async def update_source_ingredient(source_id: str, source_data: dict):
+    """Update source ingredient details (not purchases)"""
+    update_data = {}
+    if "name" in source_data:
+        update_data["name"] = source_data["name"]
+    if "image" in source_data:
+        update_data["image"] = source_data["image"]
+    if "unit" in source_data:
+        update_data["unit"] = source_data["unit"]
+    
+    await db.source_ingredients.update_one(
+        {"_id": ObjectId(source_id)},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Source ingredient updated"}
+
+@api_router.delete("/source-ingredients/{source_id}")
+async def delete_source_ingredient(source_id: str):
+    """Delete a source ingredient"""
+    # Check if any processed ingredients are linked to this source
+    linked_count = await db.ingredients.count_documents({"source_ingredient_id": source_id})
+    if linked_count > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete: {linked_count} processed ingredients are linked to this source")
+    
+    result = await db.source_ingredients.delete_one({"_id": ObjectId(source_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Source ingredient not found")
+    
+    return {"message": "Source ingredient deleted"}
 
 @api_router.get("/meals")
 async def get_meals():
