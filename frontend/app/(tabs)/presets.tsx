@@ -90,9 +90,9 @@ export default function PresetsScreen() {
 
   const fetchAllData = async () => {
     await Promise.all([
+      fetchAllMeals(),
       fetchAllCombos(),
-      fetchAllCombos(),
-      fetchMyCombos(),
+      fetchMyMeals(),
       fetchMyCombos()
     ]);
   };
