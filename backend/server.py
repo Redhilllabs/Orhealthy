@@ -186,34 +186,92 @@ class SourceIngredientReference(BaseModel):
     source_quantity: float  # Quantity of this source ingredient needed
 
 class Ingredient(BaseModel):
+    """Processed Ingredient - created from source ingredients"""
     name: str
-    price_per_unit: float
     unit: str  # g, ml, piece, cup, etc.
     description: Optional[str] = None
-    nutritional_info: Optional[dict] = None
     images: List[str] = []  # Base64 encoded images
     tags: List[str] = []  # Tags for filtering
-    # New fields for processed ingredients - updated to support multiple sources
+    # Source ingredients that make up this processed ingredient
     source_ingredients: List[SourceIngredientReference] = []  # Multiple source ingredients
     step_size: float = 1.0  # Default step size for frontend increment/decrement
     nutrition_profile: List[NutritionEntry] = []  # Nutrition per unit
+    # Price is auto-calculated from source ingredients
+    
+    @property
+    def price_per_unit(self):
+        """Calculate price from source ingredients"""
+        if not self.source_ingredients:
+            return 0
+        # This will be calculated based on source ingredient prices
+        return 0  # Placeholder - will be calculated in endpoint
 
+class RecipeIngredient(BaseModel):
+    """Processed ingredient used in a recipe"""
+    ingredient_id: str  # Reference to processed ingredient
+    name: str
+    quantity: float  # How much of this ingredient
+    unit: str
+    step_size: Optional[float] = None  # Override step size for this recipe, None = use ingredient's default
+    price: float  # Calculated from processed ingredient
+
+class Recipe(BaseModel):
+    """Recipe - created from processed ingredients"""
+    name: str
+    description: str
+    images: List[str] = []  # Base64 encoded images
+    ingredients: List[RecipeIngredient]  # Processed ingredients
+    tags: List[str] = []  # Tags for filtering
+    created_by: str = "admin"  # Can be user ID for saved recipes
+    # Nutrition and price auto-calculated from ingredients
+    
+    @property
+    def total_price(self):
+        """Calculate total price from ingredients"""
+        return sum(ing.price * ing.quantity for ing in self.ingredients)
+    
+    @property
+    def nutrition_profile(self):
+        """Calculate nutrition from all ingredients"""
+        # Will be calculated from ingredient nutrition profiles
+        return []
+
+class MealRecipe(BaseModel):
+    """Recipe used in a meal"""
+    recipe_id: str  # Reference to recipe
+    name: str
+    quantity: float = 1.0  # Multiplier for the recipe
+    step_size: Optional[float] = None  # Step size for adjusting this recipe in the meal
+    price: float  # Calculated from recipe
+
+class Meal(BaseModel):
+    """Meal - combination of recipes"""
+    name: str
+    description: str
+    images: List[str] = []  # Base64 encoded images
+    recipes: List[MealRecipe]  # Recipes that make up this meal
+    tags: List[str] = []  # Tags for filtering
+    is_preset: bool = True  # True for admin-created, False for user-created
+    created_by: str = "admin"  # User ID or "admin"
+    
+    @property
+    def total_price(self):
+        """Calculate total price from recipes"""
+        return sum(recipe.price * recipe.quantity for recipe in self.recipes)
+    
+    @property
+    def nutrition_profile(self):
+        """Calculate nutrition from all recipes"""
+        # Will be calculated from recipe nutrition profiles
+        return []
+
+# Legacy support - keep MealIngredient for cart compatibility
 class MealIngredient(BaseModel):
     ingredient_id: str
     name: str
     price: float
     default_quantity: float
     quantity: Optional[float] = None  # For customization
-
-class Meal(BaseModel):
-    name: str
-    description: str
-    images: List[str] = []  # Base64 encoded images
-    base_price: float
-    ingredients: List[MealIngredient]
-    tags: List[str] = []  # Tags for filtering
-    is_preset: bool = True
-    created_by: str = "admin"
 
 class CartItem(BaseModel):
     meal_id: Optional[str] = None
