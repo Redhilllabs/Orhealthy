@@ -1195,7 +1195,7 @@
             renderSourceIngredientEntries();
         }
 
-        function editIngredient(id) {
+        async function editIngredient(id) {
             editingIngredientId = id;
             const ingredient = allIngredients.find(i => i._id === id);
             if (!ingredient) return;
@@ -1208,6 +1208,16 @@
             document.getElementById('ingredientDescription').value = ingredient.description || '';
             document.getElementById('ingredientTags').value = ingredient.tags ? ingredient.tags.join(', ') : '';
             document.getElementById('stepSize').value = ingredient.step_size || 1;
+            
+            // Load source ingredients if not already loaded
+            if (allSourceIngredients.length === 0) {
+                try {
+                    const sources = await fetch(`${API_URL}/source-ingredients`).then(r => r.json());
+                    allSourceIngredients = sources;
+                } catch (error) {
+                    console.error('Error loading source ingredients:', error);
+                }
+            }
             
             // Load source ingredients (multiple sources support)
             sourceIngredientEntries = (ingredient.source_ingredients || []).map((src, idx) => ({
