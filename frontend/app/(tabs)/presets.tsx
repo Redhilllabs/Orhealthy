@@ -272,7 +272,8 @@ export default function PresetsScreen() {
           )}
           <View style={styles.mealFooter}>
             <Text style={styles.mealPrice}>₹{mealPrice.toFixed(2)}</Text>
-            {activeTab.startsWith('my-') && (
+            {((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
+              (activeTab === 'combos' && combosSubTab === 'my-combos')) && (
               <TouchableOpacity
                 onPress={(e) => {
                   e.stopPropagation();
