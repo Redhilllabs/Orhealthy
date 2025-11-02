@@ -2056,6 +2056,16 @@ async def update_order_status(order_id: str, status_data: dict, request: Request
     )
     return {"message": "Order status updated"}
 
+
+@api_router.delete("/admin/orders/{order_id}")
+async def delete_order(order_id: str, request: Request):
+    """Delete an order (admin only)"""
+    result = await db.orders.delete_one({"_id": ObjectId(order_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Order not found")
+    return {"message": "Order deleted"}
+
+
 @api_router.get("/admin/users")
 async def get_all_users(request: Request):
     """Get all users (admin only)"""
