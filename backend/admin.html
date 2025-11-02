@@ -1266,8 +1266,7 @@
             try {
                 let response;
                 if (editingAgentId) {
-                    // Update existing agent
-                    delete data.email; // Can't change email
+                    // Update existing agent - email CAN be changed now
                     response = await fetch(`${API_URL}/delivery-agents/${editingAgentId}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
@@ -1284,7 +1283,6 @@
                 
                 if (response.ok) {
                     closeModal('deliveryAgentModal');
-                    document.getElementById('agentEmail').disabled = false; // Re-enable for next time
                     showAlert('delivery', editingAgentId ? 'Delivery agent updated successfully' : 'Delivery agent created successfully', 'success');
                     loadDeliveryAgents();
                 }
