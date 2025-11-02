@@ -364,10 +364,15 @@ async def calculate_recipe_price(recipe_data: dict) -> float:
         quantity = ingredient.get("quantity", 0)
         
         # Get processed ingredient and calculate its price
-        processed_ing = await db.ingredients.find_one({"_id": ObjectId(ingredient_id)})
-        if processed_ing:
-            ing_price = await calculate_processed_ingredient_price(processed_ing)
-            total_price += ing_price * quantity
+        try:
+            processed_ing = await db.ingredients.find_one({"_id": ObjectId(ingredient_id)})
+            if processed_ing:
+                ing_price = await calculate_processed_ingredient_price(processed_ing)
+                if ing_price is not None:
+                    total_price += ing_price * quantity
+        except Exception:
+            # Skip invalid ingredient IDs
+            continue
     
     return total_price
 
