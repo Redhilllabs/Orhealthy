@@ -2049,9 +2049,20 @@
         }
 
         async function loadOrders() {
+            // Initialize orders tab with "all" filter
+            currentOrderStatusFilter = 'all';
+            document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelector('.status-tab').classList.add('active'); // First tab (All)
+            
             try {
                 const orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
-                const tbody = document.getElementById('ordersBody');
+                updateOrderTableHeaders('all');
+                renderOrders(orders);
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                showAlert('orders', 'Error loading orders', 'error');
+            }
+        }
                 tbody.innerHTML = orders.map(order => {
                     const orderId = order._id;
                     const billingAddress = order.billing_address || {};
