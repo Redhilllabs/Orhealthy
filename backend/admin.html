@@ -1498,17 +1498,21 @@
             }
             
             try {
-                const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+                const response = await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ status: nextStatus })
                 });
                 
                 if (response.ok) {
-                    showAlert('orders', `Order moved to ${nextStatus.replace('_', ' ')}`, 'success');
+                    showAlert('orders', `Order moved to ${nextStatus.replace(/_/g, ' ')}`, 'success');
                     filterOrdersByStatus(currentOrderStatusFilter);
+                } else {
+                    const error = await response.json();
+                    showAlert('orders', error.detail || 'Error updating order status', 'error');
                 }
             } catch (error) {
+                console.error('Error updating order status:', error);
                 showAlert('orders', 'Error updating order status', 'error');
             }
         }
@@ -1517,7 +1521,7 @@
             if (!confirm('Are you sure you want to cancel this order?')) return;
             
             try {
-                const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+                const response = await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ status: 'cancelled' })
@@ -1527,9 +1531,11 @@
                     showAlert('orders', 'Order cancelled', 'success');
                     filterOrdersByStatus(currentOrderStatusFilter);
                 } else {
-                    showAlert('orders', 'Error cancelling order', 'error');
+                    const error = await response.json();
+                    showAlert('orders', error.detail || 'Error cancelling order', 'error');
                 }
             } catch (error) {
+                console.error('Error cancelling order:', error);
                 showAlert('orders', 'Error cancelling order', 'error');
             }
         }
