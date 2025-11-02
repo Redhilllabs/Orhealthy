@@ -1503,6 +1503,27 @@
             } catch (error) {
                 showAlert('orders', 'Error cancelling order', 'error');
             }
+
+        async function deleteOrder(orderId) {
+            if (!confirm('Are you sure you want to DELETE this order? This action cannot be undone.')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/orders/${orderId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('orders', 'Order deleted successfully', 'success');
+                    filterOrdersByStatus(currentOrderStatusFilter);
+                } else {
+                    showAlert('orders', 'Error deleting order', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                showAlert('orders', 'Error deleting order', 'error');
+            }
+        }
+
         }
 
         async function updateOrderStatus(orderId, newStatus) {
