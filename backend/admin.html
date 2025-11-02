@@ -1594,7 +1594,10 @@
 
         async function showAssignAgentModal(orderId) {
             currentOrderForAssignment = orderId;
+            selectedAgentId = null;
             document.getElementById('assignAgentModal').classList.add('active');
+            document.getElementById('selectedAgentInfo').style.display = 'none';
+            document.getElementById('confirmAssignBtn').style.display = 'none';
             
             // Load available agents
             try {
@@ -1603,20 +1606,22 @@
                 
                 const container = document.getElementById('availableAgentsList');
                 if (availableAgents.length === 0) {
-                    container.innerHTML = '<p style="color: #ef4444;">No available agents at the moment.</p>';
+                    container.innerHTML = '<p style="color: #ef4444;">No available agents at the moment. Agents must be in "Available" status to receive orders.</p>';
                     return;
                 }
                 
                 container.innerHTML = availableAgents.map(agent => `
                     <div style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;" 
+                         id="agent-${agent._id}"
                          onmouseover="this.style.borderColor='#ffd700'" 
-                         onmouseout="this.style.borderColor='#e2e8f0'"
-                         onclick="assignAgent('${agent._id}')">
+                         onmouseout="if(selectedAgentId !== '${agent._id}') this.style.borderColor='#e2e8f0'"
+                         onclick="selectAgent('${agent._id}', '${agent.name}', '${agent.vehicle}', '${agent.email}')">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             ${agent.image ? `<img src="${agent.image}" style="width: 50px; height: 50px; border-radius: 25px;">` : ''}
                             <div>
                                 <div style="font-weight: 600; font-size: 16px; color: #334155;">${agent.name}</div>
-                                <div style="color: #64748b; font-size: 14px;">${agent.vehicle} • ${agent.email}</div>
+                                <div style="color: #64748b; font-size: 14px;">${agent.vehicle} • ${agent.vehicle_number || 'N/A'}</div>
+                                <div style="color: #10b981; font-size: 12px; font-weight: 600; margin-top: 4px;">● Available</div>
                             </div>
                         </div>
                     </div>
