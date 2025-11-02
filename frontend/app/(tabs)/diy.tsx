@@ -51,7 +51,7 @@ interface Recipe {
 }
 
 export default function DIYScreen() {
-  const [activeTab, setActiveTab] = useState<'ingredients' | 'all-recipes' | 'my-recipes'>('ingredients');
+  const [activeTab, setActiveTab] = useState<'ingredients' | 'all-meals' | 'my-meals'>('ingredients');
   
   // Ingredients tab state
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -59,8 +59,8 @@ export default function DIYScreen() {
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
   
   // Recipes tabs state
-  const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
-  const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
+  const [allMeals, setAllRecipes] = useState<Recipe[]>([]);
+  const [myMeals, setMyRecipes] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [selectedRecipes, setSelectedRecipes] = useState<Map<string, number>>(new Map());
   
@@ -83,13 +83,13 @@ export default function DIYScreen() {
     } else {
       filterRecipes();
     }
-  }, [searchQuery, selectedTag, ingredients, allRecipes, myRecipes, activeTab]);
+  }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, activeTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
       fetchIngredients(),
-      fetchAllRecipes(),
-      fetchMyRecipes()
+      fetchAllMeals(),
+      fetchMyMeals()
     ]);
   };
 
@@ -112,7 +112,7 @@ export default function DIYScreen() {
     }
   };
 
-  const fetchAllRecipes = async () => {
+  const fetchAllMeals = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/recipes`);
@@ -130,12 +130,12 @@ export default function DIYScreen() {
     }
   };
 
-  const fetchMyRecipes = async () => {
+  const fetchMyMeals = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals?type=recipe`, {
+      const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMyRecipes(response.data);
@@ -161,7 +161,7 @@ export default function DIYScreen() {
   };
 
   const filterRecipes = () => {
-    let recipes = activeTab === 'all-recipes' ? allRecipes : myRecipes;
+    let recipes = activeTab === 'all-meals' ? allMeals : myMeals;
 
     if (searchQuery) {
       recipes = recipes.filter(recipe =>
@@ -242,7 +242,7 @@ export default function DIYScreen() {
     } else {
       let total = 0;
       selectedRecipes.forEach((qty, id) => {
-        const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+        const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
         if (recipe) {
           total += (recipe.calculated_price || 0) * qty;
         }
@@ -302,7 +302,7 @@ export default function DIYScreen() {
       } else {
         // Creating meal from recipes
         const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
-          const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+          const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -373,7 +373,7 @@ export default function DIYScreen() {
         };
       } else {
         const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
-          const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+          const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -484,19 +484,19 @@ export default function DIYScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-recipes' && styles.activeTab]}
-          onPress={() => setActiveTab('all-recipes')}
+          style={[styles.tab, activeTab === 'all-meals' && styles.activeTab]}
+          onPress={() => setActiveTab('all-meals')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-recipes' && styles.activeTabText]}>
-            From All Recipes ({allRecipes.length})
+          <Text style={[styles.tabText, activeTab === 'all-meals' && styles.activeTabText]}>
+            From All Meals ({allMeals.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-recipes' && styles.activeTab]}
-          onPress={() => setActiveTab('my-recipes')}
+          style={[styles.tab, activeTab === 'my-meals' && styles.activeTab]}
+          onPress={() => setActiveTab('my-meals')}
         >
-          <Text style={[styles.tabText, activeTab === 'my-recipes' && styles.activeTabText]}>
-            From My Recipes ({myRecipes.length})
+          <Text style={[styles.tabText, activeTab === 'my-meals' && styles.activeTabText]}>
+            From My Meals ({myMeals.length})
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -581,7 +581,7 @@ export default function DIYScreen() {
                   );
                 })
               : Array.from(selectedRecipes.entries()).map(([id, qty]) => {
-                  const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+                  const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
                   if (!recipe) return null;
                   return (
                     <View key={id} style={styles.selectedItem}>
