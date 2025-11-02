@@ -661,7 +661,9 @@ export default function DIYScreen() {
             );
           }}
         >
-          <Text style={styles.nameInputPromptText}>Tap to name your meal</Text>
+          <Text style={styles.nameInputPromptText}>
+            {activeTab === 'diy-combos' ? 'Tap to name your combo' : 'Tap to name your meal'}
+          </Text>
         </TouchableOpacity>
       )}
     </SafeAreaView>
