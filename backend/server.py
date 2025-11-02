@@ -1404,7 +1404,10 @@ async def get_recipes():
 @api_router.get("/recipes/{recipe_id}")
 async def get_recipe(recipe_id: str):
     """Get recipe by ID with calculated price and nutrition"""
-    recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+    try:
+        recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+    except Exception:
+        raise HTTPException(status_code=404, detail="Recipe not found")
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     recipe["_id"] = str(recipe["_id"])
