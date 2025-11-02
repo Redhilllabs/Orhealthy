@@ -406,10 +406,14 @@ async def calculate_nutrition_profile(ingredients: list, collection_name: str = 
         quantity = item.get("quantity", 1.0)
         
         # Get the ingredient/recipe data
-        if collection_name == "ingredients":
-            data = await db.ingredients.find_one({"_id": ObjectId(item_id)})
-        else:
-            data = await db.meals.find_one({"_id": ObjectId(item_id)})
+        try:
+            if collection_name == "ingredients":
+                data = await db.ingredients.find_one({"_id": ObjectId(item_id)})
+            else:
+                data = await db.meals.find_one({"_id": ObjectId(item_id)})
+        except Exception:
+            # Skip invalid IDs
+            continue
         
         if data and data.get("nutrition_profile"):
             for nutrition in data["nutrition_profile"]:
