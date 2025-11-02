@@ -563,7 +563,7 @@ export default function DIYScreen() {
 
       {/* Items List */}
       <FlatList
-        data={activeTab === 'diy-meals' ? filteredIngredients : filteredRecipes}
+        data={activeTab === 'diy-meals' ? filteredIngredients : filteredMeals}
         renderItem={activeTab === 'diy-meals' ? renderIngredientItem : renderRecipeItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
