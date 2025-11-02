@@ -201,8 +201,8 @@ export default function DeliveryModeScreen() {
               <Text style={styles.headerSubtitle}>{agentData?.name || 'Delivery Agent'}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.switchButton} onPress={switchToUserMode}>
-            <Text style={styles.switchButtonText}>Switch to User Mode</Text>
+          <TouchableOpacity style={styles.exitButton} onPress={switchToUserMode}>
+            <Text style={styles.exitButtonText}>✕</Text>
           </TouchableOpacity>
         </View>
         
