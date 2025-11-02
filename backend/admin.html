@@ -393,6 +393,76 @@
     </div>
 
     <!-- Modals -->
+    <!-- Source Ingredient Modal -->
+    <div id="sourceIngredientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Source Ingredient</h2>
+                <span class="close" onclick="closeModal('sourceIngredientModal')">&times;</span>
+            </div>
+            <form id="sourceIngredientForm" onsubmit="saveSourceIngredient(event)">
+                <div class="form-group">
+                    <label>Image</label>
+                    <div class="image-upload" onclick="document.getElementById('sourceImage').click()">
+                        <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+                        <div style="font-weight: 600; color: #475569;">Click to upload image</div>
+                    </div>
+                    <input type="file" id="sourceImage" accept="image/*" style="display: none;" onchange="handleSourceImage(event)">
+                    <div id="sourceImagePreview" style="margin-top: 12px;"></div>
+                </div>
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="sourceName" required placeholder="e.g., Kala Chana">
+                </div>
+                <div class="form-group">
+                    <label>Unit *</label>
+                    <select id="sourceUnit" required>
+                        <option value="">Select unit</option>
+                        <option value="pcs">Pieces (pcs)</option>
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="g">Grams (g)</option>
+                        <option value="liters">Liters</option>
+                        <option value="ml">Milliliters (ml)</option>
+                        <option value="dozen">Dozen</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn">Create Source Ingredient</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Purchase Modal -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Purchase</h2>
+                <span class="close" onclick="closeModal('purchaseModal')">&times;</span>
+            </div>
+            <form id="purchaseForm" onsubmit="savePurchase(event)">
+                <div class="form-group">
+                    <label>Purchase Quantity *</label>
+                    <input type="number" step="0.01" id="purchaseQuantity" required placeholder="e.g., 8">
+                    <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">
+                        The quantity of the source ingredient purchased
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label>Purchase Price (₹) *</label>
+                    <input type="number" step="0.01" id="purchasePrice" required placeholder="e.g., 100">
+                    <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">
+                        Total price paid for this purchase
+                    </small>
+                </div>
+                <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                    <p style="margin: 0; font-size: 13px; color: #475569;">
+                        <strong>Note:</strong> Unit price will be calculated automatically as (Purchase Price ÷ Purchase Quantity)
+                    </p>
+                </div>
+                <button type="submit" class="btn">Add Purchase</button>
+            </form>
+        </div>
+    </div>
+
     <div id="ingredientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
