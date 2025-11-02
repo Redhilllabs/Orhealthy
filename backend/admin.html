@@ -1477,6 +1477,7 @@
                         ${showAgent ? `<td>${order.agent_name || '-'}</td>` : ''}
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
                         <td class="actions">
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px; margin-bottom: 4px;" onclick="showOrderDetails('${order._id}')">View Details</button><br>
                             ${order.status === 'ready' && !order.assigned_agent_id ? `
                                 <button class="btn" style="font-size: 12px; padding: 6px 12px; margin-bottom: 4px;" onclick="showAssignAgentModal('${order._id}')">Assign Agent</button><br>
                             ` : ''}
