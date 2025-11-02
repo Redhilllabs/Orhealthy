@@ -1150,14 +1150,33 @@
             const tags = document.getElementById('ingredientTags').value
                 .split(',').map(t => t.trim()).filter(Boolean);
             
+            // Prepare nutrition profile
+            const nutrition_profile = nutritionEntries
+                .filter(e => e.name && e.value && e.unit)
+                .map(e => ({
+                    name: e.name,
+                    value: parseFloat(e.value),
+                    unit: e.unit
+                }));
+            
             const data = {
                 name: document.getElementById('ingredientName').value,
                 price_per_unit: parseFloat(document.getElementById('ingredientPrice').value),
                 unit: document.getElementById('ingredientUnit').value,
                 description: document.getElementById('ingredientDescription').value,
                 tags: tags,
-                images: ingredientImages
+                images: ingredientImages,
+                step_size: parseFloat(document.getElementById('stepSize').value) || 1.0,
+                nutrition_profile: nutrition_profile
             };
+            
+            // Add source ingredient fields if provided
+            const sourceId = document.getElementById('sourceIngredientId').value;
+            const sourceQty = document.getElementById('sourceQuantity').value;
+            if (sourceId && sourceQty) {
+                data.source_ingredient_id = sourceId;
+                data.source_quantity = parseFloat(sourceQty);
+            }
             
             try {
                 let response;
@@ -1179,11 +1198,11 @@
                 
                 if (response.ok) {
                     closeModal('ingredientModal');
-                    showAlert('ingredients', editingIngredientId ? 'Ingredient updated successfully' : 'Ingredient saved successfully', 'success');
+                    showAlert('ingredients', editingIngredientId ? 'Processed ingredient updated successfully' : 'Processed ingredient created successfully', 'success');
                     loadIngredients();
                 }
             } catch (error) {
-                showAlert('ingredients', 'Error saving ingredient', 'error');
+                showAlert('ingredients', 'Error saving processed ingredient', 'error');
             }
         }
 
