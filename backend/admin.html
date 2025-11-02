@@ -107,17 +107,28 @@
                 <span class="nav-icon">📊</span>
                 <span>Dashboard</span>
             </div>
-            <div class="nav-item" onclick="switchTab('source-ingredients')">
-                <span class="nav-icon">🌾</span>
-                <span>Source Ingredients</span>
+            <div class="nav-item" onclick="toggleProductsMenu()">
+                <span class="nav-icon">📦</span>
+                <span>Products</span>
+                <span style="margin-left: auto;">▼</span>
             </div>
-            <div class="nav-item" onclick="switchTab('ingredients')">
-                <span class="nav-icon">🥗</span>
-                <span>Processed Ingredients</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('meals')">
-                <span class="nav-icon">🍽️</span>
-                <span>Preset Meals</span>
+            <div id="productsSubmenu" class="submenu" style="display: none;">
+                <div class="nav-item submenu-item" onclick="switchTab('source-ingredients')">
+                    <span class="nav-icon">🌾</span>
+                    <span>Source Ingredients</span>
+                </div>
+                <div class="nav-item submenu-item" onclick="switchTab('ingredients')">
+                    <span class="nav-icon">🥗</span>
+                    <span>Processed Ingredients</span>
+                </div>
+                <div class="nav-item submenu-item" onclick="switchTab('recipes')">
+                    <span class="nav-icon">📖</span>
+                    <span>Recipes</span>
+                </div>
+                <div class="nav-item submenu-item" onclick="switchTab('meals')">
+                    <span class="nav-icon">🍽️</span>
+                    <span>Meals</span>
+                </div>
             </div>
             <div class="nav-item" onclick="switchTab('users')">
                 <span class="nav-icon">👥</span>
