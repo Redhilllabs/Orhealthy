@@ -84,7 +84,7 @@ export default function DIYScreen() {
     } else {
       filterMeals();
     }
-  }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, activeTab]);
+  }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, activeTab, combosSubTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
