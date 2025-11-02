@@ -552,6 +552,11 @@ const styles = StyleSheet.create({
     color: '#4caf50',
     fontWeight: '600',
   },
+  orderDate: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 4,
+  },
   creditCard: {
     backgroundColor: '#fff',
     padding: 16,
