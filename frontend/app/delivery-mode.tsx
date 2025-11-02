@@ -677,6 +677,18 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 2,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  refreshButton: {
+    backgroundColor: '#333',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   exitButton: {
     backgroundColor: '#333',
     width: 40,
