@@ -573,7 +573,7 @@ export default function DIYScreen() {
 
       {/* Selected Items Panel */}
       {((activeTab === 'diy-meals' && selectedIngredients.size > 0) || 
-        (activeTab !== 'ingredients' && selectedMeals.size > 0)) && (
+        (activeTab === 'diy-combos' && selectedMeals.size > 0)) && (
         <View style={styles.selectedPanel}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectedScroll}>
             {activeTab === 'diy-meals'
