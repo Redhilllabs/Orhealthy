@@ -1837,24 +1837,35 @@
                 const ingredients = await response.json();
                 allIngredients = ingredients;
                 const tbody = document.getElementById('ingredientsBody');
-                tbody.innerHTML = ingredients.map(ing => `
-                    <tr>
-                        <td>${ing.images && ing.images.length > 0 ? `<img src="${ing.images[0]}" class="table-image">` : '-'}</td>
-                        <td>${ing.name}</td>
-                        <td>₹${(ing.price_per_unit || ing.calculated_price || 0).toFixed(2)}</td>
-                        <td>${ing.unit}</td>
-                        <td>${ing.tags ? ing.tags.join(', ') : '-'}</td>
-                        <td class="actions">
-                            <button class="btn" onclick="editIngredient('${ing._id}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteIngredient('${ing._id}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
+                
+                // Safely render ingredients
+                tbody.innerHTML = ingredients.map(ing => {
+                    const name = ing.name || 'Unknown';
+                    const price = ing.price_per_unit || ing.calculated_price || 0;
+                    const unit = ing.unit || '';
+                    const tags = ing.tags ? ing.tags.join(', ') : '-';
+                    const image = ing.images && ing.images.length > 0 ? `<img src="${ing.images[0]}" class="table-image">` : '-';
+                    
+                    return `
+                        <tr>
+                            <td>${image}</td>
+                            <td>${name}</td>
+                            <td>₹${price.toFixed(2)}</td>
+                            <td>${unit}</td>
+                            <td>${tags}</td>
+                            <td class="actions">
+                                <button class="btn" onclick="editIngredient('${ing._id}')">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteIngredient('${ing._id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+                
                 updateMealIngredientSelect();
             } catch (error) {
                 console.error('Error loading ingredients:', error);
-                // Only show alert if it's a real error, not during initial load
-                if (error.message) {
+                // Only show alert for network errors
+                if (error.message === 'Failed to load ingredients') {
                     showAlert('ingredients', 'Error loading ingredients', 'error');
                 }
             }
