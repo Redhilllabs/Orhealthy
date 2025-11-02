@@ -66,6 +66,7 @@ export default function DIYScreen() {
   const [selectedMeals, setSelectedMeals] = useState<Map<string, number>>(new Map());
   
   const [mealName, setMealName] = useState('');
+  const [showNameModal, setShowNameModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
