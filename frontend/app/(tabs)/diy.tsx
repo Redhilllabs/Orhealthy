@@ -51,18 +51,19 @@ interface Recipe {
 }
 
 export default function DIYScreen() {
-  const [activeTab, setActiveTab] = useState<'ingredients' | 'all-meals' | 'my-meals'>('ingredients');
+  const [activeTab, setActiveTab] = useState<'diy-meals' | 'diy-combos'>('diy-meals');
+  const [combosSubTab, setCombosSubTab] = useState<'all-meals' | 'my-meals'>('all-meals');
   
-  // Ingredients tab state
+  // DIY Meals tab state (from ingredients)
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [filteredIngredients, setFilteredIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
   
-  // Recipes tabs state
+  // DIY Combos tab state (from meals)
   const [allMeals, setAllMeals] = useState<Recipe[]>([]);
   const [myMeals, setMyMeals] = useState<Recipe[]>([]);
-  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
-  const [selectedRecipes, setSelectedRecipes] = useState<Map<string, number>>(new Map());
+  const [filteredMeals, setFilteredMeals] = useState<Recipe[]>([]);
+  const [selectedMeals, setSelectedMeals] = useState<Map<string, number>>(new Map());
   
   const [mealName, setMealName] = useState('');
   const [loading, setLoading] = useState(true);
