@@ -2642,6 +2642,39 @@
             }
         }
 
+        // Initialize event listeners when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up navigation');
+            
+            // Add click handlers to all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    console.log('Nav item clicked:', tabName);
+                    
+                    if (tabName === 'products-toggle') {
+                        toggleProductsMenu();
+                    } else if (tabName) {
+                        switchTab(tabName);
+                    }
+                });
+            });
+            
+            // Add click handlers to order status tabs
+            document.querySelectorAll('.status-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const status = this.getAttribute('data-status');
+                    if (status) {
+                        filterOrdersByStatus(status);
+                    }
+                });
+            });
+            
+            // Load initial dashboard
+            console.log('Loading initial dashboard');
+            loadDashboard();
+        });
+
     </script>
 </body>
 </html>
