@@ -1399,6 +1399,8 @@ async def update_delivery_agent(agent_id: str, agent_data: dict):
     update_data = {}
     if "name" in agent_data:
         update_data["name"] = agent_data["name"]
+    if "email" in agent_data:
+        update_data["email"] = agent_data["email"]
     if "contact_number" in agent_data:
         update_data["contact_number"] = agent_data["contact_number"]
     if "vehicle" in agent_data:
