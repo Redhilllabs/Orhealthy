@@ -64,6 +64,15 @@ export default function DeliveryModeScreen() {
 
   useEffect(() => {
     loadData();
+    
+    // Set up auto-refresh every 10 seconds for orders
+    const refreshInterval = setInterval(() => {
+      if (!loading) {
+        loadData();
+      }
+    }, 10000);
+    
+    return () => clearInterval(refreshInterval);
   }, []);
 
   const loadData = async () => {
