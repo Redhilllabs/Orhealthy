@@ -211,13 +211,13 @@ export default function DIYScreen() {
     } else {
       newSelected.set(recipeId, 1);
     }
-    setSelectedRecipes(newSelected);
+    setSelectedMeals(newSelected);
   };
 
   const removeMeal = (recipeId: string) => {
     const newSelected = new Map(selectedMeals);
     newSelected.delete(recipeId);
-    setSelectedRecipes(newSelected);
+    setSelectedMeals(newSelected);
   };
 
   const updateMealQuantity = (recipeId: string, quantity: number) => {
@@ -226,7 +226,7 @@ export default function DIYScreen() {
     } else {
       const newSelected = new Map(selectedMeals);
       newSelected.set(recipeId, quantity);
-      setSelectedRecipes(newSelected);
+      setSelectedMeals(newSelected);
     }
   };
 
@@ -331,7 +331,7 @@ export default function DIYScreen() {
       // Reset
       setMealName('');
       setSelectedIngredients(new Map());
-      setSelectedRecipes(new Map());
+      setSelectedMeals(new Map());
     } catch (error) {
       console.error('Error saving meal:', error);
       Alert.alert('Error', 'Failed to save meal');
@@ -402,7 +402,7 @@ export default function DIYScreen() {
       
       setMealName('');
       setSelectedIngredients(new Map());
-      setSelectedRecipes(new Map());
+      setSelectedMeals(new Map());
     } catch (error) {
       console.error('Error adding to cart:', error);
       Alert.alert('Error', 'Failed to add to cart');
