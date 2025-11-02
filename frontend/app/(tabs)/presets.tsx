@@ -157,10 +157,23 @@ export default function PresetsScreen() {
         price: totalPrice,
       });
 
-      Alert.alert('Success', 'Added to cart!');
+      // Platform-specific success message
+      if (Platform.OS === 'web') {
+        alert('Added to cart!');
+      } else {
+        Alert.alert('Success', 'Added to cart!');
+      }
+      
       setSelectedMeal(null);
     } catch (error) {
-      Alert.alert('Error', 'Failed to add to cart');
+      console.error('Error adding to cart:', error);
+      
+      // Platform-specific error message
+      if (Platform.OS === 'web') {
+        alert('Failed to add to cart');
+      } else {
+        Alert.alert('Error', 'Failed to add to cart');
+      }
     }
   };
 
