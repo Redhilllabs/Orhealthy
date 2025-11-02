@@ -1631,6 +1631,72 @@
                 document.getElementById('assignAgentError').style.display = 'block';
             }
         }
+        function selectAgent(agentId, agentName, agentVehicle, agentEmail) {
+            selectedAgentId = agentId;
+            
+            // Remove selection from all agents
+            document.querySelectorAll('[id^="agent-"]').forEach(el => {
+                el.style.borderColor = '#e2e8f0';
+                el.style.backgroundColor = '#fff';
+            });
+            
+            // Highlight selected agent
+            const selectedEl = document.getElementById(`agent-${agentId}`);
+            if (selectedEl) {
+                selectedEl.style.borderColor = '#3b82f6';
+                selectedEl.style.backgroundColor = '#f0f9ff';
+            }
+            
+            // Show selected agent info
+            document.getElementById('selectedAgentInfo').style.display = 'block';
+            document.getElementById('selectedAgentDetails').innerHTML = `
+                <strong>${agentName}</strong><br>
+                <small>${agentVehicle} • ${agentEmail}</small>
+            `;
+            
+            // Show confirm button
+            document.getElementById('confirmAssignBtn').style.display = 'block';
+        }
+
+        async function confirmAssignAgent() {
+            if (!selectedAgentId) {
+                document.getElementById('assignAgentError').textContent = 'Please select an agent';
+                document.getElementById('assignAgentError').style.display = 'block';
+                return;
+            }
+            
+            try {
+                // Assign agent to order
+                const assignResponse = await fetch(`${API_URL}/orders/${currentOrderForAssignment}/assign-agent`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ agent_id: selectedAgentId })
+                });
+                
+                if (!assignResponse.ok) {
+                    throw new Error('Failed to assign agent');
+                }
+                
+                // Move order to out_for_delivery status
+                const statusResponse = await fetch(`${API_URL}/admin/orders/${currentOrderForAssignment}/status`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: 'out_for_delivery' })
+                });
+                
+                if (statusResponse.ok) {
+                    closeModal('assignAgentModal');
+                    showAlert('orders', 'Agent assigned and order moved to Out for Delivery', 'success');
+                    filterOrdersByStatus(currentOrderStatusFilter);
+                } else {
+                    throw new Error('Failed to update order status');
+                }
+            } catch (error) {
+                console.error('Error assigning agent:', error);
+                document.getElementById('assignAgentError').textContent = 'Error assigning agent: ' + error.message;
+                document.getElementById('assignAgentError').style.display = 'block';
+            }
+        }
 
         async function assignAgent(agentId) {
             try {
