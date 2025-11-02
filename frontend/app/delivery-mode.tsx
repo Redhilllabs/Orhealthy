@@ -515,7 +515,7 @@ export default function DeliveryModeScreen() {
                     onPress={() => undoDelivery(order._id)}
                   >
                     <Ionicons name="arrow-undo" size={20} color="#fff" />
-                    <Text style={styles.undoButtonText}>Undo Delivery (Erred)</Text>
+                    <Text style={styles.undoButtonText}>Undo Delivery</Text>
                   </TouchableOpacity>
                 </View>
               ))
