@@ -1379,37 +1379,61 @@ async def delete_source_ingredient(source_id: str):
 
 @api_router.get("/recipes")
 async def get_recipes():
-    """Get all preset recipes (formerly meals)"""
+    """Get all preset recipes (formerly meals) with calculated prices"""
     recipes = await db.meals.find({"is_preset": True}).to_list(100)
     for recipe in recipes:
         recipe["_id"] = str(recipe["_id"])
+        # Calculate price from ingredients
+        recipe["calculated_price"] = await calculate_recipe_price(recipe)
+        # Calculate nutrition profile
+        recipe["nutrition_profile"] = await calculate_nutrition_profile(
+            recipe.get("ingredients", []), "ingredients"
+        )
     return recipes
 
 @api_router.get("/recipes/{recipe_id}")
 async def get_recipe(recipe_id: str):
-    """Get recipe by ID"""
+    """Get recipe by ID with calculated price and nutrition"""
     recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     recipe["_id"] = str(recipe["_id"])
+    # Calculate price from ingredients
+    recipe["calculated_price"] = await calculate_recipe_price(recipe)
+    # Calculate nutrition profile
+    recipe["nutrition_profile"] = await calculate_nutrition_profile(
+        recipe.get("ingredients", []), "ingredients"
+    )
     return recipe
 
 # New Meals endpoints (meals are combinations of recipes)
 @api_router.get("/meals")
 async def get_meals():
-    """Get all preset meals (combinations of recipes)"""
+    """Get all preset meals (combinations of recipes) with calculated prices"""
     meals = await db.preset_meals.find({"is_preset": True}).to_list(100)
     for meal in meals:
         meal["_id"] = str(meal["_id"])
+        # Calculate price from recipes
+        meal["calculated_price"] = await calculate_meal_price(meal)
+        # Calculate nutrition profile from recipes
+        meal["nutrition_profile"] = await calculate_nutrition_profile(
+            meal.get("recipes", []), "meals"
+        )
     return meals
 
 @api_router.get("/meals/{meal_id}")
 async def get_meal(meal_id: str):
-    """Get meal by ID"""
+    """Get meal by ID with calculated price and nutrition"""
     meal = await db.preset_meals.find_one({"_id": ObjectId(meal_id)})
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
     meal["_id"] = str(meal["_id"])
+    # Calculate price from recipes
+    meal["calculated_price"] = await calculate_meal_price(meal)
+    # Calculate nutrition profile from recipes
+    meal["nutrition_profile"] = await calculate_nutrition_profile(
+        meal.get("recipes", []), "meals"
+    )
     return meal
 
 
