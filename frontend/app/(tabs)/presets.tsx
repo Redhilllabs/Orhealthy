@@ -46,10 +46,10 @@ interface Meal {
 }
 
 export default function PresetsScreen() {
-  const [activeTab, setActiveTab] = useState<'all-meals' | 'all-combos' | 'my-meals' | 'my-combos'>('all-meals');
-  const [allMeals, setAllMeals] = useState<Meal[]>([]);
+  const [activeTab, setActiveTab] = useState<'all-combos' | 'all-combos' | 'my-combos' | 'my-combos'>('all-combos');
   const [allCombos, setAllCombos] = useState<Meal[]>([]);
-  const [myMeals, setMyMeals] = useState<Meal[]>([]);
+  const [allCombos, setAllCombos] = useState<Meal[]>([]);
+  const [myCombos, setMyCombos] = useState<Meal[]>([]);
   const [myCombos, setMyCombos] = useState<Meal[]>([]);
   const [filteredItems, setFilteredItems] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,14 +67,14 @@ export default function PresetsScreen() {
     let items: Meal[] = [];
     
     switch (activeTab) {
-      case 'all-meals':
-        items = allMeals;
+      case 'all-combos':
+        items = allCombos;
         break;
       case 'all-combos':
         items = allCombos;
         break;
-      case 'my-meals':
-        items = myMeals;
+      case 'my-combos':
+        items = myCombos;
         break;
       case 'my-combos':
         items = myCombos;
@@ -86,22 +86,22 @@ export default function PresetsScreen() {
     }
 
     setFilteredItems(items);
-  }, [selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab]);
+  }, [selectedTag, allCombos, allCombos, myCombos, myCombos, activeTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
-      fetchAllMeals(),
       fetchAllCombos(),
-      fetchMyMeals(),
+      fetchAllCombos(),
+      fetchMyCombos(),
       fetchMyCombos()
     ]);
   };
 
-  const fetchAllMeals = async () => {
+  const fetchAllCombos = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/recipes`);
-      setAllRecipes(response.data);
+      setAllCombos(response.data);
 
       const tags = new Set<string>();
       response.data.forEach((item: Meal) => {
@@ -115,11 +115,11 @@ export default function PresetsScreen() {
     }
   };
 
-  const fetchAllMeals = async () => {
+  const fetchAllCombos = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/meals`);
-      setAllMeals(response.data);
+      setAllCombos(response.data);
 
       const tags = new Set<string>();
       response.data.forEach((item: Meal) => {
@@ -133,29 +133,29 @@ export default function PresetsScreen() {
     }
   };
 
-  const fetchMyRecipes = async () => {
+  const fetchMyCombos = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals?type=recipe`, {
+      const response = await axios.get(`${API_URL}/saved-meals?type=combo`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMyRecipes(response.data);
+      setMyCombos(response.data);
     } catch (error) {
       console.error('Error fetching my recipes:', error);
     }
   };
 
-  const fetchMyMeals = async () => {
+  const fetchMyCombos = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
+      const response = await axios.get(`${API_URL}/saved-meals?type=combo`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMyMeals(response.data);
+      setMyCombos(response.data);
     } catch (error) {
       console.error('Error fetching my meals:', error);
     }
@@ -169,10 +169,10 @@ export default function PresetsScreen() {
       });
       Alert.alert('Success', 'Item deleted successfully');
       // Refresh the appropriate list
-      if (activeTab === 'my-recipes') {
-        fetchMyRecipes();
-      } else if (activeTab === 'my-meals') {
-        fetchMyMeals();
+      if (activeTab === 'my-combos') {
+        fetchMyCombos();
+      } else if (activeTab === 'my-combos') {
+        fetchMyCombos();
       }
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -319,35 +319,35 @@ export default function PresetsScreen() {
         style={styles.tabContainer}
       >
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-recipes' && styles.activeTab]}
-          onPress={() => setActiveTab('all-recipes')}
+          style={[styles.tab, activeTab === 'all-combos' && styles.activeTab]}
+          onPress={() => setActiveTab('all-combos')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-recipes' && styles.activeTabText]}>
-            All Recipes ({allRecipes.length})
+          <Text style={[styles.tabText, activeTab === 'all-combos' && styles.activeTabText]}>
+            All Combos ({allCombos.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-meals' && styles.activeTab]}
-          onPress={() => setActiveTab('all-meals')}
+          style={[styles.tab, activeTab === 'all-combos' && styles.activeTab]}
+          onPress={() => setActiveTab('all-combos')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-meals' && styles.activeTabText]}>
-            All Meals ({allMeals.length})
+          <Text style={[styles.tabText, activeTab === 'all-combos' && styles.activeTabText]}>
+            All Combos ({allCombos.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-recipes' && styles.activeTab]}
-          onPress={() => setActiveTab('my-recipes')}
+          style={[styles.tab, activeTab === 'my-combos' && styles.activeTab]}
+          onPress={() => setActiveTab('my-combos')}
         >
-          <Text style={[styles.tabText, activeTab === 'my-recipes' && styles.activeTabText]}>
-            My Recipes ({myRecipes.length})
+          <Text style={[styles.tabText, activeTab === 'my-combos' && styles.activeTabText]}>
+            My Combos ({myCombos.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-meals' && styles.activeTab]}
-          onPress={() => setActiveTab('my-meals')}
+          style={[styles.tab, activeTab === 'my-combos' && styles.activeTab]}
+          onPress={() => setActiveTab('my-combos')}
         >
-          <Text style={[styles.tabText, activeTab === 'my-meals' && styles.activeTabText]}>
-            My Meals ({myMeals.length})
+          <Text style={[styles.tabText, activeTab === 'my-combos' && styles.activeTabText]}>
+            My Combos ({myCombos.length})
           </Text>
         </TouchableOpacity>
       </ScrollView>
