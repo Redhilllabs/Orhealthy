@@ -2106,6 +2106,32 @@ async def get_all_orders(request: Request):
     
     return orders
 
+@api_router.get("/admin/orders/{order_id}")
+async def get_single_order(order_id: str, request: Request):
+    """Get a single order by ID with full details (admin only)"""
+    order = await db.orders.find_one({"_id": ObjectId(order_id)})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    order["_id"] = str(order["_id"])
+    
+    # Fetch user details
+    user = await db.users.find_one({"_id": ObjectId(order["user_id"])})
+    if user:
+        order["user_name"] = user.get("name", "Unknown")
+        order["user_email"] = user.get("email", "")
+    else:
+        order["user_name"] = "Unknown User"
+        order["user_email"] = ""
+    
+    # If assigned to agent, get agent details
+    if order.get("assigned_agent_id"):
+        agent = await db.delivery_agents.find_one({"_id": ObjectId(order["assigned_agent_id"])})
+        if agent:
+            order["agent_name"] = agent.get("name", "Unknown")
+    
+    return order
+
 @api_router.put("/admin/orders/{order_id}")
 async def update_order_status(order_id: str, status_data: dict, request: Request):
     """Update order status (admin only)"""
