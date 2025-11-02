@@ -8,7 +8,7 @@ import {
   RefreshControl,
   Alert,
   ActivityIndicator,
-  Switch
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/context/AuthContext';
@@ -38,6 +38,7 @@ interface DeliveryAgent {
   _id: string;
   name: string;
   email: string;
+  image?: string;
   status: string;
   payment_per_delivery: number;
   wallet_balance: number;
@@ -124,7 +125,6 @@ export default function DeliveryModeScreen() {
       
       if (response.ok) {
         setAgentData(prev => prev ? {...prev, status: newStatus} : null);
-        Alert.alert('Success', `Status updated to ${newStatus}`);
       } else {
         Alert.alert('Error', 'Failed to update status');
       }
@@ -162,7 +162,11 @@ export default function DeliveryModeScreen() {
     loadData();
   };
 
-  const switchToUserMode = () => {
+  const switchToUserMode = async () => {
+    // Set status to offline before switching back
+    if (agentData) {
+      await updateStatus('offline');
+    }
     router.back();
   };
 
@@ -182,9 +186,20 @@ export default function DeliveryModeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.headerTitle}>Delivery Mode</Text>
-            <Text style={styles.headerSubtitle}>{agentData?.name || 'Delivery Agent'}</Text>
+          <View style={styles.headerLeft}>
+            {agentData?.image ? (
+              <Image source={{ uri: agentData.image }} style={styles.profileImage} />
+            ) : (
+              <View style={styles.profilePlaceholder}>
+                <Text style={styles.profilePlaceholderText}>
+                  {agentData?.name?.charAt(0) || 'D'}
+                </Text>
+              </View>
+            )}
+            <View>
+              <Text style={styles.headerTitle}>Delivery Mode</Text>
+              <Text style={styles.headerSubtitle}>{agentData?.name || 'Delivery Agent'}</Text>
+            </View>
           </View>
           <TouchableOpacity style={styles.switchButton} onPress={switchToUserMode}>
             <Text style={styles.switchButtonText}>Switch to User Mode</Text>
@@ -376,6 +391,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: '#333',
+  },
+  profilePlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profilePlaceholderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffd700',
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -429,9 +469,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
   },
   statusButtonActive: {
     backgroundColor: '#333',
+    borderColor: '#333',
   },
   statusButtonText: {
     color: '#333',
