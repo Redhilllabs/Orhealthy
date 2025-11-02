@@ -409,19 +409,73 @@ export default function DeliveryModeScreen() {
           <View>
             {deliveredOrders.length > 0 ? (
               deliveredOrders.map((order: Order) => (
-                <View key={order._id} style={[styles.orderCard, styles.deliveredCard]}>
+                <View key={order._id} style={styles.orderCard}>
                   <View style={styles.orderHeader}>
-                    <Text style={styles.orderIdgray}>#{order.order_id}</Text>
-                    <Text style={styles.orderPricegray}>₹{order.final_price}</Text>
+                    <Text style={styles.orderIdgreen}>#{order.order_id || order._id.slice(-8)}</Text>
+                    <Text style={styles.orderPrice}>₹{order.final_price?.toFixed(2)}</Text>
                   </View>
-                  <Text style={styles.deliveredLabel}>✓ Delivered</Text>
-                  <Text style={styles.orderDate}>
-                    {new Date(order.created_at).toLocaleDateString()}
-                  </Text>
+                  
+                  {/* Delivered Badge */}
+                  <View style={styles.deliveredBadge}>
+                    <Ionicons name="checkmark-circle" size={16} color="#4caf50" />
+                    <Text style={styles.deliveredBadgeText}>Delivered</Text>
+                  </View>
+                  
+                  {/* Customer Info */}
+                  <View style={styles.customerSection}>
+                    <View style={styles.customerRow}>
+                      <Ionicons name="person" size={16} color="#666" />
+                      <Text style={styles.customerName}>{order.user_name || 'Customer'}</Text>
+                    </View>
+                    <View style={styles.paymentBadge}>
+                      <Ionicons 
+                        name={order.payment_id ? "card" : "cash"} 
+                        size={14} 
+                        color={order.payment_id ? "#4caf50" : "#ff9800"} 
+                      />
+                      <Text style={[styles.paymentText, {color: order.payment_id ? "#4caf50" : "#ff9800"}]}>
+                        {order.payment_id ? 'Online' : 'COD'}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  {/* Order Items */}
+                  <View style={styles.itemsSection}>
+                    <Text style={styles.itemsLabel}>Order Items:</Text>
+                    {order.items?.map((item: any, index: number) => (
+                      <Text key={index} style={styles.itemText}>
+                        • {item.meal_name} x {item.quantity} - ₹{(item.price * item.quantity).toFixed(2)}
+                      </Text>
+                    ))}
+                  </View>
+                  
+                  {/* Delivery Address */}
+                  <View style={styles.addressSection}>
+                    <View style={styles.addressHeader}>
+                      <Ionicons name="location" size={16} color="#666" />
+                      <Text style={styles.addressLabel}>Delivery Address:</Text>
+                    </View>
+                    <Text style={styles.addressText}>
+                      {order.shipping_address?.street}
+                      {order.shipping_address?.apartment && `, ${order.shipping_address.apartment}`}
+                      {'\n'}{order.shipping_address?.city}, {order.shipping_address?.state} - {order.shipping_address?.zip_code}
+                      {'\n'}📞 {order.shipping_address?.phone}
+                    </Text>
+                  </View>
+                  
+                  {/* Undo Button */}
+                  <TouchableOpacity 
+                    style={styles.undoButton}
+                    onPress={() => undoDelivery(order._id)}
+                  >
+                    <Ionicons name="arrow-undo" size={20} color="#fff" />
+                    <Text style={styles.undoButtonText}>Undo Delivery (Erred)</Text>
+                  </TouchableOpacity>
                 </View>
               ))
             ) : (
               <View style={styles.emptyState}>
+                <Ionicons name="cube-outline" size={64} color="#ccc" />
                 <Text style={styles.emptyText}>No delivered orders yet</Text>
               </View>
             )}
