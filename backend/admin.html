@@ -2766,7 +2766,7 @@
         async function checkAuthentication() {
             const token = localStorage.getItem('admin_token');
             if (!token) {
-                window.location.href = '/admin/login';
+                window.location.href = '/api/admin-login';
                 return false;
             }
             
@@ -2779,7 +2779,7 @@
                 
                 if (!response.ok) {
                     localStorage.removeItem('admin_token');
-                    window.location.href = '/admin/login';
+                    window.location.href = '/api/admin-login';
                     return false;
                 }
                 
@@ -2787,7 +2787,7 @@
             } catch (error) {
                 console.error('Auth check failed:', error);
                 localStorage.removeItem('admin_token');
-                window.location.href = '/admin/login';
+                window.location.href = '/api/admin-login';
                 return false;
             }
         }
