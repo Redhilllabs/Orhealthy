@@ -1168,9 +1168,10 @@
             }
         }
 
-        async function populateSourceIngredientDropdown() {
+        function showIngredientModal() {
             editingIngredientId = null;
             nutritionEntries = [];
+            sourceIngredientEntries = [];
             document.getElementById('ingredientModal').classList.add('active');
             document.querySelector('#ingredientModal .modal-title').textContent = 'Add Processed Ingredient';
             document.getElementById('ingredientForm').reset();
@@ -1180,7 +1181,7 @@
             document.getElementById('priceCalculationInfo').style.display = 'none';
             document.getElementById('ingredientPrice').readOnly = false;
             renderNutritionEntries();
-            populateSourceIngredientDropdown();
+            renderSourceIngredientEntries();
         }
 
         function editIngredient(id) {
@@ -1197,13 +1198,16 @@
             document.getElementById('ingredientTags').value = ingredient.tags ? ingredient.tags.join(', ') : '';
             document.getElementById('stepSize').value = ingredient.step_size || 1;
             
-            // Source ingredient fields
-            document.getElementById('sourceIngredientId').value = ingredient.source_ingredient_id || '';
-            document.getElementById('sourceQuantity').value = ingredient.source_quantity || '';
+            // Load source ingredients (multiple sources support)
+            sourceIngredientEntries = (ingredient.source_ingredients || []).map((src, idx) => ({
+                id: Date.now() + idx,
+                source_ingredient_id: src.source_ingredient_id,
+                source_quantity: src.source_quantity
+            }));
             
             // Nutrition profile
             nutritionEntries = (ingredient.nutrition_profile || []).map((entry, idx) => ({
-                id: Date.now() + idx,
+                id: Date.now() + idx + 1000,
                 name: entry.name,
                 value: entry.value,
                 unit: entry.unit
@@ -1219,9 +1223,9 @@
                 </div>
             `).join('');
             
-            populateSourceIngredientDropdown();
             renderNutritionEntries();
-            if (ingredient.source_ingredient_id && ingredient.source_quantity) {
+            renderSourceIngredientEntries();
+            if (sourceIngredientEntries.length > 0) {
                 calculateIngredientPrice();
             }
         }
@@ -1240,6 +1244,14 @@
                     unit: e.unit
                 }));
             
+            // Prepare source ingredients array
+            const source_ingredients = sourceIngredientEntries
+                .filter(e => e.source_ingredient_id && e.source_quantity)
+                .map(e => ({
+                    source_ingredient_id: e.source_ingredient_id,
+                    source_quantity: parseFloat(e.source_quantity)
+                }));
+            
             const data = {
                 name: document.getElementById('ingredientName').value,
                 price_per_unit: parseFloat(document.getElementById('ingredientPrice').value),
@@ -1248,16 +1260,9 @@
                 tags: tags,
                 images: ingredientImages,
                 step_size: parseFloat(document.getElementById('stepSize').value) || 1.0,
-                nutrition_profile: nutrition_profile
+                nutrition_profile: nutrition_profile,
+                source_ingredients: source_ingredients
             };
-            
-            // Add source ingredient fields if provided
-            const sourceId = document.getElementById('sourceIngredientId').value;
-            const sourceQty = document.getElementById('sourceQuantity').value;
-            if (sourceId && sourceQty) {
-                data.source_ingredient_id = sourceId;
-                data.source_quantity = parseFloat(sourceQty);
-            }
             
             try {
                 let response;
