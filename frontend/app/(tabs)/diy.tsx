@@ -526,7 +526,7 @@ export default function DIYScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder={`Search ${activeTab === 'diy-meals' ? 'ingredients' : 'recipes'}...`}
+            placeholder={`Search ${activeTab === 'diy-meals' ? 'ingredients' : 'meals'}...`}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
