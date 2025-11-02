@@ -2099,6 +2099,7 @@
         async function loadRecipes() {
             try {
                 const recipes = await fetch(`${API_URL}/recipes`).then(r => r.json());
+                allRecipes = recipes; // Store for use in meal creation
                 const tbody = document.getElementById('recipesBody');
                 tbody.innerHTML = recipes.map(recipe => `
                     <tr>
