@@ -43,6 +43,7 @@ interface DeliveryAgent {
   image?: string;
   vehicle: string;
   vehicle_number: string;
+  contact_number?: string;
   status: string;
   payment_per_delivery: number;
   wallet_balance: number;
@@ -66,6 +67,9 @@ export default function DeliveryModeScreen() {
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('Loading delivery agent data...');
+      console.log('User email:', user?.email);
+      console.log('Backend URL:', BACKEND_URL);
       
       // Check if user is delivery agent
       const checkResponse = await fetch(`${BACKEND_URL}/api/delivery-agents/check`, {
@@ -73,7 +77,10 @@ export default function DeliveryModeScreen() {
           'Authorization': `Bearer ${user?.id_token}`,
         },
       });
+      
+      console.log('Check response status:', checkResponse.status);
       const checkData = await checkResponse.json();
+      console.log('Check data:', JSON.stringify(checkData, null, 2));
       
       if (!checkData.is_delivery_agent) {
         Alert.alert('Error', 'You are not registered as a delivery agent');
@@ -81,11 +88,13 @@ export default function DeliveryModeScreen() {
         return;
       }
       
+      console.log('Agent data received:', checkData.agent);
       setAgentData(checkData.agent);
-      setIsBusy(checkData.agent.status === 'busy');
+      setIsBusy(checkData.agent?.status === 'busy');
       
       // Auto-set to available if not already set
-      if (!checkData.agent.status || checkData.agent.status === 'offline') {
+      if (!checkData.agent?.status || checkData.agent.status === 'offline') {
+        console.log('Setting agent to available...');
         await updateStatus('available');
         setIsBusy(false);
       }
@@ -97,6 +106,7 @@ export default function DeliveryModeScreen() {
         },
       });
       const ordersData = await ordersResponse.json();
+      console.log('Orders loaded:', ordersData.length);
       setOrders(ordersData);
       
       // Load credits
@@ -106,6 +116,7 @@ export default function DeliveryModeScreen() {
         },
       });
       const creditsData = await creditsResponse.json();
+      console.log('Credits loaded:', creditsData.credits?.length);
       setCredits(creditsData.credits || []);
       
       // Update agent data with latest wallet balance
@@ -115,7 +126,7 @@ export default function DeliveryModeScreen() {
       
     } catch (error) {
       console.error('Error loading delivery data:', error);
-      Alert.alert('Error', 'Failed to load delivery data');
+      Alert.alert('Error', 'Failed to load delivery data: ' + error);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -195,8 +206,29 @@ export default function DeliveryModeScreen() {
     );
   }
 
+  if (!agentData) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.errorText}>No agent data available</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={loadData}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   const activeOrders = orders.filter((o: Order) => o.status === 'out_for_delivery');
   const deliveredOrders = orders.filter((o: Order) => o.status === 'delivered');
+
+  // Get initials for avatar placeholder
+  const getInitials = (name: string) => {
+    if (!name) return 'DA';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   return (
     <View style={styles.container}>
@@ -204,19 +236,19 @@ export default function DeliveryModeScreen() {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
-            {agentData?.image ? (
+            {agentData.image ? (
               <Image source={{ uri: agentData.image }} style={styles.profileImage} />
             ) : (
               <View style={styles.profilePlaceholder}>
                 <Text style={styles.profilePlaceholderText}>
-                  {agentData?.name?.charAt(0) || 'D'}
+                  {getInitials(agentData.name)}
                 </Text>
               </View>
             )}
             <View style={styles.headerInfo}>
-              <Text style={styles.agentName}>{agentData?.name || 'Delivery Agent'}</Text>
+              <Text style={styles.agentName}>{agentData.name || 'Delivery Agent'}</Text>
               <Text style={styles.vehicleInfo}>
-                {agentData?.vehicle.charAt(0).toUpperCase()}{agentData?.vehicle.slice(1)} • {agentData?.vehicle_number}
+                {agentData.vehicle ? `${agentData.vehicle.charAt(0).toUpperCase()}${agentData.vehicle.slice(1)}` : 'Vehicle'} • {agentData.vehicle_number || 'N/A'}
               </Text>
             </View>
           </View>
@@ -243,8 +275,8 @@ export default function DeliveryModeScreen() {
         {/* Wallet Balance - Thin Card */}
         <View style={styles.walletCardThin}>
           <Text style={styles.walletLabelThin}>Wallet:</Text>
-          <Text style={styles.walletAmountThin}>₹{agentData?.wallet_balance || 0}</Text>
-          <Text style={styles.walletInfoThin}>(₹{agentData?.payment_per_delivery || 0}/delivery)</Text>
+          <Text style={styles.walletAmountThin}>₹{agentData.wallet_balance || 0}</Text>
+          <Text style={styles.walletInfoThin}>(₹{agentData.payment_per_delivery || 0}/delivery)</Text>
         </View>
       </View>
 
@@ -379,6 +411,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
   },
+  errorText: {
+    fontSize: 16,
+    color: '#999',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#ffd700',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   header: {
     backgroundColor: '#ffd700',
     padding: 20,
@@ -413,7 +461,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   profilePlaceholderText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#ffd700',
   },
@@ -459,32 +507,6 @@ const styles = StyleSheet.create({
   statusLabelActive: {
     color: '#333',
   },
-  infoRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  walletCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    flex: 1,
-    alignItems: 'center',
-  },
-  walletLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  walletAmount: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  walletInfo: {
-    fontSize: 10,
-    color: '#999',
-    marginTop: 2,
-  },
   walletCardThin: {
     backgroundColor: '#fff',
     paddingHorizontal: 16,
@@ -508,27 +530,6 @@ const styles = StyleSheet.create({
   walletInfoThin: {
     fontSize: 12,
     color: '#999',
-  },
-  statsColumn: {
-    flex: 1,
-    gap: 8,
-  },
-  statCard: {
-    backgroundColor: '#fff',
-    padding: 8,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
   },
   tabContainer: {
     flexDirection: 'row',
