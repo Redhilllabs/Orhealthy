@@ -1470,9 +1470,36 @@ async def update_order_status(order_id: str, status_data: dict, request: Request
     new_status = status_data["status"]
     update_data = {"status": new_status}
     
-    # If status is delivered, set delivered_at
+    # Get the order
+    order = await db.orders.find_one({"_id": ObjectId(order_id)})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # If status is delivered, set delivered_at and credit the agent
     if new_status == "delivered":
         update_data["delivered_at"] = datetime.now(timezone.utc)
+        
+        # Credit the delivery agent
+        if order.get("assigned_agent_id"):
+            agent = await db.delivery_agents.find_one({"_id": ObjectId(order["assigned_agent_id"])})
+            if agent:
+                payment_amount = agent.get("payment_per_delivery", 0)
+                
+                # Update agent wallet balance
+                await db.delivery_agents.update_one(
+                    {"_id": ObjectId(order["assigned_agent_id"])},
+                    {"$inc": {"wallet_balance": payment_amount}}
+                )
+                
+                # Record the credit transaction
+                credit_record = {
+                    "agent_email": agent["email"],
+                    "agent_id": str(agent["_id"]),
+                    "order_id": str(order["_id"]),
+                    "amount": payment_amount,
+                    "created_at": datetime.now(timezone.utc)
+                }
+                await db.delivery_credits.insert_one(credit_record)
     
     await db.orders.update_one(
         {"_id": ObjectId(order_id)},
