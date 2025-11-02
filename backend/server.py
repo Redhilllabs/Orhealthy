@@ -377,9 +377,15 @@ async def verify_admin_token(token: str) -> Optional[dict]:
         return None
     
     # Check if token is expired (24 hours)
-    if session.get("expires_at") and session["expires_at"] < datetime.now(timezone.utc):
-        await db.admin_sessions.delete_one({"token": token})
-        return None
+    if session.get("expires_at"):
+        expires_at = session["expires_at"]
+        # Ensure timezone-aware comparison
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+        if expires_at < datetime.now(timezone.utc):
+            await db.admin_sessions.delete_one({"token": token})
+            return None
     
     # Get admin user
     admin = await db.admin_users.find_one({"email": session["email"]})
