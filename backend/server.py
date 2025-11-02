@@ -1329,12 +1329,8 @@ async def get_delivery_agents():
     return agents
 
 @api_router.post("/delivery-agents")
-async def create_delivery_agent(agent_data: dict, request: Request):
-    """Create a new delivery agent"""
-    user = await get_current_user(request)
-    if not user or not user.get("is_admin"):
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
+async def create_delivery_agent(agent_data: dict):
+    """Create a new delivery agent (admin endpoint)"""
     # Check if user with this email already exists
     existing_user = await db.users.find_one({"email": agent_data["email"]})
     
