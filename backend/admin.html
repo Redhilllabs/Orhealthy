@@ -1302,26 +1302,18 @@
         }
 
         // Order Management Functions
-        async function filterOrdersByStatus(status, event) {
-            // Prevent event bubbling
-            if (event) {
-                event.stopPropagation();
-            }
-            
+        async function filterOrdersByStatus(status) {
             currentOrderStatusFilter = status;
             
             // Update active tab
             document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-            } else {
-                // Fallback: find by onclick attribute
-                const clickedTab = Array.from(document.querySelectorAll('.status-tab')).find(
-                    tab => tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`filterOrdersByStatus('${status}`)
-                );
-                if (clickedTab) {
-                    clickedTab.classList.add('active');
-                }
+            
+            // Find and activate the clicked tab
+            const clickedTab = Array.from(document.querySelectorAll('.status-tab')).find(
+                tab => tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`filterOrdersByStatus('${status}')`)
+            );
+            if (clickedTab) {
+                clickedTab.classList.add('active');
             }
             
             try {
