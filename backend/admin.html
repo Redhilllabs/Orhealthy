@@ -1424,7 +1424,7 @@
                             <div style="margin-bottom: 8px;">${itemsDetails}</div>
                             <div style="background: #f1f5f9; padding: 8px; border-radius: 4px; font-size: 13px;">
                                 <strong>Delivery Address:</strong><br>
-                                ${order.shipping_address?.full_address || 'N/A'}<br>
+                                ${order.shipping_address?.street || order.shipping_address?.full_address || 'N/A'}<br>
                                 ${order.shipping_address?.city || ''}, ${order.shipping_address?.state || ''} - ${order.shipping_address?.zip_code || ''}
                             </div>
                         </td>
