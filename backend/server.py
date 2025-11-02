@@ -1350,6 +1350,8 @@ async def create_delivery_agent(agent_data: dict):
         "vehicle_number": agent_data["vehicle_number"],
         "image": agent_data.get("image"),
         "status": "available",
+        "payment_per_delivery": float(agent_data.get("payment_per_delivery", 0)),
+        "wallet_balance": 0.0,
         "is_delivery_agent": True,
         "created_at": datetime.now(timezone.utc)
     }
