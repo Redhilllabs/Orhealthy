@@ -2546,8 +2546,8 @@ async def change_admin_credentials(credentials: dict, request: Request):
     
     return {"message": "Credentials updated successfully"}
 
-# Serve admin login page
-@app.get("/admin/login")
+# Serve admin login page via API router
+@api_router.get("/admin-login")
 async def serve_admin_login():
     """Serve admin login page"""
     login_html_path = ROOT_DIR / "admin_login.html"
@@ -2555,9 +2555,9 @@ async def serve_admin_login():
         html_content = f.read()
     return HTMLResponse(content=html_content)
 
-# Serve admin panel with authentication check
-@app.get("/admin")
-async def admin_panel_root(request: Request):
+# Serve admin panel with authentication check via API router
+@api_router.get("/admin-panel")
+async def admin_panel_api_route():
     """Serve admin panel (requires authentication via client-side check)"""
     admin_html_path = ROOT_DIR / "admin.html"
     with open(admin_html_path, "r") as f:
