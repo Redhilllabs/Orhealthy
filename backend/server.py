@@ -1499,7 +1499,10 @@ async def update_recipe(recipe_id: str, recipe_data: dict):
 @api_router.delete("/recipes/{recipe_id}")
 async def delete_recipe(recipe_id: str):
     """Delete a recipe (admin)"""
-    result = await db.meals.delete_one({"_id": ObjectId(recipe_id)})
+    try:
+        result = await db.meals.delete_one({"_id": ObjectId(recipe_id)})
+    except Exception:
+        raise HTTPException(status_code=404, detail="Recipe not found")
     
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Recipe not found")
