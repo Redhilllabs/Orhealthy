@@ -59,33 +59,75 @@ export default function PresetsScreen() {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    fetchMeals();
-    fetchSavedMeals();
+    fetchAllData();
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'all') {
-      if (selectedTag) {
-        setFilteredMeals(meals.filter(meal => meal.tags?.includes(selectedTag)));
-      } else {
-        setFilteredMeals(meals);
-      }
-    } else {
-      setFilteredMeals(savedMeals);
+    // Update filtered items based on active tab and selected tag
+    let items: Meal[] = [];
+    
+    switch (activeTab) {
+      case 'all-recipes':
+        items = allRecipes;
+        break;
+      case 'all-meals':
+        items = allMeals;
+        break;
+      case 'my-recipes':
+        items = myRecipes;
+        break;
+      case 'my-meals':
+        items = myMeals;
+        break;
     }
-  }, [selectedTag, meals, savedMeals, activeTab]);
 
-  const fetchMeals = async () => {
+    if (selectedTag) {
+      items = items.filter(item => item.tags?.includes(selectedTag));
+    }
+
+    setFilteredItems(items);
+  }, [selectedTag, allRecipes, allMeals, myRecipes, myMeals, activeTab]);
+
+  const fetchAllData = async () => {
+    await Promise.all([
+      fetchAllRecipes(),
+      fetchAllMeals(),
+      fetchMyRecipes(),
+      fetchMyMeals()
+    ]);
+  };
+
+  const fetchAllRecipes = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/recipes`);
+      setAllRecipes(response.data);
+
+      // Collect tags from all sources
+      const tags = new Set<string>();
+      response.data.forEach((item: Meal) => {
+        item.tags?.forEach(tag => tags.add(tag));
+      });
+      setAllTags(prev => Array.from(new Set([...prev, ...Array.from(tags)])));
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAllMeals = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/meals`);
-      setMeals(response.data);
+      setAllMeals(response.data);
 
+      // Collect tags
       const tags = new Set<string>();
-      response.data.forEach((meal: Meal) => {
-        meal.tags?.forEach(tag => tags.add(tag));
+      response.data.forEach((item: Meal) => {
+        item.tags?.forEach(tag => tags.add(tag));
       });
-      setAllTags(Array.from(tags));
+      setAllTags(prev => Array.from(new Set([...prev, ...Array.from(tags)])));
     } catch (error) {
       console.error('Error fetching meals:', error);
     } finally {
@@ -93,17 +135,31 @@ export default function PresetsScreen() {
     }
   };
 
-  const fetchSavedMeals = async () => {
+  const fetchMyRecipes = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals`, {
+      const response = await axios.get(`${API_URL}/saved-meals?type=recipe`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSavedMeals(response.data);
+      setMyRecipes(response.data);
     } catch (error) {
-      console.error('Error fetching saved meals:', error);
+      console.error('Error fetching my recipes:', error);
+    }
+  };
+
+  const fetchMyMeals = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyMeals(response.data);
+    } catch (error) {
+      console.error('Error fetching my meals:', error);
     }
   };
 
