@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -40,6 +41,8 @@ interface DeliveryAgent {
   name: string;
   email: string;
   image?: string;
+  vehicle: string;
+  vehicle_number: string;
   status: string;
   payment_per_delivery: number;
   wallet_balance: number;
@@ -54,6 +57,7 @@ export default function DeliveryModeScreen() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [credits, setCredits] = useState<CreditRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'assigned' | 'delivered' | 'history'>('assigned');
+  const [isBusy, setIsBusy] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -78,6 +82,13 @@ export default function DeliveryModeScreen() {
       }
       
       setAgentData(checkData.agent);
+      setIsBusy(checkData.agent.status === 'busy');
+      
+      // Auto-set to available if not already set
+      if (!checkData.agent.status || checkData.agent.status === 'offline') {
+        await updateStatus('available');
+        setIsBusy(false);
+      }
       
       // Load orders
       const ordersResponse = await fetch(`${BACKEND_URL}/api/delivery-agents/my-orders`, {
@@ -133,6 +144,11 @@ export default function DeliveryModeScreen() {
       console.error('Error updating status:', error);
       Alert.alert('Error', 'Failed to update status');
     }
+  };
+
+  const toggleBusyStatus = async (value: boolean) => {
+    setIsBusy(value);
+    await updateStatus(value ? 'busy' : 'available');
   };
 
   const markAsDelivered = async (orderId: string) => {
@@ -197,9 +213,11 @@ export default function DeliveryModeScreen() {
                 </Text>
               </View>
             )}
-            <View>
-              <Text style={styles.headerTitle}>Delivery Mode</Text>
-              <Text style={styles.headerSubtitle}>{agentData?.name || 'Delivery Agent'}</Text>
+            <View style={styles.headerInfo}>
+              <Text style={styles.agentName}>{agentData?.name || 'Delivery Agent'}</Text>
+              <Text style={styles.vehicleInfo}>
+                {agentData?.vehicle.charAt(0).toUpperCase()}{agentData?.vehicle.slice(1)} • {agentData?.vehicle_number}
+              </Text>
             </View>
           </View>
           <TouchableOpacity style={styles.exitButton} onPress={switchToUserMode}>
@@ -207,41 +225,45 @@ export default function DeliveryModeScreen() {
           </TouchableOpacity>
         </View>
         
-        {/* Wallet Balance */}
-        <View style={styles.walletCard}>
-          <Text style={styles.walletLabel}>Wallet Balance</Text>
-          <Text style={styles.walletAmount}>₹{agentData?.wallet_balance || 0}</Text>
-          <Text style={styles.paymentInfo}>₹{agentData?.payment_per_delivery || 0} per delivery</Text>
+        {/* Status Toggle */}
+        <View style={styles.statusToggleContainer}>
+          <View style={styles.statusToggle}>
+            <Text style={[styles.statusLabel, !isBusy && styles.statusLabelActive]}>Available</Text>
+            <Switch
+              value={isBusy}
+              onValueChange={toggleBusyStatus}
+              trackColor={{ false: '#4caf50', true: '#ff9800' }}
+              thumbColor="#fff"
+              ios_backgroundColor="#4caf50"
+            />
+            <Text style={[styles.statusLabel, isBusy && styles.statusLabelActive]}>Busy</Text>
+          </View>
         </View>
         
-        {/* Status Switches */}
-        <View style={styles.statusContainer}>
-          <TouchableOpacity 
-            style={[styles.statusButton, agentData?.status === 'available' && styles.statusButtonActive]}
-            onPress={() => updateStatus('available')}
-          >
-            <Text style={[styles.statusButtonText, agentData?.status === 'available' && styles.statusButtonTextActive]}>
-              Available
-            </Text>
-          </TouchableOpacity>
+        {/* Info Cards Row */}
+        <View style={styles.infoRow}>
+          {/* Wallet Card */}
+          <View style={styles.walletCard}>
+            <Text style={styles.walletLabel}>Wallet</Text>
+            <Text style={styles.walletAmount}>₹{agentData?.wallet_balance || 0}</Text>
+            <Text style={styles.walletInfo}>₹{agentData?.payment_per_delivery || 0}/delivery</Text>
+          </View>
           
-          <TouchableOpacity 
-            style={[styles.statusButton, agentData?.status === 'busy' && styles.statusButtonActive]}
-            onPress={() => updateStatus('busy')}
-          >
-            <Text style={[styles.statusButtonText, agentData?.status === 'busy' && styles.statusButtonTextActive]}>
-              Busy
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.statusButton, agentData?.status === 'offline' && styles.statusButtonActive]}
-            onPress={() => updateStatus('offline')}
-          >
-            <Text style={[styles.statusButtonText, agentData?.status === 'offline' && styles.statusButtonTextActive]}>
-              Offline
-            </Text>
-          </TouchableOpacity>
+          {/* Stats Cards */}
+          <View style={styles.statsColumn}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{activeOrders.length}</Text>
+              <Text style={styles.statLabel}>Assigned</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{deliveredOrders.length}</Text>
+              <Text style={styles.statLabel}>Delivered</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{credits.length}</Text>
+              <Text style={styles.statLabel}>Credits</Text>
+            </View>
+          </View>
         </View>
       </View>
 
@@ -270,7 +292,7 @@ export default function DeliveryModeScreen() {
           onPress={() => setActiveTab('history')}
         >
           <Text style={[styles.tabText, activeTab === 'history' && styles.tabTextActive]}>
-            Credit History
+            History
           </Text>
         </TouchableOpacity>
       </View>
@@ -284,7 +306,6 @@ export default function DeliveryModeScreen() {
       >
         {activeTab === 'assigned' ? (
           <View>
-            <Text style={styles.sectionTitle}>Assigned Deliveries</Text>
             {activeOrders.length > 0 ? (
               activeOrders.map((order: Order) => (
                 <View key={order._id} style={styles.orderCard}>
@@ -321,7 +342,6 @@ export default function DeliveryModeScreen() {
           </View>
         ) : activeTab === 'delivered' ? (
           <View>
-            <Text style={styles.sectionTitle}>Delivered Orders</Text>
             {deliveredOrders.length > 0 ? (
               deliveredOrders.map((order: Order) => (
                 <View key={order._id} style={[styles.orderCard, styles.deliveredCard]}>
@@ -343,7 +363,6 @@ export default function DeliveryModeScreen() {
           </View>
         ) : (
           <View>
-            <Text style={styles.sectionTitle}>Credit History</Text>
             {credits.length > 0 ? (
               credits.map((credit: CreditRecord) => (
                 <View key={credit._id} style={styles.creditCard}>
@@ -390,7 +409,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -417,15 +436,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffd700',
   },
-  headerTitle: {
-    fontSize: 24,
+  headerInfo: {
+    justifyContent: 'center',
+  },
+  agentName: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
-  headerSubtitle: {
-    fontSize: 14,
+  vehicleInfo: {
+    fontSize: 13,
     color: '#666',
-    marginTop: 4,
+    marginTop: 2,
   },
   exitButton: {
     backgroundColor: '#333',
@@ -435,52 +457,73 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  statusToggleContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  statusToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
+    gap: 12,
+  },
+  statusLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#999',
+  },
+  statusLabelActive: {
+    color: '#333',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   walletCard: {
     backgroundColor: '#fff',
-    padding: 20,
+    padding: 16,
     borderRadius: 12,
-    marginBottom: 16,
+    flex: 1,
     alignItems: 'center',
   },
   walletLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#666',
-    marginBottom: 8,
-  },
-  walletAmount: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#333',
     marginBottom: 4,
   },
-  paymentInfo: {
-    fontSize: 12,
-    color: '#999',
+  walletAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  statusContainer: {
-    flexDirection: 'row',
+  walletInfo: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
+  },
+  statsColumn: {
+    flex: 1,
     gap: 8,
   },
-  statusButton: {
-    flex: 1,
+  statCard: {
     backgroundColor: '#fff',
-    paddingVertical: 12,
+    padding: 8,
     borderRadius: 8,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
+    justifyContent: 'space-between',
   },
-  statusButtonActive: {
-    backgroundColor: '#333',
-    borderColor: '#333',
-  },
-  statusButtonText: {
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#333',
-    fontWeight: '600',
-    fontSize: 14,
   },
-  statusButtonTextActive: {
-    color: '#ffd700',
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
   },
   tabContainer: {
     flexDirection: 'row',
@@ -509,12 +552,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
   },
   orderCard: {
     backgroundColor: '#fff',
