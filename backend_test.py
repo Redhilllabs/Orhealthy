@@ -19,22 +19,20 @@ class BackendTester:
         self.created_recipe_id = None
         self.created_meal_id = None
         
-    def log_result(self, test_name, success, message, details=None):
+    def log_test(self, test_name, success, details=""):
         """Log test result"""
-        result = {
+        status = "✅ PASS" if success else "❌ FAIL"
+        self.test_results.append({
             "test": test_name,
             "success": success,
-            "message": message,
-            "details": details,
-            "timestamp": datetime.now().isoformat()
-        }
-        self.test_results.append(result)
-        status = "✅ PASS" if success else "❌ FAIL"
-        print(f"{status}: {test_name} - {message}")
+            "details": details
+        })
+        print(f"{status}: {test_name}")
         if details:
             print(f"   Details: {details}")
-    
-    def setup_test_data(self):
+        print()
+
+    def test_recipe_endpoints(self):
         """Setup test data - create a test post for comments testing"""
         print("\n=== Setting up test data ===")
         
