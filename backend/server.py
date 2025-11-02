@@ -1319,6 +1319,215 @@ async def delete_habit(habit_id: str, request: Request):
     
     return {"message": "Habit deleted"}
 
+# Delivery Agent endpoints
+@api_router.get("/delivery-agents")
+async def get_delivery_agents():
+    """Get all delivery agents"""
+    agents = await db.delivery_agents.find().to_list(1000)
+    for agent in agents:
+        agent["_id"] = str(agent["_id"])
+    return agents
+
+@api_router.post("/delivery-agents")
+async def create_delivery_agent(agent_data: dict, request: Request):
+    """Create a new delivery agent"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if user with this email already exists
+    existing_user = await db.users.find_one({"email": agent_data["email"]})
+    
+    agent = {
+        "email": agent_data["email"],
+        "name": agent_data["name"],
+        "vehicle": agent_data["vehicle"],
+        "image": agent_data.get("image"),
+        "status": "available",
+        "is_delivery_agent": True,
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.delivery_agents.insert_one(agent)
+    
+    # Also mark user as delivery agent if they exist
+    if existing_user:
+        await db.users.update_one(
+            {"_id": existing_user["_id"]},
+            {"$set": {"is_delivery_agent": True}}
+        )
+    
+    return {"message": "Delivery agent created", "id": str(result.inserted_id)}
+
+@api_router.put("/delivery-agents/{agent_id}")
+async def update_delivery_agent(agent_id: str, agent_data: dict, request: Request):
+    """Update delivery agent details"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    update_data = {}
+    if "name" in agent_data:
+        update_data["name"] = agent_data["name"]
+    if "vehicle" in agent_data:
+        update_data["vehicle"] = agent_data["vehicle"]
+    if "image" in agent_data:
+        update_data["image"] = agent_data["image"]
+    if "status" in agent_data:
+        update_data["status"] = agent_data["status"]
+    
+    await db.delivery_agents.update_one(
+        {"_id": ObjectId(agent_id)},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Delivery agent updated"}
+
+@api_router.put("/delivery-agents/{agent_id}/status")
+async def update_agent_status(agent_id: str, status_data: dict, request: Request):
+    """Update delivery agent status (available/busy/offline)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Check if user is the agent or admin
+    agent = await db.delivery_agents.find_one({"_id": ObjectId(agent_id)})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    if agent["email"] != user["email"] and not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    await db.delivery_agents.update_one(
+        {"_id": ObjectId(agent_id)},
+        {"$set": {"status": status_data["status"]}}
+    )
+    
+    return {"message": "Status updated"}
+
+@api_router.delete("/delivery-agents/{agent_id}")
+async def delete_delivery_agent(agent_id: str, request: Request):
+    """Delete a delivery agent"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.delivery_agents.delete_one({"_id": ObjectId(agent_id)})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    return {"message": "Delivery agent deleted"}
+
+@api_router.get("/delivery-agents/my-orders")
+async def get_agent_orders(request: Request):
+    """Get orders assigned to logged-in delivery agent"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Find agent by email
+    agent = await db.delivery_agents.find_one({"email": user["email"]})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Not a delivery agent")
+    
+    # Get assigned orders
+    orders = await db.orders.find({"assigned_agent_id": str(agent["_id"])}).sort("created_at", -1).to_list(100)
+    for order in orders:
+        order["_id"] = str(order["_id"])
+    
+    return orders
+
+@api_router.get("/delivery-agents/check")
+async def check_delivery_agent(request: Request):
+    """Check if logged-in user is a delivery agent"""
+    user = await get_current_user(request)
+    if not user:
+        return {"is_delivery_agent": False, "agent": None}
+    
+    agent = await db.delivery_agents.find_one({"email": user["email"]})
+    if agent:
+        agent["_id"] = str(agent["_id"])
+        return {"is_delivery_agent": True, "agent": agent}
+    
+    return {"is_delivery_agent": False, "agent": None}
+
+# Order Management endpoints
+@api_router.put("/orders/{order_id}/status")
+async def update_order_status(order_id: str, status_data: dict, request: Request):
+    """Update order status"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    new_status = status_data["status"]
+    update_data = {"status": new_status}
+    
+    # If status is delivered, set delivered_at
+    if new_status == "delivered":
+        update_data["delivered_at"] = datetime.now(timezone.utc)
+    
+    await db.orders.update_one(
+        {"_id": ObjectId(order_id)},
+        {"$set": update_data}
+    )
+    
+    return {"message": "Order status updated"}
+
+@api_router.put("/orders/{order_id}/assign-agent")
+async def assign_delivery_agent(order_id: str, assignment_data: dict, request: Request):
+    """Assign delivery agent to order"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    agent_id = assignment_data["agent_id"]
+    
+    # Verify agent exists and is available
+    agent = await db.delivery_agents.find_one({"_id": ObjectId(agent_id)})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    # Update order with assigned agent
+    await db.orders.update_one(
+        {"_id": ObjectId(order_id)},
+        {"$set": {
+            "assigned_agent_id": agent_id,
+            "agent_assigned_at": datetime.now(timezone.utc),
+            "status": "out_for_delivery"
+        }}
+    )
+    
+    # Update agent status to busy
+    await db.delivery_agents.update_one(
+        {"_id": ObjectId(agent_id)},
+        {"$set": {"status": "busy"}}
+    )
+    
+    return {"message": "Agent assigned successfully"}
+
+@api_router.get("/orders/by-status/{status}")
+async def get_orders_by_status(status: str, request: Request):
+    """Get orders filtered by status"""
+    user = await get_current_user(request)
+    if not user or not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    orders = await db.orders.find({"status": status}).sort("created_at", -1).to_list(100)
+    for order in orders:
+        order["_id"] = str(order["_id"])
+        # Get user info
+        user_data = await db.users.find_one({"_id": ObjectId(order["user_id"])})
+        if user_data:
+            order["user_name"] = user_data.get("name", "Unknown")
+            order["user_email"] = user_data.get("email", "")
+        # Get agent info if assigned
+        if order.get("assigned_agent_id"):
+            agent_data = await db.delivery_agents.find_one({"_id": ObjectId(order["assigned_agent_id"])})
+            if agent_data:
+                order["agent_name"] = agent_data.get("name", "Unknown")
+    
+    return orders
+
 # Address endpoints
 @api_router.post("/addresses")
 async def add_address(address_data: dict, request: Request):
