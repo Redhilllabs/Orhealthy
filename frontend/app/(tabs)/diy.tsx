@@ -303,7 +303,7 @@ export default function DIYScreen() {
       } else {
         // Creating meal from recipes
         const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
-          const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+          const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -374,7 +374,7 @@ export default function DIYScreen() {
         };
       } else {
         const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
-          const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+          const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -600,7 +600,7 @@ export default function DIYScreen() {
                   );
                 })
               : Array.from(selectedMeals.entries()).map(([id, qty]) => {
-                  const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+                  const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
                   if (!recipe) return null;
                   return (
                     <View key={id} style={styles.selectedItem}>
