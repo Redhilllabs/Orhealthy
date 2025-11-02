@@ -830,10 +830,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   listContent: {
-    padding: 8,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
+    paddingVertical: 8,
   },
   itemCard: {
     flex: 1,
