@@ -1185,7 +1185,10 @@
                     <tr>
                         <td>${agent.image ? `<img src="${agent.image}" class="table-image">` : '-'}</td>
                         <td>${agent.name}</td>
-                        <td>${agent.email}</td>
+                        <td>
+                            ${agent.email}<br>
+                            <small style="color: #666;">${agent.contact_number || 'N/A'}</small>
+                        </td>
                         <td>${vehicleDisplay}<br><small>${agent.vehicle_number || 'N/A'}</small></td>
                         <td>₹${agent.payment_per_delivery || 0}</td>
                         <td>₹${agent.wallet_balance || 0}</td>
