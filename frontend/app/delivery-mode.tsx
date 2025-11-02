@@ -100,7 +100,8 @@ export default function DeliveryModeScreen() {
       // Auto-set to available if not already set
       if (!checkData.agent?.status || checkData.agent.status === 'offline') {
         console.log('Setting agent to available...');
-        await updateStatus('available');
+        // Call updateStatus with the agent data directly
+        await updateStatusDirect(checkData.agent._id, 'available');
         setIsBusy(false);
       }
       
