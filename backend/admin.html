@@ -2608,6 +2608,158 @@
             }
         }
 
+        // Admin credentials management
+        async function changeAdminCredentials(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newEmail = document.getElementById('newEmail').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validation
+            if (newPassword && newPassword !== confirmPassword) {
+                showAlert('credentials', 'New passwords do not match', 'error');
+                return;
+            }
+            
+            if (!newEmail && !newPassword) {
+                showAlert('credentials', 'Please enter at least one new credential', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/change-credentials`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        current_password: currentPassword,
+                        new_email: newEmail || undefined,
+                        new_password: newPassword || undefined
+                    })
+                });
+                
+                if (response.ok) {
+                    showAlert('credentials', 'Credentials updated successfully!', 'success');
+                    document.getElementById('credentialsForm').reset();
+                } else {
+                    const error = await response.json();
+                    showAlert('credentials', error.detail || 'Error updating credentials', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating credentials:', error);
+                showAlert('credentials', 'Error updating credentials', 'error');
+            }
+        }
+        
+        async function adminLogout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            
+            try {
+                await fetch(`${API_URL}/admin/logout`, {
+                    method: 'POST'
+                });
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+            
+            localStorage.removeItem('admin_token');
+            window.location.href = '/admin/login';
+        }
+        
+        // Order details modal
+        async function showOrderDetails(orderId) {
+            try {
+                const response = await fetch(`${API_URL}/admin/orders/${orderId}`);
+                if (!response.ok) {
+                    showAlert('orders', 'Error loading order details', 'error');
+                    return;
+                }
+                
+                const order = await response.json();
+                const modal = document.getElementById('orderDetailsModal');
+                const content = document.getElementById('orderDetailsContent');
+                
+                // Calculate totals
+                const itemsTotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                content.innerHTML = `
+                    <div style="padding: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                            <div>
+                                <h3 style="margin-bottom: 12px; color: #1e293b;">📦 Order Information</h3>
+                                <p><strong>Order ID:</strong> ${order._id}</p>
+                                <p><strong>Status:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
+                                <p><strong>Created:</strong> ${new Date(order.created_at).toLocaleString()}</p>
+                                ${order.delivered_at ? `<p><strong>Delivered:</strong> ${new Date(order.delivered_at).toLocaleString()}</p>` : ''}
+                            </div>
+                            <div>
+                                <h3 style="margin-bottom: 12px; color: #1e293b;">👤 Customer Information</h3>
+                                <p><strong>Name:</strong> ${order.user_name || 'N/A'}</p>
+                                <p><strong>Email:</strong> ${order.user_email || 'N/A'}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 24px;">
+                            <h3 style="margin-bottom: 12px; color: #1e293b;">📋 Order Items</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Item</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${order.items.map(item => `
+                                        <tr>
+                                            <td>${item.meal_name}</td>
+                                            <td>${item.quantity}</td>
+                                            <td>₹${item.price.toFixed(2)}</td>
+                                            <td>₹${(item.price * item.quantity).toFixed(2)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                            <div>
+                                <h3 style="margin-bottom: 12px; color: #1e293b;">📍 Shipping Address</h3>
+                                <p><strong>Name:</strong> ${order.shipping_address.name}</p>
+                                <p><strong>Street:</strong> ${order.shipping_address.street}</p>
+                                <p><strong>City:</strong> ${order.shipping_address.city}, ${order.shipping_address.state}</p>
+                                <p><strong>Zip:</strong> ${order.shipping_address.zip_code}</p>
+                                <p><strong>Phone:</strong> ${order.shipping_address.phone}</p>
+                            </div>
+                            <div>
+                                <h3 style="margin-bottom: 12px; color: #1e293b;">💰 Payment Summary</h3>
+                                <p><strong>Subtotal:</strong> ₹${itemsTotal.toFixed(2)}</p>
+                                <p><strong>Discount:</strong> -₹${order.discount_amount.toFixed(2)}</p>
+                                ${order.coupon_code ? `<p><strong>Coupon:</strong> ${order.coupon_code}</p>` : ''}
+                                <p style="font-size: 18px; font-weight: 700; color: #ffd700;"><strong>Final Total:</strong> ₹${order.final_price.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        
+                        ${order.assigned_agent_id ? `
+                            <div>
+                                <h3 style="margin-bottom: 12px; color: #1e293b;">🚚 Delivery Agent</h3>
+                                <p><strong>Agent:</strong> ${order.agent_name || 'Assigned'}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+            } catch (error) {
+                console.error('Error loading order details:', error);
+                showAlert('orders', 'Error loading order details', 'error');
+            }
+        }
+
         // Authentication check
         async function checkAuthentication() {
             const token = localStorage.getItem('admin_token');
