@@ -2427,6 +2427,117 @@ async def admin_panel():
         html_content = f.read()
     return HTMLResponse(content=html_content)
 
+
+
+# Admin Authentication Endpoints
+@api_router.post("/admin/login")
+async def admin_login(credentials: dict):
+    """Admin login endpoint"""
+    email = credentials.get("email")
+    password = credentials.get("password")
+    
+    if not email or not password:
+        raise HTTPException(status_code=400, detail="Email and password required")
+    
+    # Get admin user
+    admin = await db.admin_users.find_one({"email": email})
+    if not admin:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Verify password
+    password_hash = hash_password(password)
+    if admin["password_hash"] != password_hash:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Generate token
+    token = generate_admin_token()
+    
+    # Store session
+    await db.admin_sessions.insert_one({
+        "token": token,
+        "email": email,
+        "created_at": datetime.now(timezone.utc),
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=1)
+    })
+    
+    return {"token": token, "email": email}
+
+@api_router.post("/admin/logout")
+async def admin_logout(request: Request):
+    """Admin logout endpoint"""
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    if token:
+        await db.admin_sessions.delete_one({"token": token})
+    return {"message": "Logged out successfully"}
+
+@api_router.get("/admin/verify")
+async def verify_admin(request: Request):
+    """Verify admin token"""
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    admin = await verify_admin_token(token)
+    if not admin:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    return {"email": admin["email"]}
+
+@api_router.put("/admin/change-credentials")
+async def change_admin_credentials(credentials: dict, request: Request):
+    """Change admin email and password"""
+    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    admin = await verify_admin_token(token)
+    if not admin:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    new_email = credentials.get("new_email")
+    new_password = credentials.get("new_password")
+    current_password = credentials.get("current_password")
+    
+    # Verify current password
+    if not current_password:
+        raise HTTPException(status_code=400, detail="Current password required")
+    
+    if hash_password(current_password) != admin["password_hash"]:
+        raise HTTPException(status_code=401, detail="Invalid current password")
+    
+    # Update credentials
+    update_data = {}
+    if new_email:
+        update_data["email"] = new_email
+    if new_password:
+        update_data["password_hash"] = hash_password(new_password)
+    
+    if update_data:
+        await db.admin_users.update_one(
+            {"email": admin["email"]},
+            {"$set": update_data}
+        )
+        
+        # If email changed, update sessions
+        if new_email:
+            await db.admin_sessions.update_many(
+                {"email": admin["email"]},
+                {"$set": {"email": new_email}}
+            )
+    
+    return {"message": "Credentials updated successfully"}
+
+# Serve admin login page
+@app.get("/admin/login")
+async def serve_admin_login():
+    """Serve admin login page"""
+    login_html_path = ROOT_DIR / "admin_login.html"
+    with open(login_html_path, "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
+
+# Serve admin panel with authentication check
+@app.get("/admin")
+async def admin_panel_root(request: Request):
+    """Serve admin panel (requires authentication via client-side check)"""
+    admin_html_path = ROOT_DIR / "admin.html"
+    with open(admin_html_path, "r") as f:
+        html_content = f.read()
+    return HTMLResponse(content=html_content)
+
 @api_router.get("/admin-panel")
 async def admin_panel_api():
     """Serve admin panel via API route"""
