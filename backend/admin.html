@@ -1168,7 +1168,7 @@
             }
         }
 
-        function showIngredientModal() {
+        async function showIngredientModal() {
             editingIngredientId = null;
             nutritionEntries = [];
             sourceIngredientEntries = [];
@@ -1180,6 +1180,17 @@
             document.getElementById('ingredientImagePreview').innerHTML = '';
             document.getElementById('priceCalculationInfo').style.display = 'none';
             document.getElementById('ingredientPrice').readOnly = false;
+            
+            // Load source ingredients if not already loaded
+            if (allSourceIngredients.length === 0) {
+                try {
+                    const sources = await fetch(`${API_URL}/source-ingredients`).then(r => r.json());
+                    allSourceIngredients = sources;
+                } catch (error) {
+                    console.error('Error loading source ingredients:', error);
+                }
+            }
+            
             renderNutritionEntries();
             renderSourceIngredientEntries();
         }
