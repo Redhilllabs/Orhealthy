@@ -2453,7 +2453,7 @@
 
         async function saveMeal(e) {
             e.preventDefault();
-            if (selectedMealIngredients.length === 0) return alert('Add at least one ingredient');
+            if (selectedMealRecipes.length === 0) return alert('Add at least one recipe');
             
             const tags = document.getElementById('mealTags').value
                 .split(',').map(t => t.trim()).filter(Boolean);
@@ -2461,8 +2461,7 @@
             const data = {
                 name: document.getElementById('mealName').value,
                 description: document.getElementById('mealDescription').value,
-                base_price: parseFloat(document.getElementById('mealPrice').value),
-                ingredients: selectedMealIngredients,
+                recipes: selectedMealRecipes,
                 tags: tags,
                 images: mealImages,
                 is_preset: true,
@@ -2473,14 +2472,14 @@
                 let response;
                 if (editingMealId) {
                     // Update existing meal
-                    response = await fetch(`${API_URL}/admin/meals/${editingMealId}`, {
+                    response = await fetch(`${API_URL}/meals/${editingMealId}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
                     });
                 } else {
                     // Create new meal
-                    response = await fetch(`${API_URL}/admin/meals`, {
+                    response = await fetch(`${API_URL}/meals`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
@@ -2489,20 +2488,54 @@
                 
                 if (response.ok) {
                     closeModal('mealModal');
-                    showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal saved successfully', 'success');
+                    showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal created successfully', 'success');
                     loadMeals();
+                } else {
+                    const error = await response.json();
+                    showAlert('meals', error.detail || 'Error saving meal', 'error');
                 }
             } catch (error) {
                 showAlert('meals', 'Error saving meal', 'error');
             }
         }
 
+        function handleMealImages(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    mealImages.push(e.target.result);
+                    updateMealImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateMealImagePreview() {
+            const preview = document.getElementById('mealImagePreview');
+            preview.innerHTML = mealImages.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview">
+                    <button type="button" class="image-remove" onclick="removeMealImage(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeMealImage(index) {
+            mealImages.splice(index, 1);
+            updateMealImagePreview();
+        }
+
         async function deleteMeal(id) {
             if (!confirm('Delete this meal?')) return;
             try {
-                await fetch(`${API_URL}/admin/meals/${id}`, { method: 'DELETE' });
-                showAlert('meals', 'Deleted successfully', 'success');
-                loadMeals();
+                const response = await fetch(`${API_URL}/meals/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showAlert('meals', 'Deleted successfully', 'success');
+                    loadMeals();
+                } else {
+                    showAlert('meals', 'Error deleting meal', 'error');
+                }
             } catch (error) {
                 showAlert('meals', 'Error deleting', 'error');
             }
