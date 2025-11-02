@@ -2171,6 +2171,12 @@ async def delete_order(order_id: str, request: Request):
 
 
 @api_router.get("/admin/users")
+async def get_all_users():
+    """Get all users for admin panel"""
+    users = await db.users.find().to_list(1000)
+    for user in users:
+        user["_id"] = str(user["_id"])
+    return users
 
 
 @api_router.put("/admin/orders/{order_id}/status")
