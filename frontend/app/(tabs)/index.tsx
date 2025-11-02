@@ -66,6 +66,10 @@ export default function HomeScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const POSTS_PER_PAGE = 10;
   
   // Notifications
   const [notifications, setNotifications] = useState<Notification[]>([]);
