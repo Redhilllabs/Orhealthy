@@ -14,7 +14,7 @@ from datetime import datetime
 import base64
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://meal-guide-4.preview.emergentagent.com/api"
+BACKEND_URL = "https://meal-delivery-app-4.preview.emergentagent.com/api"
 
 class BackendTester:
     def __init__(self):
