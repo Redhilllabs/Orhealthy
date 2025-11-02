@@ -1830,7 +1830,11 @@
 
         async function loadIngredients() {
             try {
-                const ingredients = await fetch(`${API_URL}/ingredients`).then(r => r.json());
+                const response = await fetch(`${API_URL}/ingredients`);
+                if (!response.ok) {
+                    throw new Error('Failed to load ingredients');
+                }
+                const ingredients = await response.json();
                 allIngredients = ingredients;
                 const tbody = document.getElementById('ingredientsBody');
                 tbody.innerHTML = ingredients.map(ing => `
@@ -1849,7 +1853,10 @@
                 updateMealIngredientSelect();
             } catch (error) {
                 console.error('Error loading ingredients:', error);
-                showAlert('ingredients', 'Error loading ingredients', 'error');
+                // Only show alert if it's a real error, not during initial load
+                if (error.message) {
+                    showAlert('ingredients', 'Error loading ingredients', 'error');
+                }
             }
         }
 
