@@ -1127,6 +1127,226 @@
             }
         }
 
+        // Delivery Agent Functions
+        let allDeliveryAgents = [];
+        let agentImage = null;
+        let editingAgentId = null;
+        let currentOrderForAssignment = null;
+        let currentOrderStatusFilter = 'all';
+
+        async function loadDeliveryAgents() {
+            try {
+                const agents = await fetch(`${API_URL}/delivery-agents`).then(r => r.json());
+                allDeliveryAgents = agents;
+                const tbody = document.getElementById('deliveryAgentsBody');
+                tbody.innerHTML = agents.map(agent => `
+                    <tr>
+                        <td>${agent.image ? `<img src="${agent.image}" class="table-image">` : '-'}</td>
+                        <td>${agent.name}</td>
+                        <td>${agent.email}</td>
+                        <td>${agent.vehicle}</td>
+                        <td><span class="status-badge status-${agent.status}">${agent.status}</span></td>
+                        <td class="actions">
+                            <button class="btn btn-danger" onclick="deleteDeliveryAgent('${agent._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showAlert('delivery', 'Error loading delivery agents', 'error');
+            }
+        }
+
+        function showDeliveryAgentModal() {
+            editingAgentId = null;
+            agentImage = null;
+            document.getElementById('deliveryAgentModal').classList.add('active');
+            document.getElementById('deliveryAgentForm').reset();
+            document.getElementById('agentImagePreview').innerHTML = '';
+        }
+
+        function handleAgentImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    agentImage = e.target.result;
+                    document.getElementById('agentImagePreview').innerHTML = `
+                        <img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveDeliveryAgent(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('agentName').value,
+                email: document.getElementById('agentEmail').value,
+                vehicle: document.getElementById('agentVehicle').value,
+                image: agentImage
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/delivery-agents`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    closeModal('deliveryAgentModal');
+                    showAlert('delivery', 'Delivery agent created successfully', 'success');
+                    loadDeliveryAgents();
+                }
+            } catch (error) {
+                showAlert('delivery', 'Error creating delivery agent', 'error');
+            }
+        }
+
+        async function deleteDeliveryAgent(agentId) {
+            if (!confirm('Delete this delivery agent?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/delivery-agents/${agentId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('delivery', 'Delivery agent deleted', 'success');
+                    loadDeliveryAgents();
+                }
+            } catch (error) {
+                showAlert('delivery', 'Error deleting delivery agent', 'error');
+            }
+        }
+
+        // Order Management Functions
+        async function filterOrdersByStatus(status) {
+            currentOrderStatusFilter = status;
+            
+            // Update active tab
+            document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            try {
+                let orders;
+                if (status === 'all') {
+                    orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
+                } else {
+                    orders = await fetch(`${API_URL}/orders/by-status/${status}`).then(r => r.json());
+                }
+                
+                renderOrders(orders);
+            } catch (error) {
+                showAlert('orders', 'Error loading orders', 'error');
+            }
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('ordersBody');
+            tbody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>${order._id.slice(-8)}</td>
+                    <td>${order.user_name || 'Unknown'}</td>
+                    <td>₹${order.final_price.toFixed(2)}</td>
+                    <td><span class="status-badge status-${order.status}">${order.status.replace('_', ' ')}</span></td>
+                    <td>${order.agent_name || '-'}</td>
+                    <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                    <td class="actions">
+                        ${order.status === 'ready' ? `
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showAssignAgentModal('${order._id}')">Assign Agent</button>
+                        ` : ''}
+                        ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+                            <select onchange="updateOrderStatus('${order._id}', this.value)" style="padding: 6px; border-radius: 4px; border: 1px solid #ddd;">
+                                <option value="">Change Status</option>
+                                <option value="arrived" ${order.status === 'arrived' ? 'disabled' : ''}>Arrived</option>
+                                <option value="accepted" ${order.status === 'accepted' ? 'disabled' : ''}>Accepted</option>
+                                <option value="preparing" ${order.status === 'preparing' ? 'disabled' : ''}>Preparing</option>
+                                <option value="ready" ${order.status === 'ready' ? 'disabled' : ''}>Ready</option>
+                                <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'disabled' : ''}>Out for Delivery</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        ` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            if (!newStatus) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (response.ok) {
+                    showAlert('orders', 'Order status updated', 'success');
+                    filterOrdersByStatus(currentOrderStatusFilter);
+                }
+            } catch (error) {
+                showAlert('orders', 'Error updating order status', 'error');
+            }
+        }
+
+        async function showAssignAgentModal(orderId) {
+            currentOrderForAssignment = orderId;
+            document.getElementById('assignAgentModal').classList.add('active');
+            
+            // Load available agents
+            try {
+                const agents = await fetch(`${API_URL}/delivery-agents`).then(r => r.json());
+                const availableAgents = agents.filter(a => a.status === 'available');
+                
+                const container = document.getElementById('availableAgentsList');
+                if (availableAgents.length === 0) {
+                    container.innerHTML = '<p style="color: #ef4444;">No available agents at the moment.</p>';
+                    return;
+                }
+                
+                container.innerHTML = availableAgents.map(agent => `
+                    <div style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;" 
+                         onmouseover="this.style.borderColor='#ffd700'" 
+                         onmouseout="this.style.borderColor='#e2e8f0'"
+                         onclick="assignAgent('${agent._id}')">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            ${agent.image ? `<img src="${agent.image}" style="width: 50px; height: 50px; border-radius: 25px;">` : ''}
+                            <div>
+                                <div style="font-weight: 600; font-size: 16px; color: #334155;">${agent.name}</div>
+                                <div style="color: #64748b; font-size: 14px;">${agent.vehicle} • ${agent.email}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('assignAgentError').textContent = 'Error loading agents';
+                document.getElementById('assignAgentError').style.display = 'block';
+            }
+        }
+
+        async function assignAgent(agentId) {
+            try {
+                const response = await fetch(`${API_URL}/orders/${currentOrderForAssignment}/assign-agent`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ agent_id: agentId })
+                });
+                
+                if (response.ok) {
+                    closeModal('assignAgentModal');
+                    showAlert('orders', 'Agent assigned successfully', 'success');
+                    filterOrdersByStatus(currentOrderStatusFilter);
+                }
+            } catch (error) {
+                document.getElementById('assignAgentError').textContent = 'Error assigning agent';
+                document.getElementById('assignAgentError').style.display = 'block';
+            }
+        }
+
         async function loadIngredients() {
             try {
                 const ingredients = await fetch(`${API_URL}/ingredients`).then(r => r.json());
