@@ -1525,6 +1525,15 @@ async def get_agent_orders(request: Request):
     orders = await db.orders.find({"assigned_agent_id": str(agent["_id"])}).sort("created_at", -1).to_list(100)
     for order in orders:
         order["_id"] = str(order["_id"])
+        
+        # Fetch user details for each order
+        order_user = await db.users.find_one({"_id": ObjectId(order["user_id"])})
+        if order_user:
+            order["user_name"] = order_user.get("name", "Unknown")
+            order["user_email"] = order_user.get("email", "")
+        else:
+            order["user_name"] = "Unknown User"
+            order["user_email"] = ""
     
     return orders
 
