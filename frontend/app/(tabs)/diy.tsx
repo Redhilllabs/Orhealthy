@@ -9,6 +9,7 @@ import {
   Image,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,17 +24,46 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 interface Ingredient {
   _id: string;
   name: string;
-  price_per_unit: number;
+  price_per_unit?: number;
+  calculated_price?: number;
   unit: string;
   description?: string;
   images?: string[];
   tags?: string[];
+  step_size?: number;
+}
+
+interface Recipe {
+  _id: string;
+  name: string;
+  description?: string;
+  images?: string[];
+  calculated_price?: number;
+  tags?: string[];
+  ingredients: Array<{
+    ingredient_id: string;
+    name: string;
+    quantity: number;
+    unit: string;
+    step_size?: number;
+    price: number;
+  }>;
 }
 
 export default function DIYScreen() {
+  const [activeTab, setActiveTab] = useState<'ingredients' | 'all-recipes' | 'my-recipes'>('ingredients');
+  
+  // Ingredients tab state
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [filteredIngredients, setFilteredIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
+  
+  // Recipes tabs state
+  const [allRecipes, setAllRecipes] = useState<Recipe[]>([]);
+  const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
+  const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
+  const [selectedRecipes, setSelectedRecipes] = useState<Map<string, number>>(new Map());
+  
   const [mealName, setMealName] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,25 +74,37 @@ export default function DIYScreen() {
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchIngredients();
+    fetchAllData();
   }, []);
 
   useEffect(() => {
-    filterIngredients();
-  }, [searchQuery, selectedTag, ingredients]);
+    if (activeTab === 'ingredients') {
+      filterIngredients();
+    } else {
+      filterRecipes();
+    }
+  }, [searchQuery, selectedTag, ingredients, allRecipes, myRecipes, activeTab]);
+
+  const fetchAllData = async () => {
+    await Promise.all([
+      fetchIngredients(),
+      fetchAllRecipes(),
+      fetchMyRecipes()
+    ]);
+  };
 
   const fetchIngredients = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${API_URL}/ingredients`);
       setIngredients(response.data);
       setFilteredIngredients(response.data);
       
-      // Extract unique tags
       const tags = new Set<string>();
       response.data.forEach((ingredient: Ingredient) => {
         ingredient.tags?.forEach(tag => tags.add(tag));
       });
-      setAllTags(Array.from(tags));
+      setAllTags(prev => Array.from(new Set([...prev, ...Array.from(tags)])));
     } catch (error) {
       console.error('Error fetching ingredients:', error);
     } finally {
@@ -70,17 +112,47 @@ export default function DIYScreen() {
     }
   };
 
+  const fetchAllRecipes = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/recipes`);
+      setAllRecipes(response.data);
+      
+      const tags = new Set<string>();
+      response.data.forEach((recipe: Recipe) => {
+        recipe.tags?.forEach(tag => tags.add(tag));
+      });
+      setAllTags(prev => Array.from(new Set([...prev, ...Array.from(tags)])));
+    } catch (error) {
+      console.error('Error fetching recipes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMyRecipes = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      if (!token) return;
+
+      const response = await axios.get(`${API_URL}/saved-meals?type=recipe`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyRecipes(response.data);
+    } catch (error) {
+      console.error('Error fetching my recipes:', error);
+    }
+  };
+
   const filterIngredients = () => {
     let filtered = ingredients;
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(ing =>
         ing.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    // Filter by tag
     if (selectedTag) {
       filtered = filtered.filter(ing => ing.tags?.includes(selectedTag));
     }
@@ -88,111 +160,177 @@ export default function DIYScreen() {
     setFilteredIngredients(filtered);
   };
 
-  const toggleIngredient = (ingredientId: string) => {
+  const filterRecipes = () => {
+    let recipes = activeTab === 'all-recipes' ? allRecipes : myRecipes;
+
+    if (searchQuery) {
+      recipes = recipes.filter(recipe =>
+        recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedTag) {
+      recipes = recipes.filter(recipe => recipe.tags?.includes(selectedTag));
+    }
+
+    setFilteredRecipes(recipes);
+  };
+
+  const toggleIngredient = (ingredientId: string, stepSize: number = 1) => {
     const newSelected = new Map(selectedIngredients);
     if (newSelected.has(ingredientId)) {
-      newSelected.delete(ingredientId);
+      const currentQty = newSelected.get(ingredientId)!;
+      newSelected.set(ingredientId, currentQty + stepSize);
     } else {
-      newSelected.set(ingredientId, 1);
+      newSelected.set(ingredientId, stepSize);
     }
     setSelectedIngredients(newSelected);
   };
 
-  const updateQuantity = (ingredientId: string, quantity: number) => {
+  const removeIngredient = (ingredientId: string) => {
     const newSelected = new Map(selectedIngredients);
-    if (quantity <= 0) {
-      newSelected.delete(ingredientId);
-    } else {
-      newSelected.set(ingredientId, quantity);
-    }
+    newSelected.delete(ingredientId);
     setSelectedIngredients(newSelected);
+  };
+
+  const updateIngredientQuantity = (ingredientId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeIngredient(ingredientId);
+    } else {
+      const newSelected = new Map(selectedIngredients);
+      newSelected.set(ingredientId, quantity);
+      setSelectedIngredients(newSelected);
+    }
+  };
+
+  const toggleRecipe = (recipeId: string) => {
+    const newSelected = new Map(selectedRecipes);
+    if (newSelected.has(recipeId)) {
+      newSelected.set(recipeId, newSelected.get(recipeId)! + 0.5);
+    } else {
+      newSelected.set(recipeId, 1);
+    }
+    setSelectedRecipes(newSelected);
+  };
+
+  const removeRecipe = (recipeId: string) => {
+    const newSelected = new Map(selectedRecipes);
+    newSelected.delete(recipeId);
+    setSelectedRecipes(newSelected);
+  };
+
+  const updateRecipeQuantity = (recipeId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeRecipe(recipeId);
+    } else {
+      const newSelected = new Map(selectedRecipes);
+      newSelected.set(recipeId, quantity);
+      setSelectedRecipes(newSelected);
+    }
   };
 
   const calculateTotal = () => {
-    let total = 0;
-    selectedIngredients.forEach((quantity, ingredientId) => {
-      const ingredient = ingredients.find(ing => ing._id === ingredientId);
-      if (ingredient) {
-        total += ingredient.price_per_unit * quantity;
-      }
-    });
-    return total;
-  };
-
-  const handleAddToCart = async () => {
-    if (selectedIngredients.size === 0) {
-      alert('Please select at least one ingredient');
-      return;
-    }
-
-    try {
-      const customizations = Array.from(selectedIngredients.entries()).map(([ingredientId, quantity]) => {
-        const ingredient = ingredients.find(ing => ing._id === ingredientId);
-        return {
-          ingredient_id: ingredientId,
-          name: ingredient?.name || '',
-          price: ingredient?.price_per_unit || 0,
-          default_quantity: quantity,
-          quantity,
-        };
+    if (activeTab === 'ingredients') {
+      let total = 0;
+      selectedIngredients.forEach((qty, id) => {
+        const ingredient = ingredients.find(i => i._id === id);
+        if (ingredient) {
+          total += (ingredient.calculated_price || ingredient.price_per_unit || 0) * qty;
+        }
       });
-
-      await addToCart({
-        meal_name: mealName || 'Custom DIY Meal',
-        customizations,
-        quantity: 1,
-        price: calculateTotal(),
+      return total;
+    } else {
+      let total = 0;
+      selectedRecipes.forEach((qty, id) => {
+        const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+        if (recipe) {
+          total += (recipe.calculated_price || 0) * qty;
+        }
       });
-
-      setMealName('');
-      setSelectedIngredients(new Map());
-      alert('Added to cart!');
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('Failed to add to cart');
+      return total;
     }
   };
 
-
-  const handleSaveMeal = async () => {
-    if (selectedIngredients.size === 0) {
-      Alert.alert('No Ingredients', 'Please select at least one ingredient');
+  const saveMeal = async () => {
+    if (!user) {
+      Alert.alert('Error', 'Please login to save meals');
       return;
     }
 
     if (!mealName.trim()) {
-      Alert.alert('Name Required', 'Please enter a name for your meal');
+      Alert.alert('Error', 'Please enter a meal name');
+      return;
+    }
+
+    if (activeTab === 'ingredients' && selectedIngredients.size === 0) {
+      Alert.alert('Error', 'Please select at least one ingredient');
+      return;
+    }
+
+    if (activeTab !== 'ingredients' && selectedRecipes.size === 0) {
+      Alert.alert('Error', 'Please select at least one recipe');
       return;
     }
 
     try {
       setSaving(true);
       const token = await storage.getItemAsync('session_token');
+      
+      let mealData: any;
+      
+      if (activeTab === 'ingredients') {
+        // Creating meal from ingredients
+        const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
+          const ingredient = ingredients.find(i => i._id === id);
+          return {
+            ingredient_id: id,
+            name: ingredient?.name || '',
+            default_quantity: qty,
+            quantity: qty,
+            price: ingredient?.calculated_price || ingredient?.price_per_unit || 0,
+            unit: ingredient?.unit || '',
+          };
+        });
 
-      const ingredientsList = Array.from(selectedIngredients.entries()).map(([ingredientId, quantity]) => {
-        const ingredient = ingredients.find(ing => ing._id === ingredientId);
-        return {
-          ingredient_id: ingredientId,
-          ingredient_name: ingredient?.name || '',
-          quantity,
-          unit: ingredient?.unit || '',
-          price: ingredient?.price_per_unit || 0,
-        };
-      });
-
-      await axios.post(
-        `${API_URL}/saved-meals`,
-        {
-          meal_name: mealName.trim(),
+        mealData = {
+          name: mealName,
           ingredients: ingredientsList,
           total_price: calculateTotal(),
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+          is_preset: false,
+          created_by: user._id,
+        };
+      } else {
+        // Creating meal from recipes
+        const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
+          const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+          return {
+            recipe_id: id,
+            name: recipe?.name || '',
+            quantity: qty,
+            step_size: 0.5,
+            price: recipe?.calculated_price || 0,
+          };
+        });
+
+        mealData = {
+          name: mealName,
+          recipes: recipesList,
+          total_price: calculateTotal(),
+          is_preset: false,
+          created_by: user._id,
+        };
+      }
+
+      await axios.post(`${API_URL}/saved-meals`, mealData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       Alert.alert('Success', 'Meal saved successfully!');
+      
+      // Reset
       setMealName('');
       setSelectedIngredients(new Map());
+      setSelectedRecipes(new Map());
     } catch (error) {
       console.error('Error saving meal:', error);
       Alert.alert('Error', 'Failed to save meal');
@@ -201,62 +339,125 @@ export default function DIYScreen() {
     }
   };
 
+  const addToCartDirect = async () => {
+    if (activeTab === 'ingredients' && selectedIngredients.size === 0) {
+      Alert.alert('Error', 'Please select at least one ingredient');
+      return;
+    }
 
-  const renderIngredient = ({ item }: { item: Ingredient }) => {
-    const quantity = selectedIngredients.get(item._id) || 0;
-    const isSelected = quantity > 0;
+    if (activeTab !== 'ingredients' && selectedRecipes.size === 0) {
+      Alert.alert('Error', 'Please select at least one recipe');
+      return;
+    }
 
-    return (
-      <TouchableOpacity
-        style={[styles.ingredientCard, isSelected && styles.ingredientCardSelected]}
-        onPress={() => toggleIngredient(item._id)}
-      >
-        {item.images && item.images.length > 0 ? (
-          <Image source={{ uri: item.images[0] }} style={styles.ingredientImage} />
-        ) : (
-          <View style={styles.ingredientImagePlaceholder}>
-            <Ionicons name="nutrition" size={32} color="#ccc" />
-          </View>
-        )}
+    try {
+      let cartData: any;
+      
+      if (activeTab === 'ingredients') {
+        const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
+          const ingredient = ingredients.find(i => i._id === id);
+          return {
+            ingredient_id: id,
+            name: ingredient?.name || '',
+            quantity: qty,
+            price: ingredient?.calculated_price || ingredient?.price_per_unit || 0,
+          };
+        });
 
-        <View style={styles.ingredientInfo}>
-          <Text style={styles.ingredientName}>{item.name}</Text>
-          <Text style={styles.ingredientPrice}>
-            ₹{item.price_per_unit.toFixed(2)} / {item.unit}
-          </Text>
-          {item.description && (
-            <Text style={styles.ingredientDescription} numberOfLines={1}>
-              {item.description}
-            </Text>
-          )}
-        </View>
+        cartData = {
+          meal_id: 'custom-' + Date.now(),
+          meal_name: mealName || 'Custom Meal',
+          customizations: ingredientsList,
+          quantity: 1,
+          price: calculateTotal(),
+        };
+      } else {
+        const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
+          const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+          return {
+            recipe_id: id,
+            name: recipe?.name || '',
+            quantity: qty,
+            price: recipe?.calculated_price || 0,
+          };
+        });
 
-        <View style={styles.ingredientActions}>
-          {isSelected ? (
-            <View style={styles.quantityControl}>
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={() => updateQuantity(item._id, quantity - 1)}
-              >
-                <Ionicons name="remove" size={16} color="#ffd700" />
-              </TouchableOpacity>
+        cartData = {
+          meal_id: 'custom-meal-' + Date.now(),
+          meal_name: mealName || 'Custom Meal',
+          recipes: recipesList,
+          quantity: 1,
+          price: calculateTotal(),
+        };
+      }
 
-              <Text style={styles.quantity}>{quantity}</Text>
+      await addToCart(cartData);
 
-              <TouchableOpacity
-                style={styles.quantityButton}
-                onPress={() => updateQuantity(item._id, quantity + 1)}
-              >
-                <Ionicons name="add" size={16} color="#ffd700" />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <Ionicons name="add-circle-outline" size={28} color="#ffd700" />
-          )}
-        </View>
-      </TouchableOpacity>
-    );
+      if (Platform.OS === 'web') {
+        alert('Added to cart!');
+      } else {
+        Alert.alert('Success', 'Added to cart!');
+      }
+      
+      setMealName('');
+      setSelectedIngredients(new Map());
+      setSelectedRecipes(new Map());
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      Alert.alert('Error', 'Failed to add to cart');
+    }
   };
+
+  const renderIngredientItem = ({ item }: { item: Ingredient }) => (
+    <TouchableOpacity
+      style={styles.itemCard}
+      onPress={() => toggleIngredient(item._id, item.step_size || 1)}
+    >
+      {item.images?.[0] ? (
+        <Image source={{ uri: item.images[0] }} style={styles.itemImage} />
+      ) : (
+        <View style={[styles.itemImage, styles.placeholderImage]}>
+          <Ionicons name="nutrition" size={32} color="#ccc" />
+        </View>
+      )}
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemPrice}>
+          ₹{(item.calculated_price || item.price_per_unit || 0).toFixed(2)}/{item.unit}
+        </Text>
+        {selectedIngredients.has(item._id) && (
+          <Text style={styles.selectedBadge}>✓ Added</Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderRecipeItem = ({ item }: { item: Recipe }) => (
+    <TouchableOpacity
+      style={styles.itemCard}
+      onPress={() => toggleRecipe(item._id)}
+    >
+      {item.images?.[0] ? (
+        <Image source={{ uri: item.images[0] }} style={styles.itemImage} />
+      ) : (
+        <View style={[styles.itemImage, styles.placeholderImage]}>
+          <Ionicons name="restaurant" size={32} color="#ccc" />
+        </View>
+      )}
+      <View style={styles.itemInfo}>
+        <Text style={styles.itemName}>{item.name}</Text>
+        {item.description && (
+          <Text style={styles.itemDescription} numberOfLines={2}>
+            {item.description}
+          </Text>
+        )}
+        <Text style={styles.itemPrice}>₹{(item.calculated_price || 0).toFixed(2)}</Text>
+        {selectedRecipes.has(item._id) && (
+          <Text style={styles.selectedBadge}>✓ Added</Text>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 
   if (loading) {
     return (
@@ -268,124 +469,189 @@ export default function DIYScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>DIY Your Meal</Text>
+      {/* Tabs */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabContainer}
+      >
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'ingredients' && styles.activeTab]}
+          onPress={() => setActiveTab('ingredients')}
+        >
+          <Text style={[styles.tabText, activeTab === 'ingredients' && styles.activeTabText]}>
+            From Ingredients
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'all-recipes' && styles.activeTab]}
+          onPress={() => setActiveTab('all-recipes')}
+        >
+          <Text style={[styles.tabText, activeTab === 'all-recipes' && styles.activeTabText]}>
+            From All Recipes ({allRecipes.length})
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'my-recipes' && styles.activeTab]}
+          onPress={() => setActiveTab('my-recipes')}
+        >
+          <Text style={[styles.tabText, activeTab === 'my-recipes' && styles.activeTabText]}>
+            From My Recipes ({myRecipes.length})
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Search and filters */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#999" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={`Search ${activeTab === 'ingredients' ? 'ingredients' : 'recipes'}...`}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
       </View>
 
-      {/* Tags Filter - moved to top */}
+      {/* Tag filters */}
       {allTags.length > 0 && (
-        <View style={styles.tagsFilterContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.tagsFilter}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tagsContainer}
+          contentContainerStyle={styles.tagsContent}
+        >
+          <TouchableOpacity
+            style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
+            onPress={() => setSelectedTag(null)}
           >
+            <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
+          </TouchableOpacity>
+          {allTags.map((tag) => (
             <TouchableOpacity
-              style={[
-                styles.filterTag,
-                !selectedTag && styles.filterTagActive,
-              ]}
-              onPress={() => setSelectedTag(null)}
+              key={tag}
+              style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
+              onPress={() => setSelectedTag(tag)}
             >
-              <Text
-                style={[
-                  styles.filterTagText,
-                  !selectedTag && styles.filterTagTextActive,
-                ]}
-              >
-                All
+              <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>
+                {tag}
               </Text>
             </TouchableOpacity>
-            {allTags.map((tag) => (
-              <TouchableOpacity
-                key={tag}
-                style={[
-                  styles.filterTag,
-                  selectedTag === tag && styles.filterTagActive,
-                ]}
-                onPress={() => setSelectedTag(tag)}
-              >
-                <Text
-                  style={[
-                    styles.filterTagText,
-                    selectedTag === tag && styles.filterTagTextActive,
-                  ]}
-                >
-                  {tag}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Items List */}
+      <FlatList
+        data={activeTab === 'ingredients' ? filteredIngredients : filteredRecipes}
+        renderItem={activeTab === 'ingredients' ? renderIngredientItem : renderRecipeItem}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={styles.listContent}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
+      />
+
+      {/* Selected Items Panel */}
+      {((activeTab === 'ingredients' && selectedIngredients.size > 0) || 
+        (activeTab !== 'ingredients' && selectedRecipes.size > 0)) && (
+        <View style={styles.selectedPanel}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectedScroll}>
+            {activeTab === 'ingredients'
+              ? Array.from(selectedIngredients.entries()).map(([id, qty]) => {
+                  const ingredient = ingredients.find(i => i._id === id);
+                  if (!ingredient) return null;
+                  const stepSize = ingredient.step_size || 1;
+                  return (
+                    <View key={id} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemName}>{ingredient.name}</Text>
+                      <View style={styles.quantityControl}>
+                        <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty - stepSize)}>
+                          <Ionicons name="remove-circle" size={24} color="#ffd700" />
+                        </TouchableOpacity>
+                        <Text style={styles.quantityText}>{qty}</Text>
+                        <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty + stepSize)}>
+                          <Ionicons name="add-circle" size={24} color="#ffd700" />
+                        </TouchableOpacity>
+                      </View>
+                      <TouchableOpacity onPress={() => removeIngredient(id)}>
+                        <Ionicons name="close-circle" size={20} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })
+              : Array.from(selectedRecipes.entries()).map(([id, qty]) => {
+                  const recipe = (activeTab === 'all-recipes' ? allRecipes : myRecipes).find(r => r._id === id);
+                  if (!recipe) return null;
+                  return (
+                    <View key={id} style={styles.selectedItem}>
+                      <Text style={styles.selectedItemName}>{recipe.name}</Text>
+                      <View style={styles.quantityControl}>
+                        <TouchableOpacity onPress={() => updateRecipeQuantity(id, qty - 0.5)}>
+                          <Ionicons name="remove-circle" size={24} color="#ffd700" />
+                        </TouchableOpacity>
+                        <Text style={styles.quantityText}>{qty}x</Text>
+                        <TouchableOpacity onPress={() => updateRecipeQuantity(id, qty + 0.5)}>
+                          <Ionicons name="add-circle" size={24} color="#ffd700" />
+                        </TouchableOpacity>
+                      </View>
+                      <TouchableOpacity onPress={() => removeRecipe(id)}>
+                        <Ionicons name="close-circle" size={20} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
           </ScrollView>
         </View>
       )}
 
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search ingredients..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-      </View>
-
-      <View style={styles.mealNameContainer}>
-        <TextInput
-          style={styles.mealNameInput}
-          placeholder="Name your meal (optional)"
-          value={mealName}
-          onChangeText={setMealName}
-          maxLength={50}
-        />
-      </View>
-
-      <FlatList
-        data={filteredIngredients}
-        renderItem={renderIngredient}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="nutrition-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>No ingredients available</Text>
-          </View>
-        }
-      />
-
-      {selectedIngredients.size > 0 && (
-        <View style={styles.footer}>
-          <View style={styles.footerInfo}>
-            <Text style={styles.footerLabel}>
-              {selectedIngredients.size} ingredient{selectedIngredients.size !== 1 ? 's' : ''}
-            </Text>
-            <Text style={styles.footerTotal}>₹{calculateTotal().toFixed(2)}</Text>
-          </View>
-
-          <View style={styles.buttonRow}>
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.saveButton]} 
-              onPress={handleSaveMeal}
+      {/* Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <View style={styles.totalSection}>
+          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.totalPrice}>₹{calculateTotal().toFixed(2)}</Text>
+        </View>
+        <View style={styles.actionButtons}>
+          {user && (
+            <TouchableOpacity
+              style={[styles.actionButton, styles.saveButton]}
+              onPress={saveMeal}
               disabled={saving}
             >
               {saving ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color="#333" />
               ) : (
                 <>
-                  <Ionicons name="bookmark" size={20} color="#fff" />
-                  <Text style={styles.actionButtonText}>Save</Text>
+                  <Ionicons name="bookmark" size={20} color="#333" />
+                  <Text style={styles.saveButtonText}>Save</Text>
                 </>
               )}
             </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.addButton]} 
-              onPress={handleAddToCart}
-            >
-              <Ionicons name="cart" size={20} color="#fff" />
-              <Text style={styles.actionButtonText}>Add to Cart</Text>
-            </TouchableOpacity>
-          </View>
+          )}
+          <TouchableOpacity
+            style={[styles.actionButton, styles.cartButton]}
+            onPress={addToCartDirect}
+          >
+            <Ionicons name="cart" size={20} color="#fff" />
+            <Text style={styles.cartButtonText}>Add to Cart</Text>
+          </TouchableOpacity>
         </View>
+      </View>
+
+      {/* Meal Name Input (shows when user wants to save) */}
+      {user && !mealName && (
+        <TouchableOpacity
+          style={styles.nameInputPrompt}
+          onPress={() => {
+            Alert.prompt(
+              'Meal Name',
+              'Enter a name for your meal',
+              (text) => setMealName(text)
+            );
+          }}
+        >
+          <Text style={styles.nameInputPromptText}>Tap to name your meal</Text>
+        </TouchableOpacity>
       )}
     </SafeAreaView>
   );
@@ -395,222 +661,244 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingBottom: 80,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    padding: 16,
+  tabContainer: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+  tab: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+    minHeight: 36,
+  },
+  activeTab: {
+    borderBottomColor: '#ffd700',
+  },
+  tabText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
+  },
+  activeTabText: {
+    color: '#ffd700',
+    fontWeight: '700',
   },
   searchContainer: {
+    padding: 16,
+    backgroundColor: '#fff',
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  searchIcon: {
-    marginRight: 12,
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#333',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  mealNameContainer: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  mealNameInput: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    marginLeft: 8,
     fontSize: 16,
   },
-  tagsFilterContainer: {
+  tagsContainer: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    maxHeight: 60,
   },
-  tagsFilter: {
-    paddingHorizontal: 16,
+  tagsContent: {
+    paddingHorizontal: 12,
     paddingVertical: 12,
     gap: 8,
   },
-  filterTag: {
+  tagChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: '#ddd',
   },
-  filterTagActive: {
+  tagChipActive: {
     backgroundColor: '#ffd700',
     borderColor: '#ffd700',
   },
-  filterTagText: {
+  tagText: {
     fontSize: 14,
     color: '#666',
     fontWeight: '500',
   },
-  filterTagTextActive: {
+  tagTextActive: {
     color: '#fff',
-    fontWeight: '600',
   },
   listContent: {
-    padding: 16,
-    paddingBottom: 180,
+    padding: 8,
   },
-  ingredientCard: {
+  columnWrapper: {
+    justifyContent: 'space-between',
+  },
+  itemCard: {
+    flex: 1,
     backgroundColor: '#fff',
     borderRadius: 12,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
+    margin: 8,
+    overflow: 'hidden',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    maxWidth: '48%',
   },
-  ingredientCardSelected: {
-    borderWidth: 2,
-    borderColor: '#ffd700',
+  itemImage: {
+    width: '100%',
+    height: 120,
   },
-  ingredientImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  ingredientImagePlaceholder: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    marginRight: 12,
+  placeholderImage: {
     backgroundColor: '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  ingredientInfo: {
-    flex: 1,
+  itemInfo: {
+    padding: 12,
   },
-  ingredientName: {
-    fontSize: 16,
-    fontWeight: '600',
+  itemName: {
+    fontSize: 14,
+    fontWeight: 'bold',
     color: '#333',
     marginBottom: 4,
   },
-  ingredientPrice: {
-    fontSize: 14,
-    color: '#ffd700',
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  ingredientDescription: {
+  itemDescription: {
     fontSize: 12,
     color: '#666',
+    marginBottom: 4,
   },
-  ingredientActions: {
-    marginLeft: 8,
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffd700',
+  },
+  selectedBadge: {
+    fontSize: 12,
+    color: '#10b981',
+    fontWeight: '600',
+    marginTop: 4,
+  },
+  selectedPanel: {
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingVertical: 12,
+  },
+  selectedScroll: {
+    paddingHorizontal: 16,
+  },
+  selectedItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 12,
+    marginRight: 12,
+    gap: 8,
+  },
+  selectedItemName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
   },
   quantityControl: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  quantityButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantity: {
+  quantityText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    minWidth: 24,
+    minWidth: 32,
     textAlign: 'center',
   },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 64,
-  },
-  emptyText: {
-    fontSize: 18,
-    color: '#666',
-    marginTop: 16,
-  },
-  footer: {
+  bottomBar: {
+    position: 'absolute',
+    bottom: 60,
+    left: 0,
+    right: 0,
     backgroundColor: '#fff',
-    padding: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+    padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  footerInfo: {
+  totalSection: {
     flex: 1,
   },
-  footerLabel: {
+  totalLabel: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 4,
   },
-  footerTotal: {
+  totalPrice: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#ffd700',
   },
-  buttonRow: {
+  actionButtons: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  actionButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: 8,
   },
-  saveButton: {
-    backgroundColor: '#3b82f6',
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    gap: 6,
   },
-  addButton: {
+  saveButton: {
     backgroundColor: '#ffd700',
   },
-  actionButtonText: {
+  saveButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  cartButton: {
+    backgroundColor: '#333',
+  },
+  cartButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  nameInputPrompt: {
+    position: 'absolute',
+    bottom: 140,
+    left: 16,
+    right: 16,
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ffd700',
+    borderStyle: 'dashed',
+  },
+  nameInputPromptText: {
+    fontSize: 14,
+    color: '#ffd700',
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
