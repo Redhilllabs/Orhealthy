@@ -97,7 +97,7 @@ export default function PresetsScreen() {
     ]);
   };
 
-  const fetchAllCombos = async () => {
+  const fetchAllMeals = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/recipes`);
