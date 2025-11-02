@@ -60,6 +60,7 @@ export default function PresetsScreen() {
   const [customizations, setCustomizations] = useState<any[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
 
   useEffect(() => {
