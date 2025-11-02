@@ -344,6 +344,47 @@ async def get_current_user(request: Request) -> Optional[dict]:
     if not session:
         return None
     
+
+
+# Admin authentication helpers
+def hash_password(password: str) -> str:
+    """Hash password using SHA-256"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def generate_admin_token() -> str:
+    """Generate a secure random token for admin session"""
+    return secrets.token_urlsafe(32)
+
+async def initialize_admin_credentials():
+    """Initialize default admin credentials if not exists"""
+    admin = await db.admin_users.find_one({"email": "redhilllabs@gmail.com"})
+    if not admin:
+        await db.admin_users.insert_one({
+            "email": "redhilllabs@gmail.com",
+            "password_hash": hash_password("@Redhilllabs"),
+            "created_at": datetime.now(timezone.utc)
+        })
+        print("Default admin credentials initialized")
+
+async def verify_admin_token(token: str) -> Optional[dict]:
+    """Verify admin token and return admin user"""
+    if not token:
+        return None
+    
+    # Check if token exists in admin_sessions
+    session = await db.admin_sessions.find_one({"token": token})
+    if not session:
+        return None
+    
+    # Check if token is expired (24 hours)
+    if session.get("expires_at") and session["expires_at"] < datetime.now(timezone.utc):
+        await db.admin_sessions.delete_one({"token": token})
+        return None
+    
+    # Get admin user
+    admin = await db.admin_users.find_one({"email": session["email"]})
+    return admin
+
     # Convert expires_at to timezone-aware datetime if it isn't already
     expires_at = session["expires_at"]
     if expires_at.tzinfo is None:
