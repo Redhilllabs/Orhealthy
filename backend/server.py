@@ -143,14 +143,55 @@ class WithdrawalRequest(BaseModel):
     processed_at: Optional[datetime] = None
 
 
+# New models for ingredient management
+class SourceIngredientPurchase(BaseModel):
+    purchase_quantity: float  # e.g., 8 (pcs)
+    purchase_price: float  # e.g., 100 (Rs)
+    unit_price: float  # Auto-calculated: purchase_price / purchase_quantity
+    purchase_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SourceIngredient(BaseModel):
+    name: str
+    image: Optional[str] = None  # Base64 encoded image
+    unit: str  # pcs, kg, liters, etc.
+    purchases: List[SourceIngredientPurchase] = []  # Purchase history
+    
+    @property
+    def latest_unit_price(self):
+        if not self.purchases:
+            return 0
+        return self.purchases[-1].unit_price
+    
+    @property
+    def lowest_unit_price(self):
+        if not self.purchases:
+            return 0
+        return min(p.unit_price for p in self.purchases)
+    
+    @property
+    def highest_unit_price(self):
+        if not self.purchases:
+            return 0
+        return max(p.unit_price for p in self.purchases)
+
+class NutritionEntry(BaseModel):
+    name: str  # e.g., Protein, Carbs, Vitamin A
+    value: float  # Value per unit of processed ingredient
+    unit: str  # g, mg, mcg, etc.
+
 class Ingredient(BaseModel):
     name: str
     price_per_unit: float
-    unit: str  # g, ml, piece
+    unit: str  # g, ml, piece, cup, etc.
     description: Optional[str] = None
     nutritional_info: Optional[dict] = None
     images: List[str] = []  # Base64 encoded images
     tags: List[str] = []  # Tags for filtering
+    # New fields for processed ingredients
+    source_ingredient_id: Optional[str] = None  # Reference to source ingredient
+    source_quantity: Optional[float] = None  # Quantity of source needed for 1 unit
+    step_size: float = 1.0  # Default step size for frontend increment/decrement
+    nutrition_profile: List[NutritionEntry] = []  # Nutrition per unit
 
 class MealIngredient(BaseModel):
     ingredient_id: str
