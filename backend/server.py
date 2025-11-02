@@ -1372,12 +1372,61 @@ async def get_saved_recipes(request: Request):
                     if len(images) >= 4:  # Limit to 4 images
                         break
         
-        meal["images"] = images if images else []
+        recipe["images"] = images if images else []
+    
+    return recipes
+
+# New Saved Meals endpoints (user-created meals from recipes)
+@api_router.post("/saved-meals")
+async def save_meal(meal_data: dict, request: Request):
+    """Save a user-created meal (combination of recipes)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    saved_meal = {
+        "user_id": user["_id"],
+        "meal_name": meal_data.get("meal_name"),
+        "recipes": meal_data.get("recipes", []),  # List of recipe references
+        "total_price": meal_data.get("total_price"),
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.user_meals.insert_one(saved_meal)
+    return {"message": "Meal saved", "id": str(result.inserted_id)}
+
+@api_router.get("/saved-meals")
+async def get_saved_meals(request: Request):
+    """Get user's saved meals (combinations of recipes)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    meals = await db.user_meals.find({"user_id": user["_id"]}).to_list(100)
+    
+    for meal in meals:
+        meal["_id"] = str(meal["_id"])
+        
+        # Enrich with recipe data
+        enriched_recipes = []
+        for recipe_ref in meal.get("recipes", []):
+            recipe_id = recipe_ref.get("recipe_id")
+            if recipe_id:
+                recipe_data = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+                if recipe_data:
+                    enriched_recipes.append({
+                        "recipe_id": recipe_id,
+                        "name": recipe_data.get("name"),
+                        "quantity": recipe_ref.get("quantity", 1),
+                        "images": recipe_data.get("images", [])
+                    })
+        
+        meal["enriched_recipes"] = enriched_recipes
     
     return meals
 
-@api_router.delete("/saved-meals/{meal_id}")
-async def delete_saved_meal(meal_id: str, request: Request):
+@api_router.delete("/saved-recipes/{recipe_id}")
+async def delete_saved_recipe(recipe_id: str, request: Request):
     """Delete a saved meal"""
     user = await get_current_user(request)
     if not user:
