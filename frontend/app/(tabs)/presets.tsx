@@ -378,10 +378,6 @@ export default function PresetsScreen() {
                     <Ionicons name="add-circle" size={28} color="#ffd700" />
                   </TouchableOpacity>
                 </View>
-                )}
-                {activeTab === 'my' && (
-                  <Text style={styles.quantityText}>x{ing.quantity}</Text>
-                )}
               </View>
             ))}
           </ScrollView>
