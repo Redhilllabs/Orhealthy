@@ -498,13 +498,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
   },
   tab: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    minHeight: 48,
+    minHeight: 36,
   },
   activeTab: {
     borderBottomColor: '#ffd700',
