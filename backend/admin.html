@@ -1163,9 +1163,35 @@
         function showSourceIngredientModal() {
             editingSourceId = null;
             document.getElementById('sourceIngredientModal').classList.add('active');
+            document.querySelector('#sourceIngredientModal .modal-title').textContent = 'Add Source Ingredient';
             document.getElementById('sourceIngredientForm').reset();
             sourceIngredientImage = null;
             document.getElementById('sourceImagePreview').innerHTML = '';
+        }
+
+        async function editSourceIngredient(sourceId) {
+            editingSourceId = sourceId;
+            try {
+                const source = allSourceIngredients.find(s => s._id === sourceId);
+                if (!source) return;
+                
+                document.getElementById('sourceIngredientModal').classList.add('active');
+                document.querySelector('#sourceIngredientModal .modal-title').textContent = 'Edit Source Ingredient';
+                document.getElementById('sourceName').value = source.name;
+                document.getElementById('sourceUnit').value = source.unit;
+                
+                // Set existing image
+                sourceIngredientImage = source.image || null;
+                if (source.image) {
+                    document.getElementById('sourceImagePreview').innerHTML = `
+                        <img src="${source.image}" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                    `;
+                } else {
+                    document.getElementById('sourceImagePreview').innerHTML = '';
+                }
+            } catch (error) {
+                showAlert('source-ingredients', 'Error loading source ingredient data', 'error');
+            }
         }
 
         function handleSourceImage(event) {
