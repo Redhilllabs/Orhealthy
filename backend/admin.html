@@ -1199,6 +1199,7 @@
             document.getElementById('agentEmail').disabled = true; // Can't change email
             document.getElementById('agentVehicle').value = agent.vehicle;
             document.getElementById('agentVehicleNumber').value = agent.vehicle_number || '';
+            document.getElementById('agentPaymentPerDelivery').value = agent.payment_per_delivery || 0;
             
             agentImage = agent.image || null;
             if (agent.image) {
