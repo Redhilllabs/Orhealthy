@@ -357,14 +357,14 @@
                     
                     <!-- Status Tabs -->
                     <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; flex-wrap: wrap;">
-                        <button class="status-tab active" onclick="filterOrdersByStatus('all')">All</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('arrived')">Arrived</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('accepted')">Accepted</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('preparing')">Preparing</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('ready')">Ready</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('out_for_delivery')">Out for Delivery</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('delivered')">Delivered</button>
-                        <button class="status-tab" onclick="filterOrdersByStatus('cancelled')">Cancelled</button>
+                        <button class="status-tab active" data-status="all">All</button>
+                        <button class="status-tab" data-status="arrived">Arrived</button>
+                        <button class="status-tab" data-status="accepted">Accepted</button>
+                        <button class="status-tab" data-status="preparing">Preparing</button>
+                        <button class="status-tab" data-status="ready">Ready</button>
+                        <button class="status-tab" data-status="out_for_delivery">Out for Delivery</button>
+                        <button class="status-tab" data-status="delivered">Delivered</button>
+                        <button class="status-tab" data-status="cancelled">Cancelled</button>
                     </div>
                     
                     <table class="table">
