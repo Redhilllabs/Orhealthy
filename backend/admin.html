@@ -138,11 +138,11 @@
                     <span class="nav-icon">🥗</span>
                     <span>Processed Ingredients</span>
                 </div>
-                <div class="nav-item submenu-item" data-tab="recipes">
+                <div class="nav-item submenu-item" data-tab="meals">
                     <span class="nav-icon">📖</span>
                     <span>Recipes</span>
                 </div>
-                <div class="nav-item submenu-item" data-tab="meals">
+                <div class="nav-item submenu-item" data-tab="combos">
                     <span class="nav-icon">🍽️</span>
                     <span>Meals</span>
                 </div>
@@ -254,11 +254,11 @@
             </div>
 
             <!-- Recipes -->
-            <div id="recipes" class="section">
+            <div id="meals" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Recipes Management</h2>
-                        <button class="btn" onclick="showRecipeModal()">+ Add Recipe</button>
+                        <h2 class="card-title">Meals Management</h2>
+                        <button class="btn" onclick="showMealModal()">+ Add Meal</button>
                     </div>
                     <div id="alert-recipes"></div>
                     <table class="table">
@@ -272,17 +272,17 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="recipesBody"></tbody>
+                        <tbody id="mealsBody"></tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Meals (Combinations of Recipes) -->
-            <div id="meals" class="section">
+            <div id="combos" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Meals Management</h2>
-                        <button class="btn" onclick="showMealModal()">+ Add Meal</button>
+                        <h2 class="card-title">Combos Management</h2>
+                        <button class="btn" onclick="showComboModal()">+ Add Combo</button>
                     </div>
                     <div id="alert-meals"></div>
                     <table class="table">
@@ -296,7 +296,7 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="mealsBody"></tbody>
+                        <tbody id="combosBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -758,13 +758,13 @@
     </div>
 
     <!-- Recipe Modal (formerly Meal Modal) -->
-    <div id="recipeModal" class="modal">
+    <div id="mealModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Add Recipe</h2>
+                <h2 class="modal-title">Add Meal</h2>
                 <span class="close" onclick="closeModal('recipeModal')">&times;</span>
             </div>
-            <form id="recipeForm" onsubmit="saveRecipe(event)">
+            <form id="recipeForm" onsubmit="saveMeal(event)">
                 <div class="form-group">
                     <label>Images</label>
                     <div class="image-upload" onclick="document.getElementById('recipeImages').click()">
@@ -806,13 +806,13 @@
     </div>
 
     <!-- Meal Modal (NEW - for meal combinations) -->
-    <div id="mealModal" class="modal">
+    <div id="comboModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Add Meal</h2>
+                <h2 class="modal-title">Add Combo</h2>
                 <span class="close" onclick="closeModal('mealModal')">&times;</span>
             </div>
-            <form id="mealForm" onsubmit="saveMeal(event)">
+            <form id="mealForm" onsubmit="saveCombo(event)">
                 <div class="form-group">
                     <label>Images</label>
                     <div class="image-upload" onclick="document.getElementById('mealImages').click()">
@@ -845,7 +845,7 @@
                     <select id="mealRecipeSelect">
                         <option value="">-- Select recipe --</option>
                     </select>
-                    <button type="button" class="btn btn-secondary" style="margin-top: 8px;" onclick="addRecipeToMeal()">Add Recipe</button>
+                    <button type="button" class="btn btn-secondary" style="margin-top: 8px;" onclick="addRecipeToMeal()">Add Meal</button>
                     <div class="ingredient-list" id="mealRecipes"></div>
                 </div>
                 <button type="submit" class="btn">Save Meal</button>
@@ -956,8 +956,8 @@
             dashboard: 'Dashboard',
             'source-ingredients': 'Source Ingredients Management',
             ingredients: 'Processed Ingredients Management',
-            recipes: 'Recipes Management',
-            meals: 'Meals Management',
+            recipes: 'Meals Management',
+            meals: 'Combos Management',
             users: 'Users Management',
             delivery: 'Delivery Agents Management',
             orders: 'Orders Management',
@@ -1012,8 +1012,8 @@
                 case 'dashboard': loadDashboard(); break;
                 case 'source-ingredients': loadSourceIngredients(); break;
                 case 'ingredients': loadIngredients(); break;
-                case 'recipes': loadRecipes(); break;
-                case 'meals': loadMeals(); break;
+                case 'recipes': loadMeals(); break;
+                case 'meals': loadCombos(); break;
                 case 'users': loadUsers(); break;
                 case 'delivery': loadDeliveryAgents(); break;
                 case 'orders': loadOrders(); break;
@@ -2156,7 +2156,7 @@
             }
         }
 
-        async function loadRecipes() {
+        async function loadMeals() {
             try {
                 const recipes = await fetch(`${API_URL}/recipes`).then(r => r.json());
                 allRecipes = recipes; // Store for use in meal creation
@@ -2169,8 +2169,8 @@
                         <td>₹${recipe.calculated_price ? recipe.calculated_price.toFixed(2) : '0.00'}</td>
                         <td>${recipe.tags ? recipe.tags.join(', ') : '-'}</td>
                         <td class="actions">
-                            <button class="btn" onclick="editRecipe('${recipe._id}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteRecipe('${recipe._id}')">Delete</button>
+                            <button class="btn" onclick="editMeal('${recipe._id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteMeal('${recipe._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -2185,10 +2185,10 @@
         let editingRecipeId = null;
         let allRecipes = [];
 
-        function showRecipeModal() {
+        function showMealModal() {
             editingRecipeId = null;
             document.getElementById('recipeModal').classList.add('active');
-            document.querySelector('#recipeModal .modal-title').textContent = 'Add Recipe';
+            document.querySelector('#recipeModal .modal-title').textContent = 'Add Meal';
             document.getElementById('recipeForm').reset();
             selectedRecipeIngredients = [];
             recipeImages = [];
@@ -2198,14 +2198,14 @@
             updateRecipeIngredientSelect();
         }
 
-        async function editRecipe(id) {
+        async function editMeal(id) {
             editingRecipeId = id;
             try {
                 const response = await fetch(`${API_URL}/recipes/${id}`);
                 const recipe = await response.json();
                 
                 document.getElementById('recipeModal').classList.add('active');
-                document.querySelector('#recipeModal .modal-title').textContent = 'Edit Recipe';
+                document.querySelector('#recipeModal .modal-title').textContent = 'Edit Meal';
                 document.getElementById('recipeName').value = recipe.name;
                 document.getElementById('recipeDescription').value = recipe.description;
                 document.getElementById('recipePrice').value = recipe.calculated_price || 0;
@@ -2330,7 +2330,7 @@
             updateRecipeImagePreview();
         }
 
-        async function saveRecipe(e) {
+        async function saveMeal(e) {
             e.preventDefault();
             if (selectedRecipeIngredients.length === 0) return alert('Add at least one ingredient');
             
@@ -2367,7 +2367,7 @@
                 if (response.ok) {
                     closeModal('recipeModal');
                     showAlert('recipes', editingRecipeId ? 'Recipe updated successfully' : 'Recipe created successfully', 'success');
-                    loadRecipes();
+                    loadMeals();
                 } else {
                     const error = await response.json();
                     showAlert('recipes', error.detail || 'Error saving recipe', 'error');
@@ -2377,13 +2377,13 @@
             }
         }
 
-        async function deleteRecipe(id) {
+        async function deleteMeal(id) {
             if (!confirm('Delete this recipe?')) return;
             try {
                 const response = await fetch(`${API_URL}/recipes/${id}`, { method: 'DELETE' });
                 if (response.ok) {
                     showAlert('recipes', 'Deleted successfully', 'success');
-                    loadRecipes();
+                    loadMeals();
                 } else {
                     showAlert('recipes', 'Error deleting recipe', 'error');
                 }
@@ -2392,7 +2392,7 @@
             }
         }
 
-        async function loadMeals() {
+        async function loadCombos() {
             try {
                 const meals = await fetch(`${API_URL}/meals`).then(r => r.json());
                 const tbody = document.getElementById('mealsBody');
@@ -2404,8 +2404,8 @@
                         <td>₹${meal.calculated_price ? meal.calculated_price.toFixed(2) : '0.00'}</td>
                         <td>${meal.tags ? meal.tags.join(', ') : '-'}</td>
                         <td class="actions">
-                            <button class="btn" onclick="editMeal('${meal._id}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteMeal('${meal._id}')">Delete</button>
+                            <button class="btn" onclick="editCombo('${meal._id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteCombo('${meal._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
@@ -2417,10 +2417,10 @@
         // Meal Management Functions (working with recipes)
         let selectedMealRecipes = [];
 
-        function showMealModal() {
+        function showComboModal() {
             editingMealId = null;
             document.getElementById('mealModal').classList.add('active');
-            document.querySelector('#mealModal .modal-title').textContent = 'Add Meal';
+            document.querySelector('#mealModal .modal-title').textContent = 'Add Combo';
             document.getElementById('mealForm').reset();
             selectedMealRecipes = [];
             mealImages = [];
@@ -2430,14 +2430,14 @@
             updateMealRecipeSelect();
         }
 
-        async function editMeal(id) {
+        async function editCombo(id) {
             editingMealId = id;
             try {
                 const response = await fetch(`${API_URL}/meals/${id}`);
                 const meal = await response.json();
                 
                 document.getElementById('mealModal').classList.add('active');
-                document.querySelector('#mealModal .modal-title').textContent = 'Edit Meal';
+                document.querySelector('#mealModal .modal-title').textContent = 'Edit Combo';
                 document.getElementById('mealName').value = meal.name;
                 document.getElementById('mealDescription').value = meal.description;
                 document.getElementById('mealPrice').value = meal.calculated_price || 0;
@@ -2523,7 +2523,7 @@
             document.getElementById('mealPrice').value = total.toFixed(2);
         }
 
-        async function saveMeal(e) {
+        async function saveCombo(e) {
             e.preventDefault();
             if (selectedMealRecipes.length === 0) return alert('Add at least one recipe');
             
@@ -2561,7 +2561,7 @@
                 if (response.ok) {
                     closeModal('mealModal');
                     showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal created successfully', 'success');
-                    loadMeals();
+                    loadCombos();
                 } else {
                     const error = await response.json();
                     showAlert('meals', error.detail || 'Error saving meal', 'error');
@@ -2598,13 +2598,13 @@
             updateMealImagePreview();
         }
 
-        async function deleteMeal(id) {
+        async function deleteCombo(id) {
             if (!confirm('Delete this meal?')) return;
             try {
                 const response = await fetch(`${API_URL}/meals/${id}`, { method: 'DELETE' });
                 if (response.ok) {
                     showAlert('meals', 'Deleted successfully', 'success');
-                    loadMeals();
+                    loadCombos();
                 } else {
                     showAlert('meals', 'Error deleting meal', 'error');
                 }
