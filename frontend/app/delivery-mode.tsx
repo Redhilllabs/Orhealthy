@@ -142,10 +142,11 @@ export default function DeliveryModeScreen() {
     if (!agentData) return;
     
     try {
+      const token = await storage.getItemAsync('session_token');
       const response = await fetch(`${BACKEND_URL}/api/delivery-agents/${agentData._id}/status`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${user?.id_token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: newStatus }),
@@ -169,10 +170,11 @@ export default function DeliveryModeScreen() {
 
   const markAsDelivered = async (orderId: string) => {
     try {
+      const token = await storage.getItemAsync('session_token');
       const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${user?.id_token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: 'delivered' }),
