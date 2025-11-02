@@ -49,7 +49,7 @@ export default function DeliveryModeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [agentData, setAgentData] = useState<DeliveryAgent | null>(null);
-  const [orders, setOrders] = useState<Order[]>({} as Order[]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [credits, setCredits] = useState<CreditRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'orders' | 'credits'>('orders');
 
