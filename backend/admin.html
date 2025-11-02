@@ -1419,9 +1419,8 @@
             const showAgent = (currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
             
             if (currentOrderStatusFilter === 'all') {
-                // All orders tab - show full info with status column, NO actions
+                // All orders tab - simplified view
                 tbody.innerHTML = orders.map(order => {
-                    const itemsList = order.items.map(item => `${item.meal_name} (x${item.quantity})`).join(', ');
                     return `
                     <tr>
                         <td>${order._id.slice(-8)}</td>
@@ -1429,33 +1428,22 @@
                             <strong>${order.user_name || 'Unknown'}</strong><br>
                             <small>${order.user_email || ''}</small>
                         </td>
-                        <td style="max-width: 300px;">
-                            <div style="margin-bottom: 8px;"><strong>Items:</strong> ${itemsList}</div>
-                            <div><strong>Address:</strong> ${order.shipping_address?.street || order.shipping_address?.full_address || 'N/A'}, ${order.shipping_address?.city || ''}, ${order.shipping_address?.state || ''}</div>
-                        </td>
                         <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
                         <td>${order.agent_name || '-'}</td>
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
-                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
+                        <td>
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
+                        </td>
                         <td class="actions">
-                            <button class="btn" style="font-size: 12px; padding: 6px 12px; margin-bottom: 4px;" onclick="showOrderDetails('${order._id}')">View Details</button>
                             <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px;" onclick="deleteOrder('${order._id}')">Delete</button>
                         </td>
                     </tr>
                 `;
                 }).join('');
             } else {
-                // Specific status tabs - show full info with action buttons, NO status column
+                // Specific status tabs - simplified view with action buttons
                 tbody.innerHTML = orders.map(order => {
-                    const itemsDetails = order.items.map(item => {
-                        let details = `<strong>${item.meal_name}</strong> (x${item.quantity})`;
-                        if (item.customizations && item.customizations.length > 0) {
-                            const customList = item.customizations.map(c => `${c.ingredient_name} (${c.quantity})`).join(', ');
-                            details += `<br><small style="color: #64748b;">Customizations: ${customList}</small>`;
-                        }
-                        return details;
-                    }).join('<br>');
-                    
                     const nextStatus = getNextStatus(order.status);
                     
                     return `
@@ -1463,29 +1451,23 @@
                         <td>${order._id.slice(-8)}</td>
                         <td>
                             <strong>${order.user_name || 'Unknown'}</strong><br>
-                            <small>${order.user_email || ''}</small><br>
-                            <small>${order.shipping_address.phone || ''}</small>
-                        </td>
-                        <td style="max-width: 350px;">
-                            <div style="margin-bottom: 8px;">${itemsDetails}</div>
-                            <div style="background: #f1f5f9; padding: 8px; border-radius: 4px; font-size: 13px;">
-                                <strong>Delivery Address:</strong><br>
-                                ${order.shipping_address?.street || order.shipping_address?.full_address || 'N/A'}<br>
-                                ${order.shipping_address?.city || ''}, ${order.shipping_address?.state || ''} - ${order.shipping_address?.zip_code || ''}
-                            </div>
+                            <small>${order.user_email || ''}</small>
                         </td>
                         <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
                         ${showAgent ? `<td>${order.agent_name || '-'}</td>` : ''}
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
+                        </td>
                         <td class="actions">
-                            <button class="btn" style="font-size: 12px; padding: 6px 12px; margin-bottom: 4px;" onclick="showOrderDetails('${order._id}')">View Details</button><br>
                             ${order.status === 'ready' && !order.assigned_agent_id ? `
                                 <button class="btn" style="font-size: 12px; padding: 6px 12px; margin-bottom: 4px;" onclick="showAssignAgentModal('${order._id}')">Assign Agent</button><br>
                             ` : ''}
                             ${nextStatus ? `
                                 <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="moveOrderForward('${order._id}', '${nextStatus}')">
                                     Move to ${nextStatus.replace(/_/g, ' ')}
-                                </button>
+                                </button><br>
                             ` : ''}
                             ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
                                 <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px; margin-top: 4px;" onclick="cancelOrder('${order._id}')">Cancel</button>
