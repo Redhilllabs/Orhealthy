@@ -429,16 +429,11 @@ const styles = StyleSheet.create({
   },
   exitButton: {
     backgroundColor: '#333',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  exitButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   walletCard: {
     backgroundColor: '#fff',
