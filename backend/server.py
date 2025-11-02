@@ -1381,6 +1381,8 @@ async def update_delivery_agent(agent_id: str, agent_data: dict):
         update_data["image"] = agent_data["image"]
     if "status" in agent_data:
         update_data["status"] = agent_data["status"]
+    if "payment_per_delivery" in agent_data:
+        update_data["payment_per_delivery"] = float(agent_data["payment_per_delivery"])
     
     await db.delivery_agents.update_one(
         {"_id": ObjectId(agent_id)},
