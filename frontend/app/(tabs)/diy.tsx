@@ -471,11 +471,7 @@ export default function DIYScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* 2 Main Tabs */}
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabContainer}
-      >
+      <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'diy-meals' && styles.activeTab]}
           onPress={() => setActiveTab('diy-meals')}
@@ -492,7 +488,7 @@ export default function DIYScreen() {
             DIY Combos
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
       {/* Sub-tabs for DIY Combos */}
       {activeTab === 'diy-combos' && (
