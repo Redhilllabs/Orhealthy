@@ -637,8 +637,9 @@ async def create_post(post_data: dict, request: Request):
     return {"message": "Post created", "id": str(result.inserted_id)}
 
 @api_router.get("/posts")
-async def get_posts(skip: int = 0, limit: int = 20):
-    """Get all posts"""
+async def get_posts(page: int = 1, limit: int = 20):
+    """Get all posts with pagination"""
+    skip = (page - 1) * limit
     posts = await db.posts.find().sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     for post in posts:
         post["_id"] = str(post["_id"])
