@@ -145,14 +145,27 @@ export default function PresetsScreen() {
             selectedMeal.base_price || 0
           );
 
+      // For saved meals (my), use the meal's ingredients directly
+      const cartCustomizations = activeTab === 'my' 
+        ? (selectedMeal.ingredients || []).map(ing => ({
+            ingredient_id: ing.ingredient_id || ing._id || '',
+            name: ing.name || ing.ingredient_name || '',
+            price: ing.price || ing.price_per_unit || 0,
+            default_quantity: ing.default_quantity || ing.quantity || 1,
+            quantity: ing.quantity || ing.default_quantity || 1,
+          }))
+        : customizations.map(ing => ({
+            ingredient_id: ing.ingredient_id || ing._id || '',
+            name: ing.name || ing.ingredient_name || '',
+            price: ing.price || ing.price_per_unit || 0,
+            default_quantity: ing.default_quantity || ing.quantity || 1,
+            quantity: ing.quantity || ing.default_quantity || 1,
+          }));
+
       await addToCart({
+        meal_id: selectedMeal._id || selectedMeal.meal_id,
         meal_name: selectedMeal.name || selectedMeal.meal_name || 'Custom Meal',
-        customizations: customizations.map(ing => ({
-          ingredient_id: ing.ingredient_id,
-          name: ing.name || ing.ingredient_name,
-          price: ing.price || ing.price_per_unit || 0,
-          quantity: ing.quantity || ing.default_quantity || 1,
-        })),
+        customizations: cartCustomizations,
         quantity: 1,
         price: totalPrice,
       });
