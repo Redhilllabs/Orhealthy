@@ -1143,19 +1143,22 @@
                 const agents = await fetch(`${API_URL}/delivery-agents`).then(r => r.json());
                 allDeliveryAgents = agents;
                 const tbody = document.getElementById('deliveryAgentsBody');
-                tbody.innerHTML = agents.map(agent => `
+                tbody.innerHTML = agents.map(agent => {
+                    const vehicleDisplay = agent.vehicle.charAt(0).toUpperCase() + agent.vehicle.slice(1);
+                    return `
                     <tr>
                         <td>${agent.image ? `<img src="${agent.image}" class="table-image">` : '-'}</td>
                         <td>${agent.name}</td>
                         <td>${agent.email}</td>
-                        <td>${agent.vehicle}<br><small>${agent.vehicle_number || 'N/A'}</small></td>
+                        <td>${vehicleDisplay}<br><small>${agent.vehicle_number || 'N/A'}</small></td>
                         <td><span class="status-badge status-${agent.status}">${agent.status}</span></td>
                         <td class="actions">
                             <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="editDeliveryAgent('${agent._id}')">Edit</button>
                             <button class="btn btn-danger" onclick="deleteDeliveryAgent('${agent._id}')">Delete</button>
                         </td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
             } catch (error) {
                 showAlert('delivery', 'Error loading delivery agents', 'error');
             }
