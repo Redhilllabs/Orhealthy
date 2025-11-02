@@ -1529,10 +1529,13 @@
                 if (response.ok) {
                     showAlert('orders', 'Order cancelled', 'success');
                     filterOrdersByStatus(currentOrderStatusFilter);
+                } else {
+                    showAlert('orders', 'Error cancelling order', 'error');
                 }
             } catch (error) {
                 showAlert('orders', 'Error cancelling order', 'error');
             }
+        }
 
         async function deleteOrder(orderId) {
             if (!confirm('Are you sure you want to DELETE this order? This action cannot be undone.')) return;
@@ -1552,8 +1555,6 @@
                 console.error('Error deleting order:', error);
                 showAlert('orders', 'Error deleting order', 'error');
             }
-        }
-
         }
 
         async function updateOrderStatus(orderId, newStatus) {
