@@ -266,61 +266,62 @@ export default function DeliveryModeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#ffd700']} />
         }
       >
-        {activeTab === 'orders' ? (
+        {activeTab === 'assigned' ? (
           <View>
-            {/* Active Orders */}
-            {activeOrders.length > 0 && (
-              <View>
-                <Text style={styles.sectionTitle}>Active Deliveries</Text>
-                {activeOrders.map((order: Order) => (
-                  <View key={order._id} style={styles.orderCard}>
-                    <View style={styles.orderHeader}>
-                      <Text style={styles.orderIdgreen}># {order.order_id}</Text>
-                      <Text style={styles.orderPrice}>₹{order.final_price}</Text>
-                    </View>
-                    
-                    <Text style={styles.orderItems}>
-                      {order.items?.length || 0} item(s)
+            <Text style={styles.sectionTitle}>Assigned Deliveries</Text>
+            {activeOrders.length > 0 ? (
+              activeOrders.map((order: Order) => (
+                <View key={order._id} style={styles.orderCard}>
+                  <View style={styles.orderHeader}>
+                    <Text style={styles.orderIdgreen}>#{order.order_id}</Text>
+                    <Text style={styles.orderPrice}>₹{order.final_price}</Text>
+                  </View>
+                  
+                  <Text style={styles.orderItems}>
+                    {order.items?.length || 0} item(s)
+                  </Text>
+                  
+                  <View style={styles.addressSection}>
+                    <Text style={styles.addressLabel}>Delivery Address:</Text>
+                    <Text style={styles.addressText}>
+                      {order.shipping_address?.street}, {order.shipping_address?.apartment && `${order.shipping_address.apartment}, `}
+                      {order.shipping_address?.city}, {order.shipping_address?.state} {order.shipping_address?.zip}
                     </Text>
-                    
-                    <View style={styles.addressSection}>
-                      <Text style={styles.addressLabel}>Delivery Address:</Text>
-                      <Text style={styles.addressText}>
-                        {order.shipping_address?.street}, {order.shipping_address?.apartment && `${order.shipping_address.apartment}, `}
-                        {order.shipping_address?.city}, {order.shipping_address?.state} {order.shipping_address?.zip}
-                      </Text>
-                    </View>
-                    
-                    <TouchableOpacity 
-                      style={styles.deliveredButton}
-                      onPress={() => markAsDelivered(order._id)}
-                    >
-                      <Text style={styles.deliveredButtonText}>Mark as Delivered</Text>
-                    </TouchableOpacity>
                   </View>
-                ))}
-              </View>
-            )}
-            
-            {/* Delivered Orders */}
-            {deliveredOrders.length > 0 && (
-              <View style={{ marginTop: 20 }}>
-                <Text style={styles.sectionTitle}>Delivered Orders</Text>
-                {deliveredOrders.map((order: Order) => (
-                  <View key={order._id} style={[styles.orderCard, styles.deliveredCard]}>
-                    <View style={styles.orderHeader}>
-                      <Text style={styles.orderIdgray}>#{order.order_id}</Text>
-                      <Text style={styles.orderPricegray}>₹{order.final_price}</Text>
-                    </View>
-                    <Text style={styles.deliveredLabel}>✓ Delivered</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-            
-            {activeOrders.length === 0 && deliveredOrders.length === 0 && (
+                  
+                  <TouchableOpacity 
+                    style={styles.deliveredButton}
+                    onPress={() => markAsDelivered(order._id)}
+                  >
+                    <Text style={styles.deliveredButtonText}>Mark as Delivered</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            ) : (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>No orders assigned yet</Text>
+                <Text style={styles.emptyText}>No assigned orders</Text>
+              </View>
+            )}
+          </View>
+        ) : activeTab === 'delivered' ? (
+          <View>
+            <Text style={styles.sectionTitle}>Delivered Orders</Text>
+            {deliveredOrders.length > 0 ? (
+              deliveredOrders.map((order: Order) => (
+                <View key={order._id} style={[styles.orderCard, styles.deliveredCard]}>
+                  <View style={styles.orderHeader}>
+                    <Text style={styles.orderIdgray}>#{order.order_id}</Text>
+                    <Text style={styles.orderPricegray}>₹{order.final_price}</Text>
+                  </View>
+                  <Text style={styles.deliveredLabel}>✓ Delivered</Text>
+                  <Text style={styles.orderDate}>
+                    {new Date(order.created_at).toLocaleDateString()}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>No delivered orders yet</Text>
               </View>
             )}
           </View>
