@@ -2118,6 +2118,208 @@
             }
         }
 
+        // Recipe Management Functions
+        let recipeImages = [];
+        let selectedRecipeIngredients = [];
+        let editingRecipeId = null;
+        let allRecipes = [];
+
+        function showRecipeModal() {
+            editingRecipeId = null;
+            document.getElementById('recipeModal').classList.add('active');
+            document.querySelector('#recipeModal .modal-title').textContent = 'Add Recipe';
+            document.getElementById('recipeForm').reset();
+            selectedRecipeIngredients = [];
+            recipeImages = [];
+            document.getElementById('recipeIngredients').innerHTML = '';
+            document.getElementById('recipeImagePreview').innerHTML = '';
+            document.getElementById('recipePrice').value = '0.00';
+            updateRecipeIngredientSelect();
+        }
+
+        async function editRecipe(id) {
+            editingRecipeId = id;
+            try {
+                const response = await fetch(`${API_URL}/recipes/${id}`);
+                const recipe = await response.json();
+                
+                document.getElementById('recipeModal').classList.add('active');
+                document.querySelector('#recipeModal .modal-title').textContent = 'Edit Recipe';
+                document.getElementById('recipeName').value = recipe.name;
+                document.getElementById('recipeDescription').value = recipe.description;
+                document.getElementById('recipePrice').value = recipe.calculated_price || 0;
+                document.getElementById('recipeTags').value = recipe.tags ? recipe.tags.join(', ') : '';
+                
+                // Set existing images
+                recipeImages = recipe.images || [];
+                const preview = document.getElementById('recipeImagePreview');
+                preview.innerHTML = recipeImages.map((img, index) => `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="Preview">
+                        <button type="button" class="image-remove" onclick="removeRecipeImage(${index})">×</button>
+                    </div>
+                `).join('');
+                
+                // Set existing ingredients
+                selectedRecipeIngredients = recipe.ingredients || [];
+                updateRecipeIngredientSelect();
+                renderRecipeIngredients();
+                updateRecipePrice();
+            } catch (error) {
+                showAlert('recipes', 'Error loading recipe data', 'error');
+            }
+        }
+
+        function updateRecipeIngredientSelect() {
+            const select = document.getElementById('recipeIngredientSelect');
+            select.innerHTML = '<option value="">-- Select processed ingredient --</option>' +
+                allIngredients.map(ing => `<option value="${ing._id}">${ing.name} (₹${ing.calculated_price ? ing.calculated_price.toFixed(2) : '0.00'}/${ing.unit})</option>`).join('');
+        }
+
+        function addIngredientToRecipe() {
+            const select = document.getElementById('recipeIngredientSelect');
+            const ingredientId = select.value;
+            if (!ingredientId) return alert('Please select an ingredient');
+            
+            const ingredient = allIngredients.find(i => i._id === ingredientId);
+            if (!ingredient) return;
+            
+            if (selectedRecipeIngredients.find(i => i.ingredient_id === ingredientId)) {
+                return alert('Ingredient already added');
+            }
+            
+            selectedRecipeIngredients.push({
+                ingredient_id: ingredientId,
+                name: ingredient.name,
+                quantity: 1.0,
+                unit: ingredient.unit,
+                step_size: ingredient.step_size || 1.0,
+                price: ingredient.calculated_price || 0
+            });
+            
+            renderRecipeIngredients();
+            updateRecipePrice();
+        }
+
+        function renderRecipeIngredients() {
+            document.getElementById('recipeIngredients').innerHTML = selectedRecipeIngredients.map((ing, idx) => `
+                <div class="ingredient-item">
+                    <span>${ing.name}</span>
+                    <input type="number" min="0.1" step="${ing.step_size || 0.1}" value="${ing.quantity}" 
+                           onchange="updateRecipeIngredientQuantity(${idx}, this.value)">
+                    <span>${ing.unit}</span>
+                    <span>₹${(ing.price * ing.quantity).toFixed(2)}</span>
+                    <button type="button" onclick="removeIngredientFromRecipe(${idx})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateRecipeIngredientQuantity(index, quantity) {
+            selectedRecipeIngredients[index].quantity = parseFloat(quantity);
+            renderRecipeIngredients();
+            updateRecipePrice();
+        }
+
+        function removeIngredientFromRecipe(index) {
+            selectedRecipeIngredients.splice(index, 1);
+            renderRecipeIngredients();
+            updateRecipePrice();
+        }
+
+        function updateRecipePrice() {
+            const total = selectedRecipeIngredients.reduce((sum, ing) => sum + (ing.price * ing.quantity), 0);
+            document.getElementById('recipePrice').value = total.toFixed(2);
+        }
+
+        function handleRecipeImages(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    recipeImages.push(e.target.result);
+                    updateRecipeImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateRecipeImagePreview() {
+            const preview = document.getElementById('recipeImagePreview');
+            preview.innerHTML = recipeImages.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview">
+                    <button type="button" class="image-remove" onclick="removeRecipeImage(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeRecipeImage(index) {
+            recipeImages.splice(index, 1);
+            updateRecipeImagePreview();
+        }
+
+        async function saveRecipe(e) {
+            e.preventDefault();
+            if (selectedRecipeIngredients.length === 0) return alert('Add at least one ingredient');
+            
+            const tags = document.getElementById('recipeTags').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+            
+            const data = {
+                name: document.getElementById('recipeName').value,
+                description: document.getElementById('recipeDescription').value,
+                ingredients: selectedRecipeIngredients,
+                tags: tags,
+                images: recipeImages,
+                created_by: 'admin'
+            };
+            
+            try {
+                let response;
+                if (editingRecipeId) {
+                    // Update existing recipe
+                    response = await fetch(`${API_URL}/recipes/${editingRecipeId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new recipe
+                    response = await fetch(`${API_URL}/recipes`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
+                
+                if (response.ok) {
+                    closeModal('recipeModal');
+                    showAlert('recipes', editingRecipeId ? 'Recipe updated successfully' : 'Recipe created successfully', 'success');
+                    loadRecipes();
+                } else {
+                    const error = await response.json();
+                    showAlert('recipes', error.detail || 'Error saving recipe', 'error');
+                }
+            } catch (error) {
+                showAlert('recipes', 'Error saving recipe', 'error');
+            }
+        }
+
+        async function deleteRecipe(id) {
+            if (!confirm('Delete this recipe?')) return;
+            try {
+                const response = await fetch(`${API_URL}/recipes/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showAlert('recipes', 'Deleted successfully', 'success');
+                    loadRecipes();
+                } else {
+                    showAlert('recipes', 'Error deleting recipe', 'error');
+                }
+            } catch (error) {
+                showAlert('recipes', 'Error deleting', 'error');
+            }
+        }
+
         async function loadMeals() {
             try {
                 const meals = await fetch(`${API_URL}/meals`).then(r => r.json());
