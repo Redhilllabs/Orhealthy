@@ -46,7 +46,7 @@ interface Meal {
 }
 
 export default function PresetsScreen() {
-  const [activeTab, setActiveTab] = useState<'all-combos' | 'all-combos' | 'my-combos' | 'my-combos'>('all-combos');
+  const [activeTab, setActiveTab] = useState<'all-meals' | 'all-combos' | 'my-meals' | 'my-combos'>('all-meals');
   const [allCombos, setAllCombos] = useState<Meal[]>([]);
   const [allCombos, setAllCombos] = useState<Meal[]>([]);
   const [myCombos, setMyCombos] = useState<Meal[]>([]);
