@@ -1207,23 +1207,37 @@
                 name: document.getElementById('agentName').value,
                 email: document.getElementById('agentEmail').value,
                 vehicle: document.getElementById('agentVehicle').value,
+                vehicle_number: document.getElementById('agentVehicleNumber').value,
                 image: agentImage
             };
             
             try {
-                const response = await fetch(`${API_URL}/delivery-agents`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(data)
-                });
+                let response;
+                if (editingAgentId) {
+                    // Update existing agent
+                    delete data.email; // Can't change email
+                    response = await fetch(`${API_URL}/delivery-agents/${editingAgentId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // Create new agent
+                    response = await fetch(`${API_URL}/delivery-agents`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
                 
                 if (response.ok) {
                     closeModal('deliveryAgentModal');
-                    showAlert('delivery', 'Delivery agent created successfully', 'success');
+                    document.getElementById('agentEmail').disabled = false; // Re-enable for next time
+                    showAlert('delivery', editingAgentId ? 'Delivery agent updated successfully' : 'Delivery agent created successfully', 'success');
                     loadDeliveryAgents();
                 }
             } catch (error) {
-                showAlert('delivery', 'Error creating delivery agent', 'error');
+                showAlert('delivery', 'Error saving delivery agent', 'error');
             }
         }
 
