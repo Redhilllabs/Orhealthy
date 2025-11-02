@@ -339,6 +339,19 @@
                 <div class="card">
                     <h2 class="card-title" style="margin-bottom: 20px;">Orders Management</h2>
                     <div id="alert-orders"></div>
+                    
+                    <!-- Status Tabs -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; flex-wrap: wrap;">
+                        <button class="status-tab active" onclick="filterOrdersByStatus('all')">All</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('arrived')">Arrived</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('accepted')">Accepted</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('preparing')">Preparing</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('ready')">Ready</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('out_for_delivery')">Out for Delivery</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('delivered')">Delivered</button>
+                        <button class="status-tab" onclick="filterOrdersByStatus('cancelled')">Cancelled</button>
+                    </div>
+                    
                     <table class="table">
                         <thead>
                             <tr>
@@ -346,6 +359,7 @@
                                 <th>User</th>
                                 <th>Total</th>
                                 <th>Status</th>
+                                <th>Agent</th>
                                 <th>Date</th>
                                 <th>Actions</th>
                             </tr>
