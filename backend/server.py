@@ -385,10 +385,15 @@ async def calculate_meal_price(meal_data: dict) -> float:
         quantity = recipe_ref.get("quantity", 1.0)
         
         # Get recipe and calculate its price
-        recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
-        if recipe:
-            recipe_price = await calculate_recipe_price(recipe)
-            total_price += recipe_price * quantity
+        try:
+            recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+            if recipe:
+                recipe_price = await calculate_recipe_price(recipe)
+                if recipe_price is not None:
+                    total_price += recipe_price * quantity
+        except Exception:
+            # Skip invalid recipe IDs
+            continue
     
     return total_price
 
