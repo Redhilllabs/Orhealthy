@@ -1159,6 +1159,8 @@
                         <td>${agent.name}</td>
                         <td>${agent.email}</td>
                         <td>${vehicleDisplay}<br><small>${agent.vehicle_number || 'N/A'}</small></td>
+                        <td>₹${agent.payment_per_delivery || 0}</td>
+                        <td>₹${agent.wallet_balance || 0}</td>
                         <td><span class="status-badge status-${agent.status}">${agent.status}</span></td>
                         <td class="actions">
                             <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="editDeliveryAgent('${agent._id}')">Edit</button>
