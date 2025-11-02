@@ -240,7 +240,7 @@ class Order(BaseModel):
     discount_amount: float = 0.0
     coupon_code: Optional[str] = None
     final_price: float
-    status: str = "pending"  # pending, confirmed, delivered
+    status: str = "arrived"  # arrived, accepted, preparing, ready, out_for_delivery, delivered, cancelled
     billing_address: Address
     shipping_address: Address
     payment_id: Optional[str] = None
@@ -248,6 +248,18 @@ class Order(BaseModel):
     ordered_for_guidee_id: Optional[str] = None  # The guidee this order is for
     commission_earned: float = 0.0  # Commission earned by guide
     commission_rate: float = 0.0  # Rate at which commission was calculated
+    assigned_agent_id: Optional[str] = None  # Delivery agent assigned to this order
+    agent_assigned_at: Optional[datetime] = None
+    delivered_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DeliveryAgent(BaseModel):
+    email: str
+    name: str
+    vehicle: str  # bike, car, van, etc.
+    image: Optional[str] = None  # Base64 encoded image
+    status: str = "available"  # available, busy, offline
+    is_delivery_agent: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Config(BaseModel):
