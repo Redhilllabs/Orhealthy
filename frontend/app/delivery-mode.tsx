@@ -205,6 +205,43 @@ export default function DeliveryModeScreen() {
     }
   };
 
+  const undoDelivery = async (orderId: string) => {
+    Alert.alert(
+      'Undo Delivery',
+      'This will move the order back to Ready status and remove the delivery credit. Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Yes, Undo',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await storage.getItemAsync('session_token');
+              const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/undo-delivery`, {
+                method: 'PUT',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              
+              if (response.ok) {
+                Alert.alert('Success', 'Delivery undone successfully. Order moved back to Ready status.');
+                loadData(); // Refresh orders
+              } else {
+                const errorData = await response.json();
+                Alert.alert('Error', errorData.detail || 'Failed to undo delivery');
+              }
+            } catch (error) {
+              console.error('Error undoing delivery:', error);
+              Alert.alert('Error', 'Failed to undo delivery');
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     loadData();
