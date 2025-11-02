@@ -588,18 +588,26 @@ export default function HomeScreen() {
         data={posts}
         renderItem={renderPost}
         keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              fetchPosts();
-              fetchNotifications();
-            }}
+            onRefresh={onRefresh}
             tintColor="#ffd700"
           />
         }
+        onEndReached={loadMorePosts}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={() => {
+          if (loadingMore) {
+            return (
+              <View style={{ paddingVertical: 20 }}>
+                <ActivityIndicator size="small" color="#ffd700" />
+              </View>
+            );
+          }
+          return null;
+        }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="chatbubbles-outline" size={64} color="#ccc" />
