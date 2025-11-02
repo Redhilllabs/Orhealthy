@@ -657,7 +657,19 @@
             <div style="padding: 20px;">
                 <p style="margin-bottom: 16px; color: #64748b;">Select an available agent for this order:</p>
                 <div id="availableAgentsList"></div>
+                <div id="selectedAgentInfo" style="display: none; background: #f0f9ff; border: 2px solid #3b82f6; padding: 16px; border-radius: 8px; margin-top: 16px;">
+                    <div style="font-weight: 600; color: #1e40af; margin-bottom: 8px;">Selected Agent:</div>
+                    <div id="selectedAgentDetails"></div>
+                </div>
                 <div id="assignAgentError" style="color: #ef4444; margin-top: 16px; display: none;"></div>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button id="confirmAssignBtn" class="btn" style="flex: 1; display: none;" onclick="confirmAssignAgent()">
+                        Assign & Move to Out for Delivery
+                    </button>
+                    <button class="btn" style="flex: 1; background: #6b7280;" onclick="closeModal('assignAgentModal')">
+                        Cancel
+                    </button>
+                </div>
             </div>
         </div>
     </div>
