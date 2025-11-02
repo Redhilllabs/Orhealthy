@@ -208,7 +208,7 @@ export default function DeliveryModeScreen() {
   const undoDelivery = async (orderId: string) => {
     Alert.alert(
       'Undo Delivery',
-      'This will move the order back to Ready status and remove the delivery credit. Are you sure?',
+      'This will move the order back to your Assigned tab and remove the delivery credit. Are you sure?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -226,7 +226,7 @@ export default function DeliveryModeScreen() {
               });
               
               if (response.ok) {
-                Alert.alert('Success', 'Delivery undone successfully. Order moved back to Ready status.');
+                Alert.alert('Success', 'Delivery undone successfully. Order moved back to Assigned tab.');
                 loadData(); // Refresh orders
               } else {
                 const errorData = await response.json();
