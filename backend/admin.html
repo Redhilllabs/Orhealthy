@@ -863,6 +863,19 @@
         </div>
     </div>
 
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Order Details</h2>
+                <span class="close" onclick="closeModal('orderDetailsModal')">&times;</span>
+            </div>
+            <div id="orderDetailsContent" style="max-height: 70vh; overflow-y: auto;">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const API_URL = '/api';
