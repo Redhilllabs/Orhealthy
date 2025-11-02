@@ -1277,7 +1277,13 @@
             
             // Update active tab
             document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
+            // Find and activate the clicked tab
+            const clickedTab = Array.from(document.querySelectorAll('.status-tab')).find(
+                tab => tab.getAttribute('onclick') === `filterOrdersByStatus('${status}')`
+            );
+            if (clickedTab) {
+                clickedTab.classList.add('active');
+            }
             
             try {
                 let orders;
