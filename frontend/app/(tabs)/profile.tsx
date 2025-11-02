@@ -686,6 +686,18 @@ export default function ProfileScreen() {
         </View>
       )}
 
+      {/* Delivery Agent Section */}
+      {isDeliveryAgent && (
+        <TouchableOpacity
+          style={styles.deliveryModeButton}
+          onPress={() => router.push('/delivery-mode')}
+        >
+          <Ionicons name="bicycle" size={24} color="#fff" />
+          <Text style={styles.deliveryModeText}>Switch to Delivery Mode</Text>
+          <Ionicons name="arrow-forward" size={20} color="#fff" />
+        </TouchableOpacity>
+      )}
+
       {/* Horizontal Tabs */}
       <ScrollView
         horizontal
