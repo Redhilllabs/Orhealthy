@@ -207,48 +207,85 @@ export default function DeliveryModeScreen() {
 
   const undoDelivery = async (orderId: string) => {
     console.log('Undo delivery called for order:', orderId);
-    Alert.alert(
-      'Undo Delivery',
-      'This will move the order back to your Assigned tab and remove the delivery credit. Are you sure?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Yes, Undo',
-          style: 'destructive',
-          onPress: async () => {
-            console.log('User confirmed undo, calling API...');
-            try {
-              const token = await storage.getItemAsync('session_token');
-              console.log('Token retrieved, calling undo endpoint...');
-              
-              const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/undo-delivery`, {
-                method: 'PUT',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-              });
-              
-              console.log('Undo response status:', response.status);
-              
-              if (response.ok) {
-                const data = await response.json();
-                console.log('Undo successful:', data);
-                Alert.alert('Success', 'Delivery undone successfully. Order moved back to Assigned tab.');
-                loadData(); // Refresh orders
-              } else {
-                const errorData = await response.json();
-                console.error('Undo failed:', errorData);
-                Alert.alert('Error', errorData.detail || 'Failed to undo delivery');
-              }
-            } catch (error) {
-              console.error('Error undoing delivery:', error);
-              Alert.alert('Error', 'Failed to undo delivery');
+    
+    // For web, use confirm dialog; for native, use Alert
+    const isWeb = Platform.OS === 'web';
+    
+    if (isWeb) {
+      const confirmed = confirm('This will move the order back to your Assigned tab and remove the delivery credit. Are you sure?');
+      if (!confirmed) {
+        console.log('User cancelled undo');
+        return;
+      }
+    } else {
+      // Native Alert dialog
+      Alert.alert(
+        'Undo Delivery',
+        'This will move the order back to your Assigned tab and remove the delivery credit. Are you sure?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Yes, Undo',
+            style: 'destructive',
+            onPress: async () => {
+              await performUndo(orderId);
             }
           }
+        ]
+      );
+      return;
+    }
+    
+    // For web, proceed directly after confirm
+    await performUndo(orderId);
+  };
+
+  const performUndo = async (orderId: string) => {
+    console.log('User confirmed undo, calling API...');
+    try {
+      const token = await storage.getItemAsync('session_token');
+      console.log('Token retrieved, calling undo endpoint...');
+      
+      const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/undo-delivery`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Undo response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Undo successful:', data);
+        
+        if (Platform.OS === 'web') {
+          alert('Success: Delivery undone successfully. Order moved back to Assigned tab.');
+        } else {
+          Alert.alert('Success', 'Delivery undone successfully. Order moved back to Assigned tab.');
         }
-      ]
-    );
+        
+        loadData(); // Refresh orders
+      } else {
+        const errorData = await response.json();
+        console.error('Undo failed:', errorData);
+        
+        if (Platform.OS === 'web') {
+          alert(`Error: ${errorData.detail || 'Failed to undo delivery'}`);
+        } else {
+          Alert.alert('Error', errorData.detail || 'Failed to undo delivery');
+        }
+      }
+    } catch (error) {
+      console.error('Error undoing delivery:', error);
+      
+      if (Platform.OS === 'web') {
+        alert('Error: Failed to undo delivery');
+      } else {
+        Alert.alert('Error', 'Failed to undo delivery');
+      }
+    }
   };
 
   const onRefresh = () => {
