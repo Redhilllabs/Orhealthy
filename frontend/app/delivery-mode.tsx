@@ -202,7 +202,7 @@ export default function DeliveryModeScreen() {
             </View>
           </View>
           <TouchableOpacity style={styles.exitButton} onPress={switchToUserMode}>
-            <Text style={styles.exitButtonText}>✕</Text>
+            <Ionicons name="log-out-outline" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
         
