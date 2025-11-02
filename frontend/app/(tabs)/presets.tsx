@@ -45,10 +45,12 @@ interface Meal {
 }
 
 export default function PresetsScreen() {
-  const [activeTab, setActiveTab] = useState<'my' | 'all'>('my');
-  const [meals, setMeals] = useState<Meal[]>([]);
-  const [savedMeals, setSavedMeals] = useState<Meal[]>([]);
-  const [filteredMeals, setFilteredMeals] = useState<Meal[]>([]);
+  const [activeTab, setActiveTab] = useState<'all-recipes' | 'all-meals' | 'my-recipes' | 'my-meals'>('all-recipes');
+  const [allRecipes, setAllRecipes] = useState<Meal[]>([]);
+  const [allMeals, setAllMeals] = useState<Meal[]>([]);
+  const [myRecipes, setMyRecipes] = useState<Meal[]>([]);
+  const [myMeals, setMyMeals] = useState<Meal[]>([]);
+  const [filteredItems, setFilteredItems] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [customizations, setCustomizations] = useState<any[]>([]);
