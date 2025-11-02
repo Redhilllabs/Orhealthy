@@ -843,6 +843,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
+  deliveredBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#e8f5e8',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  deliveredBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4caf50',
+  },
   deliveredLabel: {
     fontSize: 14,
     color: '#4caf50',
