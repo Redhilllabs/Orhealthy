@@ -139,12 +139,10 @@ export default function DeliveryModeScreen() {
     }
   };
 
-  const updateStatus = async (newStatus: string) => {
-    if (!agentData) return;
-    
+  const updateStatusDirect = async (agentId: string, newStatus: string) => {
     try {
       const token = await storage.getItemAsync('session_token');
-      const response = await fetch(`${BACKEND_URL}/api/delivery-agents/${agentData._id}/status`, {
+      const response = await fetch(`${BACKEND_URL}/api/delivery-agents/${agentId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -154,14 +152,19 @@ export default function DeliveryModeScreen() {
       });
       
       if (response.ok) {
+        console.log(`Status updated to ${newStatus}`);
         setAgentData(prev => prev ? {...prev, status: newStatus} : null);
       } else {
-        Alert.alert('Error', 'Failed to update status');
+        console.error('Failed to update status, response:', response.status);
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      Alert.alert('Error', 'Failed to update status');
     }
+  };
+
+  const updateStatus = async (newStatus: string) => {
+    if (!agentData) return;
+    await updateStatusDirect(agentData._id, newStatus);
   };
 
   const toggleBusyStatus = async (value: boolean) => {
