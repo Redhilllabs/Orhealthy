@@ -366,18 +366,18 @@ export default function PresetsScreen() {
                     ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)} {ing.unit || ''}
                   </Text>
                 </View>
-                {activeTab === 'all' && (
-                  <View style={styles.quantityControl}>
-                    <TouchableOpacity
-                      onPress={() => updateCustomization(index, Math.max(0, ing.quantity - 1))}
-                    >
-                      <Ionicons name="remove-circle" size={28} color="#ffd700" />
-                    </TouchableOpacity>
-                    <Text style={styles.quantity}>{ing.quantity || ing.default_quantity || 1}</Text>
-                    <TouchableOpacity onPress={() => updateCustomization(index, ing.quantity + 1)}>
-                      <Ionicons name="add-circle" size={28} color="#ffd700" />
-                    </TouchableOpacity>
-                  </View>
+                {/* Allow editing for both All Meals and My Meals */}
+                <View style={styles.quantityControl}>
+                  <TouchableOpacity
+                    onPress={() => updateCustomization(index, Math.max(0, ing.quantity - 1))}
+                  >
+                    <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                  </TouchableOpacity>
+                  <Text style={styles.quantity}>{ing.quantity || ing.default_quantity || 1}</Text>
+                  <TouchableOpacity onPress={() => updateCustomization(index, ing.quantity + 1)}>
+                    <Ionicons name="add-circle" size={28} color="#ffd700" />
+                  </TouchableOpacity>
+                </View>
                 )}
                 {activeTab === 'my' && (
                   <Text style={styles.quantityText}>x{ing.quantity}</Text>
