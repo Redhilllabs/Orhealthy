@@ -68,19 +68,10 @@ export default function PresetsScreen() {
   useEffect(() => {
     let items: Meal[] = [];
     
-    switch (activeTab) {
-      case 'all-combos':
-        items = allCombos;
-        break;
-      case 'all-combos':
-        items = allCombos;
-        break;
-      case 'my-combos':
-        items = myCombos;
-        break;
-      case 'my-combos':
-        items = myCombos;
-        break;
+    if (activeTab === 'meals') {
+      items = mealsSubTab === 'all-meals' ? allMeals : myMeals;
+    } else {
+      items = combosSubTab === 'all-combos' ? allCombos : myCombos;
     }
 
     if (selectedTag) {
@@ -88,7 +79,7 @@ export default function PresetsScreen() {
     }
 
     setFilteredItems(items);
-  }, [selectedTag, allCombos, allCombos, myCombos, myCombos, activeTab]);
+  }, [selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
