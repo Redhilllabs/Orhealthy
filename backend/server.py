@@ -179,6 +179,10 @@ class NutritionEntry(BaseModel):
     value: float  # Value per unit of processed ingredient
     unit: str  # g, mg, mcg, etc.
 
+class SourceIngredientReference(BaseModel):
+    source_ingredient_id: str
+    source_quantity: float  # Quantity of this source ingredient needed
+
 class Ingredient(BaseModel):
     name: str
     price_per_unit: float
@@ -187,9 +191,8 @@ class Ingredient(BaseModel):
     nutritional_info: Optional[dict] = None
     images: List[str] = []  # Base64 encoded images
     tags: List[str] = []  # Tags for filtering
-    # New fields for processed ingredients
-    source_ingredient_id: Optional[str] = None  # Reference to source ingredient
-    source_quantity: Optional[float] = None  # Quantity of source needed for 1 unit
+    # New fields for processed ingredients - updated to support multiple sources
+    source_ingredients: List[SourceIngredientReference] = []  # Multiple source ingredients
     step_size: float = 1.0  # Default step size for frontend increment/decrement
     nutrition_profile: List[NutritionEntry] = []  # Nutrition per unit
 
