@@ -79,10 +79,10 @@ export default function DIYScreen() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'ingredients') {
+    if (activeTab === 'diy-meals') {
       filterIngredients();
     } else {
-      filterRecipes();
+      filterMeals();
     }
   }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, activeTab]);
 
@@ -161,20 +161,20 @@ export default function DIYScreen() {
     setFilteredIngredients(filtered);
   };
 
-  const filterRecipes = () => {
-    let recipes = activeTab === 'all-meals' ? allMeals : myMeals;
+  const filterMeals = () => {
+    let meals = combosSubTab === 'all-meals' ? allMeals : myMeals;
 
     if (searchQuery) {
-      recipes = recipes.filter(recipe =>
-        recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+      meals = meals.filter(meal =>
+        meal.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
     if (selectedTag) {
-      recipes = recipes.filter(recipe => recipe.tags?.includes(selectedTag));
+      meals = meals.filter(meal => meal.tags?.includes(selectedTag));
     }
 
-    setFilteredRecipes(recipes);
+    setFilteredMeals(meals);
   };
 
   const toggleIngredient = (ingredientId: string, stepSize: number = 1) => {
@@ -204,8 +204,8 @@ export default function DIYScreen() {
     }
   };
 
-  const toggleRecipe = (recipeId: string) => {
-    const newSelected = new Map(selectedRecipes);
+  const toggleMeal = (recipeId: string) => {
+    const newSelected = new Map(selectedMeals);
     if (newSelected.has(recipeId)) {
       newSelected.set(recipeId, newSelected.get(recipeId)! + 0.5);
     } else {
@@ -214,17 +214,17 @@ export default function DIYScreen() {
     setSelectedRecipes(newSelected);
   };
 
-  const removeRecipe = (recipeId: string) => {
-    const newSelected = new Map(selectedRecipes);
+  const removeMeal = (recipeId: string) => {
+    const newSelected = new Map(selectedMeals);
     newSelected.delete(recipeId);
     setSelectedRecipes(newSelected);
   };
 
-  const updateRecipeQuantity = (recipeId: string, quantity: number) => {
+  const updateMealQuantity = (recipeId: string, quantity: number) => {
     if (quantity <= 0) {
-      removeRecipe(recipeId);
+      removeMeal(recipeId);
     } else {
-      const newSelected = new Map(selectedRecipes);
+      const newSelected = new Map(selectedMeals);
       newSelected.set(recipeId, quantity);
       setSelectedRecipes(newSelected);
     }
@@ -242,7 +242,7 @@ export default function DIYScreen() {
       return total;
     } else {
       let total = 0;
-      selectedRecipes.forEach((qty, id) => {
+      selectedMeals.forEach((qty, id) => {
         const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
         if (recipe) {
           total += (recipe.calculated_price || 0) * qty;
@@ -268,7 +268,7 @@ export default function DIYScreen() {
       return;
     }
 
-    if (activeTab !== 'ingredients' && selectedRecipes.size === 0) {
+    if (activeTab !== 'ingredients' && selectedMeals.size === 0) {
       Alert.alert('Error', 'Please select at least one recipe');
       return;
     }
@@ -302,7 +302,7 @@ export default function DIYScreen() {
         };
       } else {
         // Creating meal from recipes
-        const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
+        const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
@@ -346,7 +346,7 @@ export default function DIYScreen() {
       return;
     }
 
-    if (activeTab !== 'ingredients' && selectedRecipes.size === 0) {
+    if (activeTab !== 'ingredients' && selectedMeals.size === 0) {
       Alert.alert('Error', 'Please select at least one recipe');
       return;
     }
@@ -373,7 +373,7 @@ export default function DIYScreen() {
           price: calculateTotal(),
         };
       } else {
-        const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
+        const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
@@ -436,7 +436,7 @@ export default function DIYScreen() {
   const renderRecipeItem = ({ item }: { item: Recipe }) => (
     <TouchableOpacity
       style={styles.itemCard}
-      onPress={() => toggleRecipe(item._id)}
+      onPress={() => toggleMeal(item._id)}
     >
       {item.images?.[0] ? (
         <Image source={{ uri: item.images[0] }} style={styles.itemImage} />
@@ -453,7 +453,7 @@ export default function DIYScreen() {
           </Text>
         )}
         <Text style={styles.itemPrice}>₹{(item.calculated_price || 0).toFixed(2)}</Text>
-        {selectedRecipes.has(item._id) && (
+        {selectedMeals.has(item._id) && (
           <Text style={styles.selectedBadge}>✓ Added</Text>
         )}
       </View>
@@ -555,7 +555,7 @@ export default function DIYScreen() {
 
       {/* Selected Items Panel */}
       {((activeTab === 'ingredients' && selectedIngredients.size > 0) || 
-        (activeTab !== 'ingredients' && selectedRecipes.size > 0)) && (
+        (activeTab !== 'ingredients' && selectedMeals.size > 0)) && (
         <View style={styles.selectedPanel}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectedScroll}>
             {activeTab === 'ingredients'
@@ -581,22 +581,22 @@ export default function DIYScreen() {
                     </View>
                   );
                 })
-              : Array.from(selectedRecipes.entries()).map(([id, qty]) => {
+              : Array.from(selectedMeals.entries()).map(([id, qty]) => {
                   const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
                   if (!recipe) return null;
                   return (
                     <View key={id} style={styles.selectedItem}>
                       <Text style={styles.selectedItemName}>{recipe.name}</Text>
                       <View style={styles.quantityControl}>
-                        <TouchableOpacity onPress={() => updateRecipeQuantity(id, qty - 0.5)}>
+                        <TouchableOpacity onPress={() => updateMealQuantity(id, qty - 0.5)}>
                           <Ionicons name="remove-circle" size={24} color="#ffd700" />
                         </TouchableOpacity>
                         <Text style={styles.quantityText}>{qty}x</Text>
-                        <TouchableOpacity onPress={() => updateRecipeQuantity(id, qty + 0.5)}>
+                        <TouchableOpacity onPress={() => updateMealQuantity(id, qty + 0.5)}>
                           <Ionicons name="add-circle" size={24} color="#ffd700" />
                         </TouchableOpacity>
                       </View>
-                      <TouchableOpacity onPress={() => removeRecipe(id)}>
+                      <TouchableOpacity onPress={() => removeMeal(id)}>
                         <Ionicons name="close-circle" size={20} color="#ef4444" />
                       </TouchableOpacity>
                     </View>
