@@ -663,7 +663,7 @@ export default function DIYScreen() {
           {user && (
             <TouchableOpacity
               style={[styles.actionButton, styles.saveButton]}
-              onPress={saveMeal}
+              onPress={() => setShowNameModal(true)}
               disabled={saving}
             >
               {saving ? (
