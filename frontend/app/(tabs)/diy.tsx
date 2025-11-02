@@ -452,32 +452,50 @@ export default function DIYScreen() {
     );
   };
 
-  const renderRecipeItem = ({ item }: { item: Recipe }) => (
-    <TouchableOpacity
-      style={styles.itemCard}
-      onPress={() => toggleMeal(item._id)}
-    >
-      {item.images?.[0] ? (
-        <Image source={{ uri: item.images[0] }} style={styles.itemImage} />
-      ) : (
-        <View style={[styles.itemImage, styles.placeholderImage]}>
-          <Ionicons name="restaurant" size={32} color="#ccc" />
+  const renderRecipeItem = ({ item }: { item: Recipe }) => {
+    const quantity = selectedMeals.get(item._id) || 0;
+    
+    return (
+      <View style={styles.listItemCard}>
+        {item.images?.[0] ? (
+          <Image source={{ uri: item.images[0] }} style={styles.listItemImage} />
+        ) : (
+          <View style={[styles.listItemImage, styles.placeholderImage]}>
+            <Ionicons name="restaurant" size={24} color="#ccc" />
+          </View>
+        )}
+        <View style={styles.listItemInfo}>
+          <Text style={styles.itemName}>{item.name}</Text>
+          {item.description && (
+            <Text style={styles.itemDescription} numberOfLines={1}>
+              {item.description}
+            </Text>
+          )}
+          <Text style={styles.itemPrice}>₹{(item.calculated_price || 0).toFixed(2)}</Text>
         </View>
-      )}
-      <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.itemDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-        <Text style={styles.itemPrice}>₹{(item.calculated_price || 0).toFixed(2)}</Text>
-        {selectedMeals.has(item._id) && (
-          <Text style={styles.selectedBadge}>✓ Added</Text>
-        )}
+        <View style={styles.listItemControls}>
+          {quantity > 0 ? (
+            <View style={styles.quantityControl}>
+              <TouchableOpacity onPress={() => updateMealQuantity(item._id, quantity - 0.5)}>
+                <Ionicons name="remove-circle" size={28} color="#ffd700" />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{quantity}x</Text>
+              <TouchableOpacity onPress={() => updateMealQuantity(item._id, quantity + 0.5)}>
+                <Ionicons name="add-circle" size={28} color="#ffd700" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => toggleMeal(item._id)}
+            >
+              <Ionicons name="add-circle" size={28} color="#ffd700" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   if (loading) {
     return (
