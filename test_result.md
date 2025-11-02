@@ -583,27 +583,33 @@ test_plan:
 backend:
   - task: "Recipe CRUD endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added POST /api/recipes, PUT /api/recipes/{recipe_id}, DELETE /api/recipes/{recipe_id} endpoints for recipe management"
+      - working: true
+        agent: "testing"
+        comment: "✅ All Recipe CRUD endpoints working perfectly (100% success rate). Tested: POST /api/recipes (create), GET /api/recipes (list with calculated_price), GET /api/recipes/{id} (single with calculated_price & nutrition_profile), PUT /api/recipes/{id} (update), DELETE /api/recipes/{id} (delete). Error handling for invalid IDs returns proper 404 responses. Fixed ObjectId validation issues and nutrition profile calculation."
   
   - task: "Meal CRUD endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added POST /api/meals, PUT /api/meals/{meal_id}, DELETE /api/meals/{meal_id} endpoints for meal management"
+      - working: true
+        agent: "testing"
+        comment: "✅ All Meal CRUD endpoints working perfectly (100% success rate). Tested: POST /api/meals (create), GET /api/meals (list with calculated_price), GET /api/meals/{id} (single with calculated_price & nutrition_profile), PUT /api/meals/{id} (update), DELETE /api/meals/{id} (delete). Error handling for invalid IDs returns proper 404 responses. Fixed ObjectId validation issues and meal price calculation from recipes."
 
 admin:
   - task: "Recipe management UI"
