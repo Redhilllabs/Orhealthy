@@ -1413,7 +1413,7 @@
 
         function renderOrders(orders) {
             const tbody = document.getElementById('ordersBody');
-            const showAgent = (currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
+            const showAgent = (currentOrderStatusFilter === 'ready' || currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
             
             if (currentOrderStatusFilter === 'all') {
                 // All orders tab - simplified view
