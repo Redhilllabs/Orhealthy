@@ -55,6 +55,7 @@ export default function ProfileScreen() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [habits, setHabits] = useState<HabitLog[]>([]);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
+  const [isDeliveryAgent, setIsDeliveryAgent] = useState(false);
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -82,6 +83,7 @@ export default function ProfileScreen() {
     if (user) {
       fetchProfileData();
       fetchAddresses();
+      checkDeliveryAgent();
       if (user.is_guide) {
         fetchWithdrawals();
       }
