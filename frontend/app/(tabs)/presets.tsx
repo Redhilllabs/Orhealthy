@@ -40,6 +40,7 @@ interface Meal {
     default_quantity?: number;
     quantity?: number;
     unit?: string;
+    step_size?: number; // Added step_size from recipe
   }>;
 }
 
