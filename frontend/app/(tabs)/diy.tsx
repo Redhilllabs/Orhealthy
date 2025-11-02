@@ -51,7 +51,7 @@ interface Recipe {
 }
 
 export default function DIYScreen() {
-  const [activeTab, setActiveTab] = useState<'ingredients' | 'all-combos' | 'my-combos'>('ingredients');
+  const [activeTab, setActiveTab] = useState<'ingredients' | 'all-meals' | 'my-meals'>('ingredients');
   
   // Ingredients tab state
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -59,8 +59,8 @@ export default function DIYScreen() {
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
   
   // Recipes tabs state
-  const [allCombos, setAllCombos] = useState<Recipe[]>([]);
-  const [myCombos, setMyCombos] = useState<Recipe[]>([]);
+  const [allMeals, setAllMeals] = useState<Recipe[]>([]);
+  const [myMeals, setMyMeals] = useState<Recipe[]>([]);
   const [filteredRecipes, setFilteredRecipes] = useState<Recipe[]>([]);
   const [selectedRecipes, setSelectedRecipes] = useState<Map<string, number>>(new Map());
   
@@ -83,13 +83,13 @@ export default function DIYScreen() {
     } else {
       filterRecipes();
     }
-  }, [searchQuery, selectedTag, ingredients, allCombos, myCombos, activeTab]);
+  }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, activeTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
       fetchIngredients(),
-      fetchAllCombos(),
-      fetchMyCombos()
+      fetchAllMeals(),
+      fetchMyMeals()
     ]);
   };
 
@@ -112,11 +112,11 @@ export default function DIYScreen() {
     }
   };
 
-  const fetchAllCombos = async () => {
+  const fetchAllMeals = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/recipes`);
-      setAllCombos(response.data);
+      setAllMeals(response.data);
       
       const tags = new Set<string>();
       response.data.forEach((recipe: Recipe) => {
@@ -130,15 +130,15 @@ export default function DIYScreen() {
     }
   };
 
-  const fetchMyCombos = async () => {
+  const fetchMyMeals = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals?type=combo`, {
+      const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMyCombos(response.data);
+      setMyMeals(response.data);
     } catch (error) {
       console.error('Error fetching my recipes:', error);
     }
@@ -161,7 +161,7 @@ export default function DIYScreen() {
   };
 
   const filterRecipes = () => {
-    let recipes = activeTab === 'all-combos' ? allCombos : myCombos;
+    let recipes = activeTab === 'all-meals' ? allMeals : myMeals;
 
     if (searchQuery) {
       recipes = recipes.filter(recipe =>
@@ -242,7 +242,7 @@ export default function DIYScreen() {
     } else {
       let total = 0;
       selectedRecipes.forEach((qty, id) => {
-        const recipe = (activeTab === 'all-combos' ? allCombos : myCombos).find(r => r._id === id);
+        const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
         if (recipe) {
           total += (recipe.calculated_price || 0) * qty;
         }
@@ -302,7 +302,7 @@ export default function DIYScreen() {
       } else {
         // Creating meal from recipes
         const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
-          const recipe = (activeTab === 'all-combos' ? allCombos : myCombos).find(r => r._id === id);
+          const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -373,7 +373,7 @@ export default function DIYScreen() {
         };
       } else {
         const recipesList = Array.from(selectedRecipes.entries()).map(([id, qty]) => {
-          const recipe = (activeTab === 'all-combos' ? allCombos : myCombos).find(r => r._id === id);
+          const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -484,19 +484,19 @@ export default function DIYScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-combos' && styles.activeTab]}
-          onPress={() => setActiveTab('all-combos')}
+          style={[styles.tab, activeTab === 'all-meals' && styles.activeTab]}
+          onPress={() => setActiveTab('all-meals')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-combos' && styles.activeTabText]}>
-            From All Combos ({allCombos.length})
+          <Text style={[styles.tabText, activeTab === 'all-meals' && styles.activeTabText]}>
+            From All Meals ({allMeals.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-combos' && styles.activeTab]}
-          onPress={() => setActiveTab('my-combos')}
+          style={[styles.tab, activeTab === 'my-meals' && styles.activeTab]}
+          onPress={() => setActiveTab('my-meals')}
         >
-          <Text style={[styles.tabText, activeTab === 'my-combos' && styles.activeTabText]}>
-            From My Combos ({myCombos.length})
+          <Text style={[styles.tabText, activeTab === 'my-meals' && styles.activeTabText]}>
+            From My Meals ({myMeals.length})
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -581,7 +581,7 @@ export default function DIYScreen() {
                   );
                 })
               : Array.from(selectedRecipes.entries()).map(([id, qty]) => {
-                  const recipe = (activeTab === 'all-combos' ? allCombos : myCombos).find(r => r._id === id);
+                  const recipe = (activeTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
                   if (!recipe) return null;
                   return (
                     <View key={id} style={styles.selectedItem}>
