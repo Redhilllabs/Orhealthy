@@ -1514,6 +1514,58 @@ async def get_agent_orders(request: Request):
     
     return orders
 
+@api_router.put("/orders/{order_id}/undo-delivery")
+async def undo_order_delivery(order_id: str, request: Request):
+    """Undo a delivery - move back to ready and remove credit"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Get the order
+    order = await db.orders.find_one({"_id": ObjectId(order_id)})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    # Verify the logged-in user is the assigned delivery agent
+    agent = await db.delivery_agents.find_one({"email": user["email"]})
+    if not agent or str(agent["_id"]) != order.get("assigned_agent_id"):
+        raise HTTPException(status_code=403, detail="Not authorized - you are not the assigned agent")
+    
+    # Must be delivered to undo
+    if order["status"] != "delivered":
+        raise HTTPException(status_code=400, detail="Order is not in delivered status")
+    
+    # Move order back to ready status and remove agent assignment
+    await db.orders.update_one(
+        {"_id": ObjectId(order_id)},
+        {"$set": {
+            "status": "ready",
+            "assigned_agent_id": None,
+            "agent_assigned_at": None,
+            "agent_name": None,
+            "delivered_at": None
+        }}
+    )
+    
+    # Remove the delivery credit if it exists
+    await db.delivery_credits.delete_many({
+        "agent_id": str(agent["_id"]),
+        "order_id": order_id
+    })
+    
+    # Update agent's wallet balance - subtract the payment
+    payment_amount = agent.get("payment_per_delivery", 0)
+    current_balance = agent.get("wallet_balance", 0)
+    new_balance = max(0, current_balance - payment_amount)
+    
+    await db.delivery_agents.update_one(
+        {"_id": agent["_id"]},
+        {"$set": {"wallet_balance": new_balance}}
+    )
+    
+    return {"message": "Delivery undone successfully", "order_status": "ready"}
+
+
 @api_router.get("/delivery-agents/check")
 async def check_delivery_agent(request: Request):
     """Check if logged-in user is a delivery agent"""
