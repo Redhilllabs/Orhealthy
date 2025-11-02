@@ -18,6 +18,7 @@ import { useCart } from '../../src/context/CartContext';
 import { useAuth } from '../../src/context/AuthContext';
 import { storage } from '../../src/utils/storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Modal from 'react-native-modal';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
 
