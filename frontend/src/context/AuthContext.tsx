@@ -39,6 +39,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Check session on mount
+  useEffect(() => {
+    checkSession();
+  }, []);
+
   const processSessionId = async (sessionId: string) => {
     try {
       console.log('[AuthContext] Processing session ID:', sessionId);
