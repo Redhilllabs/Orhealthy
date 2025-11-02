@@ -1144,9 +1144,10 @@
                         <td>${agent.image ? `<img src="${agent.image}" class="table-image">` : '-'}</td>
                         <td>${agent.name}</td>
                         <td>${agent.email}</td>
-                        <td>${agent.vehicle}</td>
+                        <td>${agent.vehicle}<br><small>${agent.vehicle_number || 'N/A'}</small></td>
                         <td><span class="status-badge status-${agent.status}">${agent.status}</span></td>
                         <td class="actions">
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="editDeliveryAgent('${agent._id}')">Edit</button>
                             <button class="btn btn-danger" onclick="deleteDeliveryAgent('${agent._id}')">Delete</button>
                         </td>
                     </tr>
@@ -1160,8 +1161,30 @@
             editingAgentId = null;
             agentImage = null;
             document.getElementById('deliveryAgentModal').classList.add('active');
+            document.querySelector('#deliveryAgentModal .modal-title').textContent = 'Add Delivery Agent';
             document.getElementById('deliveryAgentForm').reset();
             document.getElementById('agentImagePreview').innerHTML = '';
+        }
+
+        function editDeliveryAgent(agentId) {
+            editingAgentId = agentId;
+            const agent = allDeliveryAgents.find(a => a._id === agentId);
+            if (!agent) return;
+            
+            document.getElementById('deliveryAgentModal').classList.add('active');
+            document.querySelector('#deliveryAgentModal .modal-title').textContent = 'Edit Delivery Agent';
+            document.getElementById('agentName').value = agent.name;
+            document.getElementById('agentEmail').value = agent.email;
+            document.getElementById('agentEmail').disabled = true; // Can't change email
+            document.getElementById('agentVehicle').value = agent.vehicle;
+            document.getElementById('agentVehicleNumber').value = agent.vehicle_number || '';
+            
+            agentImage = agent.image || null;
+            if (agent.image) {
+                document.getElementById('agentImagePreview').innerHTML = `
+                    <img src="${agent.image}" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                `;
+            }
         }
 
         function handleAgentImage(event) {
