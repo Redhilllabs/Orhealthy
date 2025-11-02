@@ -236,11 +236,35 @@
                 </div>
             </div>
 
+            <!-- Recipes -->
+            <div id="recipes" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recipes Management</h2>
+                        <button class="btn" onclick="showRecipeModal()">+ Add Recipe</button>
+                    </div>
+                    <div id="alert-recipes"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Tags</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recipesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Meals -->
             <div id="meals" class="section">
                 <div class="card">
                     <div class="card-header">
-                        <h2 class="card-title">Preset Meals Management</h2>
+                        <h2 class="card-title">Meals Management</h2>
                         <button class="btn" onclick="showMealModal()">+ Add Meal</button>
                     </div>
                     <div id="alert-meals"></div>
