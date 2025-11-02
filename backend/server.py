@@ -260,7 +260,15 @@ class DeliveryAgent(BaseModel):
     vehicle_number: str  # Vehicle registration number
     image: Optional[str] = None  # Base64 encoded image
     status: str = "available"  # available, busy, offline
+    payment_per_delivery: float = 0.0  # Amount paid per delivery
+    wallet_balance: float = 0.0  # Current wallet balance
     is_delivery_agent: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class DeliveryCredit(BaseModel):
+    agent_email: str
+    order_id: str
+    amount: float
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Config(BaseModel):
