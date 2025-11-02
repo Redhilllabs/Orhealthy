@@ -2243,7 +2243,8 @@
                 name: ingredient.name,
                 quantity: 1.0,
                 unit: ingredient.unit,
-                step_size: ingredient.step_size || 1.0,
+                default_step_size: ingredient.step_size || 1.0, // Store default from processed ingredient
+                step_size: ingredient.step_size || 1.0, // Can be overridden
                 price: ingredient.calculated_price || 0
             });
             
