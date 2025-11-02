@@ -1339,6 +1339,7 @@ async def create_delivery_agent(agent_data: dict):
         "email": agent_data["email"],
         "name": agent_data["name"],
         "vehicle": agent_data["vehicle"],
+        "vehicle_number": agent_data["vehicle_number"],
         "image": agent_data.get("image"),
         "status": "available",
         "is_delivery_agent": True,
@@ -1357,17 +1358,15 @@ async def create_delivery_agent(agent_data: dict):
     return {"message": "Delivery agent created", "id": str(result.inserted_id)}
 
 @api_router.put("/delivery-agents/{agent_id}")
-async def update_delivery_agent(agent_id: str, agent_data: dict, request: Request):
-    """Update delivery agent details"""
-    user = await get_current_user(request)
-    if not user:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
+async def update_delivery_agent(agent_id: str, agent_data: dict):
+    """Update delivery agent details (admin endpoint)"""
     update_data = {}
     if "name" in agent_data:
         update_data["name"] = agent_data["name"]
     if "vehicle" in agent_data:
         update_data["vehicle"] = agent_data["vehicle"]
+    if "vehicle_number" in agent_data:
+        update_data["vehicle_number"] = agent_data["vehicle_number"]
     if "image" in agent_data:
         update_data["image"] = agent_data["image"]
     if "status" in agent_data:
