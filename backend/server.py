@@ -256,6 +256,7 @@ class Order(BaseModel):
 class DeliveryAgent(BaseModel):
     email: str
     name: str
+    contact_number: str  # Phone number for the delivery agent
     vehicle: str  # bike, car, van, etc.
     vehicle_number: str  # Vehicle registration number
     image: Optional[str] = None  # Base64 encoded image
