@@ -1347,6 +1347,7 @@ async def create_delivery_agent(agent_data: dict):
     agent = {
         "email": agent_data["email"],
         "name": agent_data["name"],
+        "contact_number": agent_data.get("contact_number", ""),
         "vehicle": agent_data["vehicle"],
         "vehicle_number": agent_data["vehicle_number"],
         "image": agent_data.get("image"),
