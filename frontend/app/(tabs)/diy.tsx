@@ -268,7 +268,7 @@ export default function DIYScreen() {
       return;
     }
 
-    if (activeTab !== 'ingredients' && selectedMeals.size === 0) {
+    if (activeTab !== 'diy-meals' && selectedMeals.size === 0) {
       Alert.alert('Error', 'Please select at least one recipe');
       return;
     }
@@ -346,7 +346,7 @@ export default function DIYScreen() {
       return;
     }
 
-    if (activeTab !== 'ingredients' && selectedMeals.size === 0) {
+    if (activeTab !== 'diy-meals' && selectedMeals.size === 0) {
       Alert.alert('Error', 'Please select at least one recipe');
       return;
     }
