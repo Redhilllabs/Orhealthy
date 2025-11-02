@@ -10,6 +10,7 @@ import {
   Dimensions,
   Alert,
   Platform,
+  TextInput,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
