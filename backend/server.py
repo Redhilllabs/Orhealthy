@@ -1926,6 +1926,20 @@ async def create_order(order_data: dict, request: Request):
                 {"$inc": {"commission_balance": commission_earned}}
             )
     
+    # Transform address from User Address format to Order Address format
+    def transform_address(addr):
+        return {
+            "name": addr.get("label", ""),
+            "street": addr.get("full_address", ""),
+            "city": addr.get("city", ""),
+            "state": addr.get("state", ""),
+            "zip_code": addr.get("pincode", ""),
+            "phone": addr.get("phone", "")
+        }
+    
+    billing_address = transform_address(order_data["billing_address"])
+    shipping_address = transform_address(order_data["shipping_address"])
+    
     order = Order(
         user_id=ordered_for_guidee_id if ordered_for_guidee_id else user["_id"],
         items=order_data["items"],
@@ -1933,8 +1947,8 @@ async def create_order(order_data: dict, request: Request):
         discount_amount=discount_amount,
         coupon_code=order_data.get("coupon_code"),
         final_price=final_price,
-        billing_address=order_data["billing_address"],
-        shipping_address=order_data["shipping_address"],
+        billing_address=billing_address,
+        shipping_address=shipping_address,
         payment_id=order_data.get("payment_id"),
         ordered_by_guide_id=ordered_by_guide_id,
         ordered_for_guidee_id=ordered_for_guidee_id,
