@@ -1357,15 +1357,12 @@
             currentOrderStatusFilter = status;
             
             // Update active tab
-            document.querySelectorAll('.status-tab').forEach(tab => tab.classList.remove('active'));
-            
-            // Find and activate the clicked tab
-            const clickedTab = Array.from(document.querySelectorAll('.status-tab')).find(
-                tab => tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(`filterOrdersByStatus('${status}')`)
-            );
-            if (clickedTab) {
-                clickedTab.classList.add('active');
-            }
+            document.querySelectorAll('.status-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-status') === status) {
+                    tab.classList.add('active');
+                }
+            });
             
             try {
                 let orders;
