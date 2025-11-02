@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Suite for OrHealthy Mobile App - NEW FEATURES
-Tests the new backend API changes:
-1. GET /api/posts/{post_id}/comments - Updated to include user_picture field
-2. GET /api/saved-meals - Now generates images array from ingredient images
-3. POST /api/addresses - Now accepts apartment field
+Backend API Testing for Recipe and Meal CRUD endpoints
+Tests the newly implemented Recipe and Meal management endpoints
 """
 
 import requests
 import json
 import sys
 from datetime import datetime
-import base64
 
 # Backend URL from frontend/.env
 BACKEND_URL = "https://meal-delivery-app-4.preview.emergentagent.com/api"
@@ -20,9 +16,8 @@ class BackendTester:
     def __init__(self):
         self.session = requests.Session()
         self.test_results = []
-        self.auth_token = None
-        self.test_user_id = None
-        self.test_post_id = None
+        self.created_recipe_id = None
+        self.created_meal_id = None
         
     def log_result(self, test_name, success, message, details=None):
         """Log test result"""
