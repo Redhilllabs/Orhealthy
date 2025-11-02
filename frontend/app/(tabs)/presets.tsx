@@ -305,48 +305,82 @@ export default function PresetsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* 4 Tabs */}
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabContainer}
-      >
+      {/* 2 Main Tabs */}
+      <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-meals' && styles.activeTab]}
-          onPress={() => setActiveTab('all-meals')}
+          style={[styles.tab, activeTab === 'meals' && styles.activeTab]}
+          onPress={() => setActiveTab('meals')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-meals' && styles.activeTabText]}>
-            All Meals ({allMeals.length})
+          <Text style={[styles.tabText, activeTab === 'meals' && styles.activeTabText]}>
+            Meals
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tab, activeTab === 'all-combos' && styles.activeTab]}
-          onPress={() => setActiveTab('all-combos')}
+          style={[styles.tab, activeTab === 'combos' && styles.activeTab]}
+          onPress={() => setActiveTab('combos')}
         >
-          <Text style={[styles.tabText, activeTab === 'all-combos' && styles.activeTabText]}>
-            All Combos ({allCombos.length})
+          <Text style={[styles.tabText, activeTab === 'combos' && styles.activeTabText]}>
+            Combos
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-meals' && styles.activeTab]}
-          onPress={() => setActiveTab('my-meals')}
-        >
-          <Text style={[styles.tabText, activeTab === 'my-meals' && styles.activeTabText]}>
-            My Meals ({myMeals.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-combos' && styles.activeTab]}
-          onPress={() => setActiveTab('my-combos')}
-        >
-          <Text style={[styles.tabText, activeTab === 'my-combos' && styles.activeTabText]}>
-            My Combos ({myCombos.length})
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
+      </View>
+
+      {/* Sub-tabs */}
+      {activeTab === 'meals' ? (
+        <View style={styles.subTabContainer}>
+          <TouchableOpacity
+            style={[styles.subTab, mealsSubTab === 'all-meals' && styles.activeSubTab]}
+            onPress={() => setMealsSubTab('all-meals')}
+          >
+            <Text style={[styles.subTabText, mealsSubTab === 'all-meals' && styles.activeSubTabText]}>
+              All Meals
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.subTab, mealsSubTab === 'my-meals' && styles.activeSubTab]}
+            onPress={() => setMealsSubTab('my-meals')}
+          >
+            <Text style={[styles.subTabText, mealsSubTab === 'my-meals' && styles.activeSubTabText]}>
+              My Meals
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.subTabContainer}>
+          <TouchableOpacity
+            style={[styles.subTab, combosSubTab === 'all-combos' && styles.activeSubTab]}
+            onPress={() => setCombosSubTab('all-combos')}
+          >
+            <Text style={[styles.subTabText, combosSubTab === 'all-combos' && styles.activeSubTabText]}>
+              All Combos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.subTab, combosSubTab === 'my-combos' && styles.activeSubTab]}
+            onPress={() => setCombosSubTab('my-combos')}
+          >
+            <Text style={[styles.subTabText, combosSubTab === 'my-combos' && styles.activeSubTabText]}>
+              My Combos
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Search */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#999" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={`Search ${activeTab}...`}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
 
       {/* Tag filters */}
-      {activeTab.startsWith('all-') && allTags.length > 0 && (
+      {allTags.length > 0 && (
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
