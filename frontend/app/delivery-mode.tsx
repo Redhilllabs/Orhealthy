@@ -67,13 +67,13 @@ export default function DeliveryModeScreen() {
     
     // Set up auto-refresh every 10 seconds for orders
     const refreshInterval = setInterval(() => {
-      if (!loading) {
+      if (!loading && !refreshing) {
         loadData();
       }
     }, 10000);
     
     return () => clearInterval(refreshInterval);
-  }, [loading]);
+  }, []); // Empty dependency array - run once on mount
 
   const loadData = async () => {
     try {
