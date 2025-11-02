@@ -1293,10 +1293,28 @@ async def delete_source_ingredient(source_id: str):
     
     return {"message": "Source ingredient deleted"}
 
+@api_router.get("/recipes")
+async def get_recipes():
+    """Get all preset recipes (formerly meals)"""
+    recipes = await db.meals.find({"is_preset": True}).to_list(100)
+    for recipe in recipes:
+        recipe["_id"] = str(recipe["_id"])
+    return recipes
+
+@api_router.get("/recipes/{recipe_id}")
+async def get_recipe(recipe_id: str):
+    """Get recipe by ID"""
+    recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+    if not recipe:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    recipe["_id"] = str(recipe["_id"])
+    return recipe
+
+# New Meals endpoints (meals are combinations of recipes)
 @api_router.get("/meals")
 async def get_meals():
-    """Get all preset meals"""
-    meals = await db.meals.find({"is_preset": True}).to_list(100)
+    """Get all preset meals (combinations of recipes)"""
+    meals = await db.preset_meals.find({"is_preset": True}).to_list(100)
     for meal in meals:
         meal["_id"] = str(meal["_id"])
     return meals
@@ -1304,48 +1322,48 @@ async def get_meals():
 @api_router.get("/meals/{meal_id}")
 async def get_meal(meal_id: str):
     """Get meal by ID"""
-    meal = await db.meals.find_one({"_id": ObjectId(meal_id)})
+    meal = await db.preset_meals.find_one({"_id": ObjectId(meal_id)})
     if not meal:
         raise HTTPException(status_code=404, detail="Meal not found")
     meal["_id"] = str(meal["_id"])
     return meal
 
 
-# Saved Meals endpoints (for all users)
-@api_router.post("/saved-meals")
-async def save_meal(meal_data: dict, request: Request):
-    """Save a DIY meal (all users)"""
+# Saved Recipes endpoints (for all users) - renamed from saved-meals
+@api_router.post("/saved-recipes")
+async def save_recipe(recipe_data: dict, request: Request):
+    """Save a DIY recipe (all users)"""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    saved_meal = {
-        "guide_id": user["_id"],  # Can be any user, not just guides
-        "meal_name": meal_data["meal_name"],
-        "ingredients": meal_data["ingredients"],
-        "total_price": meal_data["total_price"],
+    saved_recipe = {
+        "user_id": user["_id"],
+        "recipe_name": recipe_data.get("meal_name", recipe_data.get("recipe_name")),
+        "ingredients": recipe_data["ingredients"],
+        "total_price": recipe_data["total_price"],
         "created_at": datetime.now(timezone.utc)
     }
     
-    result = await db.saved_meals.insert_one(saved_meal)
-    return {"message": "Meal saved", "id": str(result.inserted_id)}
+    result = await db.saved_recipes.insert_one(saved_recipe)
+    return {"message": "Recipe saved", "id": str(result.inserted_id)}
 
-@api_router.get("/saved-meals")
-async def get_saved_meals(request: Request):
-    """Get user's saved meals with generated images from ingredients"""
+@api_router.get("/saved-recipes")
+async def get_saved_recipes(request: Request):
+    """Get user's saved recipes with generated images from ingredients"""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    meals = await db.saved_meals.find({"guide_id": user["_id"]}).to_list(100)
+    recipes = await db.saved_recipes.find({"user_id": user["_id"]}).to_list(100)
     
-    # Enrich each meal with images from ingredients
-    for meal in meals:
-        meal["_id"] = str(meal["_id"])
+    # Enrich each recipe with images from ingredients
+    for recipe in recipes:
+        recipe["_id"] = str(recipe["_id"])
         
         # Generate images array from ingredient images
         images = []
-        for ingredient in meal.get("ingredients", []):
+        for ingredient in recipe.get("ingredients", []):
             ing_id = ingredient.get("ingredient_id")
             if ing_id:
                 ing_data = await db.ingredients.find_one({"_id": ObjectId(ing_id)})
