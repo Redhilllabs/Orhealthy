@@ -863,38 +863,20 @@
             }
         }
 
-        function switchTab(tabName, event) {
+        function switchTab(tabName) {
             console.log('switchTab called with:', tabName);
             
-            // Prevent event bubbling
-            if (event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
+            // Remove active class from all nav items and sections
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
             
-            // Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Remove active class from all sections
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Add active class to clicked item
-            if (event && event.currentTarget) {
-                event.currentTarget.classList.add('active');
-                console.log('Added active to currentTarget');
-            } else {
-                // Fallback: find by onclick attribute
-                const clickedItem = Array.from(document.querySelectorAll('.nav-item')).find(
-                    item => item.getAttribute('onclick') && item.getAttribute('onclick').includes(`switchTab('${tabName}`)
-                );
-                if (clickedItem) {
-                    clickedItem.classList.add('active');
-                    console.log('Added active via fallback');
-                }
+            // Find and activate the clicked nav item
+            const clickedItem = Array.from(document.querySelectorAll('.nav-item')).find(
+                item => item.getAttribute('onclick') && item.getAttribute('onclick').includes(`switchTab('${tabName}')`)
+            );
+            if (clickedItem) {
+                clickedItem.classList.add('active');
+                console.log('Added active class to nav item');
             }
             
             // Show the selected section
