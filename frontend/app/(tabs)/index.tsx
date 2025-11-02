@@ -112,16 +112,44 @@ export default function HomeScreen() {
     fetchUnreadMessagesCount();
   }, []);
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (pageNum: number = 1, append: boolean = false) => {
     try {
-      const response = await axios.get(`${API_URL}/posts`);
-      setPosts(response.data);
+      if (!append) {
+        setLoading(true);
+      }
+      const response = await axios.get(`${API_URL}/posts?page=${pageNum}&limit=${POSTS_PER_PAGE}`);
+      
+      if (append) {
+        setPosts(prev => [...prev, ...response.data]);
+      } else {
+        setPosts(response.data);
+      }
+      
+      // Check if there are more posts
+      setHasMore(response.data.length === POSTS_PER_PAGE);
     } catch (error) {
       console.error('Error fetching posts:', error);
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMorePosts = () => {
+    if (!loadingMore && hasMore) {
+      setLoadingMore(true);
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchPosts(nextPage, true);
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setPage(1);
+    setHasMore(true);
+    fetchPosts(1, false);
   };
 
   const fetchNotifications = async () => {
