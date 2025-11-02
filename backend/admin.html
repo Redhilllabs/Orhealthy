@@ -2564,9 +2564,66 @@
             }
         }
 
+        // Authentication check
+        async function checkAuthentication() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin/login';
+                return false;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/verify`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/admin/login';
+                    return false;
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                localStorage.removeItem('admin_token');
+                window.location.href = '/admin/login';
+                return false;
+            }
+        }
+
+        // Add auth header to all API requests
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            const token = localStorage.getItem('admin_token');
+            if (token && args[1]) {
+                args[1].headers = {
+                    ...args[1].headers,
+                    'Authorization': `Bearer ${token}`
+                };
+            } else if (token && !args[1]) {
+                args[1] = {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                };
+            }
+            return originalFetch.apply(this, args);
+        };
+
         // Initialize event listeners when DOM is loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM loaded, setting up navigation');
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM loaded, checking authentication');
+            
+            // Check authentication first
+            const isAuthenticated = await checkAuthentication();
+            if (!isAuthenticated) {
+                return; // Don't proceed if not authenticated
+            }
+            
+            console.log('Authenticated, setting up navigation');
             
             // Add click handlers to all nav items
             document.querySelectorAll('.nav-item').forEach(item => {
