@@ -344,6 +344,22 @@ async def get_current_user(request: Request) -> Optional[dict]:
     if not session:
         return None
     
+    # Check if session is expired
+    if session.get("expires_at"):
+        expires_at = session["expires_at"]
+        # Ensure timezone-aware comparison
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+        if expires_at < datetime.now(timezone.utc):
+            await db.sessions.delete_one({"session_token": session_token})
+            return None
+    
+    # Get user
+    user = await db.users.find_one({"_id": ObjectId(session["user_id"])})
+    if user:
+        user["_id"] = str(user["_id"])
+    return user
 
 
 # Admin authentication helpers
