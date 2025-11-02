@@ -562,6 +562,61 @@
         </div>
     </div>
 
+    <!-- Delivery Agent Modal -->
+    <div id="deliveryAgentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Delivery Agent</h2>
+                <span class="close" onclick="closeModal('deliveryAgentModal')">&times;</span>
+            </div>
+            <form id="deliveryAgentForm" onsubmit="saveDeliveryAgent(event)">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="agentName" required placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="agentEmail" required placeholder="agent@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Vehicle *</label>
+                    <select id="agentVehicle" required>
+                        <option value="">Select vehicle</option>
+                        <option value="bike">Bike</option>
+                        <option value="scooter">Scooter</option>
+                        <option value="car">Car</option>
+                        <option value="van">Van</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Image</label>
+                    <div class="image-upload" onclick="document.getElementById('agentImage').click()">
+                        <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+                        <div style="font-weight: 600; color: #475569;">Click to upload image</div>
+                    </div>
+                    <input type="file" id="agentImage" accept="image/*" style="display: none;" onchange="handleAgentImage(event)">
+                    <div id="agentImagePreview" style="margin-top: 12px;"></div>
+                </div>
+                <button type="submit" class="btn">Create Delivery Agent</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Assign Agent Modal -->
+    <div id="assignAgentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Assign Delivery Agent</h2>
+                <span class="close" onclick="closeModal('assignAgentModal')">&times;</span>
+            </div>
+            <div style="padding: 20px;">
+                <p style="margin-bottom: 16px; color: #64748b;">Select an available agent for this order:</p>
+                <div id="availableAgentsList"></div>
+                <div id="assignAgentError" style="color: #ef4444; margin-top: 16px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
     <div id="ingredientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
