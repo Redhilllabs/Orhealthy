@@ -257,6 +257,7 @@ class DeliveryAgent(BaseModel):
     email: str
     name: str
     vehicle: str  # bike, car, van, etc.
+    vehicle_number: str  # Vehicle registration number
     image: Optional[str] = None  # Base64 encoded image
     status: str = "available"  # available, busy, offline
     is_delivery_agent: bool = True
