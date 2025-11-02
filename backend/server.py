@@ -1516,7 +1516,7 @@ async def get_agent_orders(request: Request):
 
 @api_router.put("/orders/{order_id}/undo-delivery")
 async def undo_order_delivery(order_id: str, request: Request):
-    """Undo a delivery - move back to ready and remove credit"""
+    """Undo a delivery - move back to out_for_delivery and remove credit"""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -1535,14 +1535,12 @@ async def undo_order_delivery(order_id: str, request: Request):
     if order["status"] != "delivered":
         raise HTTPException(status_code=400, detail="Order is not in delivered status")
     
-    # Move order back to ready status and remove agent assignment
+    # Move order back to out_for_delivery status - keeps agent assignment
+    # This way it shows in agent's "Assigned" tab but backend shows "out_for_delivery"
     await db.orders.update_one(
         {"_id": ObjectId(order_id)},
         {"$set": {
-            "status": "ready",
-            "assigned_agent_id": None,
-            "agent_assigned_at": None,
-            "agent_name": None,
+            "status": "out_for_delivery",
             "delivered_at": None
         }}
     )
@@ -1563,7 +1561,8 @@ async def undo_order_delivery(order_id: str, request: Request):
         {"$set": {"wallet_balance": new_balance}}
     )
     
-    return {"message": "Delivery undone successfully", "order_status": "ready"}
+    return {"message": "Delivery undone successfully", "order_status": "out_for_delivery"}
+
 
 
 @api_router.get("/delivery-agents/check")
