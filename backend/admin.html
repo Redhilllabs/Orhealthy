@@ -1390,6 +1390,9 @@
                         <td>${order.agent_name || '-'}</td>
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
                         <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
+                        <td class="actions">
+                            <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px;" onclick="deleteOrder('${order._id}')">Delete</button>
+                        </td>
                     </tr>
                 `;
                 }).join('');
