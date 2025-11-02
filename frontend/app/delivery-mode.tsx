@@ -72,10 +72,13 @@ export default function DeliveryModeScreen() {
       console.log('User email:', user?.email);
       console.log('Backend URL:', BACKEND_URL);
       
+      // Get session token
+      const token = await storage.getItemAsync('session_token');
+      
       // Check if user is delivery agent
       const checkResponse = await fetch(`${BACKEND_URL}/api/delivery-agents/check`, {
         headers: {
-          'Authorization': `Bearer ${user?.id_token}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       
@@ -103,7 +106,7 @@ export default function DeliveryModeScreen() {
       // Load orders
       const ordersResponse = await fetch(`${BACKEND_URL}/api/delivery-agents/my-orders`, {
         headers: {
-          'Authorization': `Bearer ${user?.id_token}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       const ordersData = await ordersResponse.json();
