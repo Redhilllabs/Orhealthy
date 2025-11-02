@@ -687,8 +687,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    flexDirection: 'row',
   },
   tab: {
+    flex: 1,
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: 'center',
