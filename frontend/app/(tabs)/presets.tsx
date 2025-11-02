@@ -523,6 +523,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     maxHeight: 60,
+    marginTop: 0,
   },
   tagsContent: {
     paddingHorizontal: 12,
