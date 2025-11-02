@@ -709,13 +709,23 @@
             dashboard: 'Dashboard',
             'source-ingredients': 'Source Ingredients Management',
             ingredients: 'Processed Ingredients Management',
-            meals: 'Preset Meals Management',
+            recipes: 'Recipes Management',
+            meals: 'Meals Management',
             users: 'Users Management',
             orders: 'Orders Management',
             coupons: 'Coupons Management',
             withdrawals: 'Withdrawals Management',
             settings: 'Settings'
         };
+
+        function toggleProductsMenu() {
+            const submenu = document.getElementById('productsSubmenu');
+            if (submenu.style.display === 'none') {
+                submenu.style.display = 'block';
+            } else {
+                submenu.style.display = 'none';
+            }
+        }
 
         function switchTab(tabName) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -728,6 +738,7 @@
                 case 'dashboard': loadDashboard(); break;
                 case 'source-ingredients': loadSourceIngredients(); break;
                 case 'ingredients': loadIngredients(); break;
+                case 'recipes': loadRecipes(); break;
                 case 'meals': loadMeals(); break;
                 case 'users': loadUsers(); break;
                 case 'orders': loadOrders(); break;
