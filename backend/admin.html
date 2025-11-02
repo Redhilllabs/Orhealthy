@@ -531,23 +531,14 @@
                 
                 <!-- Source Ingredient Section -->
                 <div style="background: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                    <h4 style="margin: 0 0 12px 0; color: #334155; font-size: 14px;">🌾 Source Ingredient Linking (Optional)</h4>
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label>Source Ingredient</label>
-                        <select id="sourceIngredientId" onchange="calculateIngredientPrice()">
-                            <option value="">None (Enter price manually)</option>
-                        </select>
-                        <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">
-                            Link to a source ingredient for automatic price calculation
-                        </small>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 style="margin: 0; color: #334155; font-size: 14px;">🌾 Source Ingredients Linking (Optional)</h4>
+                        <button type="button" class="btn" style="padding: 6px 12px; font-size: 13px;" onclick="addSourceIngredientEntry()">+ Add Source</button>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label>Source Quantity</label>
-                        <input type="number" step="0.01" id="sourceQuantity" placeholder="e.g., 50" onchange="calculateIngredientPrice()">
-                        <small style="color: #64748b; font-size: 12px; margin-top: 4px; display: block;">
-                            Amount of source ingredient needed for 1 unit of this processed ingredient
-                        </small>
-                    </div>
+                    <div id="sourceIngredientsContainer"></div>
+                    <small style="color: #64748b; font-size: 12px; margin-top: 8px; display: block;">
+                        Add one or more source ingredients. Total price will be sum of (source quantity × unit price) for all sources.
+                    </small>
                 </div>
                 
                 <div class="form-group">
