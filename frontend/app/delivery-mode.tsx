@@ -240,30 +240,11 @@ export default function DeliveryModeScreen() {
           </View>
         </View>
         
-        {/* Info Cards Row */}
-        <View style={styles.infoRow}>
-          {/* Wallet Card */}
-          <View style={styles.walletCard}>
-            <Text style={styles.walletLabel}>Wallet</Text>
-            <Text style={styles.walletAmount}>₹{agentData?.wallet_balance || 0}</Text>
-            <Text style={styles.walletInfo}>₹{agentData?.payment_per_delivery || 0}/delivery</Text>
-          </View>
-          
-          {/* Stats Cards */}
-          <View style={styles.statsColumn}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{activeOrders.length}</Text>
-              <Text style={styles.statLabel}>Assigned</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{deliveredOrders.length}</Text>
-              <Text style={styles.statLabel}>Delivered</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{credits.length}</Text>
-              <Text style={styles.statLabel}>Credits</Text>
-            </View>
-          </View>
+        {/* Wallet Balance - Thin Card */}
+        <View style={styles.walletCardThin}>
+          <Text style={styles.walletLabelThin}>Wallet:</Text>
+          <Text style={styles.walletAmountThin}>₹{agentData?.wallet_balance || 0}</Text>
+          <Text style={styles.walletInfoThin}>(₹{agentData?.payment_per_delivery || 0}/delivery)</Text>
         </View>
       </View>
 
