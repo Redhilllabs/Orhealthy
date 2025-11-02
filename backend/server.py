@@ -336,6 +336,90 @@ class Config(BaseModel):
     type: str  # star_rating_thresholds, point_values
     config: dict
 
+# Price calculation helpers
+async def calculate_processed_ingredient_price(ingredient_data: dict) -> float:
+    """Calculate price for processed ingredient from source ingredients"""
+    total_price = 0.0
+    
+    for source_ref in ingredient_data.get("source_ingredients", []):
+        source_id = source_ref.get("source_ingredient_id")
+        source_quantity = source_ref.get("source_quantity", 0)
+        
+        # Get source ingredient
+        source = await db.source_ingredients.find_one({"_id": ObjectId(source_id)})
+        if source and source.get("purchases"):
+            # Use latest unit price
+            latest_purchase = source["purchases"][-1]
+            unit_price = latest_purchase.get("unit_price", 0)
+            total_price += unit_price * source_quantity
+    
+    return total_price
+
+async def calculate_recipe_price(recipe_data: dict) -> float:
+    """Calculate total price for recipe from processed ingredients"""
+    total_price = 0.0
+    
+    for ingredient in recipe_data.get("ingredients", []):
+        ingredient_id = ingredient.get("ingredient_id")
+        quantity = ingredient.get("quantity", 0)
+        
+        # Get processed ingredient and calculate its price
+        processed_ing = await db.ingredients.find_one({"_id": ObjectId(ingredient_id)})
+        if processed_ing:
+            ing_price = await calculate_processed_ingredient_price(processed_ing)
+            total_price += ing_price * quantity
+    
+    return total_price
+
+async def calculate_meal_price(meal_data: dict) -> float:
+    """Calculate total price for meal from recipes"""
+    total_price = 0.0
+    
+    for recipe_ref in meal_data.get("recipes", []):
+        recipe_id = recipe_ref.get("recipe_id")
+        quantity = recipe_ref.get("quantity", 1.0)
+        
+        # Get recipe and calculate its price
+        recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+        if recipe:
+            recipe_price = await calculate_recipe_price(recipe)
+            total_price += recipe_price * quantity
+    
+    return total_price
+
+async def calculate_nutrition_profile(ingredients: list, collection_name: str = "ingredients") -> list:
+    """Calculate aggregated nutrition profile from ingredients/recipes"""
+    nutrition_totals = {}
+    
+    for item in ingredients:
+        item_id = item.get("ingredient_id") or item.get("recipe_id")
+        quantity = item.get("quantity", 1.0)
+        
+        # Get the ingredient/recipe data
+        if collection_name == "ingredients":
+            data = await db.ingredients.find_one({"_id": ObjectId(item_id)})
+        else:
+            data = await db.meals.find_one({"_id": ObjectId(item_id)})
+        
+        if data and data.get("nutrition_profile"):
+            for nutrition in data["nutrition_profile"]:
+                nutrient_name = nutrition.get("name")
+                nutrient_value = nutrition.get("value", 0)
+                nutrient_unit = nutrition.get("unit", "g")
+                
+                # Aggregate nutrition values
+                if nutrient_name in nutrition_totals:
+                    nutrition_totals[nutrient_name]["value"] += nutrient_value * quantity
+                else:
+                    nutrition_totals[nutrient_name] = {
+                        "name": nutrient_name,
+                        "value": nutrient_value * quantity,
+                        "unit": nutrient_unit
+                    }
+    
+    return list(nutrition_totals.values())
+
+
 # Helper functions
 async def get_star_config() -> dict:
     """Get star rating configuration from database"""
