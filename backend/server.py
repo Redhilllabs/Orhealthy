@@ -1541,10 +1541,13 @@ async def update_meal(meal_id: str, meal_data: dict):
         "updated_at": datetime.now(timezone.utc)
     }
     
-    result = await db.preset_meals.update_one(
-        {"_id": ObjectId(meal_id)},
-        {"$set": update_data}
-    )
+    try:
+        result = await db.preset_meals.update_one(
+            {"_id": ObjectId(meal_id)},
+            {"$set": update_data}
+        )
+    except Exception:
+        raise HTTPException(status_code=404, detail="Meal not found")
     
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Meal not found")
