@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    minHeight: 36,
+    height: 40,
   },
   activeTab: {
     borderBottomColor: '#ffd700',
