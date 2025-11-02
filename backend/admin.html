@@ -2247,7 +2247,7 @@
             document.getElementById('recipeIngredients').innerHTML = selectedRecipeIngredients.map((ing, idx) => `
                 <div class="ingredient-item">
                     <span>${ing.name}</span>
-                    <input type="number" min="0.1" step="${ing.step_size || 0.1}" value="${ing.quantity}" 
+                    <input type="number" min="0.01" step="any" value="${ing.quantity}" 
                            onchange="updateRecipeIngredientQuantity(${idx}, this.value)">
                     <span>${ing.unit}</span>
                     <span>₹${(ing.price * ing.quantity).toFixed(2)}</span>
