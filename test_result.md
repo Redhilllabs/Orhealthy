@@ -809,3 +809,38 @@ agent_communication:
       - Data structure validation and error handling
       
       **All new backend API features are working correctly and ready for frontend integration.**
+  - agent: "testing"
+    message: |
+      ✅ **RECIPE & MEAL CRUD ENDPOINTS TESTING COMPLETE - 100% SUCCESS RATE**
+      
+      **COMPREHENSIVE TESTING RESULTS (12/12 tests passed):**
+      
+      **Recipe CRUD Endpoints:**
+      - ✅ POST /api/recipes - Create recipe with ingredients, images, tags
+      - ✅ GET /api/recipes - List all recipes with calculated_price field
+      - ✅ GET /api/recipes/{id} - Get single recipe with calculated_price & nutrition_profile
+      - ✅ PUT /api/recipes/{id} - Update recipe data successfully
+      - ✅ DELETE /api/recipes/{id} - Delete recipe and verify removal
+      - ✅ Error handling - Invalid IDs return proper 404 responses
+      
+      **Meal CRUD Endpoints:**
+      - ✅ POST /api/meals - Create meal with recipe references
+      - ✅ GET /api/meals - List all meals with calculated_price field
+      - ✅ GET /api/meals/{id} - Get single meal with calculated_price & nutrition_profile
+      - ✅ PUT /api/meals/{id} - Update meal data successfully
+      - ✅ DELETE /api/meals/{id} - Delete meal and verify removal
+      - ✅ Error handling - Invalid IDs return proper 404 responses
+      
+      **CRITICAL FIXES APPLIED:**
+      - Fixed ObjectId validation errors for invalid IDs (proper 404 responses)
+      - Fixed price calculation functions to handle missing ingredient/recipe data
+      - Fixed nutrition profile calculation to skip invalid ObjectIds
+      - All endpoints now handle edge cases gracefully
+      
+      **VERIFIED FEATURES:**
+      - Calculated prices are automatically computed and returned
+      - Nutrition profiles are aggregated from ingredients/recipes
+      - Proper error handling for malformed requests
+      - Data persistence and retrieval working correctly
+      
+      **All Recipe and Meal CRUD operations are fully functional and ready for production use.**
