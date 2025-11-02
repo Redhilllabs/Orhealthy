@@ -277,7 +277,7 @@
                 </div>
             </div>
 
-            <!-- Meals -->
+            <!-- Meals (Combinations of Recipes) -->
             <div id="meals" class="section">
                 <div class="card">
                     <div class="card-header">
@@ -290,13 +290,37 @@
                             <tr>
                                 <th>Image</th>
                                 <th>Name</th>
-                                <th>Description</th>
-                                <th>Price</th>
+                                <th>Recipes</th>
+                                <th>Price (Calculated)</th>
                                 <th>Tags</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="mealsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recipes (Formerly Meals) -->
+            <div id="recipes" class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recipes Management</h2>
+                        <button class="btn" onclick="showRecipeModal()">+ Add Recipe</button>
+                    </div>
+                    <div id="alert-recipes"></div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Price (Calculated)</th>
+                                <th>Tags</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recipesBody"></tbody>
                     </table>
                 </div>
             </div>
