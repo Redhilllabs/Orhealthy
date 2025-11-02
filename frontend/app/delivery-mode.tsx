@@ -117,7 +117,7 @@ export default function DeliveryModeScreen() {
       // Load credits
       const creditsResponse = await fetch(`${BACKEND_URL}/api/delivery-agents/credits`, {
         headers: {
-          'Authorization': `Bearer ${user?.id_token}`,
+          'Authorization': `Bearer ${token}`,
         },
       });
       const creditsData = await creditsResponse.json();
