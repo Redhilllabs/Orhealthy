@@ -1459,6 +1459,26 @@ async def check_delivery_agent(request: Request):
     
     return {"is_delivery_agent": False, "agent": None}
 
+@api_router.get("/delivery-agents/credits")
+async def get_delivery_credits(request: Request):
+    """Get credit history for logged-in delivery agent"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Find agent by email
+    agent = await db.delivery_agents.find_one({"email": user["email"]})
+    if not agent:
+        raise HTTPException(status_code=404, detail="Not a delivery agent")
+    
+    # Get credit history
+    credits = await db.delivery_credits.find({"agent_email": user["email"]}).sort("created_at", -1).to_list(100)
+    for credit in credits:
+        credit["_id"] = str(credit["_id"])
+    
+    return {"credits": credits, "total_balance": agent.get("wallet_balance", 0)}
+
+
 # Order Management endpoints
 @api_router.put("/orders/{order_id}/status")
 async def update_order_status(order_id: str, status_data: dict, request: Request):
