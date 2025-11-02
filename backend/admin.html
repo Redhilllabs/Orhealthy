@@ -2068,6 +2068,28 @@
             }
         }
 
+        async function loadRecipes() {
+            try {
+                const recipes = await fetch(`${API_URL}/recipes`).then(r => r.json());
+                const tbody = document.getElementById('recipesBody');
+                tbody.innerHTML = recipes.map(recipe => `
+                    <tr>
+                        <td>${recipe.images && recipe.images.length > 0 ? `<img src="${recipe.images[0]}" class="table-image">` : '-'}</td>
+                        <td>${recipe.name}</td>
+                        <td>${recipe.description}</td>
+                        <td>₹${recipe.calculated_price ? recipe.calculated_price.toFixed(2) : '0.00'}</td>
+                        <td>${recipe.tags ? recipe.tags.join(', ') : '-'}</td>
+                        <td class="actions">
+                            <button class="btn" onclick="editRecipe('${recipe._id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteRecipe('${recipe._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showAlert('recipes', 'Error loading recipes', 'error');
+            }
+        }
+
         async function loadMeals() {
             try {
                 const meals = await fetch(`${API_URL}/meals`).then(r => r.json());
@@ -2076,8 +2098,8 @@
                     <tr>
                         <td>${meal.images && meal.images.length > 0 ? `<img src="${meal.images[0]}" class="table-image">` : '-'}</td>
                         <td>${meal.name}</td>
-                        <td>${meal.description}</td>
-                        <td>₹${meal.base_price.toFixed(2)}</td>
+                        <td>${meal.recipes ? meal.recipes.length + ' recipe(s)' : '-'}</td>
+                        <td>₹${meal.calculated_price ? meal.calculated_price.toFixed(2) : '0.00'}</td>
                         <td>${meal.tags ? meal.tags.join(', ') : '-'}</td>
                         <td class="actions">
                             <button class="btn" onclick="editMeal('${meal._id}')">Edit</button>
