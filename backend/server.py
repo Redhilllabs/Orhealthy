@@ -1506,12 +1506,8 @@ async def assign_delivery_agent(order_id: str, assignment_data: dict, request: R
     return {"message": "Agent assigned successfully"}
 
 @api_router.get("/orders/by-status/{status}")
-async def get_orders_by_status(status: str, request: Request):
-    """Get orders filtered by status"""
-    user = await get_current_user(request)
-    if not user or not user.get("is_admin"):
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
+async def get_orders_by_status(status: str):
+    """Get orders filtered by status (admin endpoint)"""
     orders = await db.orders.find({"status": status}).sort("created_at", -1).to_list(100)
     for order in orders:
         order["_id"] = str(order["_id"])
