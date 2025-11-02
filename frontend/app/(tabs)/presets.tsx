@@ -67,17 +67,17 @@ export default function PresetsScreen() {
     let items: Meal[] = [];
     
     switch (activeTab) {
-      case 'all-recipes':
-        items = allRecipes;
-        break;
       case 'all-meals':
         items = allMeals;
         break;
-      case 'my-recipes':
-        items = myRecipes;
+      case 'all-combos':
+        items = allCombos;
         break;
       case 'my-meals':
         items = myMeals;
+        break;
+      case 'my-combos':
+        items = myCombos;
         break;
     }
 
@@ -86,18 +86,18 @@ export default function PresetsScreen() {
     }
 
     setFilteredItems(items);
-  }, [selectedTag, allRecipes, allMeals, myRecipes, myMeals, activeTab]);
+  }, [selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
-      fetchAllRecipes(),
       fetchAllMeals(),
-      fetchMyRecipes(),
-      fetchMyMeals()
+      fetchAllCombos(),
+      fetchMyMeals(),
+      fetchMyCombos()
     ]);
   };
 
-  const fetchAllRecipes = async () => {
+  const fetchAllMeals = async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/recipes`);
