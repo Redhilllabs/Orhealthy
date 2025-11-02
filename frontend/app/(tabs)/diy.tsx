@@ -686,22 +686,48 @@ export default function DIYScreen() {
         </View>
       </View>
 
-      {/* Meal Name Input (shows when user wants to save) */}
-      {user && !mealName && (
-        <TouchableOpacity
-          style={styles.nameInputPrompt}
-          onPress={() => {
-            Alert.prompt(
-              'Meal Name',
-              'Enter a name for your meal',
-              (text) => setMealName(text)
-            );
-          }}
+      {/* Meal Name Input Modal */}
+      {user && (
+        <Modal
+          isVisible={showNameModal}
+          onBackdropPress={() => setShowNameModal(false)}
+          style={styles.modal}
         >
-          <Text style={styles.nameInputPromptText}>
-            {activeTab === 'diy-combos' ? 'Tap to name your combo' : 'Tap to name your meal'}
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.nameModalContent}>
+            <Text style={styles.nameModalTitle}>
+              Name your {activeTab === 'diy-meals' ? 'meal' : 'combo'}
+            </Text>
+            <TextInput
+              style={styles.nameInput}
+              placeholder={`Enter ${activeTab === 'diy-meals' ? 'meal' : 'combo'} name`}
+              value={mealName}
+              onChangeText={setMealName}
+              autoFocus
+            />
+            <View style={styles.nameModalButtons}>
+              <TouchableOpacity
+                style={[styles.nameModalButton, styles.cancelButton]}
+                onPress={() => {
+                  setShowNameModal(false);
+                  setMealName('');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.nameModalButton, styles.confirmButton]}
+                onPress={() => {
+                  setShowNameModal(false);
+                  if (mealName.trim()) {
+                    saveMeal();
+                  }
+                }}
+              >
+                <Text style={styles.confirmButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       )}
     </SafeAreaView>
   );
