@@ -485,6 +485,30 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 2,
   },
+  walletCardThin: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  walletLabelThin: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+  },
+  walletAmountThin: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  walletInfoThin: {
+    fontSize: 12,
+    color: '#999',
+  },
   statsColumn: {
     flex: 1,
     gap: 8,
