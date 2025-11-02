@@ -1837,7 +1837,7 @@
                     <tr>
                         <td>${ing.images && ing.images.length > 0 ? `<img src="${ing.images[0]}" class="table-image">` : '-'}</td>
                         <td>${ing.name}</td>
-                        <td>₹${ing.price_per_unit.toFixed(2)}</td>
+                        <td>₹${(ing.price_per_unit || ing.calculated_price || 0).toFixed(2)}</td>
                         <td>${ing.unit}</td>
                         <td>${ing.tags ? ing.tags.join(', ') : '-'}</td>
                         <td class="actions">
@@ -1848,6 +1848,7 @@
                 `).join('');
                 updateMealIngredientSelect();
             } catch (error) {
+                console.error('Error loading ingredients:', error);
                 showAlert('ingredients', 'Error loading ingredients', 'error');
             }
         }
