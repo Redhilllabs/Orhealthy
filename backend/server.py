@@ -1436,6 +1436,110 @@ async def get_meal(meal_id: str):
     )
     return meal
 
+# CRUD endpoints for Recipes (admin)
+@api_router.post("/recipes")
+async def create_recipe(recipe_data: dict):
+    """Create a new recipe (admin)"""
+    recipe_doc = {
+        "name": recipe_data["name"],
+        "description": recipe_data["description"],
+        "images": recipe_data.get("images", []),
+        "ingredients": recipe_data["ingredients"],
+        "tags": recipe_data.get("tags", []),
+        "created_by": recipe_data.get("created_by", "admin"),
+        "is_preset": True,
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.meals.insert_one(recipe_doc)
+    return {"message": "Recipe created", "id": str(result.inserted_id)}
+
+@api_router.put("/recipes/{recipe_id}")
+async def update_recipe(recipe_id: str, recipe_data: dict):
+    """Update a recipe (admin)"""
+    update_data = {
+        "name": recipe_data["name"],
+        "description": recipe_data["description"],
+        "images": recipe_data.get("images", []),
+        "ingredients": recipe_data["ingredients"],
+        "tags": recipe_data.get("tags", []),
+        "created_by": recipe_data.get("created_by", "admin"),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.meals.update_one(
+        {"_id": ObjectId(recipe_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    
+    return {"message": "Recipe updated"}
+
+@api_router.delete("/recipes/{recipe_id}")
+async def delete_recipe(recipe_id: str):
+    """Delete a recipe (admin)"""
+    result = await db.meals.delete_one({"_id": ObjectId(recipe_id)})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+    
+    return {"message": "Recipe deleted"}
+
+# CRUD endpoints for Meals (admin)
+@api_router.post("/meals")
+async def create_meal(meal_data: dict):
+    """Create a new meal (combination of recipes - admin)"""
+    meal_doc = {
+        "name": meal_data["name"],
+        "description": meal_data.get("description", ""),
+        "images": meal_data.get("images", []),
+        "recipes": meal_data["recipes"],
+        "tags": meal_data.get("tags", []),
+        "is_preset": meal_data.get("is_preset", True),
+        "created_by": meal_data.get("created_by", "admin"),
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.preset_meals.insert_one(meal_doc)
+    return {"message": "Meal created", "id": str(result.inserted_id)}
+
+@api_router.put("/meals/{meal_id}")
+async def update_meal(meal_id: str, meal_data: dict):
+    """Update a meal (admin)"""
+    update_data = {
+        "name": meal_data["name"],
+        "description": meal_data.get("description", ""),
+        "images": meal_data.get("images", []),
+        "recipes": meal_data["recipes"],
+        "tags": meal_data.get("tags", []),
+        "is_preset": meal_data.get("is_preset", True),
+        "created_by": meal_data.get("created_by", "admin"),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.preset_meals.update_one(
+        {"_id": ObjectId(meal_id)},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    
+    return {"message": "Meal updated"}
+
+@api_router.delete("/meals/{meal_id}")
+async def delete_meal(meal_id: str):
+    """Delete a meal (admin)"""
+    result = await db.preset_meals.delete_one({"_id": ObjectId(meal_id)})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Meal not found")
+    
+    return {"message": "Meal deleted"}
+
+
 
 # Saved Recipes endpoints (for all users) - renamed from saved-meals
 @api_router.post("/saved-recipes")
