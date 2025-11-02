@@ -1601,6 +1601,13 @@
             document.getElementById('confirmAssignBtn').style.display = 'none';
             
             // Load available agents
+            await loadAvailableAgents();
+            
+            // Start auto-refresh every 5 seconds
+            agentRefreshInterval = setInterval(loadAvailableAgents, 5000);
+        }
+        
+        async function loadAvailableAgents() {
             try {
                 const agents = await fetch(`${API_URL}/delivery-agents`).then(r => r.json());
                 const availableAgents = agents.filter(a => a.status === 'available');
@@ -1612,9 +1619,9 @@
                 }
                 
                 container.innerHTML = availableAgents.map(agent => `
-                    <div style="border: 2px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;" 
+                    <div style="border: 2px solid ${selectedAgentId === agent._id ? '#3b82f6' : '#e2e8f0'}; background-color: ${selectedAgentId === agent._id ? '#f0f9ff' : '#fff'}; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;" 
                          id="agent-${agent._id}"
-                         onmouseover="this.style.borderColor='#ffd700'" 
+                         onmouseover="if(selectedAgentId !== '${agent._id}') this.style.borderColor='#ffd700'" 
                          onmouseout="if(selectedAgentId !== '${agent._id}') this.style.borderColor='#e2e8f0'"
                          onclick="selectAgent('${agent._id}', '${agent.name}', '${agent.vehicle}', '${agent.email}')">
                         <div style="display: flex; align-items: center; gap: 12px;">
