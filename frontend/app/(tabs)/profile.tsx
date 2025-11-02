@@ -212,12 +212,15 @@ export default function ProfileScreen() {
   const checkDeliveryAgent = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
+      console.log('Checking delivery agent status for user:', user?.email);
       const response = await axios.get(`${API_URL}/delivery-agents/check`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('Delivery agent check response:', response.data);
       setIsDeliveryAgent(response.data.is_delivery_agent || false);
     } catch (error) {
       console.error('Error checking delivery agent status:', error);
+      setIsDeliveryAgent(false);
     }
   };
 
