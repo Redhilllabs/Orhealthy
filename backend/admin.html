@@ -577,10 +577,13 @@
 
         const pageTitles = {
             dashboard: 'Dashboard',
-            ingredients: 'Ingredients Management',
+            'source-ingredients': 'Source Ingredients Management',
+            ingredients: 'Processed Ingredients Management',
             meals: 'Preset Meals Management',
             users: 'Users Management',
             orders: 'Orders Management',
+            coupons: 'Coupons Management',
+            withdrawals: 'Withdrawals Management',
             settings: 'Settings'
         };
 
@@ -593,6 +596,7 @@
 
             switch(tabName) {
                 case 'dashboard': loadDashboard(); break;
+                case 'source-ingredients': loadSourceIngredients(); break;
                 case 'ingredients': loadIngredients(); break;
                 case 'meals': loadMeals(); break;
                 case 'users': loadUsers(); break;
