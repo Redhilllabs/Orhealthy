@@ -680,6 +680,185 @@
             }
         }
 
+        // Source Ingredients Functions
+        let allSourceIngredients = [];
+        let sourceIngredientImage = null;
+        let editingSourceId = null;
+        let expandedSourceIds = new Set();
+
+        async function loadSourceIngredients() {
+            try {
+                const sources = await fetch(`${API_URL}/source-ingredients`).then(r => r.json());
+                allSourceIngredients = sources;
+                const tbody = document.getElementById('sourceIngredientsBody');
+                tbody.innerHTML = sources.map(source => `
+                    <tr>
+                        <td>${source.image ? `<img src="${source.image}" class="table-image">` : '-'}</td>
+                        <td>${source.name}</td>
+                        <td>${source.unit}</td>
+                        <td>${source.latest_purchase ? `${source.latest_purchase.purchase_quantity} ${source.unit} @ ₹${source.latest_purchase.purchase_price}` : 'No purchases'}</td>
+                        <td>₹${source.latest_unit_price.toFixed(2)}</td>
+                        <td>₹${source.lowest_unit_price.toFixed(2)}</td>
+                        <td>₹${source.highest_unit_price.toFixed(2)}</td>
+                        <td class="actions">
+                            <button class="btn" style="font-size: 12px;" onclick="togglePurchaseHistory('${source._id}')">📜 History</button>
+                            <button class="btn" onclick="showAddPurchaseModal('${source._id}')">+ Purchase</button>
+                            <button class="btn btn-danger" onclick="deleteSourceIngredient('${source._id}')">Delete</button>
+                        </td>
+                    </tr>
+                    <tr id="history-${source._id}" class="purchase-history-row" style="display: none;">
+                        <td colspan="8">
+                            <div class="purchase-history">
+                                <h4>Purchase History for ${source.name}</h4>
+                                ${source.purchases && source.purchases.length > 0 ? 
+                                    '<table class="table"><thead><tr><th>Date</th><th>Quantity</th><th>Price</th><th>Unit Price</th><th>Actions</th></tr></thead><tbody>' +
+                                    source.purchases.map((p, idx) => `
+                                        <tr>
+                                            <td>${new Date(p.purchase_date).toLocaleDateString()}</td>
+                                            <td>${p.purchase_quantity} ${source.unit}</td>
+                                            <td>₹${p.purchase_price.toFixed(2)}</td>
+                                            <td>₹${p.unit_price.toFixed(2)} per ${source.unit}</td>
+                                            <td><button class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="deletePurchase('${source._id}', ${idx})">Delete</button></td>
+                                        </tr>
+                                    `).join('') +
+                                    '</tbody></table>'
+                                    : '<p>No purchase history</p>'}
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showAlert('source-ingredients', 'Error loading source ingredients', 'error');
+            }
+        }
+
+        function togglePurchaseHistory(sourceId) {
+            const historyRow = document.getElementById(`history-${sourceId}`);
+            if (expandedSourceIds.has(sourceId)) {
+                historyRow.style.display = 'none';
+                expandedSourceIds.delete(sourceId);
+            } else {
+                historyRow.style.display = 'table-row';
+                expandedSourceIds.add(sourceId);
+            }
+        }
+
+        function showSourceIngredientModal() {
+            editingSourceId = null;
+            document.getElementById('sourceIngredientModal').classList.add('active');
+            document.getElementById('sourceIngredientForm').reset();
+            sourceIngredientImage = null;
+            document.getElementById('sourceImagePreview').innerHTML = '';
+        }
+
+        function handleSourceImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    sourceIngredientImage = e.target.result;
+                    document.getElementById('sourceImagePreview').innerHTML = `
+                        <img src="${e.target.result}" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function saveSourceIngredient(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('sourceName').value,
+                unit: document.getElementById('sourceUnit').value,
+                image: sourceIngredientImage
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/source-ingredients`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    closeModal('sourceIngredientModal');
+                    showAlert('source-ingredients', 'Source ingredient created successfully', 'success');
+                    loadSourceIngredients();
+                }
+            } catch (error) {
+                showAlert('source-ingredients', 'Error creating source ingredient', 'error');
+            }
+        }
+
+        function showAddPurchaseModal(sourceId) {
+            editingSourceId = sourceId;
+            const source = allSourceIngredients.find(s => s._id === sourceId);
+            document.getElementById('purchaseModal').classList.add('active');
+            document.querySelector('#purchaseModal .modal-title').textContent = `Add Purchase for ${source.name}`;
+            document.getElementById('purchaseForm').reset();
+        }
+
+        async function savePurchase(e) {
+            e.preventDefault();
+            const data = {
+                purchase_quantity: parseFloat(document.getElementById('purchaseQuantity').value),
+                purchase_price: parseFloat(document.getElementById('purchasePrice').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/source-ingredients/${editingSourceId}/purchase`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    closeModal('purchaseModal');
+                    showAlert('source-ingredients', 'Purchase added successfully', 'success');
+                    loadSourceIngredients();
+                }
+            } catch (error) {
+                showAlert('source-ingredients', 'Error adding purchase', 'error');
+            }
+        }
+
+        async function deletePurchase(sourceId, purchaseIndex) {
+            if (!confirm('Delete this purchase entry?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/source-ingredients/${sourceId}/purchase/${purchaseIndex}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('source-ingredients', 'Purchase deleted', 'success');
+                    loadSourceIngredients();
+                }
+            } catch (error) {
+                showAlert('source-ingredients', 'Error deleting purchase', 'error');
+            }
+        }
+
+        async function deleteSourceIngredient(sourceId) {
+            if (!confirm('Delete this source ingredient? This will fail if any processed ingredients are linked to it.')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/source-ingredients/${sourceId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showAlert('source-ingredients', 'Source ingredient deleted', 'success');
+                    loadSourceIngredients();
+                } else {
+                    const error = await response.json();
+                    showAlert('source-ingredients', error.detail || 'Error deleting source ingredient', 'error');
+                }
+            } catch (error) {
+                showAlert('source-ingredients', 'Error deleting source ingredient', 'error');
+            }
+        }
+
         async function loadIngredients() {
             try {
                 const ingredients = await fetch(`${API_URL}/ingredients`).then(r => r.json());
