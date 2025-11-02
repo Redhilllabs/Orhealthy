@@ -834,6 +834,35 @@ const styles = StyleSheet.create({
   listContent: {
     paddingVertical: 8,
   },
+  listItemCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginVertical: 6,
+    padding: 12,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  listItemImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+  },
+  listItemInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  listItemControls: {
+    marginLeft: 12,
+  },
+  addButton: {
+    padding: 4,
+  },
   itemCard: {
     flex: 1,
     backgroundColor: '#fff',
