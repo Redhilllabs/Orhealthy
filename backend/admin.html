@@ -1666,21 +1666,30 @@
             }
             
             try {
+                const token = localStorage.getItem('admin_token');
+                
                 // Assign agent to order
-                const assignResponse = await fetch(`${API_URL}/orders/${currentOrderForAssignment}/assign-agent`, {
+                const assignResponse = await fetch(`${API_URL}/admin/orders/${currentOrderForAssignment}/assign-agent`, {
                     method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify({ agent_id: selectedAgentId })
                 });
                 
                 if (!assignResponse.ok) {
-                    throw new Error('Failed to assign agent');
+                    const errorData = await assignResponse.json();
+                    throw new Error(errorData.detail || 'Failed to assign agent');
                 }
                 
                 // Move order to out_for_delivery status
                 const statusResponse = await fetch(`${API_URL}/admin/orders/${currentOrderForAssignment}/status`, {
                     method: 'PUT',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify({ status: 'out_for_delivery' })
                 });
                 
@@ -1689,7 +1698,8 @@
                     showAlert('orders', 'Agent assigned and order moved to Out for Delivery', 'success');
                     filterOrdersByStatus(currentOrderStatusFilter);
                 } else {
-                    throw new Error('Failed to update order status');
+                    const errorData = await statusResponse.json();
+                    throw new Error(errorData.detail || 'Failed to update order status');
                 }
             } catch (error) {
                 console.error('Error assigning agent:', error);
