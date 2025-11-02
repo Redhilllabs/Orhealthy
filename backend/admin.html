@@ -1388,23 +1388,24 @@
                 // All orders: show status column AND actions (delete)
                 thead.innerHTML = `
                     <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Details</th>
+                    <th>User</th>
                     <th>Total</th>
+                    <th>Status</th>
                     <th>Agent</th>
                     <th>Date</th>
-                    <th>Status</th>
+                    <th>Details</th>
                     <th>Actions</th>
                 `;
             } else {
                 // Specific status tabs: show actions, no status column
                 thead.innerHTML = `
                     <th>Order ID</th>
-                    <th>Customer</th>
-                    <th>Details</th>
+                    <th>User</th>
                     <th>Total</th>
+                    <th>Status</th>
                     ${showAgent ? '<th>Agent</th>' : ''}
                     <th>Date</th>
+                    <th>Details</th>
                     <th>Actions</th>
                 `;
             }
