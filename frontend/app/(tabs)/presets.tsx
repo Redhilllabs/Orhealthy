@@ -339,7 +339,7 @@ export default function PresetsScreen() {
         )}
         <View style={styles.mealInfo}>
           <Text style={styles.mealName}>{mealName}</Text>
-          {item.description && (
+          {item.description && item.description.trim() && (
             <Text style={styles.mealDescription} numberOfLines={2}>
               {item.description}
             </Text>
