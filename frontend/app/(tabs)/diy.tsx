@@ -126,16 +126,21 @@ export default function DIYScreen() {
       const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('Raw saved meals data:', response.data);
       // Transform saved meals to match Recipe interface
-      const transformedMeals = response.data.map((meal: any) => ({
-        _id: meal._id,
-        name: meal.name || 'Unnamed Meal',
-        description: meal.description || '',
-        images: meal.images || [],
-        calculated_price: meal.total_price || meal.calculated_price || 0,
-        tags: meal.tags || [],
-        ingredients: meal.ingredients || [],
-      }));
+      const transformedMeals = response.data.map((meal: any) => {
+        console.log('Transforming meal:', meal.name, meal.total_price);
+        return {
+          _id: meal._id,
+          name: meal.name || 'Unnamed Meal',
+          description: meal.description || '',
+          images: meal.images || [],
+          calculated_price: meal.total_price || meal.calculated_price || 0,
+          tags: meal.tags || [],
+          ingredients: meal.ingredients || [],
+        };
+      });
+      console.log('Transformed meals:', transformedMeals);
       setMyMeals(transformedMeals);
     } catch (error) {
       console.error('Error fetching my meals:', error);
