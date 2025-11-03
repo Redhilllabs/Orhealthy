@@ -181,6 +181,7 @@ export default function PresetsScreen() {
   };
 
   const deleteSavedItem = async (itemId: string) => {
+    console.log('deleteSavedItem called with:', itemId, 'activeTab:', activeTab, 'mealsSubTab:', mealsSubTab, 'combosSubTab:', combosSubTab);
     try {
       const token = await storage.getItemAsync('session_token');
       
@@ -191,13 +192,17 @@ export default function PresetsScreen() {
       } else if (activeTab === 'combos' && combosSubTab === 'my-combos') {
         endpoint = `${API_URL}/meals/${itemId}`;
       } else {
+        console.log('Cannot delete - wrong tab combination');
         Alert.alert('Error', 'Cannot delete preset items');
         return;
       }
       
-      await axios.delete(endpoint, {
+      console.log('Deleting from endpoint:', endpoint);
+      const response = await axios.delete(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('Delete response:', response.status);
+      
       Alert.alert('Success', 'Item deleted successfully');
       
       // Refresh the appropriate list based on active tab
@@ -206,8 +211,8 @@ export default function PresetsScreen() {
       } else {
         fetchMyCombos();
       }
-    } catch (error) {
-      console.error('Error deleting item:', error);
+    } catch (error: any) {
+      console.error('Error deleting item:', error.response?.data || error.message);
       Alert.alert('Error', 'Failed to delete item');
     }
   };
