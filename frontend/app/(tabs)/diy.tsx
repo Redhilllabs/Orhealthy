@@ -1479,11 +1479,6 @@ const styles = StyleSheet.create({
   addButton: {
     padding: 4,
   },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
   quantityText: {
     fontSize: 16,
     fontWeight: 'bold',
