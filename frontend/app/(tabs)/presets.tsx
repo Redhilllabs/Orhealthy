@@ -85,12 +85,21 @@ export default function PresetsScreen() {
       items = combosSubTab === 'all-combos' ? allCombos : myCombos;
     }
 
+    // Apply search filter
+    if (searchQuery) {
+      items = items.filter(item => {
+        const name = item.name || item.meal_name || '';
+        return name.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    }
+
+    // Apply tag filter
     if (selectedTag) {
       items = items.filter(item => item.tags?.includes(selectedTag));
     }
 
     setFilteredItems(items);
-  }, [selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
+  }, [searchQuery, selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
