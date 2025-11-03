@@ -742,6 +742,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    height: 60,
   },
   tagsContent: {
     paddingHorizontal: 12,
