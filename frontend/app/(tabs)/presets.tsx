@@ -376,113 +376,111 @@ export default function PresetsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {/* 2 Main Tabs - Sticky */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'meals' && styles.activeTab]}
+          onPress={() => setActiveTab('meals')}
+        >
+          <Text style={[styles.tabText, activeTab === 'meals' && styles.activeTabText]}>
+            Meals
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'combos' && styles.activeTab]}
+          onPress={() => setActiveTab('combos')}
+        >
+          <Text style={[styles.tabText, activeTab === 'combos' && styles.activeTabText]}>
+            Combos
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Sub-tabs - Sticky */}
+      <View style={styles.subTabContainer}>
+        <TouchableOpacity
+          style={[styles.subTab, 
+            (activeTab === 'meals' && mealsSubTab === 'all-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'all-combos') 
+            ? styles.activeSubTab : null]}
+          onPress={() => {
+            if (activeTab === 'meals') setMealsSubTab('all-meals');
+            else setCombosSubTab('all-combos');
+          }}
+        >
+          <Text style={[styles.subTabText, 
+            ((activeTab === 'meals' && mealsSubTab === 'all-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'all-combos'))
+            ? styles.activeSubTabText : null]}>
+            {activeTab === 'meals' ? 'All Meals' : 'All Combos'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.subTab, 
+            (activeTab === 'meals' && mealsSubTab === 'my-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'my-combos')
+            ? styles.activeSubTab : null]}
+          onPress={() => {
+            if (activeTab === 'meals') setMealsSubTab('my-meals');
+            else setCombosSubTab('my-combos');
+          }}
+        >
+          <Text style={[styles.subTabText, 
+            ((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'my-combos'))
+            ? styles.activeSubTabText : null]}>
+            {activeTab === 'meals' ? 'My Meals' : 'My Combos'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Search - Sticky */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#999" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder={`Search ${activeTab}...`}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+      </View>
+
+      {/* Tag filters - Sticky */}
+      {allTags.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tagsContainer}
+          contentContainerStyle={styles.tagsContent}
+        >
+          <TouchableOpacity
+            style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
+            onPress={() => setSelectedTag(null)}
+          >
+            <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
+          </TouchableOpacity>
+          {allTags.map((tag) => (
+            <TouchableOpacity
+              key={tag}
+              style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
+              onPress={() => setSelectedTag(tag)}
+            >
+              <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>
+                {tag}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      )}
+
+      {/* Items List */}
       <FlatList
         data={filteredItems}
         renderItem={renderMeal}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
-        ListHeaderComponent={
-          <>
-            {/* 2 Main Tabs */}
-            <View style={styles.tabContainer}>
-              <TouchableOpacity
-                style={[styles.tab, activeTab === 'meals' && styles.activeTab]}
-                onPress={() => setActiveTab('meals')}
-              >
-                <Text style={[styles.tabText, activeTab === 'meals' && styles.activeTabText]}>
-                  Meals
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.tab, activeTab === 'combos' && styles.activeTab]}
-                onPress={() => setActiveTab('combos')}
-              >
-                <Text style={[styles.tabText, activeTab === 'combos' && styles.activeTabText]}>
-                  Combos
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Sub-tabs */}
-            <View style={styles.subTabContainer}>
-              <TouchableOpacity
-                style={[styles.subTab, 
-                  (activeTab === 'meals' && mealsSubTab === 'all-meals') || 
-                  (activeTab === 'combos' && combosSubTab === 'all-combos') 
-                  ? styles.activeSubTab : null]}
-                onPress={() => {
-                  if (activeTab === 'meals') setMealsSubTab('all-meals');
-                  else setCombosSubTab('all-combos');
-                }}
-              >
-                <Text style={[styles.subTabText, 
-                  ((activeTab === 'meals' && mealsSubTab === 'all-meals') || 
-                  (activeTab === 'combos' && combosSubTab === 'all-combos'))
-                  ? styles.activeSubTabText : null]}>
-                  {activeTab === 'meals' ? 'All Meals' : 'All Combos'}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.subTab, 
-                  (activeTab === 'meals' && mealsSubTab === 'my-meals') || 
-                  (activeTab === 'combos' && combosSubTab === 'my-combos')
-                  ? styles.activeSubTab : null]}
-                onPress={() => {
-                  if (activeTab === 'meals') setMealsSubTab('my-meals');
-                  else setCombosSubTab('my-combos');
-                }}
-              >
-                <Text style={[styles.subTabText, 
-                  ((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
-                  (activeTab === 'combos' && combosSubTab === 'my-combos'))
-                  ? styles.activeSubTabText : null]}>
-                  {activeTab === 'meals' ? 'My Meals' : 'My Combos'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Search */}
-            <View style={styles.searchContainer}>
-              <View style={styles.searchBar}>
-                <Ionicons name="search" size={20} color="#999" />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder={`Search ${activeTab}...`}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                />
-              </View>
-            </View>
-
-            {/* Tag filters */}
-            {allTags.length > 0 && (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.tagsContainer}
-                contentContainerStyle={styles.tagsContent}
-              >
-                <TouchableOpacity
-                  style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
-                  onPress={() => setSelectedTag(null)}
-                >
-                  <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
-                </TouchableOpacity>
-                {allTags.map((tag) => (
-                  <TouchableOpacity
-                    key={tag}
-                    style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
-                    onPress={() => setSelectedTag(tag)}
-                  >
-                    <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>
-                      {tag}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-          </>
-        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="restaurant-outline" size={64} color="#ccc" />
