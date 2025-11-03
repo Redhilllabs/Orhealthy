@@ -1,16 +1,48 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Recipe and Meal CRUD endpoints
-Tests the newly implemented Recipe and Meal management endpoints
+Backend API Testing for Admin Panel Combo Management
+Tests the OrHealthy admin panel combo management functionality
 """
 
 import requests
 import json
 import sys
+import os
 from datetime import datetime
 
-# Backend URL from frontend/.env
-BACKEND_URL = "https://mealhierarchy.preview.emergentagent.com/api"
+# Get backend URL from frontend .env file
+BACKEND_URL = "https://mealhierarchy.preview.emergentagent.com"
+API_BASE = f"{BACKEND_URL}/api"
+ADMIN_PANEL_URL = f"{API_BASE}/admin-panel"
+
+# Admin credentials
+ADMIN_EMAIL = "admin@admin.com"
+ADMIN_PASSWORD = "admin"
+
+class Colors:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    BOLD = '\033[1m'
+    END = '\033[0m'
+
+def print_test_header(test_name):
+    print(f"\n{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}Testing: {test_name}{Colors.END}")
+    print(f"{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.END}")
+
+def print_success(message):
+    print(f"{Colors.GREEN}✅ {message}{Colors.END}")
+
+def print_error(message):
+    print(f"{Colors.RED}❌ {message}{Colors.END}")
+
+def print_warning(message):
+    print(f"{Colors.YELLOW}⚠️  {message}{Colors.END}")
+
+def print_info(message):
+    print(f"{Colors.BLUE}ℹ️  {message}{Colors.END}")
 
 class BackendTester:
     def __init__(self):
