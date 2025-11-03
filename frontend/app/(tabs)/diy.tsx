@@ -787,8 +787,9 @@ export default function DIYScreen() {
           </Text>
           
           <ScrollView style={styles.selectedItemsList}>
-            {activeTab === 'diy-meals'
-              ? Array.from(selectedIngredients.entries()).map(([id, qty]) => {
+            {activeTab === 'diy-meals' ? (
+              <>
+                {Array.from(selectedIngredients.entries()).map(([id, qty]) => {
                   const ingredient = ingredients.find(i => i._id === id);
                   if (!ingredient) return null;
                   const stepSize = ingredient.step_size || 1;
@@ -812,8 +813,12 @@ export default function DIYScreen() {
                       </View>
                     </View>
                   );
-                })
-              : Array.from(selectedMeals.entries()).map(([id, qty]) => {
+                })}
+              </>
+            ) : (
+              <>
+                {Array.from(selectedMeals.entries()).map(([id, qty]) => {
+                  // Search in both allMeals and myMeals to show combined selections
                   let recipe = allMeals.find(r => r._id === id);
                   if (!recipe) {
                     recipe = myMeals.find(r => r._id === id);
@@ -840,6 +845,8 @@ export default function DIYScreen() {
                     </View>
                   );
                 })}
+              </>
+            )}
           </ScrollView>
 
           <View style={styles.bottomSheetFooter}>
