@@ -807,7 +807,8 @@ const styles = StyleSheet.create({
   mealCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 12,
+    marginHorizontal: 16,
     overflow: 'hidden',
     elevation: 2,
     shadowColor: '#000',
