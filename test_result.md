@@ -1153,6 +1153,38 @@ backend:
 agent_communication:
   - agent: "testing"
     message: |
+      ✅ **ADMIN PANEL MEALS & COMBOS TAB FIXES VERIFICATION COMPLETE - 100% SUCCESS RATE**
+      
+      **TESTED SPECIFIC FIXES FROM REVIEW REQUEST:**
+      
+      **1. Meals Not Appearing in Meals Tab ✅ FIXED**
+      - Issue: Meals tab was using incorrect table ID "recipesBody"
+      - Fix: Changed to correct table ID "mealsBody" in loadMeals() function
+      - Verification: ✅ Meals now appear correctly (2 meals loaded from /api/recipes)
+      - Table ID "mealsBody" found in admin panel HTML
+      
+      **2. Error Message Verification ✅ FIXED**
+      - Issue: Combos tab was showing "error loading meals" instead of "error loading combos"
+      - Fix: Updated error message in loadCombos() function
+      - Verification: ✅ Combos tab now shows correct error message "Error loading combos"
+      - No cross-contamination of error messages between tabs
+      
+      **COMPREHENSIVE TESTING (7/7 tests passed):**
+      - ✅ Admin Panel Access - All required elements found
+      - ✅ Meals API Endpoint - 2 meals loaded successfully
+      - ✅ Combos API Endpoint - 3 combos loaded successfully  
+      - ✅ Meals Tab Functionality - Correct table ID and API endpoint
+      - ✅ Combos Tab Functionality - Correct error messages
+      - ✅ Error Message Verification - Both tabs use proper terminology
+      - ✅ Cross-Tab Navigation - Smooth switching between tabs
+      
+      **AUTHENTICATION TESTED:**
+      - Admin login: admin@admin.com / admin ✅ Working
+      - Admin panel accessible without authentication issues
+      
+      **BOTH REPORTED ISSUES HAVE BEEN SUCCESSFULLY FIXED AND VERIFIED**
+  - agent: "testing"
+    message: |
       ✅ **ADMIN PANEL MEALS TAB TESTING COMPLETE - 100% SUCCESS RATE**
       
       **COMPREHENSIVE TESTING RESULTS (10/10 tests passed):**
