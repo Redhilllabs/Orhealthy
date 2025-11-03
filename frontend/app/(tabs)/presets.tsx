@@ -159,10 +159,23 @@ export default function PresetsScreen() {
   const deleteSavedItem = async (itemId: string) => {
     try {
       const token = await storage.getItemAsync('session_token');
-      await axios.delete(`${API_URL}/saved-meals/${itemId}`, {
+      
+      // Determine which endpoint to use based on active tab
+      let endpoint = '';
+      if (activeTab === 'meals' && subTab === 'my-meals') {
+        endpoint = `${API_URL}/recipes/${itemId}`;
+      } else if (activeTab === 'combos' && subTab === 'my-combos') {
+        endpoint = `${API_URL}/meals/${itemId}`;
+      } else {
+        Alert.alert('Error', 'Cannot delete preset items');
+        return;
+      }
+      
+      await axios.delete(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
       Alert.alert('Success', 'Item deleted successfully');
+      
       // Refresh the appropriate list based on active tab and sub-tab
       if (activeTab === 'meals') {
         fetchMyMeals();
