@@ -787,11 +787,14 @@ export default function DIYScreen() {
               <Text style={styles.itemName}>{item.name}</Text>
               <Text style={styles.itemPrice}>₹{price.toFixed(2)}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={24} color="#999" />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.deleteIconButton}
-            onPress={() => handleDeleteMyDiyItem(item._id)}
+            onPress={() => {
+              // Show confirmation before delete
+              setItemToDelete(item._id);
+              setShowDeleteConfirmModal(true);
+            }}
           >
             <Ionicons name="trash" size={20} color="#ef4444" />
           </TouchableOpacity>
