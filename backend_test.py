@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Admin Panel Combo Management
-Tests the OrHealthy admin panel combo management functionality
+Backend Testing for Admin Panel - Meals Tab Functionality
+Tests the fixed issues with meals management in the admin panel.
 """
 
 import requests
 import json
 import sys
 import os
+import time
 from datetime import datetime
 
 # Get backend URL from frontend .env file
