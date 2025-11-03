@@ -203,11 +203,17 @@ export default function PresetsScreen() {
 
   const handleMealPress = (meal: Meal) => {
     setSelectedMeal(meal);
-    if (activeTab.startsWith('my-')) {
-      setCustomizations(meal.ingredients);
+    // For combos, use recipes; for meals, use ingredients
+    if (activeTab === 'combos') {
+      setCustomizations(
+        (meal.recipes || []).map(recipe => ({
+          ...recipe,
+          quantity: recipe.quantity || 1,
+        }))
+      );
     } else {
       setCustomizations(
-        meal.ingredients.map(ing => ({
+        (meal.ingredients || []).map(ing => ({
           ...ing,
           quantity: ing.default_quantity || ing.quantity || 1,
         }))
