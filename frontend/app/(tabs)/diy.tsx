@@ -383,8 +383,6 @@ export default function DIYScreen() {
   };
 
   const handleDeleteMyDiyItem = async (itemId: string) => {
-    
-  const handleDeleteMyDiyItem = async (itemId: string) => {
     try {
       setGlobalLoading(true);
       const token = await storage.getItemAsync('session_token');
