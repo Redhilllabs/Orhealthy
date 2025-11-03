@@ -67,6 +67,7 @@ export default function DIYScreen() {
   const [selectedMeals, setSelectedMeals] = useState<Map<string, number>>(new Map());
   
   const [mealName, setMealName] = useState('');
+  const [selectedSaveTags, setSelectedSaveTags] = useState<string[]>([]);
   const [showNameModal, setShowNameModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,16 +99,9 @@ export default function DIYScreen() {
 
   const fetchIngredients = async () => {
     try {
-      setLoading(true);
       const response = await axios.get(`${API_URL}/ingredients`);
       setIngredients(response.data);
-      setFilteredIngredients(response.data);
-      
-      const tags = new Set<string>();
-      response.data.forEach((ingredient: Ingredient) => {
-        ingredient.tags?.forEach(tag => tags.add(tag));
-      });
-      setAllTags(prev => Array.from(new Set([...prev, ...Array.from(tags)])));
+      extractTags(response.data, []);
     } catch (error) {
       console.error('Error fetching ingredients:', error);
     } finally {
@@ -117,34 +111,36 @@ export default function DIYScreen() {
 
   const fetchAllMeals = async () => {
     try {
-      setLoading(true);
       const response = await axios.get(`${API_URL}/recipes`);
       setAllMeals(response.data);
-      
-      const tags = new Set<string>();
-      response.data.forEach((recipe: Recipe) => {
-        recipe.tags?.forEach(tag => tags.add(tag));
-      });
-      setAllTags(prev => Array.from(new Set([...prev, ...Array.from(tags)])));
+      extractTags([], response.data);
     } catch (error) {
-      console.error('Error fetching recipes:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error fetching all meals:', error);
     }
   };
 
   const fetchMyMeals = async () => {
+    if (!user) return;
     try {
       const token = await storage.getItemAsync('session_token');
-      if (!token) return;
-
       const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMyMeals(response.data);
     } catch (error) {
-      console.error('Error fetching my recipes:', error);
+      console.error('Error fetching my meals:', error);
     }
+  };
+
+  const extractTags = (ingredients: Ingredient[], meals: Recipe[]) => {
+    const tags = new Set<string>();
+    ingredients.forEach(ing => {
+      ing.tags?.forEach(tag => tags.add(tag));
+    });
+    meals.forEach(meal => {
+      meal.tags?.forEach(tag => tags.add(tag));
+    });
+    setAllTags(Array.from(tags));
   };
 
   const filterIngredients = () => {
@@ -209,7 +205,7 @@ export default function DIYScreen() {
   const toggleMeal = (recipeId: string) => {
     const newSelected = new Map(selectedMeals);
     if (newSelected.has(recipeId)) {
-      newSelected.set(recipeId, newSelected.get(recipeId)! + 0.5);
+      newSelected.set(recipeId, newSelected.get(recipeId)! + 1);
     } else {
       newSelected.set(recipeId, 1);
     }
@@ -227,7 +223,7 @@ export default function DIYScreen() {
       removeMeal(recipeId);
     } else {
       const newSelected = new Map(selectedMeals);
-      newSelected.set(recipeId, quantity);
+      newSelected.set(recipeId, Math.round(quantity));
       setSelectedMeals(newSelected);
     }
   };
@@ -254,6 +250,31 @@ export default function DIYScreen() {
     }
   };
 
+  // Generate image from constituents
+  const generateCompositeImage = () => {
+    if (activeTab === 'diy-meals') {
+      // Get images from selected ingredients
+      const images: string[] = [];
+      selectedIngredients.forEach((qty, id) => {
+        const ingredient = ingredients.find(i => i._id === id);
+        if (ingredient?.images?.[0]) {
+          images.push(ingredient.images[0]);
+        }
+      });
+      return images.slice(0, 4); // Up to 4 images
+    } else {
+      // Get images from selected meals
+      const images: string[] = [];
+      selectedMeals.forEach((qty, id) => {
+        const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+        if (recipe?.images?.[0]) {
+          images.push(recipe.images[0]);
+        }
+      });
+      return images.slice(0, 4); // Up to 4 images
+    }
+  };
+
   const saveMeal = async () => {
     if (!user) {
       Alert.alert('Error', 'Please login to save meals');
@@ -271,13 +292,14 @@ export default function DIYScreen() {
     }
 
     if (activeTab !== 'diy-meals' && selectedMeals.size === 0) {
-      Alert.alert('Error', 'Please select at least one recipe');
+      Alert.alert('Error', 'Please select at least one meal');
       return;
     }
 
     try {
       setSaving(true);
       const token = await storage.getItemAsync('session_token');
+      const compositeImages = generateCompositeImage();
       
       let mealData: any;
       
@@ -292,25 +314,28 @@ export default function DIYScreen() {
             quantity: qty,
             price: ingredient?.calculated_price || ingredient?.price_per_unit || 0,
             unit: ingredient?.unit || '',
+            step_size: ingredient?.step_size || 1,
           };
         });
 
         mealData = {
           name: mealName,
           ingredients: ingredientsList,
+          images: compositeImages,
+          tags: selectedSaveTags,
           total_price: calculateTotal(),
           is_preset: false,
           created_by: user._id,
         };
       } else {
-        // Creating meal from recipes
+        // Creating combo from meals
         const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
             quantity: qty,
-            step_size: 0.5,
+            step_size: 1,
             price: recipe?.calculated_price || 0,
           };
         });
@@ -318,6 +343,8 @@ export default function DIYScreen() {
         mealData = {
           name: mealName,
           recipes: recipesList,
+          images: compositeImages,
+          tags: selectedSaveTags,
           total_price: calculateTotal(),
           is_preset: false,
           created_by: user._id,
@@ -328,12 +355,18 @@ export default function DIYScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      Alert.alert('Success', 'Meal saved successfully!');
+      Alert.alert('Success', `${activeTab === 'diy-meals' ? 'Meal' : 'Combo'} saved successfully!`);
       
       // Reset
       setMealName('');
+      setSelectedSaveTags([]);
       setSelectedIngredients(new Map());
       setSelectedMeals(new Map());
+      
+      // Refresh my meals
+      if (activeTab === 'diy-meals') {
+        fetchMyMeals();
+      }
     } catch (error) {
       console.error('Error saving meal:', error);
       Alert.alert('Error', 'Failed to save meal');
@@ -349,66 +382,83 @@ export default function DIYScreen() {
     }
 
     if (activeTab !== 'diy-meals' && selectedMeals.size === 0) {
-      Alert.alert('Error', 'Please select at least one recipe');
+      Alert.alert('Error', 'Please select at least one meal');
       return;
     }
 
     try {
+      const compositeImages = generateCompositeImage();
       let cartData: any;
       
       if (activeTab === 'diy-meals') {
+        // DIY Meal with ingredients and proportions
         const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
           const ingredient = ingredients.find(i => i._id === id);
           return {
             ingredient_id: id,
             name: ingredient?.name || '',
             quantity: qty,
+            unit: ingredient?.unit || '',
             price: ingredient?.calculated_price || ingredient?.price_per_unit || 0,
           };
         });
 
         cartData = {
-          meal_id: 'custom-' + Date.now(),
-          meal_name: mealName || 'Custom Meal',
+          meal_id: 'diy-meal-' + Date.now(),
+          meal_name: 'DIY Meal',
+          description: ingredientsList.map(i => `${i.name} (${i.quantity}${i.unit})`).join(', '),
+          images: compositeImages,
           customizations: ingredientsList,
           quantity: 1,
           price: calculateTotal(),
+          isDIY: true,
         };
       } else {
-        const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
+        // DIY Combo with meals, their ingredients and proportions
+        const mealsData = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
             recipe_id: id,
             name: recipe?.name || '',
             quantity: qty,
             price: recipe?.calculated_price || 0,
+            ingredients: recipe?.ingredients || [],
           };
         });
 
         cartData = {
-          meal_id: 'custom-meal-' + Date.now(),
-          meal_name: mealName || 'Custom Meal',
-          recipes: recipesList,
+          meal_id: 'diy-combo-' + Date.now(),
+          meal_name: 'DIY Combo',
+          description: mealsData.map(m => `${m.name} (x${m.quantity})`).join(', '),
+          images: compositeImages,
+          meals: mealsData,
           quantity: 1,
           price: calculateTotal(),
+          isDIY: true,
         };
       }
 
       await addToCart(cartData);
 
-      if (Platform.OS === 'web') {
-        alert('Added to cart!');
-      } else {
-        Alert.alert('Success', 'Added to cart!');
-      }
+      Alert.alert('Success', 'Added to cart!');
       
-      setMealName('');
+      // Reset selections
       setSelectedIngredients(new Map());
       setSelectedMeals(new Map());
     } catch (error) {
       console.error('Error adding to cart:', error);
       Alert.alert('Error', 'Failed to add to cart');
     }
+  };
+
+  const toggleSaveTag = (tag: string) => {
+    setSelectedSaveTags(prev => {
+      if (prev.includes(tag)) {
+        return prev.filter(t => t !== tag);
+      } else {
+        return [...prev, tag];
+      }
+    });
   };
 
   const renderIngredientItem = ({ item }: { item: Ingredient }) => {
@@ -468,21 +518,16 @@ export default function DIYScreen() {
         )}
         <View style={styles.listItemInfo}>
           <Text style={styles.itemName}>{item.name}</Text>
-          {item.description && (
-            <Text style={styles.itemDescription} numberOfLines={1}>
-              {item.description}
-            </Text>
-          )}
           <Text style={styles.itemPrice}>₹{(item.calculated_price || 0).toFixed(2)}</Text>
         </View>
         <View style={styles.listItemControls}>
           {quantity > 0 ? (
             <View style={styles.quantityControl}>
-              <TouchableOpacity onPress={() => updateMealQuantity(item._id, quantity - 0.5)}>
+              <TouchableOpacity onPress={() => updateMealQuantity(item._id, quantity - 1)}>
                 <Ionicons name="remove-circle" size={28} color="#ffd700" />
               </TouchableOpacity>
-              <Text style={styles.quantityText}>{quantity}x</Text>
-              <TouchableOpacity onPress={() => updateMealQuantity(item._id, quantity + 0.5)}>
+              <Text style={styles.quantityText}>{quantity}</Text>
+              <TouchableOpacity onPress={() => updateMealQuantity(item._id, quantity + 1)}>
                 <Ionicons name="add-circle" size={28} color="#ffd700" />
               </TouchableOpacity>
             </View>
@@ -551,100 +596,86 @@ export default function DIYScreen() {
         </View>
       )}
 
-      {/* Search and filters */}
-      <View style={styles.searchContainer}>
+      {/* Search and Filter */}
+      <View style={styles.searchSection}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder={`Search ${activeTab === 'diy-meals' ? 'ingredients' : 'meals'}...`}
+            placeholder={activeTab === 'diy-meals' ? 'Search ingredients...' : 'Search meals...'}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
       </View>
 
-      {/* Tag filters */}
+      {/* Tags Filter */}
       {allTags.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tagsContainer}
-          contentContainerStyle={styles.tagsContent}
-        >
-          <TouchableOpacity
-            style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
-            onPress={() => setSelectedTag(null)}
-          >
-            <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
-          </TouchableOpacity>
-          {allTags.map((tag) => (
+        <View style={styles.tagsContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <TouchableOpacity
-              key={tag}
-              style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
-              onPress={() => setSelectedTag(tag)}
+              style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
+              onPress={() => setSelectedTag(null)}
             >
-              <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>
-                {tag}
-              </Text>
+              <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+            {allTags.map((tag) => (
+              <TouchableOpacity
+                key={tag}
+                style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
+                onPress={() => setSelectedTag(selectedTag === tag ? null : tag)}
+              >
+                <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>{tag}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       )}
 
-      {/* Items List */}
+      {/* List */}
       <FlatList
         data={activeTab === 'diy-meals' ? filteredIngredients : filteredMeals}
         renderItem={activeTab === 'diy-meals' ? renderIngredientItem : renderRecipeItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>
+              {activeTab === 'diy-meals' ? 'No ingredients found' : 'No meals found'}
+            </Text>
+          </View>
+        }
       />
 
-      {/* Selected Items Panel */}
-      {((activeTab === 'diy-meals' && selectedIngredients.size > 0) || 
-        (activeTab === 'diy-combos' && selectedMeals.size > 0)) && (
-        <View style={styles.selectedPanel}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.selectedScroll}>
+      {/* Selected Items Summary */}
+      {((activeTab === 'diy-meals' && selectedIngredients.size > 0) ||
+        (activeTab !== 'diy-meals' && selectedMeals.size > 0)) && (
+        <View style={styles.selectedSummary}>
+          <Text style={styles.selectedTitle}>Selected Items:</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {activeTab === 'diy-meals'
               ? Array.from(selectedIngredients.entries()).map(([id, qty]) => {
                   const ingredient = ingredients.find(i => i._id === id);
-                  if (!ingredient) return null;
-                  const stepSize = ingredient.step_size || 1;
                   return (
                     <View key={id} style={styles.selectedItem}>
-                      <Text style={styles.selectedItemName}>{ingredient.name}</Text>
-                      <View style={styles.quantityControl}>
-                        <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty - stepSize)}>
-                          <Ionicons name="remove-circle" size={24} color="#ffd700" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>{qty}</Text>
-                        <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty + stepSize)}>
-                          <Ionicons name="add-circle" size={24} color="#ffd700" />
-                        </TouchableOpacity>
-                      </View>
+                      <Text style={styles.selectedItemText}>
+                        {ingredient?.name} ({qty}{ingredient?.unit})
+                      </Text>
                       <TouchableOpacity onPress={() => removeIngredient(id)}>
-                        <Ionicons name="close-circle" size={20} color="#ef4444" />
+                        <Ionicons name="close-circle" size={18} color="#ff4444" />
                       </TouchableOpacity>
                     </View>
                   );
                 })
               : Array.from(selectedMeals.entries()).map(([id, qty]) => {
                   const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
-                  if (!recipe) return null;
                   return (
                     <View key={id} style={styles.selectedItem}>
-                      <Text style={styles.selectedItemName}>{recipe.name}</Text>
-                      <View style={styles.quantityControl}>
-                        <TouchableOpacity onPress={() => updateMealQuantity(id, qty - 0.5)}>
-                          <Ionicons name="remove-circle" size={24} color="#ffd700" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantityText}>{qty}x</Text>
-                        <TouchableOpacity onPress={() => updateMealQuantity(id, qty + 0.5)}>
-                          <Ionicons name="add-circle" size={24} color="#ffd700" />
-                        </TouchableOpacity>
-                      </View>
+                      <Text style={styles.selectedItemText}>
+                        {recipe?.name} (x{qty})
+                      </Text>
                       <TouchableOpacity onPress={() => removeMeal(id)}>
-                        <Ionicons name="close-circle" size={20} color="#ef4444" />
+                        <Ionicons name="close-circle" size={18} color="#ff4444" />
                       </TouchableOpacity>
                     </View>
                   );
@@ -686,11 +717,15 @@ export default function DIYScreen() {
         </View>
       </View>
 
-      {/* Meal Name Input Modal */}
+      {/* Meal Name Input Modal with Tags */}
       {user && (
         <Modal
           isVisible={showNameModal}
-          onBackdropPress={() => setShowNameModal(false)}
+          onBackdropPress={() => {
+            setShowNameModal(false);
+            setMealName('');
+            setSelectedSaveTags([]);
+          }}
           style={styles.modal}
         >
           <View style={styles.nameModalContent}>
@@ -704,12 +739,43 @@ export default function DIYScreen() {
               onChangeText={setMealName}
               autoFocus
             />
+            
+            {/* Tags Selection */}
+            <Text style={styles.tagsLabel}>Select Tags (Optional)</Text>
+            <ScrollView style={styles.tagsScrollView} showsVerticalScrollIndicator={false}>
+              <View style={styles.tagsGrid}>
+                {allTags.map((tag) => (
+                  <TouchableOpacity
+                    key={tag}
+                    style={[
+                      styles.tagSelectChip,
+                      selectedSaveTags.includes(tag) && styles.tagSelectChipActive
+                    ]}
+                    onPress={() => toggleSaveTag(tag)}
+                  >
+                    <Text
+                      style={[
+                        styles.tagSelectText,
+                        selectedSaveTags.includes(tag) && styles.tagSelectTextActive
+                      ]}
+                    >
+                      {tag}
+                    </Text>
+                    {selectedSaveTags.includes(tag) && (
+                      <Ionicons name="checkmark-circle" size={16} color="#ffd700" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+
             <View style={styles.nameModalButtons}>
               <TouchableOpacity
                 style={[styles.nameModalButton, styles.cancelButton]}
                 onPress={() => {
                   setShowNameModal(false);
                   setMealName('');
+                  setSelectedSaveTags([]);
                 }}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
@@ -745,69 +811,54 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabContainer: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    flexDirection: 'row',
   },
   tab: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 16,
     alignItems: 'center',
-    justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    height: 40,
   },
   activeTab: {
     borderBottomColor: '#ffd700',
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
     color: '#666',
   },
   activeTabText: {
-    color: '#ffd700',
-    fontWeight: '700',
+    color: '#333',
   },
   subTabContainer: {
-    backgroundColor: '#f9f9f9',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    marginTop: 0,
     flexDirection: 'row',
+    backgroundColor: '#fff',
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 12,
   },
   subTab: {
-    flex: 1,
+    paddingHorizontal: 20,
     paddingVertical: 8,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderRadius: 20,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: '#f5f5f5',
   },
   activeSubTab: {
     backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
   },
   subTabText: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#666',
   },
   activeSubTabText: {
     color: '#333',
-    fontWeight: '600',
   },
-  // Duplicate styles removed
-  searchContainer: {
+  searchSection: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     backgroundColor: '#fff',
@@ -819,45 +870,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   searchInput: {
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
+    color: '#333',
   },
   tagsContainer: {
     backgroundColor: '#fff',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    maxHeight: 60,
-    marginTop: 0,
-  },
-  tagsContent: {
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    gap: 8,
   },
   tagChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#ddd',
+    marginLeft: 8,
   },
   tagChipActive: {
     backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
   },
   tagText: {
     fontSize: 14,
+    fontWeight: '600',
     color: '#666',
-    fontWeight: '500',
   },
   tagTextActive: {
-    color: '#fff',
+    color: '#333',
   },
   listContent: {
     paddingVertical: 8,
@@ -881,9 +925,30 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 8,
   },
+  placeholderImage: {
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   listItemInfo: {
     flex: 1,
     marginLeft: 12,
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  itemDescription: {
+    fontSize: 13,
+    color: '#999',
+    marginTop: 2,
+  },
+  itemPrice: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffd700',
+    marginTop: 4,
   },
   listItemControls: {
     marginLeft: 12,
@@ -891,100 +956,71 @@ const styles = StyleSheet.create({
   addButton: {
     padding: 4,
   },
-  itemCard: {
-    flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    margin: 8,
-    overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    maxWidth: '48%',
-  },
-  itemImage: {
-    width: '100%',
-    height: 120,
-  },
-  placeholderImage: {
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
+  quantityControl: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  itemInfo: {
-    padding: 12,
-  },
-  itemName: {
-    fontSize: 14,
+  quantityText: {
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 4,
+    minWidth: 40,
+    textAlign: 'center',
   },
-  itemDescription: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
+  emptyContainer: {
+    padding: 40,
+    alignItems: 'center',
   },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffd700',
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
   },
-  selectedBadge: {
-    fontSize: 12,
-    color: '#10b981',
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  selectedPanel: {
+  selectedSummary: {
     backgroundColor: '#fff',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    paddingVertical: 12,
   },
-  selectedScroll: {
-    paddingHorizontal: 16,
+  selectedTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
   },
   selectedItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 12,
-    marginRight: 12,
-    gap: 8,
+    backgroundColor: '#f5f5f5',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 8,
+    gap: 6,
   },
-  selectedItemName: {
-    fontSize: 14,
-    fontWeight: '600',
+  selectedItemText: {
+    fontSize: 13,
     color: '#333',
-  },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  quantityText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    minWidth: 32,
-    textAlign: 'center',
   },
   bottomBar: {
     position: 'absolute',
-    bottom: 60,
+    bottom: 0,
     left: 0,
     right: 0,
     backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderTopWidth: 1,
     borderTopColor: '#eee',
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   totalSection: {
     flex: 1,
@@ -994,9 +1030,9 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   totalPrice: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#ffd700',
+    color: '#333',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -1005,44 +1041,26 @@ const styles = StyleSheet.create({
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
     paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 12,
     gap: 6,
   },
   saveButton: {
-    backgroundColor: '#ffd700',
+    backgroundColor: '#f5f5f5',
   },
   saveButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#333',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   cartButton: {
-    backgroundColor: '#333',
+    backgroundColor: '#ffd700',
   },
   cartButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  nameInputPrompt: {
-    position: 'absolute',
-    bottom: 140,
-    left: 16,
-    right: 16,
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#ffd700',
-    borderStyle: 'dashed',
-  },
-  nameInputPromptText: {
     fontSize: 14,
-    color: '#ffd700',
     fontWeight: '600',
-    textAlign: 'center',
+    color: '#333',
   },
   modal: {
     justifyContent: 'center',
@@ -1055,6 +1073,7 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '90%',
     maxWidth: 400,
+    maxHeight: '80%',
   },
   nameModalTitle: {
     fontSize: 18,
@@ -1069,8 +1088,46 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 16,
     backgroundColor: '#f9f9f9',
+  },
+  tagsLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+    marginBottom: 8,
+  },
+  tagsScrollView: {
+    maxHeight: 200,
+    marginBottom: 16,
+  },
+  tagsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tagSelectChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    gap: 6,
+  },
+  tagSelectChipActive: {
+    backgroundColor: '#fff8dc',
+    borderColor: '#ffd700',
+  },
+  tagSelectText: {
+    fontSize: 13,
+    color: '#666',
+  },
+  tagSelectTextActive: {
+    color: '#333',
+    fontWeight: '600',
   },
   nameModalButtons: {
     flexDirection: 'row',
