@@ -1316,6 +1316,40 @@ export default function DIYScreen() {
         </View>
       </Modal>
 
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isVisible={showDeleteConfirmModal}
+        onBackdropPress={() => setShowDeleteConfirmModal(false)}
+        style={styles.modal}
+      >
+        <View style={styles.deleteConfirmContent}>
+          <Ionicons name="warning" size={60} color="#ef4444" />
+          <Text style={styles.deleteConfirmTitle}>Delete Item?</Text>
+          <Text style={styles.deleteConfirmMessage}>
+            This action cannot be undone. Are you sure you want to delete this {myDiySubTab === 'my-meals' ? 'meal' : 'combo'}?
+          </Text>
+          <View style={styles.deleteConfirmActions}>
+            <TouchableOpacity
+              style={styles.cancelDeleteButton}
+              onPress={() => setShowDeleteConfirmModal(false)}
+            >
+              <Text style={styles.cancelDeleteButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.confirmDeleteButton}
+              onPress={() => {
+                setShowDeleteConfirmModal(false);
+                if (itemToDelete) {
+                  handleDeleteMyDiyItem(itemToDelete);
+                }
+              }}
+            >
+              <Text style={styles.confirmDeleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       </SafeAreaView>
 
       {/* Floating View Button - Only show in DIY Meals and DIY Combos, not My DIY */}
