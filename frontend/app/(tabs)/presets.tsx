@@ -325,14 +325,23 @@ export default function PresetsScreen() {
             {((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
               (activeTab === 'combos' && combosSubTab === 'my-combos')) && (
               <TouchableOpacity
+                style={styles.deleteButton}
                 onPress={(e) => {
+                  console.log('DELETE BUTTON CLICKED!', item._id, item.name);
                   e.stopPropagation();
                   Alert.alert(
                     'Delete Item',
                     'Are you sure you want to delete this saved item?',
                     [
-                      { text: 'Cancel', style: 'cancel' },
-                      { text: 'Delete', style: 'destructive', onPress: () => deleteSavedItem(item._id) },
+                      { text: 'Cancel', style: 'cancel', onPress: () => console.log('Delete cancelled') },
+                      { 
+                        text: 'Delete', 
+                        style: 'destructive', 
+                        onPress: () => {
+                          console.log('Delete confirmed, calling deleteSavedItem');
+                          deleteSavedItem(item._id);
+                        }
+                      },
                     ]
                   );
                 }}
