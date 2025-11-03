@@ -156,7 +156,7 @@ export default function DIYScreen() {
   };
 
   const filterIngredients = () => {
-    let filtered = ingredients;
+    let filtered = [...ingredients];
 
     if (searchQuery) {
       filtered = filtered.filter(ing =>
@@ -175,8 +175,8 @@ export default function DIYScreen() {
   };
 
   const filterMeals = () => {
-    // Combine all meals and my meals for combos (no sub-tabs)
-    let meals = [...allMeals, ...myMeals];
+    // For DIY Combos, show only admin meals (allMeals)
+    let meals = [...allMeals];
 
     if (searchQuery) {
       meals = meals.filter(meal =>
@@ -192,6 +192,26 @@ export default function DIYScreen() {
     meals = meals.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
     setFilteredMeals(meals);
+  };
+
+  const filterMyDiyItems = () => {
+    // For My DIY tab, show user items based on sub-tab
+    let items = myDiySubTab === 'my-meals' ? myMeals : myCombos;
+
+    if (searchQuery) {
+      items = items.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (selectedTag) {
+      items = items.filter(item => item.tags?.includes(selectedTag));
+    }
+
+    // Sort alphabetically by name
+    items = items.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+    setFilteredMyDiyItems(items);
   };
 
   const toggleIngredient = (ingredientId: string, stepSize: number = 1) => {
