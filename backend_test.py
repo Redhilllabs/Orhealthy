@@ -400,54 +400,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-                        "unit": test_ingredient["unit"],
-                        "step_size": 1.0,
-                        "price": test_ingredient.get("calculated_price", 0)
-                    }
-                ],
-                "tags": ["test", "automated"],
-                "created_by": "admin"
-            }
-            
-            response = self.session.post(f"{BACKEND_URL}/api/recipes", json=meal_data)
-            if response.status_code == 200:
-                result = response.json()
-                meal_id = result.get("id")
-                self.log_test("Create Meal API", True, 
-                            f"Successfully created meal with ID: {meal_id}")
-                return meal_id
-            else:
-                self.log_test("Create Meal API", False, 
-                            f"Failed to create meal: {response.status_code} - {response.text}")
-                return None
-        except Exception as e:
-            self.log_test("Create Meal API", False, f"Error creating meal: {str(e)}")
-            return None
-    
-    def test_edit_meal(self, meal_id, ingredients):
-        """Test PUT /api/recipes/{id} endpoint (edit meal)"""
-        if not meal_id or not ingredients:
-            self.log_test("Edit Meal API", False, "No meal ID or ingredients available for editing")
-            return False
-            
-        try:
-            # Update meal data
-            updated_meal_data = {
-                "name": f"Updated Test Meal {int(time.time())}",
-                "description": "Updated test meal description",
-                "images": [],
-                "ingredients": [
-                    {
-                        "ingredient_id": ingredients[0]["_id"],
-                        "name": ingredients[0]["name"],
-                        "quantity": 3.0,  # Changed quantity
-                        "unit": ingredients[0]["unit"],
-                        "step_size": 2.0,  # Changed step size
-                        "price": ingredients[0].get("calculated_price", 0)
-                    }
-                ],
-                "tags": ["test", "updated"],
-                "created_by": "admin"
             }
             
             response = self.session.put(f"{BACKEND_URL}/api/recipes/{meal_id}", json=updated_meal_data)
