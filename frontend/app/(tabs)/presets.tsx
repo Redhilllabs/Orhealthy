@@ -58,6 +58,10 @@ export default function PresetsScreen() {
   const [activeTab, setActiveTab] = useState<'meals' | 'combos'>('meals');
   const [allMeals, setAllMeals] = useState<Meal[]>([]);
   const [allCombos, setAllCombos] = useState<Meal[]>([]);
+  const [myMeals, setMyMeals] = useState<Meal[]>([]);
+  const [myCombos, setMyCombos] = useState<Meal[]>([]);
+  const [mealsSubTab, setMealsSubTab] = useState<'all-meals' | 'my-meals'>('all-meals');
+  const [combosSubTab, setCombosSubTab] = useState<'all-combos' | 'my-combos'>('all-combos');
   const [filteredItems, setFilteredItems] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
