@@ -850,12 +850,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 12,
+    justifyContent: 'space-evenly',
   },
   subTab: {
+    flex: 1,
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#f5f5f5',
+    alignItems: 'center',
   },
   activeSubTab: {
     backgroundColor: '#ffd700',
