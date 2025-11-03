@@ -2628,6 +2628,94 @@
             }
         }
 
+        function updateComboMealSelect() {
+            const select = document.getElementById('comboMealSelect');
+            select.innerHTML = '<option value="">-- Select meal --</option>' +
+                allRecipes.map(meal => `<option value="${meal._id}">${meal.name} (₹${meal.calculated_price ? meal.calculated_price.toFixed(2) : '0.00'})</option>`).join('');
+        }
+
+        function addMealToCombo() {
+            const select = document.getElementById('comboMealSelect');
+            const mealId = select.value;
+            if (!mealId) return alert('Please select a meal');
+            
+            const meal = allRecipes.find(m => m._id === mealId);
+            if (!meal) return;
+            
+            if (selectedComboMeals.find(m => m.meal_id === mealId)) {
+                return alert('Meal already added');
+            }
+            
+            selectedComboMeals.push({
+                meal_id: mealId,
+                name: meal.name,
+                quantity: 1.0,
+                step_size: 0.5,
+                price: meal.calculated_price || 0
+            });
+            
+            renderComboMeals();
+            updateComboPrice();
+        }
+
+        function renderComboMeals() {
+            document.getElementById('comboMeals').innerHTML = selectedComboMeals.map((meal, idx) => `
+                <div class="ingredient-item">
+                    <span>${meal.name}</span>
+                    <input type="number" min="0.01" step="any" value="${meal.quantity}" 
+                           onchange="updateComboMealQuantity(${idx}, this.value)">
+                    <span>x</span>
+                    <span>₹${(meal.price * meal.quantity).toFixed(2)}</span>
+                    <button type="button" onclick="removeMealFromCombo(${idx})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateComboMealQuantity(index, quantity) {
+            selectedComboMeals[index].quantity = parseFloat(quantity);
+            renderComboMeals();
+            updateComboPrice();
+        }
+
+        function removeMealFromCombo(index) {
+            selectedComboMeals.splice(index, 1);
+            renderComboMeals();
+            updateComboPrice();
+        }
+
+        function updateComboPrice() {
+            const total = selectedComboMeals.reduce((sum, meal) => sum + (meal.price * meal.quantity), 0);
+            document.getElementById('comboPrice').value = total.toFixed(2);
+        }
+
+        function handleComboImages(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    comboImages.push(e.target.result);
+                    updateComboImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateComboImagePreview() {
+            const preview = document.getElementById('comboImagePreview');
+            preview.innerHTML = comboImages.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview">
+                    <button type="button" class="image-remove" onclick="removeComboImage(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeComboImage(index) {
+            comboImages.splice(index, 1);
+            updateComboImagePreview();
+        }
+
+
         function updateMealRecipeSelect() {
             const select = document.getElementById('mealRecipeSelect');
             select.innerHTML = '<option value="">-- Select recipe --</option>' +
