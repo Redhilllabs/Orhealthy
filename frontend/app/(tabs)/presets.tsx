@@ -71,6 +71,10 @@ export default function PresetsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
   const { user } = useAuth();
+  
+  // Delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAllData();
