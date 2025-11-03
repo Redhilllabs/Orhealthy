@@ -1046,15 +1046,16 @@ const styles = StyleSheet.create({
   },
   loadingOverlayContent: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
+    borderRadius: 16,
+    padding: 32,
     alignItems: 'center',
-    gap: 12,
+    minWidth: 200,
   },
   loadingOverlayText: {
+    marginTop: 16,
     fontSize: 16,
-    color: '#333',
     fontWeight: '600',
+    color: '#333',
   },
   alertModalContent: {
     backgroundColor: '#fff',
