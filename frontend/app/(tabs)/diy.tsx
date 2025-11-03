@@ -164,11 +164,15 @@ export default function DIYScreen() {
       filtered = filtered.filter(ing => ing.tags?.includes(selectedTag));
     }
 
+    // Sort alphabetically by name
+    filtered = filtered.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
     setFilteredIngredients(filtered);
   };
 
   const filterMeals = () => {
-    let meals = combosSubTab === 'all-meals' ? allMeals : myMeals;
+    // Combine all meals and my meals for combos (no sub-tabs)
+    let meals = [...allMeals, ...myMeals];
 
     if (searchQuery) {
       meals = meals.filter(meal =>
@@ -179,6 +183,9 @@ export default function DIYScreen() {
     if (selectedTag) {
       meals = meals.filter(meal => meal.tags?.includes(selectedTag));
     }
+
+    // Sort alphabetically by name
+    meals = meals.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 
     setFilteredMeals(meals);
   };
