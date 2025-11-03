@@ -117,7 +117,6 @@ export default function DIYScreen() {
     try {
       const response = await axios.get(`${API_URL}/ingredients`);
       setIngredients(response.data);
-      extractTags(response.data, []);
     } catch (error) {
       console.error('Error fetching ingredients:', error);
     } finally {
