@@ -92,11 +92,8 @@ export default function PresetsScreen() {
   useEffect(() => {
     let items: Meal[] = [];
     
-    if (activeTab === 'meals') {
-      items = mealsSubTab === 'all-meals' ? allMeals : myMeals;
-    } else {
-      items = combosSubTab === 'all-combos' ? allCombos : myCombos;
-    }
+    // Show only admin items (no user items)
+    items = activeTab === 'meals' ? allMeals : allCombos;
 
     // Apply search filter
     if (searchQuery) {
@@ -118,8 +115,15 @@ export default function PresetsScreen() {
       return nameA.localeCompare(nameB);
     });
 
+    // Extract tags from current items
+    const tags = new Set<string>();
+    items.forEach(item => {
+      item.tags?.forEach(tag => tags.add(tag));
+    });
+    setAllTags(Array.from(tags).sort());
+
     setFilteredItems(items);
-  }, [searchQuery, selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
+  }, [searchQuery, selectedTag, allMeals, allCombos, activeTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
