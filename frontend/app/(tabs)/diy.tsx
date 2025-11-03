@@ -1306,6 +1306,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    height: 60,
   },
   tagChip: {
     paddingHorizontal: 16,
