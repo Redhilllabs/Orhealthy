@@ -1806,106 +1806,95 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'center',
   },
-  editModalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 24,
-    maxHeight: '80%',
-    maxWidth: 500,
+  myDiyItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
-  editModalHeader: {
+  deleteIconButton: {
+    padding: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  ingredientRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  editModalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    flex: 1,
-  },
-  editModalBody: {
-    maxHeight: 400,
-  },
-  editModalLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  editModalItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  editModalItemName: {
-    fontSize: 14,
-    color: '#666',
+  ingredientInfo: {
     flex: 1,
   },
-  editModalItemQty: {
+  ingredientName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 4,
+  },
+  ingredientPrice: {
     fontSize: 14,
+    color: '#666',
+  },
+  quantityControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  quantity: {
+    fontSize: 16,
     fontWeight: '600',
     color: '#333',
+    minWidth: 40,
+    textAlign: 'center',
   },
-  editModalTags: {
+  addBackButton: {
+    padding: 4,
+  },
+  modalFooter: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
   },
-  editModalTag: {
-    backgroundColor: '#ffd700',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  editModalTagText: {
-    fontSize: 12,
-    color: '#333',
-  },
-  editModalPrice: {
+  modalFooterLabel: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 16,
-    textAlign: 'right',
   },
-  editModalFooter: {
+  modalFooterPrice: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffd700',
+  },
+  modalActions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 20,
+    paddingTop: 16,
   },
-  deleteButton: {
+  saveButton: {
     flex: 1,
-    backgroundColor: '#ef4444',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#4CAF50',
     paddingVertical: 14,
     borderRadius: 12,
-    gap: 8,
+    alignItems: 'center',
   },
-  deleteButtonText: {
+  saveButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  addToCartButton: {
+  modalAddToCartButton: {
     flex: 1,
     backgroundColor: '#ffd700',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: 14,
     borderRadius: 12,
-    gap: 8,
+    alignItems: 'center',
   },
-  addToCartButtonText: {
+  modalAddToCartButtonText: {
     color: '#333',
     fontSize: 16,
     fontWeight: '600',
