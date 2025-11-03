@@ -146,6 +146,21 @@ export default function DIYScreen() {
     }
   };
 
+  const fetchMyCombos = async () => {
+    if (!user) return;
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/meals?user_id=${user._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // Filter only user's non-preset combos for "My Combos"
+      const userCombos = response.data.filter((combo: any) => combo.created_by === user._id && combo.is_preset === false);
+      setMyCombos(userCombos);
+    } catch (error) {
+      console.error('Error fetching my combos:', error);
+    }
+  };
+
   const extractTags = (ingredients: Ingredient[], meals: Recipe[]) => {
     const tags = new Set<string>();
     ingredients.forEach(ing => {
