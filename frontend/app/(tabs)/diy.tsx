@@ -620,28 +620,6 @@ export default function DIYScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Sub-tabs for DIY Combos */}
-      {activeTab === 'diy-combos' && (
-        <View style={styles.subTabContainer}>
-          <TouchableOpacity
-            style={[styles.subTab, combosSubTab === 'all-meals' && styles.activeSubTab]}
-            onPress={() => setCombosSubTab('all-meals')}
-          >
-            <Text style={[styles.subTabText, combosSubTab === 'all-meals' && styles.activeSubTabText]}>
-              All Meals
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.subTab, combosSubTab === 'my-meals' && styles.activeSubTab]}
-            onPress={() => setCombosSubTab('my-meals')}
-          >
-            <Text style={[styles.subTabText, combosSubTab === 'my-meals' && styles.activeSubTabText]}>
-              My Meals
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
       {/* Search and Filter */}
       <View style={styles.searchSection}>
         <View style={styles.searchBar}>
