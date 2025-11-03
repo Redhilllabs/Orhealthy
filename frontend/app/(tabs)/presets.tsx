@@ -739,10 +739,9 @@ const styles = StyleSheet.create({
   },
   tagsContainer: {
     backgroundColor: '#fff',
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    maxHeight: 60,
-    marginTop: 0,
   },
   tagsContent: {
     paddingHorizontal: 12,
