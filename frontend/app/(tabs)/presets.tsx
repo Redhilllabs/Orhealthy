@@ -103,6 +103,13 @@ export default function PresetsScreen() {
       items = combosSubTab === 'all-combos' ? allCombos : myCombos;
     }
 
+    // Extract tags from current tab items BEFORE filtering
+    const tags = new Set<string>();
+    items.forEach(item => {
+      item.tags?.forEach(tag => tags.add(tag));
+    });
+    setAllTags(Array.from(tags).sort());
+
     // Apply search filter
     if (searchQuery) {
       items = items.filter(item => {
@@ -123,15 +130,14 @@ export default function PresetsScreen() {
       return nameA.localeCompare(nameB);
     });
 
-    // Extract tags from current items
-    const tags = new Set<string>();
-    items.forEach(item => {
-      item.tags?.forEach(tag => tags.add(tag));
-    });
-    setAllTags(Array.from(tags).sort());
-
     setFilteredItems(items);
   }, [searchQuery, selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
+
+  // Reset selected tag when switching tabs
+  useEffect(() => {
+    setSelectedTag(null);
+    setSearchQuery('');
+  }, [activeTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
