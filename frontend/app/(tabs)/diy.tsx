@@ -52,19 +52,23 @@ interface Recipe {
 }
 
 export default function DIYScreen() {
-  const [activeTab, setActiveTab] = useState<'diy-meals' | 'diy-combos'>('diy-meals');
-  const [combosSubTab, setCombosSubTab] = useState<'all-meals' | 'my-meals'>('all-meals');
+  const [activeTab, setActiveTab] = useState<'diy-meals' | 'diy-combos' | 'my-diy'>('diy-meals');
+  const [myDiySubTab, setMyDiySubTab] = useState<'my-meals' | 'my-combos'>('my-meals');
   
   // DIY Meals tab state (from ingredients)
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [filteredIngredients, setFilteredIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
   
-  // DIY Combos tab state (from meals) - Combined selections from both tabs
+  // DIY Combos tab state (from admin meals only)
   const [allMeals, setAllMeals] = useState<Recipe[]>([]);
-  const [myMeals, setMyMeals] = useState<Recipe[]>([]);
   const [filteredMeals, setFilteredMeals] = useState<Recipe[]>([]);
   const [selectedMeals, setSelectedMeals] = useState<Map<string, number>>(new Map());
+  
+  // My DIY tab state (user-created items)
+  const [myMeals, setMyMeals] = useState<Recipe[]>([]);
+  const [myCombos, setMyCombos] = useState<Recipe[]>([]);
+  const [filteredMyDiyItems, setFilteredMyDiyItems] = useState<Recipe[]>([]);
   
   const [mealName, setMealName] = useState('');
   const [selectedSaveTags, setSelectedSaveTags] = useState<string[]>([]);
