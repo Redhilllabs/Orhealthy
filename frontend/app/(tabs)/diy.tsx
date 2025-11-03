@@ -602,6 +602,7 @@ export default function DIYScreen() {
 
   const renderRecipeItem = ({ item }: { item: Recipe }) => {
     const quantity = selectedMeals.get(item._id) || 0;
+    const price = item.calculated_price || item.total_price || item.price || 0;
     
     return (
       <View style={styles.listItemCard}>
@@ -614,7 +615,7 @@ export default function DIYScreen() {
         )}
         <View style={styles.listItemInfo}>
           <Text style={styles.itemName}>{item.name}</Text>
-          <Text style={styles.itemPrice}>₹{(item.calculated_price || 0).toFixed(2)}</Text>
+          <Text style={styles.itemPrice}>₹{price.toFixed(2)}</Text>
         </View>
         <View style={styles.listItemControls}>
           {quantity > 0 ? (
