@@ -1169,74 +1169,122 @@ export default function DIYScreen() {
         </View>
       </Modal>
       
-      {/* Edit My DIY Item Modal */}
+      {/* Edit My DIY Item Modal - Bottom Sheet */}
       <Modal
         isVisible={showEditModal}
         onBackdropPress={() => setShowEditModal(false)}
-        style={styles.modal}
+        style={styles.modalBottom}
       >
-        <View style={styles.editModalContent}>
-          <View style={styles.editModalHeader}>
-            <Text style={styles.editModalTitle}>{editingItem?.name}</Text>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{editingItem?.name}</Text>
             <TouchableOpacity onPress={() => setShowEditModal(false)}>
-              <Ionicons name="close" size={24} color="#333" />
+              <Ionicons name="close" size={28} color="#333" />
             </TouchableOpacity>
           </View>
           
-          <ScrollView style={styles.editModalBody}>
-            <Text style={styles.editModalLabel}>
-              {myDiySubTab === 'my-meals' ? 'Ingredients:' : 'Meals:'}
-            </Text>
+          <ScrollView style={styles.modalBody}>
             {myDiySubTab === 'my-meals' ? (
-              editingItem?.ingredients?.map((ing, idx) => (
-                <View key={idx} style={styles.editModalItem}>
-                  <Text style={styles.editModalItemName}>{ing.name || ing.ingredient_name}</Text>
-                  <Text style={styles.editModalItemQty}>
-                    {ing.quantity || ing.default_quantity} {ing.unit || ''}
-                  </Text>
+              editingCustomizations.map((ing, index) => (
+                <View key={index} style={styles.ingredientRow}>
+                  <View style={styles.ingredientInfo}>
+                    <Text style={styles.ingredientName}>{ing.name || ing.ingredient_name}</Text>
+                    <Text style={styles.ingredientPrice}>
+                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)}/{ing.unit || 'unit'}
+                    </Text>
+                  </View>
+                  <View style={styles.quantityControl}>
+                    {(ing.quantity || 0) > 0 ? (
+                      <>
+                        <TouchableOpacity
+                          onPress={() => {
+                            const stepSize = ing.step_size || 1;
+                            updateEditingCustomization(index, (ing.quantity || 0) - stepSize);
+                          }}
+                        >
+                          <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                        <Text style={styles.quantity}>{ing.quantity}</Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            const stepSize = ing.step_size || 1;
+                            updateEditingCustomization(index, (ing.quantity || 0) + stepSize);
+                          }}
+                        >
+                          <Ionicons name="add-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => {
+                          const stepSize = ing.step_size || 1;
+                          updateEditingCustomization(index, stepSize);
+                        }}
+                        style={styles.addBackButton}
+                      >
+                        <Ionicons name="add-circle" size={32} color="#ffd700" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               ))
             ) : (
-              editingItem?.meals?.map((meal, idx) => (
-                <View key={idx} style={styles.editModalItem}>
-                  <Text style={styles.editModalItemName}>{meal.name}</Text>
-                  <Text style={styles.editModalItemQty}>x{meal.quantity || 1}</Text>
+              editingCustomizations.map((meal, index) => (
+                <View key={index} style={styles.ingredientRow}>
+                  <View style={styles.ingredientInfo}>
+                    <Text style={styles.ingredientName}>{meal.name}</Text>
+                    <Text style={styles.ingredientPrice}>
+                      ₹{(meal.price || 0).toFixed(2)}/meal
+                    </Text>
+                  </View>
+                  <View style={styles.quantityControl}>
+                    {(meal.quantity || 0) > 0 ? (
+                      <>
+                        <TouchableOpacity
+                          onPress={() => updateEditingCustomization(index, (meal.quantity || 0) - 1)}
+                        >
+                          <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                        <Text style={styles.quantity}>{meal.quantity}</Text>
+                        <TouchableOpacity
+                          onPress={() => updateEditingCustomization(index, (meal.quantity || 0) + 1)}
+                        >
+                          <Ionicons name="add-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <TouchableOpacity
+                        onPress={() => updateEditingCustomization(index, 1)}
+                        style={styles.addBackButton}
+                      >
+                        <Ionicons name="add-circle" size={32} color="#ffd700" />
+                      </TouchableOpacity>
+                    )}
+                  </View>
                 </View>
               ))
             )}
-            
-            {editingItem?.tags && editingItem.tags.length > 0 && (
-              <>
-                <Text style={styles.editModalLabel}>Tags:</Text>
-                <View style={styles.editModalTags}>
-                  {editingItem.tags.map((tag, idx) => (
-                    <View key={idx} style={styles.editModalTag}>
-                      <Text style={styles.editModalTagText}>{tag}</Text>
-                    </View>
-                  ))}
-                </View>
-              </>
-            )}
-            
-            <Text style={styles.editModalPrice}>
-              Total: ₹{(editingItem?.calculated_price || editingItem?.total_price || editingItem?.price || 0).toFixed(2)}
-            </Text>
           </ScrollView>
           
-          <View style={styles.editModalFooter}>
+          <View style={styles.modalFooter}>
+            <Text style={styles.modalFooterLabel}>Total:</Text>
+            <Text style={styles.modalFooterPrice}>
+              ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || 0) * (item.quantity || 0)), 0).toFixed(2)}
+            </Text>
+          </View>
+          
+          <View style={styles.modalActions}>
             <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={handleDeleteMyDiyItem}
+              style={styles.saveButton}
+              onPress={handleSaveMyDiyItem}
             >
-              <Ionicons name="trash" size={20} color="#fff" />
-              <Text style={styles.deleteButtonText}>Delete</Text>
+              <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.addToCartButton}
+              style={styles.modalAddToCartButton}
               onPress={handleAddEditedItemToCart}
             >
-              <Ionicons name="cart" size={20} color="#fff" />
-              <Text style={styles.addToCartButtonText}>Add to Cart</Text>
+              <Text style={styles.modalAddToCartButtonText}>Add to Cart</Text>
             </TouchableOpacity>
           </View>
         </View>
