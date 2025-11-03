@@ -60,7 +60,7 @@ export default function DIYScreen() {
   const [filteredIngredients, setFilteredIngredients] = useState<Ingredient[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<Map<string, number>>(new Map());
   
-  // DIY Combos tab state (from meals)
+  // DIY Combos tab state (from meals) - Combined selections from both tabs
   const [allMeals, setAllMeals] = useState<Recipe[]>([]);
   const [myMeals, setMyMeals] = useState<Recipe[]>([]);
   const [filteredMeals, setFilteredMeals] = useState<Recipe[]>([]);
@@ -77,6 +77,7 @@ export default function DIYScreen() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [globalLoading, setGlobalLoading] = useState(false);
   const { addToCart } = useCart();
   const { user } = useAuth();
 
@@ -133,7 +134,6 @@ export default function DIYScreen() {
       });
       // Filter only user's non-preset meals for "My Meals"
       const userMeals = response.data.filter((meal: any) => meal.created_by === user._id && meal.is_preset === false);
-      console.log('My meals from /recipes:', userMeals);
       setMyMeals(userMeals);
     } catch (error) {
       console.error('Error fetching my meals:', error);
@@ -249,7 +249,11 @@ export default function DIYScreen() {
     } else {
       let total = 0;
       selectedMeals.forEach((qty, id) => {
-        const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+        // Search in both allMeals and myMeals
+        let recipe = allMeals.find(r => r._id === id);
+        if (!recipe) {
+          recipe = myMeals.find(r => r._id === id);
+        }
         if (recipe) {
           total += (recipe.calculated_price || 0) * qty;
         }
@@ -272,7 +276,10 @@ export default function DIYScreen() {
     } else {
       const images: string[] = [];
       selectedMeals.forEach((qty, id) => {
-        const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+        let recipe = allMeals.find(r => r._id === id);
+        if (!recipe) {
+          recipe = myMeals.find(r => r._id === id);
+        }
         if (recipe?.images?.[0]) {
           images.push(recipe.images[0]);
         }
@@ -283,26 +290,31 @@ export default function DIYScreen() {
 
   const saveMeal = async () => {
     if (!user) {
-      Alert.alert('Error', 'Please login to save meals');
+      setSuccessMessage('Please login to save meals');
+      setShowSuccessModal(true);
       return;
     }
 
     if (!mealName.trim()) {
-      Alert.alert('Error', 'Please enter a meal name');
+      setSuccessMessage('Please enter a meal name');
+      setShowSuccessModal(true);
       return;
     }
 
     if (activeTab === 'diy-meals' && selectedIngredients.size === 0) {
-      Alert.alert('Error', 'Please select at least one ingredient');
+      setSuccessMessage('Please select at least one ingredient');
+      setShowSuccessModal(true);
       return;
     }
 
     if (activeTab !== 'diy-meals' && selectedMeals.size === 0) {
-      Alert.alert('Error', 'Please select at least one meal');
+      setSuccessMessage('Please select at least one meal');
+      setShowSuccessModal(true);
       return;
     }
 
     try {
+      setGlobalLoading(true);
       setSaving(true);
       const token = await storage.getItemAsync('session_token');
       const compositeImages = generateCompositeImage();
@@ -337,7 +349,10 @@ export default function DIYScreen() {
       } else {
         // Creating combo from meals -> POST to /meals
         const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
-          const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+          let recipe = allMeals.find(r => r._id === id);
+          if (!recipe) {
+            recipe = myMeals.find(r => r._id === id);
+          }
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -386,21 +401,25 @@ export default function DIYScreen() {
       setShowSuccessModal(true);
     } finally {
       setSaving(false);
+      setGlobalLoading(false);
     }
   };
 
   const addToCartDirect = async () => {
     if (activeTab === 'diy-meals' && selectedIngredients.size === 0) {
-      Alert.alert('Error', 'Please select at least one ingredient');
+      setSuccessMessage('Please select at least one ingredient');
+      setShowSuccessModal(true);
       return;
     }
 
     if (activeTab !== 'diy-meals' && selectedMeals.size === 0) {
-      Alert.alert('Error', 'Please select at least one meal');
+      setSuccessMessage('Please select at least one meal');
+      setShowSuccessModal(true);
       return;
     }
 
     try {
+      setGlobalLoading(true);
       const compositeImages = generateCompositeImage();
       let cartData: any;
       
@@ -428,7 +447,10 @@ export default function DIYScreen() {
         };
       } else {
         const mealsData = Array.from(selectedMeals.entries()).map(([id, qty]) => {
-          const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+          let recipe = allMeals.find(r => r._id === id);
+          if (!recipe) {
+            recipe = myMeals.find(r => r._id === id);
+          }
           return {
             recipe_id: id,
             name: recipe?.name || '',
@@ -441,7 +463,7 @@ export default function DIYScreen() {
         cartData = {
           meal_id: 'diy-combo-' + Date.now(),
           meal_name: 'DIY Combo',
-          description: mealsData.map(m => `${m.name} (x${m.quantity})`).join(', '),
+          description: mealsData.map(m => `${m.name} (${m.quantity})`).join(', '),
           images: compositeImages,
           meals: mealsData,
           quantity: 1,
@@ -463,6 +485,8 @@ export default function DIYScreen() {
       console.error('Error adding to cart:', error);
       setSuccessMessage('Failed to add to cart. Please try again.');
       setShowSuccessModal(true);
+    } finally {
+      setGlobalLoading(false);
     }
   };
 
@@ -768,12 +792,13 @@ export default function DIYScreen() {
                   const ingredient = ingredients.find(i => i._id === id);
                   if (!ingredient) return null;
                   const stepSize = ingredient.step_size || 1;
+                  const pricePerUnit = ingredient.calculated_price || ingredient.price_per_unit || 0;
                   return (
                     <View key={id} style={styles.selectedItemRow}>
                       <View style={styles.selectedItemInfo}>
                         <Text style={styles.selectedItemName}>{ingredient.name}</Text>
                         <Text style={styles.selectedItemPrice}>
-                          ₹{((ingredient.calculated_price || ingredient.price_per_unit || 0) * qty).toFixed(2)}
+                          ₹{pricePerUnit.toFixed(2)}/{ingredient.unit} • Total: ₹{(pricePerUnit * qty).toFixed(2)}
                         </Text>
                       </View>
                       <View style={styles.selectedItemControls}>
@@ -789,21 +814,25 @@ export default function DIYScreen() {
                   );
                 })
               : Array.from(selectedMeals.entries()).map(([id, qty]) => {
-                  const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+                  let recipe = allMeals.find(r => r._id === id);
+                  if (!recipe) {
+                    recipe = myMeals.find(r => r._id === id);
+                  }
                   if (!recipe) return null;
+                  const pricePerMeal = recipe.calculated_price || 0;
                   return (
                     <View key={id} style={styles.selectedItemRow}>
                       <View style={styles.selectedItemInfo}>
                         <Text style={styles.selectedItemName}>{recipe.name}</Text>
                         <Text style={styles.selectedItemPrice}>
-                          ₹{((recipe.calculated_price || 0) * qty).toFixed(2)}
+                          ₹{pricePerMeal.toFixed(2)}/meal • Total: ₹{(pricePerMeal * qty).toFixed(2)}
                         </Text>
                       </View>
                       <View style={styles.selectedItemControls}>
                         <TouchableOpacity onPress={() => updateMealQuantity(id, qty - 1)}>
                           <Ionicons name="remove-circle" size={28} color="#ffd700" />
                         </TouchableOpacity>
-                        <Text style={styles.selectedItemQty}>x{qty}</Text>
+                        <Text style={styles.selectedItemQty}>{qty}</Text>
                         <TouchableOpacity onPress={() => updateMealQuantity(id, qty + 1)}>
                           <Ionicons name="add-circle" size={28} color="#ffd700" />
                         </TouchableOpacity>
@@ -885,6 +914,16 @@ export default function DIYScreen() {
             <Ionicons name="chevron-up" size={20} color="#333" />
           </View>
         </TouchableOpacity>
+      )}
+      
+      {/* Global Loading Overlay */}
+      {globalLoading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingOverlayContent}>
+            <ActivityIndicator size="large" color="#ffd700" />
+            <Text style={styles.loadingOverlayText}>Processing...</Text>
+          </View>
+        </View>
       )}
     </View>
   );
@@ -1252,9 +1291,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   selectedItemPrice: {
-    fontSize: 14,
-    color: '#ffd700',
-    fontWeight: '600',
+    fontSize: 13,
+    color: '#666',
+    fontWeight: '500',
   },
   selectedItemControls: {
     flexDirection: 'row',
@@ -1347,5 +1386,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     textAlign: 'center',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+  },
+  loadingOverlayContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  loadingOverlayText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   },
 });
