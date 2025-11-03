@@ -14,7 +14,7 @@ import re
 from datetime import datetime
 
 # Configuration
-BACKEND_URL = "https://mealhierarchy.preview.emergentagent.com"
+BACKEND_URL = "https://orhealthy-portal.preview.emergentagent.com"
 ADMIN_EMAIL = "admin@admin.com"
 ADMIN_PASSWORD = "admin"
 
