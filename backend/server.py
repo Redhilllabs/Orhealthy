@@ -1386,9 +1386,20 @@ async def delete_source_ingredient(source_id: str):
     return {"message": "Source ingredient deleted"}
 
 @api_router.get("/recipes")
-async def get_recipes():
-    """Get all preset recipes (formerly meals) with calculated prices"""
-    recipes = await db.meals.find({"is_preset": True}).to_list(100)
+async def get_recipes(user_id: str = None):
+    """Get all recipes with calculated prices. If user_id provided, includes user's non-preset recipes."""
+    if user_id:
+        # Return both preset recipes AND user's non-preset recipes
+        recipes = await db.meals.find({
+            "$or": [
+                {"is_preset": True},
+                {"created_by": user_id, "is_preset": False}
+            ]
+        }).to_list(100)
+    else:
+        # Only preset recipes
+        recipes = await db.meals.find({"is_preset": True}).to_list(100)
+    
     for recipe in recipes:
         recipe["_id"] = str(recipe["_id"])
         # Calculate price from ingredients
