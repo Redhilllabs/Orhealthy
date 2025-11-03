@@ -2012,6 +2012,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  bottomSheetTotalLabel: {
+    fontSize: 16,
+    color: '#666',
+  },
+  bottomSheetTotal: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
   modalBottom: {
     justifyContent: 'flex-end',
     margin: 0,
