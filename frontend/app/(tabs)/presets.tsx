@@ -762,6 +762,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
+    outlineStyle: 'none',
   },
   tagsContainer: {
     backgroundColor: '#fff',
