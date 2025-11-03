@@ -166,9 +166,9 @@ export default function PresetsScreen() {
       
       // Determine which endpoint to use based on active tab
       let endpoint = '';
-      if (activeTab === 'meals' && subTab === 'my-meals') {
+      if (activeTab === 'meals' && mealsSubTab === 'my-meals') {
         endpoint = `${API_URL}/recipes/${itemId}`;
-      } else if (activeTab === 'combos' && subTab === 'my-combos') {
+      } else if (activeTab === 'combos' && combosSubTab === 'my-combos') {
         endpoint = `${API_URL}/meals/${itemId}`;
       } else {
         Alert.alert('Error', 'Cannot delete preset items');
@@ -180,7 +180,7 @@ export default function PresetsScreen() {
       });
       Alert.alert('Success', 'Item deleted successfully');
       
-      // Refresh the appropriate list based on active tab and sub-tab
+      // Refresh the appropriate list based on active tab
       if (activeTab === 'meals') {
         fetchMyMeals();
       } else {
