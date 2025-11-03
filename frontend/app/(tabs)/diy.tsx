@@ -130,7 +130,6 @@ export default function DIYScreen() {
       // Filter only admin preset meals for "All Meals"
       const presetMeals = response.data.filter((meal: any) => meal.is_preset === true);
       setAllMeals(presetMeals);
-      extractTags([], response.data);
     } catch (error) {
       console.error('Error fetching all meals:', error);
     }
