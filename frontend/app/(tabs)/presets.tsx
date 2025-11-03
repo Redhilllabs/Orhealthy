@@ -421,7 +421,7 @@ export default function PresetsScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search items..."
+            placeholder={activeTab === 'meals' ? 'Search meals...' : 'Search combos...'}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
