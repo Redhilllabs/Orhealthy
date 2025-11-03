@@ -249,6 +249,7 @@ export default function PresetsScreen() {
     if (!selectedMeal) return;
 
     try {
+      setGlobalLoading(true);
       const totalPrice = activeTab.startsWith('my-')
         ? selectedMeal.total_price || selectedMeal.calculated_price || 0
         : customizations.reduce(
@@ -287,6 +288,8 @@ export default function PresetsScreen() {
       } else {
         Alert.alert('Error', 'Failed to add to cart');
       }
+    } finally {
+      setGlobalLoading(false);
     }
   };
 
