@@ -397,45 +397,42 @@ export default function PresetsScreen() {
       </View>
 
       {/* Sub-tabs */}
-      {activeTab === 'meals' ? (
-        <View style={styles.subTabContainer}>
-          <TouchableOpacity
-            style={[styles.subTab, mealsSubTab === 'all-meals' && styles.activeSubTab]}
-            onPress={() => setMealsSubTab('all-meals')}
-          >
-            <Text style={[styles.subTabText, mealsSubTab === 'all-meals' && styles.activeSubTabText]}>
-              All Meals
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.subTab, mealsSubTab === 'my-meals' && styles.activeSubTab]}
-            onPress={() => setMealsSubTab('my-meals')}
-          >
-            <Text style={[styles.subTabText, mealsSubTab === 'my-meals' && styles.activeSubTabText]}>
-              My Meals
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <View style={styles.subTabContainer}>
-          <TouchableOpacity
-            style={[styles.subTab, combosSubTab === 'all-combos' && styles.activeSubTab]}
-            onPress={() => setCombosSubTab('all-combos')}
-          >
-            <Text style={[styles.subTabText, combosSubTab === 'all-combos' && styles.activeSubTabText]}>
-              All Combos
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.subTab, combosSubTab === 'my-combos' && styles.activeSubTab]}
-            onPress={() => setCombosSubTab('my-combos')}
-          >
-            <Text style={[styles.subTabText, combosSubTab === 'my-combos' && styles.activeSubTabText]}>
-              My Combos
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <View style={styles.subTabContainer}>
+        <TouchableOpacity
+          style={[styles.subTab, 
+            (activeTab === 'meals' && mealsSubTab === 'all-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'all-combos') 
+            ? styles.activeSubTab : null]}
+          onPress={() => {
+            if (activeTab === 'meals') setMealsSubTab('all-meals');
+            else setCombosSubTab('all-combos');
+          }}
+        >
+          <Text style={[styles.subTabText, 
+            ((activeTab === 'meals' && mealsSubTab === 'all-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'all-combos'))
+            ? styles.activeSubTabText : null]}>
+            {activeTab === 'meals' ? 'All Meals' : 'All Combos'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.subTab, 
+            (activeTab === 'meals' && mealsSubTab === 'my-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'my-combos')
+            ? styles.activeSubTab : null]}
+          onPress={() => {
+            if (activeTab === 'meals') setMealsSubTab('my-meals');
+            else setCombosSubTab('my-combos');
+          }}
+        >
+          <Text style={[styles.subTabText, 
+            ((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
+            (activeTab === 'combos' && combosSubTab === 'my-combos'))
+            ? styles.activeSubTabText : null]}>
+            {activeTab === 'meals' ? 'My Meals' : 'My Combos'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Search */}
       <View style={styles.searchContainer}>
