@@ -744,6 +744,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffd700',
   },
+  deleteButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#fee',
+    zIndex: 10,
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
