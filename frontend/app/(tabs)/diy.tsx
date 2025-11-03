@@ -369,7 +369,7 @@ export default function DIYScreen() {
       
       // Refresh data
       if (myDiySubTab === 'my-meals') {
-        fetchMyRecipes();
+        fetchMyMeals();
       } else {
         fetchMyCombos();
       }
@@ -399,7 +399,7 @@ export default function DIYScreen() {
       
       // Refresh data
       if (myDiySubTab === 'my-meals') {
-        fetchMyRecipes();
+        fetchMyMeals();
       } else {
         fetchMyCombos();
       }
