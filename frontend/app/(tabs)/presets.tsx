@@ -527,25 +527,39 @@ export default function PresetsScreen() {
                   )}
                 </View>
                 <View style={styles.quantityControl}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
-                      updateCustomization(index, Math.max(0, ing.quantity - stepSize));
-                    }}
-                  >
-                    <Ionicons name="remove-circle" size={28} color="#ffd700" />
-                  </TouchableOpacity>
-                  <Text style={styles.quantity}>
-                    {activeTab === 'combos' ? `${ing.quantity || 1}` : `${ing.quantity || ing.default_quantity || 1}`}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
-                      updateCustomization(index, ing.quantity + stepSize);
-                    }}
-                  >
-                    <Ionicons name="add-circle" size={28} color="#ffd700" />
-                  </TouchableOpacity>
+                  {(ing.quantity || 0) > 0 ? (
+                    <>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
+                          updateCustomization(index, Math.max(0, ing.quantity - stepSize));
+                        }}
+                      >
+                        <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                      </TouchableOpacity>
+                      <Text style={styles.quantity}>
+                        {activeTab === 'combos' ? `${ing.quantity || 1}` : `${ing.quantity || ing.default_quantity || 1}`}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
+                          updateCustomization(index, ing.quantity + stepSize);
+                        }}
+                      >
+                        <Ionicons name="add-circle" size={28} color="#ffd700" />
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => {
+                        const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
+                        updateCustomization(index, stepSize);
+                      }}
+                      style={styles.addBackButton}
+                    >
+                      <Ionicons name="add-circle" size={32} color="#ffd700" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               </View>
             ))}
