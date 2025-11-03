@@ -34,7 +34,7 @@ interface Meal {
   calculated_price?: number;
   total_price?: number;
   tags?: string[];
-  ingredients: Array<{
+  ingredients?: Array<{
     ingredient_id?: string;
     ingredient_name?: string;
     name?: string;
@@ -43,6 +43,13 @@ interface Meal {
     default_quantity?: number;
     quantity?: number;
     unit?: string;
+    step_size?: number;
+  }>;
+  recipes?: Array<{
+    recipe_id?: string;
+    name?: string;
+    price?: number;
+    quantity?: number;
     step_size?: number;
   }>;
 }
