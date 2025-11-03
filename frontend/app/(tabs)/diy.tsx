@@ -384,12 +384,13 @@ export default function DIYScreen() {
 
   const handleDeleteMyDiyItem = async (itemId: string) => {
     
+  const handleDeleteMyDiyItem = async (itemId: string) => {
     try {
       setGlobalLoading(true);
       const token = await storage.getItemAsync('session_token');
       const endpoint = myDiySubTab === 'my-meals' 
-        ? `${API_URL}/recipes/${editingItem._id}`
-        : `${API_URL}/meals/${editingItem._id}`;
+        ? `${API_URL}/recipes/${itemId}`
+        : `${API_URL}/meals/${itemId}`;
       
       await axios.delete(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
@@ -397,8 +398,6 @@ export default function DIYScreen() {
       
       setSuccessMessage('Item deleted successfully');
       setShowSuccessModal(true);
-      setShowEditModal(false);
-      setEditingItem(null);
       
       // Refresh data
       if (myDiySubTab === 'my-meals') {
