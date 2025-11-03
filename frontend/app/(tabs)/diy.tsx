@@ -1136,6 +1136,80 @@ export default function DIYScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
+      
+      {/* Edit My DIY Item Modal */}
+      <Modal
+        isVisible={showEditModal}
+        onBackdropPress={() => setShowEditModal(false)}
+        style={styles.modal}
+      >
+        <View style={styles.editModalContent}>
+          <View style={styles.editModalHeader}>
+            <Text style={styles.editModalTitle}>{editingItem?.name}</Text>
+            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.editModalBody}>
+            <Text style={styles.editModalLabel}>
+              {myDiySubTab === 'my-meals' ? 'Ingredients:' : 'Meals:'}
+            </Text>
+            {myDiySubTab === 'my-meals' ? (
+              editingItem?.ingredients?.map((ing, idx) => (
+                <View key={idx} style={styles.editModalItem}>
+                  <Text style={styles.editModalItemName}>{ing.name || ing.ingredient_name}</Text>
+                  <Text style={styles.editModalItemQty}>
+                    {ing.quantity || ing.default_quantity} {ing.unit || ''}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              editingItem?.meals?.map((meal, idx) => (
+                <View key={idx} style={styles.editModalItem}>
+                  <Text style={styles.editModalItemName}>{meal.name}</Text>
+                  <Text style={styles.editModalItemQty}>x{meal.quantity || 1}</Text>
+                </View>
+              ))
+            )}
+            
+            {editingItem?.tags && editingItem.tags.length > 0 && (
+              <>
+                <Text style={styles.editModalLabel}>Tags:</Text>
+                <View style={styles.editModalTags}>
+                  {editingItem.tags.map((tag, idx) => (
+                    <View key={idx} style={styles.editModalTag}>
+                      <Text style={styles.editModalTagText}>{tag}</Text>
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
+            
+            <Text style={styles.editModalPrice}>
+              Total: ₹{(editingItem?.calculated_price || editingItem?.total_price || editingItem?.price || 0).toFixed(2)}
+            </Text>
+          </ScrollView>
+          
+          <View style={styles.editModalFooter}>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={handleDeleteMyDiyItem}
+            >
+              <Ionicons name="trash" size={20} color="#fff" />
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.addToCartButton}
+              onPress={handleAddEditedItemToCart}
+            >
+              <Ionicons name="cart" size={20} color="#fff" />
+              <Text style={styles.addToCartButtonText}>Add to Cart</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       </SafeAreaView>
 
       {/* Floating View Button */}
