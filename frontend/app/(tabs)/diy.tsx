@@ -1195,123 +1195,111 @@ export default function DIYScreen() {
         </View>
       </Modal>
       
-      {/* Edit My DIY Item Modal - Bottom Sheet */}
+      {/* Edit My DIY Item Modal - Bottom Sheet with Same Style as DIY Selections */}
       <Modal
         isVisible={showEditModal}
         onBackdropPress={() => setShowEditModal(false)}
-        style={styles.modalBottom}
+        onSwipeComplete={() => setShowEditModal(false)}
+        swipeDirection={['down']}
+        style={styles.bottomSheetModal}
       >
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{editingItem?.name}</Text>
-            <TouchableOpacity onPress={() => setShowEditModal(false)}>
-              <Ionicons name="close" size={28} color="#333" />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.bottomSheetContent}>
+          <View style={styles.bottomSheetHandle} />
+          <Text style={styles.bottomSheetTitle}>
+            {editingItem?.name}
+          </Text>
           
-          <ScrollView style={styles.modalBody}>
+          <ScrollView style={styles.selectedItemsList}>
             {myDiySubTab === 'my-meals' ? (
-              editingCustomizations.map((ing, index) => (
-                <View key={index} style={styles.ingredientRow}>
-                  <View style={styles.ingredientInfo}>
-                    <Text style={styles.ingredientName}>{ing.name || ing.ingredient_name}</Text>
-                    <Text style={styles.ingredientPrice}>
-                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)}/{ing.unit || 'unit'}
-                    </Text>
-                  </View>
-                  <View style={styles.quantityControl}>
-                    {(ing.quantity || 0) > 0 ? (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => {
-                            const stepSize = ing.step_size || 1;
-                            updateEditingCustomization(index, (ing.quantity || 0) - stepSize);
-                          }}
-                        >
-                          <Ionicons name="remove-circle" size={28} color="#ffd700" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantity}>{ing.quantity}</Text>
-                        <TouchableOpacity
-                          onPress={() => {
-                            const stepSize = ing.step_size || 1;
-                            updateEditingCustomization(index, (ing.quantity || 0) + stepSize);
-                          }}
-                        >
-                          <Ionicons name="add-circle" size={28} color="#ffd700" />
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <TouchableOpacity
-                        onPress={() => {
-                          const stepSize = ing.step_size || 1;
-                          updateEditingCustomization(index, stepSize);
-                        }}
-                        style={styles.addBackButton}
-                      >
-                        <Ionicons name="add-circle" size={32} color="#ffd700" />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              ))
+              <>
+                {editingCustomizations.map((ing, index) => {
+                  const pricePerUnit = ing.price || ing.price_per_unit || 0;
+                  const quantity = ing.quantity || 0;
+                  const stepSize = ing.step_size || 1;
+                  return (
+                    <View key={index} style={styles.selectedItemRow}>
+                      <View style={styles.selectedItemInfo}>
+                        <Text style={styles.selectedItemName}>{ing.name || ing.ingredient_name}</Text>
+                        <Text style={styles.selectedItemPrice}>
+                          ₹{pricePerUnit.toFixed(2)}/{ing.unit || 'unit'} • Total: ₹{(pricePerUnit * quantity).toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={styles.selectedItemControls}>
+                        {quantity > 0 ? (
+                          <>
+                            <TouchableOpacity onPress={() => updateEditingCustomization(index, quantity - stepSize)}>
+                              <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                            </TouchableOpacity>
+                            <Text style={styles.selectedItemQty}>{quantity}{ing.unit || ''}</Text>
+                            <TouchableOpacity onPress={() => updateEditingCustomization(index, quantity + stepSize)}>
+                              <Ionicons name="add-circle" size={28} color="#ffd700" />
+                            </TouchableOpacity>
+                          </>
+                        ) : (
+                          <TouchableOpacity onPress={() => updateEditingCustomization(index, stepSize)}>
+                            <Ionicons name="add-circle" size={32} color="#ffd700" />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </>
             ) : (
-              editingCustomizations.map((meal, index) => (
-                <View key={index} style={styles.ingredientRow}>
-                  <View style={styles.ingredientInfo}>
-                    <Text style={styles.ingredientName}>{meal.name}</Text>
-                    <Text style={styles.ingredientPrice}>
-                      ₹{(meal.price || 0).toFixed(2)}/meal
-                    </Text>
-                  </View>
-                  <View style={styles.quantityControl}>
-                    {(meal.quantity || 0) > 0 ? (
-                      <>
-                        <TouchableOpacity
-                          onPress={() => updateEditingCustomization(index, (meal.quantity || 0) - 1)}
-                        >
-                          <Ionicons name="remove-circle" size={28} color="#ffd700" />
-                        </TouchableOpacity>
-                        <Text style={styles.quantity}>{meal.quantity}</Text>
-                        <TouchableOpacity
-                          onPress={() => updateEditingCustomization(index, (meal.quantity || 0) + 1)}
-                        >
-                          <Ionicons name="add-circle" size={28} color="#ffd700" />
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <TouchableOpacity
-                        onPress={() => updateEditingCustomization(index, 1)}
-                        style={styles.addBackButton}
-                      >
-                        <Ionicons name="add-circle" size={32} color="#ffd700" />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              ))
+              <>
+                {editingCustomizations.map((meal, index) => {
+                  const pricePerMeal = meal.price || meal.calculated_price || 0;
+                  const quantity = meal.quantity || 0;
+                  return (
+                    <View key={index} style={styles.selectedItemRow}>
+                      <View style={styles.selectedItemInfo}>
+                        <Text style={styles.selectedItemName}>{meal.name}</Text>
+                        <Text style={styles.selectedItemPrice}>
+                          ₹{pricePerMeal.toFixed(2)}/meal • Total: ₹{(pricePerMeal * quantity).toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={styles.selectedItemControls}>
+                        {quantity > 0 ? (
+                          <>
+                            <TouchableOpacity onPress={() => updateEditingCustomization(index, quantity - 1)}>
+                              <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                            </TouchableOpacity>
+                            <Text style={styles.selectedItemQty}>{quantity}</Text>
+                            <TouchableOpacity onPress={() => updateEditingCustomization(index, quantity + 1)}>
+                              <Ionicons name="add-circle" size={28} color="#ffd700" />
+                            </TouchableOpacity>
+                          </>
+                        ) : (
+                          <TouchableOpacity onPress={() => updateEditingCustomization(index, 1)}>
+                            <Ionicons name="add-circle" size={32} color="#ffd700" />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    </View>
+                  );
+                })}
+              </>
             )}
           </ScrollView>
           
-          <View style={styles.modalFooter}>
-            <Text style={styles.modalFooterLabel}>Total:</Text>
-            <Text style={styles.modalFooterPrice}>
-              ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || 0) * (item.quantity || 0)), 0).toFixed(2)}
+          <View style={styles.bottomSheetFooter}>
+            <Text style={styles.bottomSheetTotal}>
+              Total: ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || item.calculated_price || 0) * (item.quantity || 0)), 0).toFixed(2)}
             </Text>
-          </View>
-          
-          <View style={styles.modalActions}>
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={handleSaveMyDiyItem}
-            >
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalAddToCartButton}
-              onPress={handleAddEditedItemToCart}
-            >
-              <Text style={styles.modalAddToCartButtonText}>Add to Cart</Text>
-            </TouchableOpacity>
+            <View style={styles.bottomSheetActions}>
+              <TouchableOpacity
+                style={styles.bottomSheetSaveButton}
+                onPress={handleSaveMyDiyItem}
+              >
+                <Text style={styles.bottomSheetSaveButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.bottomSheetAddButton}
+                onPress={handleAddEditedItemToCart}
+              >
+                <Text style={styles.bottomSheetAddButtonText}>Add to Cart</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
