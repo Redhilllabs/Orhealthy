@@ -140,13 +140,25 @@ export default function PresetsScreen() {
   const fetchMyMeals = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
-      if (!token || !user) return;
+      if (!token || !user) {
+        console.log('fetchMyMeals: No token or user', { token: !!token, user: !!user });
+        return;
+      }
 
+      console.log('fetchMyMeals: Fetching from /api/recipes with user_id:', user._id);
       const response = await axios.get(`${API_URL}/recipes?user_id=${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('fetchMyMeals: Raw response:', response.data);
+      
       // Filter only user-created meals (not presets)
-      const userMeals = response.data.filter((meal: any) => meal.created_by === user._id && !meal.is_preset);
+      const userMeals = response.data.filter((meal: any) => {
+        const isUserCreated = meal.created_by === user._id;
+        const isNotPreset = !meal.is_preset;
+        console.log('Meal filter:', meal.name, { created_by: meal.created_by, user_id: user._id, isUserCreated, is_preset: meal.is_preset, isNotPreset });
+        return isUserCreated && isNotPreset;
+      });
+      console.log('fetchMyMeals: Filtered user meals:', userMeals);
       setMyMeals(userMeals);
     } catch (error) {
       console.error('Error fetching my recipes:', error);
