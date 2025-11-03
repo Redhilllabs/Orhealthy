@@ -2596,35 +2596,35 @@
         }
 
         async function editCombo(id) {
-            editingMealId = id;
+            editingComboId = id;
             try {
-                const response = await fetch(`${API_URL}/meals/${id}`);
-                const meal = await response.json();
+                const response = await fetch(`${API_URL}/combos/${id}`);
+                const combo = await response.json();
                 
                 document.getElementById('comboModal').classList.add('active');
-                document.querySelector('#mealModal .modal-title').textContent = 'Edit Combo';
-                document.getElementById('mealName').value = meal.name;
-                document.getElementById('mealDescription').value = meal.description;
-                document.getElementById('mealPrice').value = meal.calculated_price || 0;
-                document.getElementById('mealTags').value = meal.tags ? meal.tags.join(', ') : '';
+                document.querySelector('#comboModal .modal-title').textContent = 'Edit Combo';
+                document.getElementById('comboName').value = combo.name;
+                document.getElementById('comboDescription').value = combo.description;
+                document.getElementById('comboPrice').value = combo.calculated_price || 0;
+                document.getElementById('comboTags').value = combo.tags ? combo.tags.join(', ') : '';
                 
                 // Set existing images
-                mealImages = meal.images || [];
-                const preview = document.getElementById('mealImagePreview');
-                preview.innerHTML = mealImages.map((img, index) => `
+                comboImages = combo.images || [];
+                const preview = document.getElementById('comboImagePreview');
+                preview.innerHTML = comboImages.map((img, index) => `
                     <div class="image-preview-item">
                         <img src="${img}" alt="Preview">
-                        <button type="button" class="image-remove" onclick="removeMealImage(${index})">×</button>
+                        <button type="button" class="image-remove" onclick="removeComboImage(${index})">×</button>
                     </div>
                 `).join('');
                 
-                // Set existing recipes
-                selectedMealRecipes = meal.recipes || [];
-                updateMealRecipeSelect();
-                renderMealRecipes();
-                updateMealPrice();
+                // Set existing meals
+                selectedComboMeals = combo.meals || [];
+                updateComboMealSelect();
+                renderComboMeals();
+                updateComboPrice();
             } catch (error) {
-                showAlert('meals', 'Error loading meal data', 'error');
+                showAlert('combos', 'Error loading combo data', 'error');
             }
         }
 
