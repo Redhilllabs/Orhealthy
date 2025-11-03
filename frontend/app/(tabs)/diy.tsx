@@ -626,7 +626,7 @@ export default function DIYScreen() {
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {/* 2 Main Tabs */}
+      {/* 3 Main Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'diy-meals' && styles.activeTab]}
@@ -644,7 +644,37 @@ export default function DIYScreen() {
             DIY Combos
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'my-diy' && styles.activeTab]}
+          onPress={() => setActiveTab('my-diy')}
+        >
+          <Text style={[styles.tabText, activeTab === 'my-diy' && styles.activeTabText]}>
+            My DIY
+          </Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Sub-tabs for My DIY */}
+      {activeTab === 'my-diy' && (
+        <View style={styles.subTabContainer}>
+          <TouchableOpacity
+            style={[styles.subTab, myDiySubTab === 'my-meals' && styles.activeSubTab]}
+            onPress={() => setMyDiySubTab('my-meals')}
+          >
+            <Text style={[styles.subTabText, myDiySubTab === 'my-meals' && styles.activeSubTabText]}>
+              My Meals
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.subTab, myDiySubTab === 'my-combos' && styles.activeSubTab]}
+            onPress={() => setMyDiySubTab('my-combos')}
+          >
+            <Text style={[styles.subTabText, myDiySubTab === 'my-combos' && styles.activeSubTabText]}>
+              My Combos
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Search and Filter */}
       <View style={styles.searchSection}>
@@ -652,7 +682,7 @@ export default function DIYScreen() {
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
             style={styles.searchInput}
-            placeholder={activeTab === 'diy-meals' ? 'Search ingredients...' : 'Search meals...'}
+            placeholder="Search items..."
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
