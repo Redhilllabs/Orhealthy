@@ -2783,10 +2783,11 @@
             const tags = document.getElementById('comboTags').value
                 .split(',').map(t => t.trim()).filter(Boolean);
             
+            // Backend expects "recipes" field for meals
             const data = {
                 name: document.getElementById('comboName').value,
                 description: document.getElementById('comboDescription').value,
-                meals: selectedComboMeals,
+                recipes: selectedComboMeals,
                 tags: tags,
                 images: comboImages,
                 is_preset: true,
@@ -2797,14 +2798,14 @@
                 let response;
                 if (editingComboId) {
                     // Update existing combo
-                    response = await fetch(`${API_URL}/combos/${editingComboId}`, {
+                    response = await fetch(`${API_URL}/meals/${editingComboId}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
                     });
                 } else {
                     // Create new combo
-                    response = await fetch(`${API_URL}/combos`, {
+                    response = await fetch(`${API_URL}/meals`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
