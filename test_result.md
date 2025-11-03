@@ -1222,3 +1222,83 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+frontend:
+  - task: "DIY and Presets UI/UX Improvements"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/diy.tsx, frontend/app/(tabs)/presets.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Implemented the following fixes and improvements:
+          
+          **1. Removed "x" prefix from quantity display (COMPLETED)**
+          - Fixed in presets.tsx line 534: Changed `x${ing.quantity || 1}` to `${ing.quantity || 1}`
+          - Now displays just the number without the "x" prefix for combo quantities
+          
+          **2. DIY Combos - Combined selections display (IMPROVED)**
+          - Updated bottom sheet modal in diy.tsx to use explicit fragments (lines 789-843)
+          - The selection logic already searches in both allMeals and myMeals arrays
+          - Selections from both "All Meals" and "My Meals" should now display together in the bottom sheet
+          - Added comments to clarify the combined selection behavior
+          
+          **3. Price Display (VERIFIED CORRECT)**
+          - DIY Ingredients: Shows "₹{price}/{unit} • Total: ₹{total}" format (line 800-801)
+          - DIY Meals/Combos: Shows "₹{price}/meal • Total: ₹{total}" format (line 827-828)
+          - Displays both per-unit/per-meal price and total price correctly
+          
+          **4. Global Loading Overlay (ADDED TO PRESETS)**
+          - Added globalLoading state to presets.tsx
+          - Updated deleteSavedItem function to show/hide loading overlay (lines 188-223)
+          - Updated handleAddToCart function to show/hide loading overlay (lines 245-289)
+          - Added loading overlay component at the end of the screen (lines 608-618)
+          - Added loading overlay styles (lines 969-985)
+          - Loading spinner with grey overlay now shows for delete and add-to-cart operations
+          
+          **5. Text Node Error Investigation**
+          - Refactored conditional rendering in diy.tsx to use explicit fragments
+          - All text is properly wrapped in <Text> components
+          - The "Unexpected text node: ." error may be resolved by the fragment refactoring
+          
+          **Next Steps:**
+          - Test the frontend to verify all fixes are working
+          - Check if the "Unexpected text node" error still appears
+          - Verify combined selections display correctly when switching between "All Meals" and "My Meals" in DIY Combos
+          - Test loading overlays during save, add-to-cart, and delete operations
+
+agent_communication:
+  - agent: "main"
+    message: |
+      🔧 **DIY and Presets UI/UX Improvements Complete**
+      
+      **Changes Implemented:**
+      
+      **presets.tsx:**
+      1. ✅ Removed "x" prefix from combo quantity display
+      2. ✅ Added global loading state and overlay component
+      3. ✅ Updated deleteSavedItem to show loading overlay
+      4. ✅ Updated handleAddToCart to show loading overlay
+      5. ✅ Added loading overlay styles
+      
+      **diy.tsx:**
+      1. ✅ Refactored bottom sheet modal to use explicit fragments
+      2. ✅ Improved combined selection display logic with comments
+      3. ✅ Verified price display format is correct (per unit + total)
+      4. ✅ Global loading overlay already present and functional
+      
+      **Expected Results:**
+      - No more "x" prefix on quantity numbers
+      - Selections from both "All Meals" and "My Meals" show together in DIY Combos bottom sheet
+      - Price displays show both per-unit/per-meal and total prices
+      - Loading spinner with grey overlay appears during all save/add-to-cart/delete operations
+      - "Unexpected text node: ." error should be resolved (pending verification)
+      
+      **Ready for Testing:**
+      - Frontend has been restarted
+      - All changes are live
+      - Need to verify all functionality works as expected
