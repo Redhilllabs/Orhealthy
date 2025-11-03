@@ -304,6 +304,129 @@ export default function DIYScreen() {
       selectedIngredients.forEach((qty, id) => {
         const ingredient = ingredients.find(i => i._id === id);
         if (ingredient) {
+          const price = ingredient.calculated_price || ingredient.price_per_unit || 0;
+          total += price * qty;
+        }
+      });
+      return total;
+    } else {
+      let total = 0;
+      selectedMeals.forEach((qty, id) => {
+        let recipe = allMeals.find(r => r._id === id);
+        if (!recipe) {
+          recipe = myMeals.find(r => r._id === id);
+        }
+        if (recipe) {
+          const price = recipe.calculated_price || recipe.total_price || recipe.price || 0;
+          total += price * qty;
+        }
+      });
+      return total;
+    }
+  };
+
+  const handleEditMyDiyItem = (item: Recipe) => {
+    setEditingItem(item);
+    setShowEditModal(true);
+  };
+
+  const handleDeleteMyDiyItem = async () => {
+    if (!editingItem) return;
+    
+    try {
+      setGlobalLoading(true);
+      const token = await storage.getItemAsync('session_token');
+      const endpoint = myDiySubTab === 'my-meals' 
+        ? `${API_URL}/recipes/${editingItem._id}`
+        : `${API_URL}/meals/${editingItem._id}`;
+      
+      await axios.delete(endpoint, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      setSuccessMessage('Item deleted successfully');
+      setShowSuccessModal(true);
+      setShowEditModal(false);
+      setEditingItem(null);
+      
+      // Refresh data
+      if (myDiySubTab === 'my-meals') {
+        fetchMyRecipes();
+      } else {
+        fetchMyCombos();
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      setSuccessMessage('Failed to delete item');
+      setShowSuccessModal(true);
+    } finally {
+      setGlobalLoading(false);
+    }
+  };
+
+  const handleAddEditedItemToCart = async () => {
+    if (!editingItem) return;
+    
+    try {
+      setGlobalLoading(true);
+      setShowEditModal(false);
+      
+      const price = editingItem.calculated_price || editingItem.total_price || editingItem.price || 0;
+      
+      if (myDiySubTab === 'my-meals') {
+        // Add meal to cart
+        const customizations = editingItem.ingredients?.map(ing => ({
+          ingredient_id: ing.ingredient_id || ing._id || '',
+          name: ing.name || ing.ingredient_name || '',
+          price: ing.price || ing.price_per_unit || 0,
+          default_quantity: ing.default_quantity || ing.quantity || 1,
+          quantity: ing.quantity || ing.default_quantity || 1,
+        })) || [];
+
+        await addToCart({
+          meal_id: editingItem._id,
+          meal_name: editingItem.name,
+          customizations: customizations,
+          quantity: 1,
+          price: price,
+        });
+      } else {
+        // Add combo to cart - flatten meals into customizations
+        const customizations = editingItem.meals?.map(meal => ({
+          ingredient_id: meal.recipe_id || meal._id || '',
+          name: meal.name || '',
+          price: meal.price || 0,
+          default_quantity: meal.quantity || 1,
+          quantity: meal.quantity || 1,
+        })) || [];
+
+        await addToCart({
+          meal_id: editingItem._id,
+          meal_name: editingItem.name,
+          customizations: customizations,
+          quantity: 1,
+          price: price,
+        });
+      }
+
+      setSuccessMessage('Added to cart!');
+      setShowSuccessModal(true);
+      setEditingItem(null);
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      setSuccessMessage('Failed to add to cart');
+      setShowSuccessModal(true);
+    } finally {
+      setGlobalLoading(false);
+    }
+  };
+
+  const calculateTotal = () => {
+    if (activeTab === 'diy-meals') {
+      let total = 0;
+      selectedIngredients.forEach((qty, id) => {
+        const ingredient = ingredients.find(i => i._id === id);
+        if (ingredient) {
           total += (ingredient.calculated_price || ingredient.price_per_unit || 0) * qty;
         }
       });
