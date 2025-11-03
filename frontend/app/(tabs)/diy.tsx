@@ -423,59 +423,50 @@ export default function DIYScreen() {
 
     try {
       setGlobalLoading(true);
-      const compositeImages = generateCompositeImage();
-      let cartData: any;
       
       if (activeTab === 'diy-meals') {
-        const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
+        const customizations = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
           const ingredient = ingredients.find(i => i._id === id);
           return {
             ingredient_id: id,
             name: ingredient?.name || '',
-            quantity: qty,
-            unit: ingredient?.unit || '',
             price: ingredient?.calculated_price || ingredient?.price_per_unit || 0,
+            default_quantity: qty,
+            quantity: qty,
           };
         });
 
-        cartData = {
+        await addToCart({
           meal_id: 'diy-meal-' + Date.now(),
           meal_name: 'DIY Meal',
-          description: ingredientsList.map(i => `${i.name} (${i.quantity}${i.unit})`).join(', '),
-          images: compositeImages,
-          customizations: ingredientsList,
+          customizations: customizations,
           quantity: 1,
           price: calculateTotal(),
-          isDIY: true,
-        };
+        });
       } else {
-        const mealsData = Array.from(selectedMeals.entries()).map(([id, qty]) => {
+        // For DIY combos, we need to flatten the meals into customizations
+        const customizations = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           let recipe = allMeals.find(r => r._id === id);
           if (!recipe) {
             recipe = myMeals.find(r => r._id === id);
           }
           return {
-            recipe_id: id,
+            ingredient_id: id,
             name: recipe?.name || '',
-            quantity: qty,
             price: recipe?.calculated_price || 0,
-            ingredients: recipe?.ingredients || [],
+            default_quantity: qty,
+            quantity: qty,
           };
         });
 
-        cartData = {
+        await addToCart({
           meal_id: 'diy-combo-' + Date.now(),
           meal_name: 'DIY Combo',
-          description: mealsData.map(m => `${m.name} (${m.quantity})`).join(', '),
-          images: compositeImages,
-          meals: mealsData,
+          customizations: customizations,
           quantity: 1,
           price: calculateTotal(),
-          isDIY: true,
-        };
+        });
       }
-
-      await addToCart(cartData);
 
       setSuccessMessage('Added to cart!');
       setShowSuccessModal(true);
