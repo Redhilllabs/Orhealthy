@@ -849,6 +849,26 @@ export default function DIYScreen() {
           </View>
         </View>
       </Modal>
+      
+      {/* Success Modal */}
+      <Modal
+        isVisible={showSuccessModal}
+        onBackdropPress={() => setShowSuccessModal(false)}
+        style={styles.modal}
+      >
+        <View style={styles.successModalContent}>
+          <View style={styles.successIcon}>
+            <Ionicons name="checkmark-circle" size={60} color="#4CAF50" />
+          </View>
+          <Text style={styles.successMessage}>{successMessage}</Text>
+          <TouchableOpacity
+            style={styles.successButton}
+            onPress={() => setShowSuccessModal(false)}
+          >
+            <Text style={styles.successButtonText}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
       </SafeAreaView>
 
       {/* Floating View Button */}
