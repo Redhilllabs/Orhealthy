@@ -2184,18 +2184,23 @@
         let selectedRecipeIngredients = [];
         let editingRecipeId = null;
         let allRecipes = [];
+        
+        // Meal Management Functions (meals from processed ingredients)
+        let mealImages = [];
+        let selectedMealIngredients = [];
+        let editingMealId = null;
 
         function showMealModal() {
-            editingRecipeId = null;
-            document.getElementById('recipeModal').classList.add('active');
-            document.querySelector('#recipeModal .modal-title').textContent = 'Add Meal';
-            document.getElementById('recipeForm').reset();
-            selectedRecipeIngredients = [];
-            recipeImages = [];
-            document.getElementById('recipeIngredients').innerHTML = '';
-            document.getElementById('recipeImagePreview').innerHTML = '';
-            document.getElementById('recipePrice').value = '0.00';
-            updateRecipeIngredientSelect();
+            editingMealId = null;
+            document.getElementById('mealModal').classList.add('active');
+            document.querySelector('#mealModal .modal-title').textContent = 'Add Meal';
+            document.getElementById('mealForm').reset();
+            selectedMealIngredients = [];
+            mealImages = [];
+            document.getElementById('mealIngredients').innerHTML = '';
+            document.getElementById('mealImagePreview').innerHTML = '';
+            document.getElementById('mealPrice').value = '0.00';
+            updateMealIngredientSelect();
         }
 
         async function editMeal(id) {
