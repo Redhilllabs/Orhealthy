@@ -1318,4 +1318,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  successModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 32,
+    alignItems: 'center',
+    maxWidth: 400,
+  },
+  successIcon: {
+    marginBottom: 16,
+  },
+  successMessage: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  successButton: {
+    backgroundColor: '#ffd700',
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 12,
+    minWidth: 120,
+  },
+  successButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
+  },
 });
