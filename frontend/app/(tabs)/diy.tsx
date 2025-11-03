@@ -1726,16 +1726,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 8,
   },
-  saveButton: {
-    backgroundColor: '#f5f5f5',
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-  },
   cartButton: {
     backgroundColor: '#ffd700',
   },
