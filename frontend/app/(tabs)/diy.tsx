@@ -98,6 +98,11 @@ export default function DIYScreen() {
       filterMyDiyItems();
     }
   }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, myCombos, activeTab, myDiySubTab]);
+  // Reset selected tag and search when switching tabs
+  useEffect(() => {
+    setSelectedTag(null);
+    setSearchQuery('');
+  }, [activeTab, myDiySubTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
