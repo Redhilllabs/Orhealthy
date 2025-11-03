@@ -115,6 +115,13 @@ export default function PresetsScreen() {
       items = items.filter(item => item.tags?.includes(selectedTag));
     }
 
+    // Sort alphabetically by name
+    items = items.sort((a, b) => {
+      const nameA = (a.name || a.meal_name || '').toLowerCase();
+      const nameB = (b.name || b.meal_name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
     setFilteredItems(items);
   }, [searchQuery, selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
 
