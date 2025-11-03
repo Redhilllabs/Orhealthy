@@ -260,19 +260,18 @@ export default function PresetsScreen() {
   const handleAddToCart = async () => {
     if (!selectedMeal) return;
 
-    try {
-      // Validate that at least one item has quantity > 0
-      const hasItems = customizations.some(ing => (ing.quantity || 0) > 0);
-      
-      if (!hasItems) {
-        if (Platform.OS === 'web') {
-          alert('Please add at least one item');
-        } else {
-          Alert.alert('Error', 'Please add at least one item');
-        }
-        return;
-      }
+    // Validate that at least one item has quantity > 0
+    const hasItems = customizations.some(ing => (ing.quantity || 0) > 0);
+    
+    if (!hasItems) {
+      showAlert('Please add at least one item', 'error');
+      return;
+    }
 
+    // Close the selections modal first
+    setSelectedMeal(null);
+    
+    try {
       setGlobalLoading(true);
       
       // Use the same calculation as calculateTotal() - direct sum only
@@ -300,21 +299,10 @@ export default function PresetsScreen() {
         price: totalPrice,
       });
 
-      if (Platform.OS === 'web') {
-        alert('Added to cart!');
-      } else {
-        Alert.alert('Success', 'Added to cart!');
-      }
-      
-      setSelectedMeal(null);
+      showAlert('Added to cart!', 'success');
     } catch (error) {
       console.error('Error adding to cart:', error);
-      
-      if (Platform.OS === 'web') {
-        alert('Failed to add to cart');
-      } else {
-        Alert.alert('Error', 'Failed to add to cart');
-      }
+      showAlert('Failed to add to cart', 'error');
     } finally {
       setGlobalLoading(false);
     }
