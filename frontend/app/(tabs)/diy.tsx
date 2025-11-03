@@ -714,14 +714,24 @@ export default function DIYScreen() {
 
       {/* List */}
       <FlatList
-        data={activeTab === 'diy-meals' ? filteredIngredients : filteredMeals}
+        data={
+          activeTab === 'diy-meals' 
+            ? filteredIngredients 
+            : activeTab === 'diy-combos'
+            ? filteredMeals
+            : filteredMyDiyItems
+        }
         renderItem={activeTab === 'diy-meals' ? renderIngredientItem : renderRecipeItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
-              {activeTab === 'diy-meals' ? 'No ingredients found' : 'No meals found'}
+              {activeTab === 'diy-meals' 
+                ? 'No ingredients found' 
+                : activeTab === 'diy-combos'
+                ? 'No meals found'
+                : 'No saved items yet'}
             </Text>
           </View>
         }
