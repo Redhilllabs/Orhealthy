@@ -72,6 +72,10 @@ export default function DIYScreen() {
   
   const [mealName, setMealName] = useState('');
   const [selectedSaveTags, setSelectedSaveTags] = useState<string[]>([]);
+  
+  // Edit modal for My DIY items
+  const [editingItem, setEditingItem] = useState<Recipe | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showSelectedModal, setShowSelectedModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
