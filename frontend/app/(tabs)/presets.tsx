@@ -211,7 +211,7 @@ export default function PresetsScreen() {
         endpoint = `${API_URL}/meals/${itemId}`;
       } else {
         console.log('Cannot delete - wrong tab combination');
-        Alert.alert('Error', 'Cannot delete preset items');
+        showAlert('Cannot delete preset items', 'error');
         return;
       }
       
@@ -221,7 +221,7 @@ export default function PresetsScreen() {
       });
       console.log('Delete response:', response.status);
       
-      Alert.alert('Success', 'Item deleted successfully');
+      showAlert('Item deleted successfully', 'success');
       
       // Refresh the appropriate list based on active tab
       if (activeTab === 'meals') {
@@ -231,7 +231,7 @@ export default function PresetsScreen() {
       }
     } catch (error: any) {
       console.error('Error deleting item:', error.response?.data || error.message);
-      Alert.alert('Error', 'Failed to delete item');
+      showAlert('Failed to delete item', 'error');
     } finally {
       setGlobalLoading(false);
     }
