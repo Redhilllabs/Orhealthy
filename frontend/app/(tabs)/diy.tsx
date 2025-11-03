@@ -77,6 +77,8 @@ export default function DIYScreen() {
   const [editingItem, setEditingItem] = useState<Recipe | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingCustomizations, setEditingCustomizations] = useState<any[]>([]);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showSelectedModal, setShowSelectedModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
