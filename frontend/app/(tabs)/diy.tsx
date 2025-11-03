@@ -1982,6 +1982,30 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  bottomSheetSaveButton: {
+    flex: 1,
+    backgroundColor: '#999',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  bottomSheetSaveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  bottomSheetAddButton: {
+    flex: 1,
+    backgroundColor: '#ffd700',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  bottomSheetAddButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   modalBottom: {
     justifyContent: 'flex-end',
     margin: 0,
