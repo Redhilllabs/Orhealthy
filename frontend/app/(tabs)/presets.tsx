@@ -300,14 +300,12 @@ export default function PresetsScreen() {
   };
 
   const calculateTotal = () => {
-    if (activeTab.startsWith('my-') && selectedMeal) {
-      return selectedMeal.total_price || selectedMeal.calculated_price || 0;
-    }
-    const ingredientsTotal = customizations.reduce(
-      (sum, ing) => sum + (ing.price || ing.price_per_unit || 0) * (ing.quantity || 1),
+    // Direct summation of individual ingredient/meal costs based on their quantities
+    const total = customizations.reduce(
+      (sum, ing) => sum + (ing.price || ing.price_per_unit || 0) * (ing.quantity || 0),
       0
     );
-    return (selectedMeal?.base_price || selectedMeal?.calculated_price || 0) + ingredientsTotal;
+    return total;
   };
 
   const renderMeal = ({ item }: { item: Meal }) => {
