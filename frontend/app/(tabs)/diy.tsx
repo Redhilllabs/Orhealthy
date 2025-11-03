@@ -1263,7 +1263,7 @@ export default function DIYScreen() {
                   </View>
                 </View>
               ))
-            )}
+            ))}
           </ScrollView>
           
           <View style={styles.modalFooter}>
