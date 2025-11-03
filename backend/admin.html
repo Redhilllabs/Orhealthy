@@ -2852,17 +2852,17 @@
         }
 
         async function deleteCombo(id) {
-            if (!confirm('Delete this meal?')) return;
+            if (!confirm('Delete this combo?')) return;
             try {
-                const response = await fetch(`${API_URL}/meals/${id}`, { method: 'DELETE' });
+                const response = await fetch(`${API_URL}/combos/${id}`, { method: 'DELETE' });
                 if (response.ok) {
-                    showAlert('meals', 'Deleted successfully', 'success');
+                    showAlert('combos', 'Deleted successfully', 'success');
                     loadCombos();
                 } else {
-                    showAlert('meals', 'Error deleting meal', 'error');
+                    showAlert('combos', 'Error deleting combo', 'error');
                 }
             } catch (error) {
-                showAlert('meals', 'Error deleting', 'error');
+                showAlert('combos', 'Error deleting', 'error');
             }
         }
 
