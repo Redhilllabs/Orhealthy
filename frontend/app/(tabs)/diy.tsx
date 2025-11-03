@@ -436,41 +436,49 @@ export default function DIYScreen() {
       setGlobalLoading(true);
       setShowEditModal(false);
       
-      const price = editingItem.calculated_price || editingItem.total_price || editingItem.price || 0;
+      // Calculate price from edited customizations
+      const totalPrice = editingCustomizations.reduce(
+        (sum, item) => sum + ((item.price || item.price_per_unit || 0) * (item.quantity || 0)), 
+        0
+      );
       
       if (myDiySubTab === 'my-meals') {
-        // Add meal to cart
-        const customizations = editingItem.ingredients?.map(ing => ({
-          ingredient_id: ing.ingredient_id || ing._id || '',
-          name: ing.name || ing.ingredient_name || '',
-          price: ing.price || ing.price_per_unit || 0,
-          default_quantity: ing.default_quantity || ing.quantity || 1,
-          quantity: ing.quantity || ing.default_quantity || 1,
-        })) || [];
+        // Add meal to cart with edited customizations
+        const customizations = editingCustomizations
+          .filter(ing => (ing.quantity || 0) > 0)
+          .map(ing => ({
+            ingredient_id: ing.ingredient_id || ing._id || '',
+            name: ing.name || ing.ingredient_name || '',
+            price: ing.price || ing.price_per_unit || 0,
+            default_quantity: ing.default_quantity || ing.quantity || 1,
+            quantity: ing.quantity || ing.default_quantity || 1,
+          }));
 
         await addToCart({
           meal_id: editingItem._id,
           meal_name: editingItem.name,
           customizations: customizations,
           quantity: 1,
-          price: price,
+          price: totalPrice,
         });
       } else {
-        // Add combo to cart - flatten meals into customizations
-        const customizations = editingItem.meals?.map(meal => ({
-          ingredient_id: meal.recipe_id || meal._id || '',
-          name: meal.name || '',
-          price: meal.price || 0,
-          default_quantity: meal.quantity || 1,
-          quantity: meal.quantity || 1,
-        })) || [];
+        // Add combo to cart with edited customizations
+        const customizations = editingCustomizations
+          .filter(meal => (meal.quantity || 0) > 0)
+          .map(meal => ({
+            ingredient_id: meal.recipe_id || meal._id || '',
+            name: meal.name || '',
+            price: meal.price || 0,
+            default_quantity: meal.quantity || 1,
+            quantity: meal.quantity || 1,
+          }));
 
         await addToCart({
           meal_id: editingItem._id,
           meal_name: editingItem.name,
           customizations: customizations,
           quantity: 1,
-          price: price,
+          price: totalPrice,
         });
       }
 
