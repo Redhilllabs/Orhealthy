@@ -531,7 +531,7 @@ export default function PresetsScreen() {
                     <Ionicons name="remove-circle" size={28} color="#ffd700" />
                   </TouchableOpacity>
                   <Text style={styles.quantity}>
-                    {activeTab === 'combos' ? `x${ing.quantity || 1}` : `${ing.quantity || ing.default_quantity || 1}`}
+                    {activeTab === 'combos' ? `${ing.quantity || 1}` : `${ing.quantity || ing.default_quantity || 1}`}
                   </Text>
                   <TouchableOpacity
                     onPress={() => {
