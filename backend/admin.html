@@ -2203,6 +2203,151 @@
             updateMealIngredientSelect();
         }
 
+        function updateMealIngredientSelect() {
+            const select = document.getElementById('mealIngredientSelect');
+            select.innerHTML = '<option value="">-- Select processed ingredient --</option>' +
+                allIngredients.map(ing => `<option value="${ing._id}">${ing.name} (₹${ing.calculated_price ? ing.calculated_price.toFixed(2) : '0.00'}/${ing.unit})</option>`).join('');
+        }
+
+        function addIngredientToMeal() {
+            const select = document.getElementById('mealIngredientSelect');
+            const ingredientId = select.value;
+            if (!ingredientId) return alert('Please select a processed ingredient');
+            
+            const ingredient = allIngredients.find(i => i._id === ingredientId);
+            if (!ingredient) return;
+            
+            if (selectedMealIngredients.find(i => i.ingredient_id === ingredientId)) {
+                return alert('Ingredient already added');
+            }
+            
+            selectedMealIngredients.push({
+                ingredient_id: ingredientId,
+                name: ingredient.name,
+                quantity: 1.0,
+                unit: ingredient.unit,
+                default_step_size: ingredient.step_size || 1.0,
+                step_size: ingredient.step_size || 1.0,
+                price: ingredient.calculated_price || 0
+            });
+            
+            renderMealIngredients();
+            updateMealPrice();
+        }
+
+        function renderMealIngredients() {
+            document.getElementById('mealIngredients').innerHTML = selectedMealIngredients.map((ing, idx) => `
+                <div class="ingredient-item">
+                    <span>${ing.name}</span>
+                    <input type="number" min="0.01" step="any" value="${ing.quantity}" 
+                           onchange="updateMealIngredientQuantity(${idx}, this.value)" 
+                           placeholder="Quantity"
+                           style="width: 80px;">
+                    <span>${ing.unit}</span>
+                    <input type="number" min="0.01" step="0.01" value="${ing.step_size || ing.default_step_size || 1.0}" 
+                           onchange="updateMealIngredientStepSize(${idx}, this.value)" 
+                           placeholder="Step override" 
+                           style="width: 100px; margin-left: 10px;" 
+                           title="Step size override (optional)">
+                    <span>₹${(ing.price * ing.quantity).toFixed(2)}</span>
+                    <button type="button" onclick="removeIngredientFromMeal(${idx})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function updateMealIngredientQuantity(index, quantity) {
+            selectedMealIngredients[index].quantity = parseFloat(quantity);
+            renderMealIngredients();
+            updateMealPrice();
+        }
+
+        function updateMealIngredientStepSize(index, stepSize) {
+            selectedMealIngredients[index].step_size = parseFloat(stepSize);
+        }
+
+        function removeIngredientFromMeal(index) {
+            selectedMealIngredients.splice(index, 1);
+            renderMealIngredients();
+            updateMealPrice();
+        }
+
+        function updateMealPrice() {
+            const total = selectedMealIngredients.reduce((sum, ing) => sum + (ing.price * ing.quantity), 0);
+            document.getElementById('mealPrice').value = total.toFixed(2);
+        }
+
+        function handleMealImages(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    mealImages.push(e.target.result);
+                    updateMealImagePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function updateMealImagePreview() {
+            const preview = document.getElementById('mealImagePreview');
+            preview.innerHTML = mealImages.map((img, index) => `
+                <div class="image-preview-item">
+                    <img src="${img}" alt="Preview">
+                    <button type="button" class="image-remove" onclick="removeMealImage(${index})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function removeMealImage(index) {
+            mealImages.splice(index, 1);
+            updateMealImagePreview();
+        }
+
+        async function saveMeal(e) {
+            e.preventDefault();
+            if (selectedMealIngredients.length === 0) return alert('Add at least one processed ingredient');
+            
+            const tags = document.getElementById('mealTags').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+            
+            const data = {
+                name: document.getElementById('mealName').value,
+                description: document.getElementById('mealDescription').value,
+                ingredients: selectedMealIngredients,
+                tags: tags,
+                images: mealImages,
+                created_by: 'admin'
+            };
+            
+            try {
+                let response;
+                if (editingMealId) {
+                    response = await fetch(`${API_URL}/recipes/${editingMealId}`, {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    response = await fetch(`${API_URL}/recipes`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
+                
+                if (response.ok) {
+                    closeModal('mealModal');
+                    showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal created successfully', 'success');
+                    loadMeals();
+                } else {
+                    const error = await response.json();
+                    showAlert('meals', error.detail || 'Error saving meal', 'error');
+                }
+            } catch (error) {
+                showAlert('meals', 'Error saving meal', 'error');
+            }
+        }
+
         async function editMeal(id) {
             editingRecipeId = id;
             try {
