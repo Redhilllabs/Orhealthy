@@ -806,7 +806,8 @@ export default function DIYScreen() {
           </View>
         </Modal>
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
 
