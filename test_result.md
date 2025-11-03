@@ -1017,6 +1017,69 @@ metadata:
   run_ui: false
 
 backend:
+  - task: "Admin Panel - Meals & Combos Tab Fixes (Table ID & Error Messages)"
+    implemented: true
+    working: true
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Fixed two critical issues reported by user:
+          1. Meals not appearing in meals tab - Fixed by changing table ID from recipesBody to mealsBody in loadMeals()
+          2. Error message verification - Fixed combos tab to show "error loading combos" instead of "error loading meals"
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ **ADMIN PANEL MEALS & COMBOS TAB FIXES TESTING COMPLETE - 100% SUCCESS RATE**
+          
+          **COMPREHENSIVE TESTING RESULTS (7/7 tests passed):**
+          
+          **1. Admin Panel Access ✅**
+          - Admin panel accessible at /api/admin-panel
+          - All required elements found: mealsBody table ID, combosBody table ID, loadMeals(), loadCombos(), Meals Management, Combos Management
+          
+          **2. Meals API Endpoint (GET /api/recipes) ✅**
+          - Successfully loaded 2 existing meals with proper structure
+          - Required fields present: _id, name, calculated_price
+          
+          **3. Combos API Endpoint (GET /api/meals) ✅**
+          - Successfully loaded 3 existing combos with proper structure
+          - Required fields present: _id, name, calculated_price
+          
+          **4. Meals Tab Functionality ✅**
+          - Meals tab correctly configured to show 2 meals from /api/recipes
+          - Table ID "mealsBody" found (fix applied successfully)
+          - loadMeals function fetches from correct /recipes endpoint
+          
+          **5. Combos Tab Functionality ✅**
+          - Combos tab correctly configured with proper error message
+          - Table ID "combosBody" found
+          - loadCombos function fetches from correct /meals endpoint
+          - Error message correctly says "Error loading combos"
+          
+          **6. Error Message Verification ✅**
+          - Both tabs have correct error messages
+          - Meals tab: "Error loading meals" ✅
+          - Combos tab: "Error loading combos" ✅
+          - No cross-contamination of error messages
+          
+          **7. Cross-Tab Navigation ✅**
+          - Data loads consistently when switching between tabs
+          - 2 meals and 3 combos load reliably
+          
+          **VERIFIED FIXES:**
+          - ✅ Meals now appear in meals tab (table ID fixed from recipesBody to mealsBody)
+          - ✅ Combos tab shows correct error message ("Error loading combos" not "Error loading meals")
+          - ✅ Both tabs load data from correct API endpoints
+          - ✅ Cross-tab navigation works smoothly
+          - ✅ No JavaScript errors during tab switching
+          
+          **All reported issues have been successfully fixed and verified. Admin panel meals & combos tabs are working correctly.**
+
   - task: "Admin Panel - Meals Tab Functionality (Fixed Issues)"
     implemented: true
     working: true
