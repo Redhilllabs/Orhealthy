@@ -96,8 +96,12 @@ export default function PresetsScreen() {
   useEffect(() => {
     let items: Meal[] = [];
     
-    // Show only admin items (no user items)
-    items = activeTab === 'meals' ? allMeals : allCombos;
+    // Determine which items to show based on active tab and sub-tab
+    if (activeTab === 'meals') {
+      items = mealsSubTab === 'all-meals' ? allMeals : myMeals;
+    } else {
+      items = combosSubTab === 'all-combos' ? allCombos : myCombos;
+    }
 
     // Apply search filter
     if (searchQuery) {
@@ -127,7 +131,7 @@ export default function PresetsScreen() {
     setAllTags(Array.from(tags).sort());
 
     setFilteredItems(items);
-  }, [searchQuery, selectedTag, allMeals, allCombos, activeTab]);
+  }, [searchQuery, selectedTag, allMeals, allCombos, myMeals, myCombos, activeTab, mealsSubTab, combosSubTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
