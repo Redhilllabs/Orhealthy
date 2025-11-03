@@ -162,19 +162,19 @@ export default function DIYScreen() {
     }
   };
 
-  const extractTags = (ingredients: Ingredient[], meals: Recipe[]) => {
+  const extractTags = (items: (Ingredient | Recipe)[]) => {
     const tags = new Set<string>();
-    ingredients.forEach(ing => {
-      ing.tags?.forEach(tag => tags.add(tag));
+    items.forEach(item => {
+      item.tags?.forEach(tag => tags.add(tag));
     });
-    meals.forEach(meal => {
-      meal.tags?.forEach(tag => tags.add(tag));
-    });
-    setAllTags(Array.from(tags));
+    setAllTags(Array.from(tags).sort());
   };
 
   const filterIngredients = () => {
     let filtered = [...ingredients];
+
+    // Extract tags from ingredients for DIY Meals tab
+    extractTags(ingredients);
 
     if (searchQuery) {
       filtered = filtered.filter(ing =>
@@ -196,6 +196,9 @@ export default function DIYScreen() {
     // For DIY Combos, show only admin meals (allMeals)
     let meals = [...allMeals];
 
+    // Extract tags from admin meals for DIY Combos tab
+    extractTags(allMeals);
+
     if (searchQuery) {
       meals = meals.filter(meal =>
         meal.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -215,6 +218,9 @@ export default function DIYScreen() {
   const filterMyDiyItems = () => {
     // For My DIY tab, show user items based on sub-tab
     let items = myDiySubTab === 'my-meals' ? myMeals : myCombos;
+
+    // Extract tags from user items only for My DIY tab
+    extractTags(items);
 
     if (searchQuery) {
       items = items.filter(item =>
