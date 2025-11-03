@@ -452,7 +452,8 @@ export default function DIYScreen() {
 
       await addToCart(cartData);
 
-      Alert.alert('Success', 'Added to cart!');
+      setSuccessMessage('Added to cart!');
+      setShowSuccessModal(true);
       
       // Reset selections
       setSelectedIngredients(new Map());
@@ -460,7 +461,8 @@ export default function DIYScreen() {
       setShowSelectedModal(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
-      Alert.alert('Error', 'Failed to add to cart');
+      setSuccessMessage('Failed to add to cart. Please try again.');
+      setShowSuccessModal(true);
     }
   };
 
