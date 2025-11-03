@@ -344,6 +344,7 @@ export default function DIYScreen() {
         endpoint = `${API_URL}/meals`;
         mealData = {
           name: mealName,
+          description: '',
           recipes: recipesList,
           images: compositeImages,
           tags: selectedSaveTags,
