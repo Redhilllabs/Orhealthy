@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
-Backend Testing for Admin Panel - Meals Tab Functionality
-Tests the fixed issues with meals management in the admin panel.
+Backend Testing Script for Admin Panel - Meals & Combos Tab Fixes
+Testing the specific fixes mentioned in the review request:
+1. Meals not appearing in meals tab - Fixed by changing table ID from recipesBody to mealsBody
+2. Error message verification - Need to check if "error loading meals" flashes in combos tab (should say "error loading combos")
 """
 
 import requests
 import json
 import sys
 import time
+import re
 from datetime import datetime
 
 # Configuration
