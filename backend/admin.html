@@ -2583,16 +2583,16 @@
         let selectedMealRecipes = [];
 
         function showComboModal() {
-            editingMealId = null;
+            editingComboId = null;
             document.getElementById('comboModal').classList.add('active');
-            document.querySelector('#mealModal .modal-title').textContent = 'Add Combo';
-            document.getElementById('mealForm').reset();
-            selectedMealRecipes = [];
-            mealImages = [];
-            document.getElementById('mealRecipes').innerHTML = '';
-            document.getElementById('mealImagePreview').innerHTML = '';
-            document.getElementById('mealPrice').value = '0.00';
-            updateMealRecipeSelect();
+            document.querySelector('#comboModal .modal-title').textContent = 'Add Combo';
+            document.getElementById('comboForm').reset();
+            selectedComboMeals = [];
+            comboImages = [];
+            document.getElementById('comboMeals').innerHTML = '';
+            document.getElementById('comboImagePreview').innerHTML = '';
+            document.getElementById('comboPrice').value = '0.00';
+            updateComboMealSelect();
         }
 
         async function editCombo(id) {
