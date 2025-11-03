@@ -801,7 +801,8 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   listContent: {
-    padding: 16,
+    paddingTop: 12,
+    paddingBottom: 16,
   },
   mealCard: {
     backgroundColor: '#fff',
