@@ -2559,13 +2559,13 @@
 
         async function loadCombos() {
             try {
-                const combos = await fetch(`${API_URL}/combos`).then(r => r.json());
+                const combos = await fetch(`${API_URL}/meals`).then(r => r.json());
                 const tbody = document.getElementById('combosBody');
                 tbody.innerHTML = combos.map(combo => `
                     <tr>
                         <td>${combo.images && combo.images.length > 0 ? `<img src="${combo.images[0]}" class="table-image">` : '-'}</td>
                         <td>${combo.name}</td>
-                        <td>${combo.meals ? combo.meals.length + ' meal(s)' : '-'}</td>
+                        <td>${combo.recipes ? combo.recipes.length + ' meal(s)' : '-'}</td>
                         <td>₹${combo.calculated_price ? combo.calculated_price.toFixed(2) : '0.00'}</td>
                         <td>${combo.tags ? combo.tags.join(', ') : '-'}</td>
                         <td class="actions">
