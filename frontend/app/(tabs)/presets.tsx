@@ -1050,4 +1050,41 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
+  alertModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 32,
+    margin: 20,
+    maxWidth: 400,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  alertIcon: {
+    marginBottom: 16,
+  },
+  alertMessage: {
+    fontSize: 18,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 26,
+  },
+  alertButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  successAlertButton: {
+    backgroundColor: '#4CAF50',
+  },
+  errorAlertButton: {
+    backgroundColor: '#ef4444',
+  },
+  alertButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
