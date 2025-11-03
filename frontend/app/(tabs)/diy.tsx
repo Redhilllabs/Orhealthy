@@ -1888,7 +1888,7 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#999',
     paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
