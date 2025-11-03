@@ -70,6 +70,12 @@ export default function PresetsScreen() {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [globalLoading, setGlobalLoading] = useState(false);
+  
+  // Custom alert modal
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
+  
   const { addToCart } = useCart();
   const { user } = useAuth();
   
