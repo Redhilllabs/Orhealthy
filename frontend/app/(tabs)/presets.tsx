@@ -482,30 +482,40 @@ export default function PresetsScreen() {
               <Text style={styles.modalDescription}>{selectedMeal.description}</Text>
             )}
 
-            <Text style={styles.sectionTitle}>Ingredients</Text>
+            <Text style={styles.sectionTitle}>
+              {activeTab === 'combos' ? 'Meals' : 'Ingredients'}
+            </Text>
             {customizations.map((ing, index) => (
               <View key={index} style={styles.ingredientRow}>
                 <View style={styles.ingredientInfo}>
                   <Text style={styles.ingredientName}>
                     {ing.name || ing.ingredient_name}
                   </Text>
-                  <Text style={styles.ingredientPrice}>
-                    ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)} {ing.unit || ''}
-                  </Text>
+                  {activeTab === 'combos' ? (
+                    <Text style={styles.ingredientPrice}>
+                      ₹{(ing.price || 0).toFixed(2)}
+                    </Text>
+                  ) : (
+                    <Text style={styles.ingredientPrice}>
+                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)} {ing.unit || ''}
+                    </Text>
+                  )}
                 </View>
                 <View style={styles.quantityControl}>
                   <TouchableOpacity
                     onPress={() => {
-                      const stepSize = ing.step_size || 1;
+                      const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
                       updateCustomization(index, Math.max(0, ing.quantity - stepSize));
                     }}
                   >
                     <Ionicons name="remove-circle" size={28} color="#ffd700" />
                   </TouchableOpacity>
-                  <Text style={styles.quantity}>{ing.quantity || ing.default_quantity || 1}</Text>
+                  <Text style={styles.quantity}>
+                    {activeTab === 'combos' ? `x${ing.quantity || 1}` : `${ing.quantity || ing.default_quantity || 1}`}
+                  </Text>
                   <TouchableOpacity
                     onPress={() => {
-                      const stepSize = ing.step_size || 1;
+                      const stepSize = activeTab === 'combos' ? 1 : (ing.step_size || 1);
                       updateCustomization(index, ing.quantity + stepSize);
                     }}
                   >
