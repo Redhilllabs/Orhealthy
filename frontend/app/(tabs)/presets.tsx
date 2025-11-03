@@ -168,13 +168,25 @@ export default function PresetsScreen() {
   const fetchMyCombos = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
-      if (!token || !user) return;
+      if (!token || !user) {
+        console.log('fetchMyCombos: No token or user', { token: !!token, user: !!user });
+        return;
+      }
 
+      console.log('fetchMyCombos: Fetching from /api/meals with user_id:', user._id);
       const response = await axios.get(`${API_URL}/meals?user_id=${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('fetchMyCombos: Raw response:', response.data);
+      
       // Filter only user-created combos (not presets)
-      const userCombos = response.data.filter((combo: any) => combo.created_by === user._id && !combo.is_preset);
+      const userCombos = response.data.filter((combo: any) => {
+        const isUserCreated = combo.created_by === user._id;
+        const isNotPreset = !combo.is_preset;
+        console.log('Combo filter:', combo.name, { created_by: combo.created_by, user_id: user._id, isUserCreated, is_preset: combo.is_preset, isNotPreset });
+        return isUserCreated && isNotPreset;
+      });
+      console.log('fetchMyCombos: Filtered user combos:', userCombos);
       setMyCombos(userCombos);
     } catch (error) {
       console.error('Error fetching my meals:', error);
