@@ -869,8 +869,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   modal: {
+    justifyContent: 'center',
+    alignItems: 'center',
     margin: 0,
-    justifyContent: 'flex-end',
   },
   modalContent: {
     backgroundColor: '#fff',
