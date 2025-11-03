@@ -611,6 +611,16 @@ export default function PresetsScreen() {
           </View>
         </View>
       </Modal>
+      
+      {/* Global Loading Overlay */}
+      {globalLoading && (
+        <View style={styles.loadingOverlay}>
+          <View style={styles.loadingOverlayContent}>
+            <ActivityIndicator size="large" color="#ffd700" />
+            <Text style={styles.loadingOverlayText}>Processing...</Text>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
