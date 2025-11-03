@@ -334,21 +334,8 @@ export default function PresetsScreen() {
                 onPress={(e) => {
                   console.log('DELETE BUTTON CLICKED!', item._id, item.name);
                   e.stopPropagation();
-                  Alert.alert(
-                    'Delete Item',
-                    'Are you sure you want to delete this saved item?',
-                    [
-                      { text: 'Cancel', style: 'cancel', onPress: () => console.log('Delete cancelled') },
-                      { 
-                        text: 'Delete', 
-                        style: 'destructive', 
-                        onPress: () => {
-                          console.log('Delete confirmed, calling deleteSavedItem');
-                          deleteSavedItem(item._id);
-                        }
-                      },
-                    ]
-                  );
+                  setItemToDelete(item._id);
+                  setShowDeleteModal(true);
                 }}
               >
                 <Ionicons name="trash-outline" size={20} color="#ef4444" />
