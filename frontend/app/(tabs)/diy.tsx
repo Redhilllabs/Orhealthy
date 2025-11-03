@@ -758,23 +758,31 @@ export default function DIYScreen() {
     // For My DIY tab, items are clickable to edit
     if (activeTab === 'my-diy') {
       return (
-        <TouchableOpacity 
-          style={styles.listItemCard}
-          onPress={() => handleEditMyDiyItem(item)}
-        >
-          {item.images?.[0] ? (
-            <Image source={{ uri: item.images[0] }} style={styles.listItemImage} />
-          ) : (
-            <View style={[styles.listItemImage, styles.placeholderImage]}>
-              <Ionicons name="restaurant" size={24} color="#ccc" />
+        <View style={styles.listItemCard}>
+          <TouchableOpacity 
+            style={styles.myDiyItemContent}
+            onPress={() => handleEditMyDiyItem(item)}
+          >
+            {item.images?.[0] ? (
+              <Image source={{ uri: item.images[0] }} style={styles.listItemImage} />
+            ) : (
+              <View style={[styles.listItemImage, styles.placeholderImage]}>
+                <Ionicons name="restaurant" size={24} color="#ccc" />
+              </View>
+            )}
+            <View style={styles.listItemInfo}>
+              <Text style={styles.itemName}>{item.name}</Text>
+              <Text style={styles.itemPrice}>₹{price.toFixed(2)}</Text>
             </View>
-          )}
-          <View style={styles.listItemInfo}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemPrice}>₹{price.toFixed(2)}</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color="#999" />
-        </TouchableOpacity>
+            <Ionicons name="chevron-forward" size={24} color="#999" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.deleteIconButton}
+            onPress={() => handleDeleteMyDiyItem(item._id)}
+          >
+            <Ionicons name="trash" size={20} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
       );
     }
     
