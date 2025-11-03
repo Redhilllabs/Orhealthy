@@ -2778,33 +2778,33 @@
 
         async function saveCombo(e) {
             e.preventDefault();
-            if (selectedMealRecipes.length === 0) return alert('Add at least one recipe');
+            if (selectedComboMeals.length === 0) return alert('Add at least one meal');
             
-            const tags = document.getElementById('mealTags').value
+            const tags = document.getElementById('comboTags').value
                 .split(',').map(t => t.trim()).filter(Boolean);
             
             const data = {
-                name: document.getElementById('mealName').value,
-                description: document.getElementById('mealDescription').value,
-                recipes: selectedMealRecipes,
+                name: document.getElementById('comboName').value,
+                description: document.getElementById('comboDescription').value,
+                meals: selectedComboMeals,
                 tags: tags,
-                images: mealImages,
+                images: comboImages,
                 is_preset: true,
                 created_by: 'admin'
             };
             
             try {
                 let response;
-                if (editingMealId) {
-                    // Update existing meal
-                    response = await fetch(`${API_URL}/meals/${editingMealId}`, {
+                if (editingComboId) {
+                    // Update existing combo
+                    response = await fetch(`${API_URL}/combos/${editingComboId}`, {
                         method: 'PUT',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
                     });
                 } else {
-                    // Create new meal
-                    response = await fetch(`${API_URL}/meals`, {
+                    // Create new combo
+                    response = await fetch(`${API_URL}/combos`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(data)
@@ -2812,15 +2812,15 @@
                 }
                 
                 if (response.ok) {
-                    closeModal('mealModal');
-                    showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal created successfully', 'success');
+                    closeModal('comboModal');
+                    showAlert('combos', editingComboId ? 'Combo updated successfully' : 'Combo created successfully', 'success');
                     loadCombos();
                 } else {
                     const error = await response.json();
-                    showAlert('meals', error.detail || 'Error saving meal', 'error');
+                    showAlert('combos', error.detail || 'Error saving combo', 'error');
                 }
             } catch (error) {
-                showAlert('meals', 'Error saving meal', 'error');
+                showAlert('combos', 'Error saving combo', 'error');
             }
         }
 
