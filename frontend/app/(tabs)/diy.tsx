@@ -355,9 +355,24 @@ export default function DIYScreen() {
         ? `${API_URL}/recipes/${editingItem._id}`
         : `${API_URL}/meals/${editingItem._id}`;
       
+      // Send complete data with only updated customizations
       const updateData = myDiySubTab === 'my-meals'
-        ? { ingredients: editingCustomizations }
-        : { meals: editingCustomizations };
+        ? {
+            name: editingItem.name,
+            description: editingItem.description || '',
+            images: editingItem.images || [],
+            ingredients: editingCustomizations,
+            tags: editingItem.tags || [],
+            created_by: editingItem.created_by || 'user'
+          }
+        : {
+            name: editingItem.name,
+            description: editingItem.description || '',
+            images: editingItem.images || [],
+            meals: editingCustomizations,
+            tags: editingItem.tags || [],
+            created_by: editingItem.created_by || 'user'
+          };
       
       await axios.put(endpoint, updateData, {
         headers: { Authorization: `Bearer ${token}` },
