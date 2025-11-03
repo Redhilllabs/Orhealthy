@@ -2164,8 +2164,8 @@
         async function loadMeals() {
             try {
                 const recipes = await fetch(`${API_URL}/recipes`).then(r => r.json());
-                allRecipes = recipes; // Store for use in meal creation
-                const tbody = document.getElementById('recipesBody');
+                allRecipes = recipes; // Store for use in combo creation
+                const tbody = document.getElementById('mealsBody');
                 tbody.innerHTML = recipes.map(recipe => `
                     <tr>
                         <td>${recipe.images && recipe.images.length > 0 ? `<img src="${recipe.images[0]}" class="table-image">` : '-'}</td>
