@@ -63,6 +63,7 @@ export default function PresetsScreen() {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const { addToCart } = useCart();
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchAllData();
