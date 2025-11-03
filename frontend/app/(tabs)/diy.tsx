@@ -329,12 +329,16 @@ export default function DIYScreen() {
   };
 
   const handleEditMyDiyItem = (item: Recipe) => {
+    console.log('Editing item:', item);
+    console.log('Item meals:', item.meals);
+    console.log('Item recipes:', item.recipes);
     setEditingItem(item);
     // Initialize customizations from the item
     if (myDiySubTab === 'my-meals') {
       setEditingCustomizations(item.ingredients || []);
     } else {
-      setEditingCustomizations(item.meals || []);
+      // Backend might use 'recipes' field instead of 'meals' for combos
+      setEditingCustomizations(item.meals || item.recipes || []);
     }
     setShowEditModal(true);
   };
