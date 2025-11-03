@@ -328,11 +328,61 @@ export default function DIYScreen() {
 
   const handleEditMyDiyItem = (item: Recipe) => {
     setEditingItem(item);
+    // Initialize customizations from the item
+    if (myDiySubTab === 'my-meals') {
+      setEditingCustomizations(item.ingredients || []);
+    } else {
+      setEditingCustomizations(item.meals || []);
+    }
     setShowEditModal(true);
   };
 
-  const handleDeleteMyDiyItem = async () => {
+  const updateEditingCustomization = (index: number, newQty: number) => {
+    const updated = [...editingCustomizations];
+    updated[index] = { ...updated[index], quantity: Math.max(0, newQty) };
+    setEditingCustomizations(updated);
+  };
+
+  const handleSaveMyDiyItem = async () => {
     if (!editingItem) return;
+    
+    try {
+      setGlobalLoading(true);
+      setShowEditModal(false);
+      
+      const token = await storage.getItemAsync('session_token');
+      const endpoint = myDiySubTab === 'my-meals' 
+        ? `${API_URL}/recipes/${editingItem._id}`
+        : `${API_URL}/meals/${editingItem._id}`;
+      
+      const updateData = myDiySubTab === 'my-meals'
+        ? { ingredients: editingCustomizations }
+        : { meals: editingCustomizations };
+      
+      await axios.put(endpoint, updateData, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      setSuccessMessage('Item updated successfully');
+      setShowSuccessModal(true);
+      setEditingItem(null);
+      
+      // Refresh data
+      if (myDiySubTab === 'my-meals') {
+        fetchMyRecipes();
+      } else {
+        fetchMyCombos();
+      }
+    } catch (error) {
+      console.error('Error updating item:', error);
+      setSuccessMessage('Failed to update item');
+      setShowSuccessModal(true);
+    } finally {
+      setGlobalLoading(false);
+    }
+  };
+
+  const handleDeleteMyDiyItem = async (itemId: string) => {
     
     try {
       setGlobalLoading(true);
