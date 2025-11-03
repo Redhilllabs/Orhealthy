@@ -11,7 +11,6 @@ import {
   Alert,
   Platform,
   TextInput,
-  Modal,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
