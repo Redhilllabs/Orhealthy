@@ -188,6 +188,7 @@ export default function PresetsScreen() {
   const deleteSavedItem = async (itemId: string) => {
     console.log('deleteSavedItem called with:', itemId, 'activeTab:', activeTab, 'mealsSubTab:', mealsSubTab, 'combosSubTab:', combosSubTab);
     try {
+      setGlobalLoading(true);
       const token = await storage.getItemAsync('session_token');
       
       // Determine which endpoint to use based on active tab
@@ -219,6 +220,8 @@ export default function PresetsScreen() {
     } catch (error: any) {
       console.error('Error deleting item:', error.response?.data || error.message);
       Alert.alert('Error', 'Failed to delete item');
+    } finally {
+      setGlobalLoading(false);
     }
   };
 
