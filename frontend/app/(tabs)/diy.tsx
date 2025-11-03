@@ -1318,8 +1318,8 @@ export default function DIYScreen() {
 
       </SafeAreaView>
 
-      {/* Floating View Button */}
-      {selectedCount > 0 && (
+      {/* Floating View Button - Only show in DIY Meals and DIY Combos, not My DIY */}
+      {selectedCount > 0 && activeTab !== 'my-diy' && (
         <TouchableOpacity
           style={styles.floatingViewButton}
           onPress={() => setShowSelectedModal(true)}
