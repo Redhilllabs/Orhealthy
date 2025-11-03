@@ -442,6 +442,8 @@ export default function DIYScreen() {
       setTimeout(() => {
         if (activeTab === 'diy-meals') {
           fetchMyMeals();
+        } else if (activeTab === 'diy-combos') {
+          fetchMyCombos();
         }
       }, 500);
     } catch (error) {
