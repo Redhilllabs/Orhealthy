@@ -369,7 +369,7 @@ export default function DIYScreen() {
             name: editingItem.name,
             description: editingItem.description || '',
             images: editingItem.images || [],
-            meals: editingCustomizations,
+            recipes: editingCustomizations,
             tags: editingItem.tags || [],
             created_by: editingItem.created_by || 'user'
           };
