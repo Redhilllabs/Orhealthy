@@ -662,32 +662,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabContainer: {
+    flexDirection: 'row',
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    flexDirection: 'row',
   },
   tab: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 16,
     alignItems: 'center',
-    justifyContent: 'center',
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
-    height: 40,
   },
   activeTab: {
     borderBottomColor: '#ffd700',
   },
   tabText: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '600',
     color: '#666',
   },
   activeTabText: {
-    color: '#ffd700',
-    fontWeight: '700',
+    color: '#333',
   },
   subTabContainer: {
     backgroundColor: '#fff',
