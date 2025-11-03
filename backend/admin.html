@@ -2855,7 +2855,7 @@
         async function deleteCombo(id) {
             if (!confirm('Delete this combo?')) return;
             try {
-                const response = await fetch(`${API_URL}/combos/${id}`, { method: 'DELETE' });
+                const response = await fetch(`${API_URL}/meals/${id}`, { method: 'DELETE' });
                 if (response.ok) {
                     showAlert('combos', 'Deleted successfully', 'success');
                     loadCombos();
