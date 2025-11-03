@@ -103,7 +103,8 @@ export default function DIYScreen() {
     await Promise.all([
       fetchIngredients(),
       fetchAllMeals(),
-      fetchMyMeals()
+      fetchMyMeals(),
+      fetchMyCombos()
     ]);
   };
 
