@@ -700,13 +700,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffd700',
   },
   subTabText: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
     color: '#666',
   },
   activeSubTabText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: '#333',
   },
   searchContainer: {
     paddingHorizontal: 16,
