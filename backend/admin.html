@@ -2598,7 +2598,7 @@
         async function editCombo(id) {
             editingComboId = id;
             try {
-                const response = await fetch(`${API_URL}/combos/${id}`);
+                const response = await fetch(`${API_URL}/meals/${id}`);
                 const combo = await response.json();
                 
                 document.getElementById('comboModal').classList.add('active');
@@ -2618,8 +2618,8 @@
                     </div>
                 `).join('');
                 
-                // Set existing meals
-                selectedComboMeals = combo.meals || [];
+                // Set existing meals (stored as recipes in backend)
+                selectedComboMeals = combo.recipes || [];
                 updateComboMealSelect();
                 renderComboMeals();
                 updateComboPrice();
