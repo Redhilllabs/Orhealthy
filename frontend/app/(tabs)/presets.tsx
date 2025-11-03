@@ -131,12 +131,14 @@ export default function PresetsScreen() {
   const fetchMyMeals = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
-      if (!token) return;
+      if (!token || !user) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
+      const response = await axios.get(`${API_URL}/recipes?user_id=${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMyMeals(response.data);
+      // Filter only user-created meals (not presets)
+      const userMeals = response.data.filter((meal: any) => meal.created_by === user._id && !meal.is_preset);
+      setMyMeals(userMeals);
     } catch (error) {
       console.error('Error fetching my recipes:', error);
     }
@@ -145,12 +147,14 @@ export default function PresetsScreen() {
   const fetchMyCombos = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
-      if (!token) return;
+      if (!token || !user) return;
 
-      const response = await axios.get(`${API_URL}/saved-meals?type=combo`, {
+      const response = await axios.get(`${API_URL}/meals?user_id=${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMyCombos(response.data);
+      // Filter only user-created combos (not presets)
+      const userCombos = response.data.filter((combo: any) => combo.created_by === user._id && !combo.is_preset);
+      setMyCombos(userCombos);
     } catch (error) {
       console.error('Error fetching my meals:', error);
     }
