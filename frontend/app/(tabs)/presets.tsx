@@ -249,21 +249,36 @@ export default function PresetsScreen() {
     if (!selectedMeal) return;
 
     try {
-      setGlobalLoading(true);
-      const totalPrice = activeTab.startsWith('my-')
-        ? selectedMeal.total_price || selectedMeal.calculated_price || 0
-        : customizations.reduce(
-            (sum, ing) => sum + (ing.price || ing.price_per_unit || 0) * (ing.quantity || 1),
-            selectedMeal.base_price || selectedMeal.calculated_price || 0
-          );
+      // Validate that at least one item has quantity > 0
+      const hasItems = customizations.some(ing => (ing.quantity || 0) > 0);
+      
+      if (!hasItems) {
+        if (Platform.OS === 'web') {
+          alert('Please add at least one item');
+        } else {
+          Alert.alert('Error', 'Please add at least one item');
+        }
+        return;
+      }
 
-      const cartCustomizations = customizations.map(ing => ({
-        ingredient_id: ing.ingredient_id || ing._id || '',
-        name: ing.name || ing.ingredient_name || '',
-        price: ing.price || ing.price_per_unit || 0,
-        default_quantity: ing.default_quantity || ing.quantity || 1,
-        quantity: ing.quantity || ing.default_quantity || 1,
-      }));
+      setGlobalLoading(true);
+      
+      // Use the same calculation as calculateTotal() - direct sum only
+      const totalPrice = customizations.reduce(
+        (sum, ing) => sum + (ing.price || ing.price_per_unit || 0) * (ing.quantity || 0),
+        0
+      );
+
+      // Filter out items with quantity 0
+      const cartCustomizations = customizations
+        .filter(ing => (ing.quantity || 0) > 0)
+        .map(ing => ({
+          ingredient_id: ing.ingredient_id || ing._id || '',
+          name: ing.name || ing.ingredient_name || '',
+          price: ing.price || ing.price_per_unit || 0,
+          default_quantity: ing.default_quantity || ing.quantity || 1,
+          quantity: ing.quantity || ing.default_quantity || 1,
+        }));
 
       await addToCart({
         meal_id: selectedMeal._id || selectedMeal.meal_id,
