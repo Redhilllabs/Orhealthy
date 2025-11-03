@@ -908,4 +908,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  deleteModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    margin: 20,
+    maxWidth: 400,
+    alignSelf: 'center',
+  },
+  deleteModalHeader: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    alignItems: 'center',
+  },
+  deleteModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  deleteModalBody: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  deleteModalText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  deleteModalFooter: {
+    flexDirection: 'row',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderRightWidth: 1,
+    borderRightColor: '#eee',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '600',
+  },
+  confirmDeleteButton: {
+    flex: 1,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  confirmDeleteButtonText: {
+    fontSize: 16,
+    color: '#ef4444',
+    fontWeight: '600',
+  },
 });
