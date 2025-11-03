@@ -1456,12 +1456,12 @@ async def create_recipe(recipe_data: dict):
     """Create a new recipe (admin)"""
     recipe_doc = {
         "name": recipe_data["name"],
-        "description": recipe_data["description"],
+        "description": recipe_data.get("description", ""),
         "images": recipe_data.get("images", []),
         "ingredients": recipe_data["ingredients"],
         "tags": recipe_data.get("tags", []),
         "created_by": recipe_data.get("created_by", "admin"),
-        "is_preset": True,
+        "is_preset": recipe_data.get("is_preset", True),
         "created_at": datetime.now(timezone.utc)
     }
     
