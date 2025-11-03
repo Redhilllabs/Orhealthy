@@ -395,7 +395,7 @@ export default function PresetsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* 2 Main Tabs - Sticky */}
+      {/* 2 Main Tabs - Fixed Width Structure */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'meals' && styles.activeTab]}
