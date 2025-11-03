@@ -44,25 +44,54 @@ def print_warning(message):
 def print_info(message):
     print(f"{Colors.BLUE}ℹ️  {message}{Colors.END}")
 
-class BackendTester:
+class AdminPanelTester:
     def __init__(self):
         self.session = requests.Session()
-        self.test_results = []
-        self.created_recipe_id = None
-        self.created_meal_id = None
+        self.admin_token = None
+        self.test_results = {
+            'passed': 0,
+            'failed': 0,
+            'warnings': 0
+        }
+        self.test_combo_id = None
         
-    def log_test(self, test_name, success, details=""):
-        """Log test result"""
-        status = "✅ PASS" if success else "❌ FAIL"
-        self.test_results.append({
-            "test": test_name,
-            "success": success,
-            "details": details
-        })
-        print(f"{status}: {test_name}")
-        if details:
-            print(f"   Details: {details}")
-        print()
+    def run_all_tests(self):
+        """Run all admin panel combo management tests"""
+        print(f"{Colors.BOLD}OrHealthy Admin Panel - Combo Management Testing{Colors.END}")
+        print(f"Backend URL: {BACKEND_URL}")
+        print(f"API Base: {API_BASE}")
+        print(f"Admin Panel: {ADMIN_PANEL_URL}")
+        
+        try:
+            # Test 1: Admin Panel Access & Loading
+            self.test_admin_panel_access()
+            
+            # Test 2: Admin Authentication
+            self.test_admin_authentication()
+            
+            # Test 3: Load Existing Combos (GET /api/meals)
+            self.test_load_combos()
+            
+            # Test 4: Load Recipes for Combo Creation (GET /api/recipes)
+            self.test_load_recipes_for_combos()
+            
+            # Test 5: Create New Combo (POST /api/meals)
+            self.test_create_combo()
+            
+            # Test 6: Edit Existing Combo (PUT /api/meals/{id})
+            self.test_edit_combo()
+            
+            # Test 7: Delete Combo (DELETE /api/meals/{id})
+            self.test_delete_combo()
+            
+            # Test 8: Error Handling
+            self.test_error_handling()
+            
+        except Exception as e:
+            print_error(f"Critical test failure: {str(e)}")
+            self.test_results['failed'] += 1
+        
+        self.print_summary()
 
     def test_recipe_endpoints(self):
         """Test all Recipe CRUD endpoints"""
