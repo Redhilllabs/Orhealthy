@@ -783,6 +783,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderWidth: 1,
     borderColor: '#ddd',
+    minWidth: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tagChipActive: {
     backgroundColor: '#ffd700',
