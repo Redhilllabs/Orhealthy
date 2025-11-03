@@ -904,3 +904,36 @@ agent_communication:
       - Test image upload and preview for combos
       
       Please test the admin panel combo management functionality thoroughly.
+
+backend:
+  - task: "Admin Panel - Combo Management"
+    implemented: true
+    working: "NA"
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Completed Phase 1 of admin panel combo management:
+          - Fixed all HTML IDs in comboModal to use combo* prefix
+          - Added comboImages, selectedComboMeals, editingComboId variables
+          - Updated showComboModal, editCombo, saveCombo, deleteCombo, loadCombos functions
+          - Added 9 helper functions for combo management
+          - Mapped to correct backend API endpoints (/api/meals)
+          - Ready for testing: create, edit, delete combos with price auto-calculation
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 3
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Admin Panel - Combo Management"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
