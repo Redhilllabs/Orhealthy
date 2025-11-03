@@ -418,6 +418,9 @@ export default function DIYScreen() {
       return;
     }
 
+    // Close the selections modal first
+    setShowSelectedModal(false);
+
     try {
       setGlobalLoading(true);
       const compositeImages = generateCompositeImage();
@@ -480,7 +483,6 @@ export default function DIYScreen() {
       // Reset selections
       setSelectedIngredients(new Map());
       setSelectedMeals(new Map());
-      setShowSelectedModal(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
       setSuccessMessage('Failed to add to cart. Please try again.');
