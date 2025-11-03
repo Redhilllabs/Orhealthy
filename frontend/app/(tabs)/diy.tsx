@@ -421,32 +421,6 @@ export default function DIYScreen() {
     }
   };
 
-  const calculateTotal = () => {
-    if (activeTab === 'diy-meals') {
-      let total = 0;
-      selectedIngredients.forEach((qty, id) => {
-        const ingredient = ingredients.find(i => i._id === id);
-        if (ingredient) {
-          total += (ingredient.calculated_price || ingredient.price_per_unit || 0) * qty;
-        }
-      });
-      return total;
-    } else {
-      let total = 0;
-      selectedMeals.forEach((qty, id) => {
-        // Search in both allMeals and myMeals
-        let recipe = allMeals.find(r => r._id === id);
-        if (!recipe) {
-          recipe = myMeals.find(r => r._id === id);
-        }
-        if (recipe) {
-          total += (recipe.calculated_price || 0) * qty;
-        }
-      });
-      return total;
-    }
-  };
-
   // Generate image from constituents
   const generateCompositeImage = () => {
     if (activeTab === 'diy-meals') {
