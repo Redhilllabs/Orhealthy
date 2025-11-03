@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
   },
   floatingViewButton: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 90,
     left: 20,
     right: 20,
     backgroundColor: '#ffd700',
