@@ -113,7 +113,9 @@ export default function DIYScreen() {
   const fetchAllMeals = async () => {
     try {
       const response = await axios.get(`${API_URL}/recipes`);
-      setAllMeals(response.data);
+      // Filter only admin preset meals for "All Meals"
+      const presetMeals = response.data.filter((meal: any) => meal.is_preset === true);
+      setAllMeals(presetMeals);
       extractTags([], response.data);
     } catch (error) {
       console.error('Error fetching all meals:', error);
@@ -127,8 +129,10 @@ export default function DIYScreen() {
       const response = await axios.get(`${API_URL}/recipes?user_id=${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('My meals from /recipes:', response.data);
-      setMyMeals(response.data);
+      // Filter only user's non-preset meals for "My Meals"
+      const userMeals = response.data.filter((meal: any) => meal.created_by === user._id && meal.is_preset === false);
+      console.log('My meals from /recipes:', userMeals);
+      setMyMeals(userMeals);
     } catch (error) {
       console.error('Error fetching my meals:', error);
     }
