@@ -363,7 +363,9 @@ export default function DIYScreen() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      Alert.alert('Success', `${activeTab === 'diy-meals' ? 'Meal' : 'Combo'} saved successfully!`);
+      // Show success message
+      setSuccessMessage(`Saved to ${activeTab === 'diy-meals' ? 'My Meals' : 'My Combos'} in Presets!`);
+      setShowSuccessModal(true);
       
       // Reset
       setMealName('');
@@ -372,13 +374,16 @@ export default function DIYScreen() {
       setSelectedMeals(new Map());
       setShowSelectedModal(false);
       
-      // Refresh data
-      if (activeTab === 'diy-meals') {
-        fetchMyMeals();
-      }
+      // Refresh data after a delay to allow modal to show
+      setTimeout(() => {
+        if (activeTab === 'diy-meals') {
+          fetchMyMeals();
+        }
+      }, 500);
     } catch (error) {
       console.error('Error saving meal:', error);
-      Alert.alert('Error', 'Failed to save meal');
+      setSuccessMessage('Failed to save. Please try again.');
+      setShowSuccessModal(true);
     } finally {
       setSaving(false);
     }
