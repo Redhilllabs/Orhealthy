@@ -537,7 +537,7 @@ export default function PresetsScreen() {
                     </Text>
                   ) : (
                     <Text style={styles.ingredientPrice}>
-                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)} {ing.unit || ''}
+                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)}{ing.unit ? ` ${ing.unit}` : ''}
                     </Text>
                   )}
                 </View>
