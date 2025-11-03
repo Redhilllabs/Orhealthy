@@ -92,10 +92,12 @@ export default function DIYScreen() {
   useEffect(() => {
     if (activeTab === 'diy-meals') {
       filterIngredients();
-    } else {
+    } else if (activeTab === 'diy-combos') {
       filterMeals();
+    } else if (activeTab === 'my-diy') {
+      filterMyDiyItems();
     }
-  }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, activeTab, combosSubTab]);
+  }, [searchQuery, selectedTag, ingredients, allMeals, myMeals, myCombos, activeTab, myDiySubTab]);
 
   const fetchAllData = async () => {
     await Promise.all([
