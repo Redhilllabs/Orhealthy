@@ -559,6 +559,52 @@ export default function PresetsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isVisible={showDeleteModal}
+        onBackdropPress={() => setShowDeleteModal(false)}
+        style={styles.modal}
+      >
+        <View style={styles.deleteModalContent}>
+          <View style={styles.deleteModalHeader}>
+            <Text style={styles.deleteModalTitle}>Delete Item</Text>
+          </View>
+          
+          <View style={styles.deleteModalBody}>
+            <Text style={styles.deleteModalText}>
+              Are you sure you want to delete this saved item?
+            </Text>
+          </View>
+          
+          <View style={styles.deleteModalFooter}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                console.log('Delete cancelled');
+                setShowDeleteModal(false);
+                setItemToDelete(null);
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.confirmDeleteButton}
+              onPress={() => {
+                console.log('Delete confirmed, calling deleteSavedItem');
+                if (itemToDelete) {
+                  deleteSavedItem(itemToDelete);
+                }
+                setShowDeleteModal(false);
+                setItemToDelete(null);
+              }}
+            >
+              <Text style={styles.confirmDeleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
