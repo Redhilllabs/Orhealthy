@@ -856,3 +856,51 @@ agent_communication:
       - Data persistence and retrieval working correctly
       
       **All Recipe and Meal CRUD operations are fully functional and ready for production use.**
+  - agent: "main"
+    message: |
+      **ADMIN PANEL COMBO MANAGEMENT - Phase 1 COMPLETED**
+      
+      **CHANGES IMPLEMENTED:**
+      
+      **1. Fixed Combo Modal HTML Structure:**
+      - Updated all HTML element IDs in comboModal to use `combo*` prefix (comboName, comboDescription, comboImages, comboImagePreview, comboPrice, comboTags, comboMealSelect, comboMeals)
+      - Removed duplicate IDs that were conflicting with mealModal
+      - Fixed form ID to use `comboForm` and form submission handler to call `saveCombo(event)`
+      
+      **2. Added Combo-Specific JavaScript Variables:**
+      - Added `comboImages` array for storing combo images
+      - Added `selectedComboMeals` array for storing selected meals in combo
+      - Added `editingComboId` variable for tracking the combo being edited
+      
+      **3. Updated JavaScript Functions:**
+      - `showComboModal()` - Uses correct combo modal IDs and variables
+      - `editCombo(id)` - Fetches from `/api/meals/{id}` and populates combo modal
+      - `saveCombo(e)` - Saves to `/api/meals` endpoint with proper data structure
+      - `deleteCombo(id)` - Deletes from `/api/meals/{id}` endpoint
+      - `loadCombos()` - Fetches from `/api/meals` and populates combosBody table
+      
+      **4. Added Helper Functions:**
+      - `updateComboMealSelect()` - Populates meal dropdown from allRecipes
+      - `addMealToCombo()` - Adds selected meal to combo with proper structure (recipe_id, name, quantity, step_size, price)
+      - `renderComboMeals()` - Renders selected meals list with quantity controls
+      - `updateComboMealQuantity(index, quantity)` - Updates meal quantity
+      - `removeMealFromCombo(index)` - Removes meal from combo
+      - `updateComboPrice()` - Calculates total price from selected meals
+      - `handleComboImages(event)` - Handles image file selection
+      - `updateComboImagePreview()` - Updates image preview display
+      - `removeComboImage(index)` - Removes image from combo
+      
+      **5. Backend API Mapping:**
+      - Admin panel "Combos" → Backend `/api/meals` endpoint
+      - Admin panel "Meals" → Backend `/api/recipes` endpoint
+      - Combo data structure uses `recipes` field (containing meals from /api/recipes)
+      
+      **NEEDS TESTING:**
+      - Verify admin panel loads without JavaScript errors
+      - Test creating new combo with meals
+      - Test editing existing combo
+      - Test deleting combo
+      - Verify price auto-calculation when adding/removing meals
+      - Test image upload and preview for combos
+      
+      Please test the admin panel combo management functionality thoroughly.
