@@ -563,7 +563,8 @@ export default function DIYScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
       {/* 2 Main Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
