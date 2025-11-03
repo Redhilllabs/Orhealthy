@@ -636,6 +636,30 @@ export default function PresetsScreen() {
         </View>
       </Modal>
       
+      {/* Custom Alert Modal */}
+      <Modal
+        isVisible={showAlertModal}
+        onBackdropPress={() => setShowAlertModal(false)}
+        style={styles.modal}
+      >
+        <View style={styles.alertModalContent}>
+          <View style={styles.alertIcon}>
+            {alertType === 'success' ? (
+              <Ionicons name="checkmark-circle" size={60} color="#4CAF50" />
+            ) : (
+              <Ionicons name="close-circle" size={60} color="#ef4444" />
+            )}
+          </View>
+          <Text style={styles.alertMessage}>{alertMessage}</Text>
+          <TouchableOpacity
+            style={[styles.alertButton, alertType === 'success' ? styles.successAlertButton : styles.errorAlertButton]}
+            onPress={() => setShowAlertModal(false)}
+          >
+            <Text style={styles.alertButtonText}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      
       {/* Global Loading Overlay */}
       {globalLoading && (
         <View style={styles.loadingOverlay}>
