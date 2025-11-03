@@ -1287,23 +1287,25 @@ export default function DIYScreen() {
           </ScrollView>
           
           <View style={styles.bottomSheetFooter}>
+            <Text style={styles.bottomSheetTotalLabel}>Total:</Text>
             <Text style={styles.bottomSheetTotal}>
-              Total: ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || item.calculated_price || 0) * (item.quantity || 0)), 0).toFixed(2)}
+              ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || item.calculated_price || 0) * (item.quantity || 0)), 0).toFixed(2)}
             </Text>
-            <View style={styles.bottomSheetActions}>
-              <TouchableOpacity
-                style={styles.bottomSheetSaveButton}
-                onPress={handleSaveMyDiyItem}
-              >
-                <Text style={styles.bottomSheetSaveButtonText}>Save</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.bottomSheetAddButton}
-                onPress={handleAddEditedItemToCart}
-              >
-                <Text style={styles.bottomSheetAddButtonText}>Add to Cart</Text>
-              </TouchableOpacity>
-            </View>
+          </View>
+          
+          <View style={styles.bottomSheetActions}>
+            <TouchableOpacity
+              style={styles.bottomSheetSaveButton}
+              onPress={handleSaveMyDiyItem}
+            >
+              <Text style={styles.bottomSheetSaveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.bottomSheetAddButton}
+              onPress={handleAddEditedItemToCart}
+            >
+              <Text style={styles.bottomSheetAddButtonText}>Add to Cart</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
