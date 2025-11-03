@@ -530,11 +530,11 @@ export default function PresetsScreen() {
                   </Text>
                   {activeTab === 'combos' ? (
                     <Text style={styles.ingredientPrice}>
-                      ₹{(ing.price || 0).toFixed(2)}
+                      ₹{(ing.price || 0).toFixed(2)}/meal • Total: ₹{((ing.price || 0) * (ing.quantity || 1)).toFixed(2)}
                     </Text>
                   ) : (
                     <Text style={styles.ingredientPrice}>
-                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)}{ing.unit ? ` ${ing.unit}` : ''}
+                      ₹{(ing.price || ing.price_per_unit || 0).toFixed(2)}/{ing.unit || 'unit'} • Total: ₹{((ing.price || ing.price_per_unit || 0) * (ing.quantity || ing.default_quantity || 1)).toFixed(2)}
                     </Text>
                   )}
                 </View>
