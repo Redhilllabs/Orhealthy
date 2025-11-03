@@ -502,7 +502,7 @@ export default function PresetsScreen() {
       <Modal
         isVisible={selectedMeal !== null}
         onBackdropPress={() => setSelectedMeal(null)}
-        style={styles.modal}
+        style={styles.modalBottom}
       >
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
