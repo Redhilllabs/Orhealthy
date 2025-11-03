@@ -1022,6 +1022,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: '#333',
+    outlineStyle: 'none',
   },
   tagsContainer: {
     backgroundColor: '#fff',
