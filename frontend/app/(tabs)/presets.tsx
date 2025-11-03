@@ -83,6 +83,12 @@ export default function PresetsScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
+  const showAlert = (message: string, type: 'success' | 'error' = 'success') => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setShowAlertModal(true);
+  };
+
   useEffect(() => {
     fetchAllData();
   }, []);
