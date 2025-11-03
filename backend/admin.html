@@ -2559,23 +2559,23 @@
 
         async function loadCombos() {
             try {
-                const meals = await fetch(`${API_URL}/meals`).then(r => r.json());
-                const tbody = document.getElementById('mealsBody');
-                tbody.innerHTML = meals.map(meal => `
+                const combos = await fetch(`${API_URL}/combos`).then(r => r.json());
+                const tbody = document.getElementById('combosBody');
+                tbody.innerHTML = combos.map(combo => `
                     <tr>
-                        <td>${meal.images && meal.images.length > 0 ? `<img src="${meal.images[0]}" class="table-image">` : '-'}</td>
-                        <td>${meal.name}</td>
-                        <td>${meal.recipes ? meal.recipes.length + ' recipe(s)' : '-'}</td>
-                        <td>₹${meal.calculated_price ? meal.calculated_price.toFixed(2) : '0.00'}</td>
-                        <td>${meal.tags ? meal.tags.join(', ') : '-'}</td>
+                        <td>${combo.images && combo.images.length > 0 ? `<img src="${combo.images[0]}" class="table-image">` : '-'}</td>
+                        <td>${combo.name}</td>
+                        <td>${combo.meals ? combo.meals.length + ' meal(s)' : '-'}</td>
+                        <td>₹${combo.calculated_price ? combo.calculated_price.toFixed(2) : '0.00'}</td>
+                        <td>${combo.tags ? combo.tags.join(', ') : '-'}</td>
                         <td class="actions">
-                            <button class="btn" onclick="editCombo('${meal._id}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteCombo('${meal._id}')">Delete</button>
+                            <button class="btn" onclick="editCombo('${combo._id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteCombo('${combo._id}')">Delete</button>
                         </td>
                     </tr>
                 `).join('');
             } catch (error) {
-                showAlert('meals', 'Error loading meals', 'error');
+                showAlert('combos', 'Error loading combos', 'error');
             }
         }
 
