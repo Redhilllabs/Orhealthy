@@ -1071,21 +1071,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   alertButton: {
+    backgroundColor: '#ffd700',
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderRadius: 12,
     minWidth: 120,
-    alignItems: 'center',
-  },
-  successAlertButton: {
-    backgroundColor: '#ffd700',
-  },
-  errorAlertButton: {
-    backgroundColor: '#ef4444',
   },
   alertButtonText: {
-    color: '#333',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
+    color: '#333',
+    textAlign: 'center',
   },
 });
