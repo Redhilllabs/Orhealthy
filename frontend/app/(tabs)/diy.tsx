@@ -70,6 +70,8 @@ export default function DIYScreen() {
   const [selectedSaveTags, setSelectedSaveTags] = useState<string[]>([]);
   const [showNameModal, setShowNameModal] = useState(false);
   const [showSelectedModal, setShowSelectedModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
