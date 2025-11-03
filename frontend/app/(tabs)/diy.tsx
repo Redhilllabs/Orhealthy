@@ -69,6 +69,7 @@ export default function DIYScreen() {
   const [mealName, setMealName] = useState('');
   const [selectedSaveTags, setSelectedSaveTags] = useState<string[]>([]);
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showSelectedModal, setShowSelectedModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -123,25 +124,11 @@ export default function DIYScreen() {
     if (!user) return;
     try {
       const token = await storage.getItemAsync('session_token');
-      const response = await axios.get(`${API_URL}/saved-meals?type=meal`, {
+      const response = await axios.get(`${API_URL}/recipes?user_id=${user._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Raw saved meals data:', response.data);
-      // Transform saved meals to match Recipe interface
-      const transformedMeals = response.data.map((meal: any) => {
-        console.log('Transforming meal:', meal.name, meal.total_price);
-        return {
-          _id: meal._id,
-          name: meal.name || 'Unnamed Meal',
-          description: meal.description || '',
-          images: meal.images || [],
-          calculated_price: meal.total_price || meal.calculated_price || 0,
-          tags: meal.tags || [],
-          ingredients: meal.ingredients || [],
-        };
-      });
-      console.log('Transformed meals:', transformedMeals);
-      setMyMeals(transformedMeals);
+      console.log('My meals from /recipes:', response.data);
+      setMyMeals(response.data);
     } catch (error) {
       console.error('Error fetching my meals:', error);
     }
@@ -268,7 +255,6 @@ export default function DIYScreen() {
   // Generate image from constituents
   const generateCompositeImage = () => {
     if (activeTab === 'diy-meals') {
-      // Get images from selected ingredients
       const images: string[] = [];
       selectedIngredients.forEach((qty, id) => {
         const ingredient = ingredients.find(i => i._id === id);
@@ -276,9 +262,8 @@ export default function DIYScreen() {
           images.push(ingredient.images[0]);
         }
       });
-      return images.slice(0, 4); // Up to 4 images
+      return images.slice(0, 4);
     } else {
-      // Get images from selected meals
       const images: string[] = [];
       selectedMeals.forEach((qty, id) => {
         const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
@@ -286,7 +271,7 @@ export default function DIYScreen() {
           images.push(recipe.images[0]);
         }
       });
-      return images.slice(0, 4); // Up to 4 images
+      return images.slice(0, 4);
     }
   };
 
@@ -316,16 +301,16 @@ export default function DIYScreen() {
       const token = await storage.getItemAsync('session_token');
       const compositeImages = generateCompositeImage();
       
+      let endpoint = '';
       let mealData: any;
       
       if (activeTab === 'diy-meals') {
-        // Creating meal from ingredients
+        // Creating meal from ingredients -> POST to /recipes
         const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
           const ingredient = ingredients.find(i => i._id === id);
           return {
             ingredient_id: id,
             name: ingredient?.name || '',
-            default_quantity: qty,
             quantity: qty,
             price: ingredient?.calculated_price || ingredient?.price_per_unit || 0,
             unit: ingredient?.unit || '',
@@ -333,17 +318,17 @@ export default function DIYScreen() {
           };
         });
 
+        endpoint = `${API_URL}/recipes`;
         mealData = {
           name: mealName,
           ingredients: ingredientsList,
           images: compositeImages,
           tags: selectedSaveTags,
-          total_price: calculateTotal(),
           is_preset: false,
           created_by: user._id,
         };
       } else {
-        // Creating combo from meals
+        // Creating combo from meals -> POST to /meals
         const recipesList = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
@@ -355,18 +340,18 @@ export default function DIYScreen() {
           };
         });
 
+        endpoint = `${API_URL}/meals`;
         mealData = {
           name: mealName,
           recipes: recipesList,
           images: compositeImages,
           tags: selectedSaveTags,
-          total_price: calculateTotal(),
           is_preset: false,
           created_by: user._id,
         };
       }
 
-      await axios.post(`${API_URL}/saved-meals`, mealData, {
+      await axios.post(endpoint, mealData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -377,8 +362,9 @@ export default function DIYScreen() {
       setSelectedSaveTags([]);
       setSelectedIngredients(new Map());
       setSelectedMeals(new Map());
+      setShowSelectedModal(false);
       
-      // Refresh my meals
+      // Refresh data
       if (activeTab === 'diy-meals') {
         fetchMyMeals();
       }
@@ -406,7 +392,6 @@ export default function DIYScreen() {
       let cartData: any;
       
       if (activeTab === 'diy-meals') {
-        // DIY Meal with ingredients and proportions
         const ingredientsList = Array.from(selectedIngredients.entries()).map(([id, qty]) => {
           const ingredient = ingredients.find(i => i._id === id);
           return {
@@ -429,7 +414,6 @@ export default function DIYScreen() {
           isDIY: true,
         };
       } else {
-        // DIY Combo with meals, their ingredients and proportions
         const mealsData = Array.from(selectedMeals.entries()).map(([id, qty]) => {
           const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
           return {
@@ -460,6 +444,7 @@ export default function DIYScreen() {
       // Reset selections
       setSelectedIngredients(new Map());
       setSelectedMeals(new Map());
+      setShowSelectedModal(false);
     } catch (error) {
       console.error('Error adding to cart:', error);
       Alert.alert('Error', 'Failed to add to cart');
@@ -474,6 +459,10 @@ export default function DIYScreen() {
         return [...prev, tag];
       }
     });
+  };
+
+  const getSelectedCount = () => {
+    return activeTab === 'diy-meals' ? selectedIngredients.size : selectedMeals.size;
   };
 
   const renderIngredientItem = ({ item }: { item: Ingredient }) => {
@@ -566,6 +555,8 @@ export default function DIYScreen() {
       </View>
     );
   }
+
+  const selectedCount = getSelectedCount();
 
   return (
     <View style={styles.container}>
@@ -663,76 +654,6 @@ export default function DIYScreen() {
         }
       />
 
-      {/* Selected Items Summary */}
-      {((activeTab === 'diy-meals' && selectedIngredients.size > 0) ||
-        (activeTab !== 'diy-meals' && selectedMeals.size > 0)) && (
-        <View style={styles.selectedSummary}>
-          <Text style={styles.selectedTitle}>Selected Items:</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {activeTab === 'diy-meals'
-              ? Array.from(selectedIngredients.entries()).map(([id, qty]) => {
-                  const ingredient = ingredients.find(i => i._id === id);
-                  return (
-                    <View key={id} style={styles.selectedItem}>
-                      <Text style={styles.selectedItemText}>
-                        {ingredient?.name} ({qty}{ingredient?.unit})
-                      </Text>
-                      <TouchableOpacity onPress={() => removeIngredient(id)}>
-                        <Ionicons name="close-circle" size={18} color="#ff4444" />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })
-              : Array.from(selectedMeals.entries()).map(([id, qty]) => {
-                  const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
-                  return (
-                    <View key={id} style={styles.selectedItem}>
-                      <Text style={styles.selectedItemText}>
-                        {recipe?.name} (x{qty})
-                      </Text>
-                      <TouchableOpacity onPress={() => removeMeal(id)}>
-                        <Ionicons name="close-circle" size={18} color="#ff4444" />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-          </ScrollView>
-        </View>
-      )}
-
-      {/* Bottom Action Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.totalSection}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalPrice}>₹{calculateTotal().toFixed(2)}</Text>
-        </View>
-        <View style={styles.actionButtons}>
-          {user && (
-            <TouchableOpacity
-              style={[styles.actionButton, styles.saveButton]}
-              onPress={() => setShowNameModal(true)}
-              disabled={saving}
-            >
-              {saving ? (
-                <ActivityIndicator size="small" color="#333" />
-              ) : (
-                <>
-                  <Ionicons name="bookmark" size={20} color="#333" />
-                  <Text style={styles.saveButtonText}>Save</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={[styles.actionButton, styles.cartButton]}
-            onPress={addToCartDirect}
-          >
-            <Ionicons name="cart" size={20} color="#fff" />
-            <Text style={styles.cartButtonText}>Add to Cart</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       {/* Meal Name Input Modal with Tags */}
       {user && (
         <Modal
@@ -811,7 +732,125 @@ export default function DIYScreen() {
           </View>
         </Modal>
       )}
+
+      {/* Selected Items Bottom Sheet Modal */}
+      <Modal
+        isVisible={showSelectedModal}
+        onBackdropPress={() => setShowSelectedModal(false)}
+        onSwipeComplete={() => setShowSelectedModal(false)}
+        swipeDirection={['down']}
+        style={styles.bottomSheetModal}
+      >
+        <View style={styles.bottomSheetContent}>
+          <View style={styles.bottomSheetHandle} />
+          <Text style={styles.bottomSheetTitle}>
+            Selected {activeTab === 'diy-meals' ? 'Ingredients' : 'Meals'} ({selectedCount})
+          </Text>
+          
+          <ScrollView style={styles.selectedItemsList}>
+            {activeTab === 'diy-meals'
+              ? Array.from(selectedIngredients.entries()).map(([id, qty]) => {
+                  const ingredient = ingredients.find(i => i._id === id);
+                  if (!ingredient) return null;
+                  const stepSize = ingredient.step_size || 1;
+                  return (
+                    <View key={id} style={styles.selectedItemRow}>
+                      <View style={styles.selectedItemInfo}>
+                        <Text style={styles.selectedItemName}>{ingredient.name}</Text>
+                        <Text style={styles.selectedItemPrice}>
+                          ₹{((ingredient.calculated_price || ingredient.price_per_unit || 0) * qty).toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={styles.selectedItemControls}>
+                        <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty - stepSize)}>
+                          <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                        <Text style={styles.selectedItemQty}>{qty}{ingredient.unit}</Text>
+                        <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty + stepSize)}>
+                          <Ionicons name="add-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })
+              : Array.from(selectedMeals.entries()).map(([id, qty]) => {
+                  const recipe = (combosSubTab === 'all-meals' ? allMeals : myMeals).find(r => r._id === id);
+                  if (!recipe) return null;
+                  return (
+                    <View key={id} style={styles.selectedItemRow}>
+                      <View style={styles.selectedItemInfo}>
+                        <Text style={styles.selectedItemName}>{recipe.name}</Text>
+                        <Text style={styles.selectedItemPrice}>
+                          ₹{((recipe.calculated_price || 0) * qty).toFixed(2)}
+                        </Text>
+                      </View>
+                      <View style={styles.selectedItemControls}>
+                        <TouchableOpacity onPress={() => updateMealQuantity(id, qty - 1)}>
+                          <Ionicons name="remove-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                        <Text style={styles.selectedItemQty}>x{qty}</Text>
+                        <TouchableOpacity onPress={() => updateMealQuantity(id, qty + 1)}>
+                          <Ionicons name="add-circle" size={28} color="#ffd700" />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                })}
+          </ScrollView>
+
+          <View style={styles.bottomSheetFooter}>
+            <View style={styles.totalSection}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalPrice}>₹{calculateTotal().toFixed(2)}</Text>
+            </View>
+            <View style={styles.bottomSheetActions}>
+              {user && (
+                <TouchableOpacity
+                  style={[styles.bottomSheetButton, styles.saveButton]}
+                  onPress={() => {
+                    setShowSelectedModal(false);
+                    setShowNameModal(true);
+                  }}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator size="small" color="#333" />
+                  ) : (
+                    <>
+                      <Ionicons name="bookmark" size={20} color="#333" />
+                      <Text style={styles.saveButtonText}>Save</Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              )}
+              <TouchableOpacity
+                style={[styles.bottomSheetButton, styles.cartButton]}
+                onPress={addToCartDirect}
+              >
+                <Ionicons name="cart" size={20} color="#fff" />
+                <Text style={styles.cartButtonText}>Add to Cart</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       </SafeAreaView>
+
+      {/* Floating View Button */}
+      {selectedCount > 0 && (
+        <TouchableOpacity
+          style={styles.floatingViewButton}
+          onPress={() => setShowSelectedModal(true)}
+        >
+          <View style={styles.floatingButtonContent}>
+            <View style={styles.floatingButtonBadge}>
+              <Text style={styles.floatingButtonBadgeText}>{selectedCount}</Text>
+            </View>
+            <Text style={styles.floatingButtonText}>View Selected</Text>
+            <Ionicons name="chevron-up" size={20} color="#333" />
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -823,7 +862,6 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    paddingBottom: 80,
   },
   loadingContainer: {
     flex: 1,
@@ -928,6 +966,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingVertical: 8,
+    paddingBottom: 100,
   },
   listItemCard: {
     flexDirection: 'row',
@@ -962,11 +1001,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  itemDescription: {
-    fontSize: 13,
-    color: '#999',
-    marginTop: 2,
-  },
   itemPrice: {
     fontSize: 14,
     fontWeight: '600',
@@ -999,91 +1033,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
-  selectedSummary: {
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  selectedTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 8,
-  },
-  selectedItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 8,
-    gap: 6,
-  },
-  selectedItemText: {
-    fontSize: 13,
-    color: '#333',
-  },
-  bottomBar: {
+  floatingViewButton: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: '#ffd700',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
     shadowRadius: 8,
   },
-  totalSection: {
-    flex: 1,
-  },
-  totalLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  totalPrice: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  actionButton: {
+  floatingButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    justifyContent: 'center',
+  },
+  floatingButtonBadge: {
+    backgroundColor: '#333',
     borderRadius: 12,
-    gap: 6,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
   },
-  saveButton: {
-    backgroundColor: '#f5f5f5',
+  floatingButtonBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
-  saveButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
+  floatingButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#333',
-  },
-  cartButton: {
-    backgroundColor: '#ffd700',
-  },
-  cartButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    flex: 1,
   },
   modal: {
     justifyContent: 'center',
@@ -1180,5 +1168,119 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  bottomSheetModal: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  bottomSheetContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 12,
+    maxHeight: '80%',
+  },
+  bottomSheetHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#ddd',
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  bottomSheetTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  selectedItemsList: {
+    maxHeight: 400,
+    paddingHorizontal: 20,
+  },
+  selectedItemRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  selectedItemInfo: {
+    flex: 1,
+  },
+  selectedItemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  selectedItemPrice: {
+    fontSize: 14,
+    color: '#ffd700',
+    fontWeight: '600',
+  },
+  selectedItemControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  selectedItemQty: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  bottomSheetFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  totalSection: {
+    marginBottom: 16,
+  },
+  totalLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  totalPrice: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 4,
+  },
+  bottomSheetActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  bottomSheetButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+  },
+  saveButton: {
+    backgroundColor: '#f5f5f5',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  cartButton: {
+    backgroundColor: '#ffd700',
+  },
+  cartButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
