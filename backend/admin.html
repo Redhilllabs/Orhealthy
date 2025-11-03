@@ -2349,35 +2349,50 @@
         }
 
         async function editMeal(id) {
-            editingRecipeId = id;
+            editingMealId = id;
             try {
                 const response = await fetch(`${API_URL}/recipes/${id}`);
-                const recipe = await response.json();
+                const meal = await response.json();
                 
-                document.getElementById('recipeModal').classList.add('active');
-                document.querySelector('#recipeModal .modal-title').textContent = 'Edit Meal';
-                document.getElementById('recipeName').value = recipe.name;
-                document.getElementById('recipeDescription').value = recipe.description;
-                document.getElementById('recipePrice').value = recipe.calculated_price || 0;
-                document.getElementById('recipeTags').value = recipe.tags ? recipe.tags.join(', ') : '';
+                document.getElementById('mealModal').classList.add('active');
+                document.querySelector('#mealModal .modal-title').textContent = 'Edit Meal';
+                document.getElementById('mealName').value = meal.name;
+                document.getElementById('mealDescription').value = meal.description;
+                document.getElementById('mealPrice').value = meal.calculated_price || 0;
+                document.getElementById('mealTags').value = meal.tags ? meal.tags.join(', ') : '';
                 
                 // Set existing images
-                recipeImages = recipe.images || [];
-                const preview = document.getElementById('recipeImagePreview');
-                preview.innerHTML = recipeImages.map((img, index) => `
+                mealImages = meal.images || [];
+                const preview = document.getElementById('mealImagePreview');
+                preview.innerHTML = mealImages.map((img, index) => `
                     <div class="image-preview-item">
                         <img src="${img}" alt="Preview">
-                        <button type="button" class="image-remove" onclick="removeRecipeImage(${index})">×</button>
+                        <button type="button" class="image-remove" onclick="removeMealImage(${index})">×</button>
                     </div>
                 `).join('');
                 
                 // Set existing ingredients
-                selectedRecipeIngredients = recipe.ingredients || [];
-                updateRecipeIngredientSelect();
-                renderRecipeIngredients();
-                updateRecipePrice();
+                selectedMealIngredients = meal.ingredients || [];
+                updateMealIngredientSelect();
+                renderMealIngredients();
+                updateMealPrice();
             } catch (error) {
-                showAlert('recipes', 'Error loading recipe data', 'error');
+                showAlert('meals', 'Error loading meal data', 'error');
+            }
+        }
+
+        async function deleteMeal(id) {
+            if (!confirm('Delete this meal?')) return;
+            try {
+                const response = await fetch(`${API_URL}/recipes/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showAlert('meals', 'Deleted successfully', 'success');
+                    loadMeals();
+                } else {
+                    showAlert('meals', 'Error deleting meal', 'error');
+                }
+            } catch (error) {
+                showAlert('meals', 'Error deleting', 'error');
             }
         }
 
