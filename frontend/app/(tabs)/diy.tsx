@@ -604,6 +604,30 @@ export default function DIYScreen() {
     const quantity = selectedMeals.get(item._id) || 0;
     const price = item.calculated_price || item.total_price || item.price || 0;
     
+    // For My DIY tab, items are clickable to edit
+    if (activeTab === 'my-diy') {
+      return (
+        <TouchableOpacity 
+          style={styles.listItemCard}
+          onPress={() => handleEditMyDiyItem(item)}
+        >
+          {item.images?.[0] ? (
+            <Image source={{ uri: item.images[0] }} style={styles.listItemImage} />
+          ) : (
+            <View style={[styles.listItemImage, styles.placeholderImage]}>
+              <Ionicons name="restaurant" size={24} color="#ccc" />
+            </View>
+          )}
+          <View style={styles.listItemInfo}>
+            <Text style={styles.itemName}>{item.name}</Text>
+            <Text style={styles.itemPrice}>₹{price.toFixed(2)}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={24} color="#999" />
+        </TouchableOpacity>
+      );
+    }
+    
+    // For DIY Combos tab, normal behavior with quantity controls
     return (
       <View style={styles.listItemCard}>
         {item.images?.[0] ? (
