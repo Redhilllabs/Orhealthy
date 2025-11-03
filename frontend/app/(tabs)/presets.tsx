@@ -16,6 +16,7 @@ import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useCart } from '../../src/context/CartContext';
+import { useAuth } from '../../src/context/AuthContext';
 import { storage } from '../../src/utils/storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Modal from 'react-native-modal';
