@@ -1060,37 +1060,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 32,
-    margin: 20,
-    maxWidth: 400,
-    alignSelf: 'center',
     alignItems: 'center',
+    maxWidth: 400,
   },
   alertIcon: {
     marginBottom: 16,
   },
   alertMessage: {
     fontSize: 18,
+    fontWeight: '600',
     color: '#333',
     textAlign: 'center',
     marginBottom: 24,
-    lineHeight: 26,
   },
   alertButton: {
-    paddingVertical: 12,
     paddingHorizontal: 32,
+    paddingVertical: 12,
     borderRadius: 12,
     minWidth: 120,
     alignItems: 'center',
   },
   successAlertButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#ffd700',
   },
   errorAlertButton: {
     backgroundColor: '#ef4444',
   },
   alertButtonText: {
-    color: '#fff',
+    color: '#333',
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
 });
