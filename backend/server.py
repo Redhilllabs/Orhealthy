@@ -1430,9 +1430,20 @@ async def get_recipe(recipe_id: str):
 
 # New Meals endpoints (meals are combinations of recipes)
 @api_router.get("/meals")
-async def get_meals():
-    """Get all preset meals (combinations of recipes) with calculated prices"""
-    meals = await db.preset_meals.find({"is_preset": True}).to_list(100)
+async def get_meals(user_id: str = None):
+    """Get all meals (combinations of recipes) with calculated prices. If user_id provided, includes user's non-preset meals."""
+    if user_id:
+        # Return both preset meals AND user's non-preset meals
+        meals = await db.preset_meals.find({
+            "$or": [
+                {"is_preset": True},
+                {"created_by": user_id, "is_preset": False}
+            ]
+        }).to_list(100)
+    else:
+        # Only preset meals
+        meals = await db.preset_meals.find({"is_preset": True}).to_list(100)
+    
     for meal in meals:
         meal["_id"] = str(meal["_id"])
         # Calculate price from recipes
