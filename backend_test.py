@@ -7,570 +7,381 @@ Tests the fixed issues with meals management in the admin panel.
 import requests
 import json
 import sys
-import os
 import time
 from datetime import datetime
 
-# Get backend URL from frontend .env file
+# Configuration
 BACKEND_URL = "https://mealhierarchy.preview.emergentagent.com"
-API_BASE = f"{BACKEND_URL}/api"
-ADMIN_PANEL_URL = f"{API_BASE}/admin-panel"
-
-# Admin credentials
 ADMIN_EMAIL = "admin@admin.com"
 ADMIN_PASSWORD = "admin"
-
-class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    BOLD = '\033[1m'
-    END = '\033[0m'
-
-def print_test_header(test_name):
-    print(f"\n{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}Testing: {test_name}{Colors.END}")
-    print(f"{Colors.BLUE}{Colors.BOLD}{'='*60}{Colors.END}")
-
-def print_success(message):
-    print(f"{Colors.GREEN}✅ {message}{Colors.END}")
-
-def print_error(message):
-    print(f"{Colors.RED}❌ {message}{Colors.END}")
-
-def print_warning(message):
-    print(f"{Colors.YELLOW}⚠️  {message}{Colors.END}")
-
-def print_info(message):
-    print(f"{Colors.BLUE}ℹ️  {message}{Colors.END}")
 
 class AdminPanelTester:
     def __init__(self):
         self.session = requests.Session()
         self.admin_token = None
-        self.test_results = {
-            'passed': 0,
-            'failed': 0,
-            'warnings': 0
+        self.test_results = []
+        
+    def log_test(self, test_name, success, message, details=None):
+        """Log test results"""
+        result = {
+            "test": test_name,
+            "success": success,
+            "message": message,
+            "details": details,
+            "timestamp": datetime.now().isoformat()
         }
-        self.test_combo_id = None
-        
-    def run_all_tests(self):
-        """Run all admin panel combo management tests"""
-        print(f"{Colors.BOLD}OrHealthy Admin Panel - Combo Management Testing{Colors.END}")
-        print(f"Backend URL: {BACKEND_URL}")
-        print(f"API Base: {API_BASE}")
-        print(f"Admin Panel: {ADMIN_PANEL_URL}")
-        
+        self.test_results.append(result)
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status}: {test_name} - {message}")
+        if details and not success:
+            print(f"   Details: {details}")
+    
+    def admin_login(self):
+        """Test admin authentication"""
         try:
-            # Test 1: Admin Panel Access & Loading
-            self.test_admin_panel_access()
-            
-            # Test 2: Admin Authentication
-            self.test_admin_authentication()
-            
-            # Test 3: Load Existing Combos (GET /api/meals)
-            self.test_load_combos()
-            
-            # Test 4: Load Recipes for Combo Creation (GET /api/recipes)
-            self.test_load_recipes_for_combos()
-            
-            # Test 5: Create New Combo (POST /api/meals)
-            self.test_create_combo()
-            
-            # Test 6: Edit Existing Combo (PUT /api/meals/{id})
-            self.test_edit_combo()
-            
-            # Test 7: Delete Combo (DELETE /api/meals/{id})
-            self.test_delete_combo()
-            
-            # Test 8: Error Handling
-            self.test_error_handling()
-            
-        except Exception as e:
-            print_error(f"Critical test failure: {str(e)}")
-            self.test_results['failed'] += 1
-        
-        self.print_summary()
-
-    def test_admin_panel_access(self):
-        """Test admin panel HTML page access"""
-        print_test_header("Admin Panel Access & Loading")
-        
-        try:
-            # Test admin panel HTML page
-            response = self.session.get(ADMIN_PANEL_URL, timeout=10)
-            
+            # Try to access admin panel first
+            response = self.session.get(f"{BACKEND_URL}/api/admin-panel")
             if response.status_code == 200:
-                print_success(f"Admin panel accessible at {ADMIN_PANEL_URL}")
-                
-                # Check if HTML contains combo management elements
+                self.log_test("Admin Panel Access", True, "Admin panel accessible without authentication")
+                return True
+            else:
+                self.log_test("Admin Panel Access", False, f"Admin panel not accessible: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Panel Access", False, f"Error accessing admin panel: {str(e)}")
+            return False
+    
+    def test_admin_panel_loading(self):
+        """Test admin panel HTML loading and structure"""
+        try:
+            response = self.session.get(f"{BACKEND_URL}/api/admin-panel")
+            if response.status_code == 200:
                 html_content = response.text
-                combo_elements = [
-                    'combos',
-                    'Combos Management', 
-                    'Add Combo',
-                    'comboModal',
-                    'comboForm',
-                    'comboName',
-                    'comboDescription',
-                    'comboPrice',
-                    'comboTags',
-                    'comboMealSelect'
+                
+                # Check for key elements mentioned in the review request
+                required_elements = [
+                    'id="meals"',  # Meals section
+                    'Meals Management',  # Section title
+                    'Add Meal',  # Add button text
+                    'id="mealModal"',  # Modal
+                    'id="mealForm"',  # Form
+                    'Add Ingredient',  # Add ingredient button
+                    'mealIngredientSelect',  # Ingredient dropdown
+                    'step_size',  # Step size override field
                 ]
                 
                 missing_elements = []
-                for element in combo_elements:
+                for element in required_elements:
                     if element not in html_content:
                         missing_elements.append(element)
                 
-                if not missing_elements:
-                    print_success("All combo management HTML elements found")
-                    self.test_results['passed'] += 1
+                if missing_elements:
+                    self.log_test("Admin Panel HTML Structure", False, 
+                                f"Missing elements: {', '.join(missing_elements)}")
+                    return False
                 else:
-                    print_error(f"Missing HTML elements: {missing_elements}")
-                    self.test_results['failed'] += 1
-                    
+                    self.log_test("Admin Panel HTML Structure", True, 
+                                "All required HTML elements found")
+                    return True
             else:
-                print_error(f"Admin panel not accessible. Status: {response.status_code}")
-                self.test_results['failed'] += 1
-                
-        except requests.exceptions.RequestException as e:
-            print_error(f"Failed to access admin panel: {str(e)}")
-            self.test_results['failed'] += 1
-    
-    def test_admin_authentication(self):
-        """Test admin authentication"""
-        print_test_header("Admin Authentication")
-        
-        try:
-            # Test admin login endpoint (assuming it exists)
-            login_data = {
-                "email": ADMIN_EMAIL,
-                "password": ADMIN_PASSWORD
-            }
-            
-            # Try different possible admin login endpoints
-            login_endpoints = [
-                f"{API_BASE}/admin/login",
-                f"{API_BASE}/auth/admin/login",
-                f"{API_BASE}/admin-login"
-            ]
-            
-            login_successful = False
-            for endpoint in login_endpoints:
-                try:
-                    response = self.session.post(endpoint, json=login_data, timeout=10)
-                    if response.status_code == 200:
-                        print_success(f"Admin login successful at {endpoint}")
-                        # Try to extract token if available
-                        try:
-                            data = response.json()
-                            if 'token' in data:
-                                self.admin_token = data['token']
-                                self.session.headers.update({'Authorization': f'Bearer {self.admin_token}'})
-                        except:
-                            pass
-                        login_successful = True
-                        break
-                except:
-                    continue
-            
-            if not login_successful:
-                print_warning("Admin login endpoint not found or credentials invalid")
-                print_info("Proceeding with tests without authentication")
-                self.test_results['warnings'] += 1
-            else:
-                self.test_results['passed'] += 1
-                
+                self.log_test("Admin Panel HTML Structure", False, 
+                            f"Failed to load admin panel: {response.status_code}")
+                return False
         except Exception as e:
-            print_warning(f"Admin authentication test failed: {str(e)}")
-            self.test_results['warnings'] += 1
+            self.log_test("Admin Panel HTML Structure", False, f"Error: {str(e)}")
+            return False
     
-    def test_load_combos(self):
-        """Test loading existing combos via GET /api/meals"""
-        print_test_header("Load Existing Combos (GET /api/meals)")
-        
+    def test_load_meals_api(self):
+        """Test GET /api/recipes endpoint (admin panel 'meals' maps to backend 'recipes')"""
         try:
-            response = self.session.get(f"{API_BASE}/meals", timeout=10)
-            
+            response = self.session.get(f"{BACKEND_URL}/api/recipes")
             if response.status_code == 200:
-                combos = response.json()
-                print_success(f"GET /api/meals successful. Found {len(combos)} combos")
-                
-                if combos:
-                    # Check structure of first combo
-                    first_combo = combos[0]
-                    required_fields = ['_id', 'name', 'recipes', 'calculated_price']
-                    optional_fields = ['description', 'images', 'tags']
-                    
-                    missing_required = [field for field in required_fields if field not in first_combo]
-                    present_optional = [field for field in optional_fields if field in first_combo]
-                    
-                    if not missing_required:
-                        print_success(f"Combo structure valid. Required fields: {required_fields}")
-                        print_info(f"Optional fields present: {present_optional}")
-                        
-                        # Display sample combo info
-                        print_info(f"Sample combo: {first_combo.get('name', 'Unknown')} - ₹{first_combo.get('calculated_price', 0)}")
-                        if first_combo.get('recipes'):
-                            print_info(f"Contains {len(first_combo['recipes'])} recipes")
-                        
-                        self.test_results['passed'] += 1
-                    else:
-                        print_error(f"Missing required fields in combo: {missing_required}")
-                        self.test_results['failed'] += 1
-                else:
-                    print_info("No combos found in database")
-                    self.test_results['passed'] += 1
-                    
+                meals = response.json()
+                self.log_test("Load Meals API", True, 
+                            f"Successfully loaded {len(meals)} meals", 
+                            f"Sample meal: {meals[0] if meals else 'No meals found'}")
+                return meals
             else:
-                print_error(f"Failed to load combos. Status: {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print_error(f"Error details: {error_data}")
-                except:
-                    print_error(f"Response text: {response.text}")
-                self.test_results['failed'] += 1
-                
-        except requests.exceptions.RequestException as e:
-            print_error(f"Network error loading combos: {str(e)}")
-            self.test_results['failed'] += 1
+                self.log_test("Load Meals API", False, 
+                            f"Failed to load meals: {response.status_code}")
+                return []
         except Exception as e:
-            print_error(f"Error loading combos: {str(e)}")
-            self.test_results['failed'] += 1
+            self.log_test("Load Meals API", False, f"Error loading meals: {str(e)}")
+            return []
     
-    def test_load_recipes_for_combos(self):
-        """Test loading recipes for combo creation via GET /api/recipes"""
-        print_test_header("Load Recipes for Combo Creation (GET /api/recipes)")
-        
+    def test_load_ingredients_api(self):
+        """Test GET /api/ingredients endpoint for meal creation"""
         try:
-            response = self.session.get(f"{API_BASE}/recipes", timeout=10)
-            
+            response = self.session.get(f"{BACKEND_URL}/api/ingredients")
             if response.status_code == 200:
-                recipes = response.json()
-                print_success(f"GET /api/recipes successful. Found {len(recipes)} recipes")
-                
-                if recipes:
-                    # Check structure of first recipe
-                    first_recipe = recipes[0]
-                    required_fields = ['_id', 'name', 'calculated_price']
-                    
-                    missing_required = [field for field in required_fields if field not in first_recipe]
-                    
-                    if not missing_required:
-                        print_success("Recipe structure valid for combo creation")
-                        print_info(f"Sample recipe: {first_recipe.get('name', 'Unknown')} - ₹{first_recipe.get('calculated_price', 0)}")
-                        self.test_results['passed'] += 1
-                    else:
-                        print_error(f"Missing required fields in recipe: {missing_required}")
-                        self.test_results['failed'] += 1
-                else:
-                    print_warning("No recipes found - combo creation may not work properly")
-                    self.test_results['warnings'] += 1
-                    
+                ingredients = response.json()
+                self.log_test("Load Ingredients API", True, 
+                            f"Successfully loaded {len(ingredients)} processed ingredients",
+                            f"Sample ingredient: {ingredients[0] if ingredients else 'No ingredients found'}")
+                return ingredients
             else:
-                print_error(f"Failed to load recipes. Status: {response.status_code}")
-                self.test_results['failed'] += 1
-                
+                self.log_test("Load Ingredients API", False, 
+                            f"Failed to load ingredients: {response.status_code}")
+                return []
         except Exception as e:
-            print_error(f"Error loading recipes: {str(e)}")
-            self.test_results['failed'] += 1
+            self.log_test("Load Ingredients API", False, f"Error loading ingredients: {str(e)}")
+            return []
     
-    def test_create_combo(self):
-        """Test creating a new combo via POST /api/meals"""
-        print_test_header("Create New Combo (POST /api/meals)")
-        
+    def test_create_meal(self, ingredients):
+        """Test POST /api/recipes endpoint (create new meal)"""
+        if not ingredients:
+            self.log_test("Create Meal API", False, "No ingredients available for meal creation")
+            return None
+            
         try:
-            # First get available recipes
-            recipes_response = self.session.get(f"{API_BASE}/recipes", timeout=10)
-            if recipes_response.status_code != 200:
-                print_error("Cannot test combo creation - recipes not available")
-                self.test_results['failed'] += 1
-                return
-            
-            recipes = recipes_response.json()
-            if not recipes:
-                print_error("Cannot test combo creation - no recipes available")
-                self.test_results['failed'] += 1
-                return
-            
-            # Create test combo data
-            test_combo = {
-                "name": f"Test Combo {datetime.now().strftime('%H%M%S')}",
-                "description": "Test combo created by automated testing",
+            # Create test meal with first available ingredient
+            test_ingredient = ingredients[0]
+            meal_data = {
+                "name": f"Test Meal {int(time.time())}",
+                "description": "Test meal created by automated testing",
                 "images": ["data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="],
-                "recipes": [
+                "ingredients": [
                     {
-                        "recipe_id": recipes[0]["_id"],
-                        "name": recipes[0]["name"],
-                        "quantity": 1.0,
+                        "ingredient_id": test_ingredient["_id"],
+                        "name": test_ingredient["name"],
+                        "quantity": 2.0,
+                        "unit": test_ingredient["unit"],
                         "step_size": 1.0,
-                        "price": recipes[0].get("calculated_price", 0)
+                        "price": test_ingredient.get("calculated_price", 0)
                     }
                 ],
                 "tags": ["test", "automated"],
-                "is_preset": True,
                 "created_by": "admin"
             }
             
-            response = self.session.post(f"{API_BASE}/meals", json=test_combo, timeout=10)
-            
+            response = self.session.post(f"{BACKEND_URL}/api/recipes", json=meal_data)
             if response.status_code == 200:
                 result = response.json()
-                print_success("Combo creation successful")
-                print_info(f"Created combo ID: {result.get('id', 'Unknown')}")
-                
-                # Store the ID for later tests
-                self.test_combo_id = result.get('id')
-                self.test_results['passed'] += 1
-                
-            elif response.status_code == 401:
-                print_warning("Combo creation requires authentication")
-                self.test_results['warnings'] += 1
+                meal_id = result.get("id")
+                self.log_test("Create Meal API", True, 
+                            f"Successfully created meal with ID: {meal_id}")
+                return meal_id
             else:
-                print_error(f"Combo creation failed. Status: {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print_error(f"Error details: {error_data}")
-                except:
-                    print_error(f"Response text: {response.text}")
-                self.test_results['failed'] += 1
-                
+                self.log_test("Create Meal API", False, 
+                            f"Failed to create meal: {response.status_code} - {response.text}")
+                return None
         except Exception as e:
-            print_error(f"Error creating combo: {str(e)}")
-            self.test_results['failed'] += 1
+            self.log_test("Create Meal API", False, f"Error creating meal: {str(e)}")
+            return None
     
-    def test_edit_combo(self):
-        """Test editing an existing combo via PUT /api/meals/{id}"""
-        print_test_header("Edit Existing Combo (PUT /api/meals/{id})")
-        
+    def test_edit_meal(self, meal_id, ingredients):
+        """Test PUT /api/recipes/{id} endpoint (edit meal)"""
+        if not meal_id or not ingredients:
+            self.log_test("Edit Meal API", False, "No meal ID or ingredients available for editing")
+            return False
+            
         try:
-            # Get existing combos to edit
-            combos_response = self.session.get(f"{API_BASE}/meals", timeout=10)
-            if combos_response.status_code != 200:
-                print_error("Cannot test combo editing - combos not available")
-                self.test_results['failed'] += 1
-                return
-            
-            combos = combos_response.json()
-            if not combos:
-                print_error("Cannot test combo editing - no combos available")
-                self.test_results['failed'] += 1
-                return
-            
-            # Use first combo for editing test
-            combo_to_edit = combos[0]
-            combo_id = combo_to_edit["_id"]
-            
-            # Create updated combo data
-            updated_combo = {
-                "name": f"Updated {combo_to_edit['name']} {datetime.now().strftime('%H%M%S')}",
-                "description": "Updated by automated testing",
-                "images": combo_to_edit.get("images", []),
-                "recipes": combo_to_edit.get("recipes", []),
-                "tags": ["updated", "test"],
-                "is_preset": True,
-                "created_by": "admin"
-            }
-            
-            response = self.session.put(f"{API_BASE}/meals/{combo_id}", json=updated_combo, timeout=10)
-            
-            if response.status_code == 200:
-                print_success("Combo editing successful")
-                print_info(f"Updated combo ID: {combo_id}")
-                self.test_results['passed'] += 1
-                
-            elif response.status_code == 401:
-                print_warning("Combo editing requires authentication")
-                self.test_results['warnings'] += 1
-            elif response.status_code == 404:
-                print_error("Combo not found for editing")
-                self.test_results['failed'] += 1
-            else:
-                print_error(f"Combo editing failed. Status: {response.status_code}")
-                try:
-                    error_data = response.json()
-                    print_error(f"Error details: {error_data}")
-                except:
-                    print_error(f"Response text: {response.text}")
-                self.test_results['failed'] += 1
-                
-        except Exception as e:
-            print_error(f"Error editing combo: {str(e)}")
-            self.test_results['failed'] += 1
-    
-    def test_delete_combo(self):
-        """Test deleting a combo via DELETE /api/meals/{id}"""
-        print_test_header("Delete Combo (DELETE /api/meals/{id})")
-        
-        try:
-            # First create a combo to delete
-            recipes_response = self.session.get(f"{API_BASE}/recipes", timeout=10)
-            if recipes_response.status_code != 200 or not recipes_response.json():
-                print_error("Cannot test combo deletion - recipes not available")
-                self.test_results['failed'] += 1
-                return
-            
-            recipes = recipes_response.json()
-            
-            # Create a test combo to delete
-            test_combo = {
-                "name": f"Delete Test Combo {datetime.now().strftime('%H%M%S')}",
-                "description": "Combo created for deletion testing",
-                "recipes": [
+            # Update meal data
+            updated_meal_data = {
+                "name": f"Updated Test Meal {int(time.time())}",
+                "description": "Updated test meal description",
+                "images": [],
+                "ingredients": [
                     {
-                        "recipe_id": recipes[0]["_id"],
-                        "name": recipes[0]["name"],
-                        "quantity": 1.0,
-                        "step_size": 1.0,
-                        "price": recipes[0].get("calculated_price", 0)
+                        "ingredient_id": ingredients[0]["_id"],
+                        "name": ingredients[0]["name"],
+                        "quantity": 3.0,  # Changed quantity
+                        "unit": ingredients[0]["unit"],
+                        "step_size": 2.0,  # Changed step size
+                        "price": ingredients[0].get("calculated_price", 0)
                     }
                 ],
-                "tags": ["delete-test"],
-                "is_preset": True,
+                "tags": ["test", "updated"],
                 "created_by": "admin"
             }
             
-            create_response = self.session.post(f"{API_BASE}/meals", json=test_combo, timeout=10)
-            
-            if create_response.status_code == 200:
-                combo_id = create_response.json().get('id')
-                print_info(f"Created test combo for deletion: {combo_id}")
-                
-                # Now delete it
-                delete_response = self.session.delete(f"{API_BASE}/meals/{combo_id}", timeout=10)
-                
-                if delete_response.status_code == 200:
-                    print_success("Combo deletion successful")
-                    self.test_results['passed'] += 1
-                elif delete_response.status_code == 401:
-                    print_warning("Combo deletion requires authentication")
-                    self.test_results['warnings'] += 1
-                else:
-                    print_error(f"Combo deletion failed. Status: {delete_response.status_code}")
-                    self.test_results['failed'] += 1
+            response = self.session.put(f"{BACKEND_URL}/api/recipes/{meal_id}", json=updated_meal_data)
+            if response.status_code == 200:
+                self.log_test("Edit Meal API", True, f"Successfully updated meal {meal_id}")
+                return True
             else:
-                # Try deleting an existing combo instead
-                combos_response = self.session.get(f"{API_BASE}/meals", timeout=10)
-                if combos_response.status_code == 200:
-                    combos = combos_response.json()
-                    if combos:
-                        combo_id = combos[-1]["_id"]  # Use last combo
-                        delete_response = self.session.delete(f"{API_BASE}/meals/{combo_id}", timeout=10)
-                        
-                        if delete_response.status_code == 200:
-                            print_success("Combo deletion successful (existing combo)")
-                            self.test_results['passed'] += 1
-                        elif delete_response.status_code == 401:
-                            print_warning("Combo deletion requires authentication")
-                            self.test_results['warnings'] += 1
-                        else:
-                            print_error(f"Combo deletion failed. Status: {delete_response.status_code}")
-                            self.test_results['failed'] += 1
-                    else:
-                        print_warning("No combos available for deletion test")
-                        self.test_results['warnings'] += 1
-                else:
-                    print_error("Cannot test combo deletion - unable to access combos")
-                    self.test_results['failed'] += 1
-                
+                self.log_test("Edit Meal API", False, 
+                            f"Failed to update meal: {response.status_code} - {response.text}")
+                return False
         except Exception as e:
-            print_error(f"Error testing combo deletion: {str(e)}")
-            self.test_results['failed'] += 1
+            self.log_test("Edit Meal API", False, f"Error updating meal: {str(e)}")
+            return False
+    
+    def test_delete_meal(self, meal_id):
+        """Test DELETE /api/recipes/{id} endpoint (delete meal)"""
+        if not meal_id:
+            self.log_test("Delete Meal API", False, "No meal ID available for deletion")
+            return False
+            
+        try:
+            response = self.session.delete(f"{BACKEND_URL}/api/recipes/{meal_id}")
+            if response.status_code == 200:
+                self.log_test("Delete Meal API", True, f"Successfully deleted meal {meal_id}")
+                return True
+            else:
+                self.log_test("Delete Meal API", False, 
+                            f"Failed to delete meal: {response.status_code} - {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Delete Meal API", False, f"Error deleting meal: {str(e)}")
+            return False
+    
+    def test_price_calculation(self, ingredients):
+        """Test price auto-calculation functionality"""
+        if not ingredients:
+            self.log_test("Price Calculation", False, "No ingredients available for price calculation test")
+            return False
+            
+        try:
+            # Create meal with multiple ingredients to test price calculation
+            test_ingredients = ingredients[:2] if len(ingredients) >= 2 else ingredients[:1]
+            total_expected_price = 0
+            meal_ingredients = []
+            
+            for ing in test_ingredients:
+                quantity = 2.0
+                price = ing.get("calculated_price", 0)
+                total_expected_price += price * quantity
+                
+                meal_ingredients.append({
+                    "ingredient_id": ing["_id"],
+                    "name": ing["name"],
+                    "quantity": quantity,
+                    "unit": ing["unit"],
+                    "step_size": 1.0,
+                    "price": price
+                })
+            
+            meal_data = {
+                "name": f"Price Test Meal {int(time.time())}",
+                "description": "Testing price calculation",
+                "ingredients": meal_ingredients,
+                "tags": ["price-test"],
+                "created_by": "admin"
+            }
+            
+            # Create meal
+            response = self.session.post(f"{BACKEND_URL}/api/recipes", json=meal_data)
+            if response.status_code == 200:
+                meal_id = response.json().get("id")
+                
+                # Get the created meal to check calculated price
+                get_response = self.session.get(f"{BACKEND_URL}/api/recipes/{meal_id}")
+                if get_response.status_code == 200:
+                    meal = get_response.json()
+                    calculated_price = meal.get("calculated_price", 0)
+                    
+                    # Clean up
+                    self.session.delete(f"{BACKEND_URL}/api/recipes/{meal_id}")
+                    
+                    if abs(calculated_price - total_expected_price) < 0.01:  # Allow small floating point differences
+                        self.log_test("Price Calculation", True, 
+                                    f"Price calculation correct: Expected ₹{total_expected_price:.2f}, Got ₹{calculated_price:.2f}")
+                        return True
+                    else:
+                        self.log_test("Price Calculation", False, 
+                                    f"Price calculation incorrect: Expected ₹{total_expected_price:.2f}, Got ₹{calculated_price:.2f}")
+                        return False
+                else:
+                    self.log_test("Price Calculation", False, "Failed to retrieve created meal for price verification")
+                    return False
+            else:
+                self.log_test("Price Calculation", False, f"Failed to create test meal: {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Price Calculation", False, f"Error testing price calculation: {str(e)}")
+            return False
     
     def test_error_handling(self):
-        """Test error handling scenarios"""
-        print_test_header("Error Handling")
-        
+        """Test error handling for invalid operations"""
         try:
-            # Test 1: Create combo without meals (should show error)
-            print_info("Testing combo creation without meals...")
-            empty_combo = {
-                "name": "Empty Combo",
-                "description": "Combo with no meals",
-                "recipes": [],  # Empty recipes
-                "tags": ["test"],
-                "is_preset": True,
-                "created_by": "admin"
-            }
-            
-            response = self.session.post(f"{API_BASE}/meals", json=empty_combo, timeout=10)
-            
-            if response.status_code == 400:
-                print_success("Properly rejected combo without meals (400 error)")
-                self.test_results['passed'] += 1
-            elif response.status_code == 200:
-                print_warning("Combo without meals was accepted (may be valid behavior)")
-                self.test_results['warnings'] += 1
+            # Test invalid meal ID
+            response = self.session.get(f"{BACKEND_URL}/api/recipes/invalid_id")
+            if response.status_code == 404:
+                self.log_test("Error Handling - Invalid ID", True, "Properly returns 404 for invalid meal ID")
             else:
-                print_info(f"Combo without meals returned status: {response.status_code}")
-                self.test_results['warnings'] += 1
+                self.log_test("Error Handling - Invalid ID", False, f"Unexpected response for invalid ID: {response.status_code}")
             
-            # Test 2: Delete non-existent combo
-            print_info("Testing deletion of non-existent combo...")
-            fake_id = "507f1f77bcf86cd799439011"  # Valid ObjectId format but non-existent
-            
-            delete_response = self.session.delete(f"{API_BASE}/meals/{fake_id}", timeout=10)
-            
-            if delete_response.status_code == 404:
-                print_success("Properly handled non-existent combo deletion (404 error)")
-                self.test_results['passed'] += 1
-            elif delete_response.status_code == 401:
-                print_warning("Non-existent combo deletion requires authentication")
-                self.test_results['warnings'] += 1
+            # Test deleting non-existent meal
+            response = self.session.delete(f"{BACKEND_URL}/api/recipes/507f1f77bcf86cd799439011")  # Valid ObjectId format but non-existent
+            if response.status_code == 404:
+                self.log_test("Error Handling - Delete Non-existent", True, "Properly returns 404 for non-existent meal deletion")
             else:
-                print_info(f"Non-existent combo deletion returned status: {delete_response.status_code}")
-                self.test_results['warnings'] += 1
+                self.log_test("Error Handling - Delete Non-existent", False, f"Unexpected response for non-existent deletion: {response.status_code}")
             
-            # Test 3: Invalid combo ID format
-            print_info("Testing invalid combo ID format...")
-            invalid_id = "invalid-id-format"
-            
-            get_response = self.session.get(f"{API_BASE}/meals/{invalid_id}", timeout=10)
-            
-            if get_response.status_code in [400, 404]:
-                print_success("Properly handled invalid combo ID format")
-                self.test_results['passed'] += 1
-            else:
-                print_info(f"Invalid combo ID returned status: {get_response.status_code}")
-                self.test_results['warnings'] += 1
-                
+            return True
         except Exception as e:
-            print_error(f"Error testing error handling: {str(e)}")
-            self.test_results['failed'] += 1
+            self.log_test("Error Handling", False, f"Error testing error handling: {str(e)}")
+            return False
     
-    def print_summary(self):
-        """Print test summary"""
-        print(f"\n{Colors.BOLD}{'='*60}{Colors.END}")
-        print(f"{Colors.BOLD}TEST SUMMARY{Colors.END}")
-        print(f"{Colors.BOLD}{'='*60}{Colors.END}")
+    def run_all_tests(self):
+        """Run all admin panel meals tab tests"""
+        print("🧪 Starting Admin Panel - Meals Tab Testing")
+        print("=" * 60)
         
-        total_tests = self.test_results['passed'] + self.test_results['failed'] + self.test_results['warnings']
+        # Test 1: Admin Panel Access & Loading
+        if not self.admin_login():
+            print("❌ Cannot proceed without admin panel access")
+            return False
         
-        print(f"{Colors.GREEN}✅ Passed: {self.test_results['passed']}{Colors.END}")
-        print(f"{Colors.RED}❌ Failed: {self.test_results['failed']}{Colors.END}")
-        print(f"{Colors.YELLOW}⚠️  Warnings: {self.test_results['warnings']}{Colors.END}")
-        print(f"{Colors.BOLD}Total Tests: {total_tests}{Colors.END}")
+        # Test 2: Admin Panel HTML Structure
+        self.test_admin_panel_loading()
         
-        if self.test_results['failed'] == 0:
-            if self.test_results['warnings'] == 0:
-                print(f"\n{Colors.GREEN}{Colors.BOLD}🎉 ALL TESTS PASSED! Admin Panel Combo Management is working perfectly.{Colors.END}")
-            else:
-                print(f"\n{Colors.YELLOW}{Colors.BOLD}✅ Tests completed with warnings. Core functionality working.{Colors.END}")
-        else:
-            print(f"\n{Colors.RED}{Colors.BOLD}❌ Some tests failed. Admin Panel Combo Management needs attention.{Colors.END}")
+        # Test 3: Load Meals API
+        meals = self.test_load_meals_api()
         
-        # Success rate
-        if total_tests > 0:
-            success_rate = ((self.test_results['passed'] + self.test_results['warnings']) / total_tests) * 100
-            print(f"{Colors.BOLD}Success Rate: {success_rate:.1f}%{Colors.END}")
+        # Test 4: Load Ingredients API
+        ingredients = self.test_load_ingredients_api()
+        
+        # Test 5: Create New Meal
+        meal_id = self.test_create_meal(ingredients)
+        
+        # Test 6: Edit Existing Meal
+        if meal_id:
+            self.test_edit_meal(meal_id, ingredients)
+        
+        # Test 7: Price Calculation
+        self.test_price_calculation(ingredients)
+        
+        # Test 8: Delete Meal
+        if meal_id:
+            self.test_delete_meal(meal_id)
+        
+        # Test 9: Error Handling
+        self.test_error_handling()
+        
+        # Summary
+        print("\n" + "=" * 60)
+        print("📊 TEST SUMMARY")
+        print("=" * 60)
+        
+        passed = sum(1 for result in self.test_results if result["success"])
+        total = len(self.test_results)
+        
+        print(f"Total Tests: {total}")
+        print(f"Passed: {passed}")
+        print(f"Failed: {total - passed}")
+        print(f"Success Rate: {(passed/total)*100:.1f}%")
+        
+        if total - passed > 0:
+            print("\n❌ FAILED TESTS:")
+            for result in self.test_results:
+                if not result["success"]:
+                    print(f"  • {result['test']}: {result['message']}")
+        
+        return passed == total
 
 def main():
-    """Main function to run all tests"""
+    """Main test execution"""
     tester = AdminPanelTester()
-    tester.run_all_tests()
+    success = tester.run_all_tests()
+    
+    if success:
+        print("\n🎉 All tests passed! Admin Panel Meals Tab is working correctly.")
+        sys.exit(0)
+    else:
+        print("\n⚠️  Some tests failed. Please check the issues above.")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
