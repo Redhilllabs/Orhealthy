@@ -764,43 +764,43 @@
                 <h2 class="modal-title">Add Meal</h2>
                 <span class="close" onclick="closeModal('mealModal')">&times;</span>
             </div>
-            <form id="recipeForm" onsubmit="saveMeal(event)">
+            <form id="mealForm" onsubmit="saveMeal(event)">
                 <div class="form-group">
                     <label>Images</label>
-                    <div class="image-upload" onclick="document.getElementById('recipeImages').click()">
+                    <div class="image-upload" onclick="document.getElementById('mealImages').click()">
                         <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
                         <div style="font-weight: 600; color: #475569;">Click to upload images</div>
                         <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Multiple images supported</div>
                     </div>
-                    <input type="file" id="recipeImages" multiple accept="image/*" style="display: none;" onchange="handleRecipeImages(event)">
-                    <div id="recipeImagePreview" class="image-preview-grid"></div>
+                    <input type="file" id="mealImages" multiple accept="image/*" style="display: none;" onchange="handleMealImages(event)">
+                    <div id="mealImagePreview" class="image-preview-grid"></div>
                 </div>
                 <div class="form-group">
-                    <label>Recipe Name *</label>
-                    <input type="text" id="recipeName" required>
+                    <label>Meal Name *</label>
+                    <input type="text" id="mealName" required>
                 </div>
                 <div class="form-group">
                     <label>Description *</label>
-                    <textarea id="recipeDescription" required></textarea>
+                    <textarea id="mealDescription" required></textarea>
                 </div>
                 <div class="form-group">
                     <label>Price (Auto-calculated from ingredients)</label>
-                    <input type="number" step="0.01" id="recipePrice" readonly value="0.00">
+                    <input type="number" step="0.01" id="mealPrice" readonly value="0.00">
                     <small style="color: #64748b;">Price will be calculated based on selected ingredients</small>
                 </div>
                 <div class="form-group">
                     <label>Tags (comma separated)</label>
-                    <input type="text" id="recipeTags" placeholder="e.g. high-protein, low-carb, vegan">
+                    <input type="text" id="mealTags" placeholder="e.g. high-protein, low-carb, vegan">
                 </div>
                 <div class="form-group">
                     <label>Ingredients *</label>
-                    <select id="recipeIngredientSelect">
+                    <select id="mealIngredientSelect">
                         <option value="">-- Select processed ingredient --</option>
                     </select>
-                    <button type="button" class="btn btn-secondary" style="margin-top: 8px;" onclick="addIngredientToRecipe()">Add Ingredient</button>
-                    <div class="ingredient-list" id="recipeIngredients"></div>
+                    <button type="button" class="btn btn-secondary" style="margin-top: 8px;" onclick="addIngredientToMeal()">Add Ingredient</button>
+                    <div class="ingredient-list" id="mealIngredients"></div>
                 </div>
-                <button type="submit" class="btn">Save Recipe</button>
+                <button type="submit" class="btn">Save Meal</button>
             </form>
         </div>
     </div>
@@ -2237,7 +2237,7 @@
                 allIngredients.map(ing => `<option value="${ing._id}">${ing.name} (₹${ing.calculated_price ? ing.calculated_price.toFixed(2) : '0.00'}/${ing.unit})</option>`).join('');
         }
 
-        function addIngredientToRecipe() {
+        function addIngredientToMeal() {
             const select = document.getElementById('recipeIngredientSelect');
             const ingredientId = select.value;
             if (!ingredientId) return alert('Please select an ingredient');
@@ -2303,7 +2303,7 @@
             document.getElementById('recipePrice').value = total.toFixed(2);
         }
 
-        function handleRecipeImages(event) {
+        function handleMealImages(event) {
             const files = event.target.files;
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
