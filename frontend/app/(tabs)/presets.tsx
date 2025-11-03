@@ -901,6 +901,9 @@ const styles = StyleSheet.create({
     minWidth: 32,
     textAlign: 'center',
   },
+  addBackButton: {
+    padding: 4,
+  },
   modalFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
