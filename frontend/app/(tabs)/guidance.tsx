@@ -111,6 +111,11 @@ export default function GuidanceScreen() {
   // View Plan Modal States (for guidees)
   const [showViewPlanModal, setShowViewPlanModal] = useState(false);
   const [currentViewPlan, setCurrentViewPlan] = useState<MealPlan | null>(null);
+  
+  // Meal Detail Modal States
+  const [showMealDetailModal, setShowMealDetailModal] = useState(false);
+  const [selectedMealForDetail, setSelectedMealForDetail] = useState<any>(null);
+  const [mealDetailLoading, setMealDetailLoading] = useState(false);
 
   // Activity Log Modal States
   const [showActivityModal, setShowActivityModal] = useState(false);
