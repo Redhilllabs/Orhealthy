@@ -1330,7 +1330,7 @@ export default function DIYScreen() {
           <Ionicons name="warning" size={60} color="#ef4444" />
           <Text style={styles.deleteConfirmTitle}>Delete Item?</Text>
           <Text style={styles.deleteConfirmMessage}>
-            This action cannot be undone. Are you sure you want to delete this {myDiySubTab === 'my-meals' ? 'meal' : 'combo'}?
+            This action cannot be undone. Are you sure you want to delete this {myDiySubTab === 'my-meals' ? 'bowl' : 'meal'}?
           </Text>
           <View style={styles.deleteConfirmActions}>
             <TouchableOpacity
