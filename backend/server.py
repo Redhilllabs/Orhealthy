@@ -1833,6 +1833,31 @@ async def delete_habit(habit_id: str, request: Request):
     
     return {"message": "Habit deleted"}
 
+# Following/Guides endpoints
+@api_router.get("/following")
+async def get_following(request: Request):
+    """Get list of guides that the user follows with their ratings"""
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    guide_ids = user.get("guides", [])
+    guides = []
+    
+    for guide_id in guide_ids:
+        try:
+            guide = await db.users.find_one({"_id": ObjectId(guide_id)})
+            if guide:
+                guides.append({
+                    "_id": str(guide["_id"]),
+                    "name": guide.get("name", ""),
+                    "average_rating": guide.get("average_rating")
+                })
+        except Exception:
+            continue
+    
+    return guides
+
 # Meal Plan endpoints
 @api_router.post("/meal-plans")
 async def create_meal_plan(request: Request, meal_plan_data: dict):
