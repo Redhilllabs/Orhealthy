@@ -401,6 +401,66 @@ backend:
 
 
 frontend:
+  - task: "Plan Requests Tab for Guides"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/guidance.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Plan Requests tab as the first tab for guides. Fetches plans from GET /api/meal-plans/guide. Shows plan details with accept button and start planning button based on status."
+
+  - task: "Date Picker in Plan Request Modal"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/guidance.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented proper DateTimePicker for mobile and text input fallback for web. Added showDatePicker state and date handling."
+
+  - task: "Mandatory Guide Selection"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/guidance.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added validation in submitPlanRequest to ensure guide is selected before submission. Shows error alert if guide not selected."
+
+  - task: "Meal Placeholder Change"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/guidance.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Changed meal name placeholder from generic text to 'Sprouted Legumes Bowl' in activity log meals form."
+
+  - task: "Planning Modal with Meal Selection"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/guidance.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created comprehensive planning modal for guides. Generates dates based on plan type, displays meal times for each date, provides dropdown/picker for meal selection from combined list of preset bowls, preset meals, my bowls, and my meals. Includes Save Progress and Submit Plan buttons with validation."
+
   - task: "Custom Delete Confirmation Modal - Guidance Tab"
     implemented: true
     working: "NA"
