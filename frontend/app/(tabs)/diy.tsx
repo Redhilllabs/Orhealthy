@@ -615,7 +615,7 @@ export default function DIYScreen() {
       });
 
       // Show success message
-      const itemType = activeTab === 'diy-meals' ? 'My DIY Meals' : 'My DIY Combos';
+      const itemType = activeTab === 'diy-meals' ? 'My Bowls in My DIY' : 'My Meals in My DIY';
       setSuccessMessage(`Saved to ${itemType}`);
       setShowSuccessModal(true);
       
