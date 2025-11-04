@@ -2195,23 +2195,27 @@ export default function GuidanceScreen() {
                                 <TouchableOpacity
                                   style={styles.addToCartIconButton}
                                   onPress={async () => {
-                                    setSelectedMealForDetail(mealOption);
                                     setShowMealDetailModal(true);
-                                    // Fetch full meal details
                                     setMealDetailLoading(true);
                                     try {
                                       const token = await storage.getItemAsync('session_token');
                                       let mealDetails;
-                                      if (mealOption.type === 'preset_bowl') {
-                                        const response = await axios.get(`${API_URL}/recipes/${mealOption._id}`);
+                                      if (mealOption.type === 'preset_bowl' || mealOption.type === 'my_bowl') {
+                                        const response = await axios.get(`${API_URL}/recipes/${mealOption._id}`, {
+                                          headers: { Authorization: `Bearer ${token}` },
+                                        });
                                         mealDetails = response.data;
-                                      } else if (mealOption.type === 'preset_meal') {
-                                        const response = await axios.get(`${API_URL}/meals/${mealOption._id}`);
+                                      } else if (mealOption.type === 'preset_meal' || mealOption.type === 'my_meal') {
+                                        const response = await axios.get(`${API_URL}/meals/${mealOption._id}`, {
+                                          headers: { Authorization: `Bearer ${token}` },
+                                        });
                                         mealDetails = response.data;
                                       }
+                                      console.log('Fetched meal details:', mealDetails);
                                       setSelectedMealForDetail(mealDetails);
                                     } catch (error) {
                                       console.error('Error fetching meal details:', error);
+                                      setSelectedMealForDetail(mealOption);
                                     } finally {
                                       setMealDetailLoading(false);
                                     }
