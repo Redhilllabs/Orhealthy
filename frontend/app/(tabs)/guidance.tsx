@@ -1213,7 +1213,6 @@ export default function GuidanceScreen() {
             }
           >
             <View style={styles.aboutHeader}>
-              <Text style={styles.tabTitle}>About Me</Text>
               <TouchableOpacity
                 style={styles.editIconButton}
                 onPress={() => setShowEditModal(true)}
