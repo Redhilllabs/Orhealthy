@@ -662,6 +662,18 @@ backend:
         comment: "✅ All Meal CRUD endpoints working perfectly (100% success rate). Tested: POST /api/meals (create), GET /api/meals (list with calculated_price), GET /api/meals/{id} (single with calculated_price & nutrition_profile), PUT /api/meals/{id} (update), DELETE /api/meals/{id} (delete). Error handling for invalid IDs returns proper 404 responses. Fixed ObjectId validation issues and meal price calculation from recipes."
 
 admin:
+  - task: "Admin Panel - Recipe Count Label Fix"
+    implemented: true
+    working: "NA"
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Changed recipe count label in meals (combos) section from 'meal(s)' to 'recipe(s)'. Line 2496 updated."
+
   - task: "Source Ingredient Edit functionality"
     implemented: true
     working: "NA"
