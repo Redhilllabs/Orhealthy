@@ -1496,6 +1496,18 @@ async def get_meals(user_id: str = None):
     
     for meal in meals:
         meal["_id"] = str(meal["_id"])
+        # Refresh recipe prices with latest calculated prices
+        for recipe_ref in meal.get("recipes", []):
+            recipe_id = recipe_ref.get("recipe_id")
+            if recipe_id:
+                try:
+                    recipe = await db.meals.find_one({"_id": ObjectId(recipe_id)})
+                    if recipe:
+                        # Recalculate recipe price from its ingredients
+                        calculated_price = await calculate_recipe_price(recipe)
+                        recipe_ref["price"] = calculated_price
+                except Exception:
+                    pass
         # Calculate price from recipes
         meal["calculated_price"] = await calculate_meal_price(meal)
         # Calculate nutrition profile from recipes
