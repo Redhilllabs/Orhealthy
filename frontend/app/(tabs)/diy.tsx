@@ -527,14 +527,13 @@ export default function DIYScreen() {
 
   const saveMeal = async () => {
     if (!user) {
-      setSuccessMessage('Please login to save meals');
+      setSuccessMessage('Please login to save');
       setShowSuccessModal(true);
       return;
     }
 
     if (!mealName.trim()) {
-      setSuccessMessage('Please enter a meal name');
-      setShowSuccessModal(true);
+      setNameError(true);
       return;
     }
 
