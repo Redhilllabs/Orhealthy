@@ -470,7 +470,10 @@ export default function GuidanceScreen() {
 
   const startPlanning = async (plan: MealPlan) => {
     setCurrentPlanForPlanning(plan);
-    await fetchMealOptionsForPlanning();
+    setShowPlanningModal(true); // Show modal immediately
+    
+    // Fetch data in background
+    fetchMealOptionsForPlanning();
     
     // Initialize selections with existing logged meals if any
     if (plan.logged_meals) {
@@ -478,8 +481,6 @@ export default function GuidanceScreen() {
     } else {
       setPlanningMealSelections({});
     }
-    
-    setShowPlanningModal(true);
   };
 
   const savePlanProgress = async () => {
