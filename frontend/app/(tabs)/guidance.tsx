@@ -1991,7 +1991,7 @@ export default function GuidanceScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalBody}>
+            <ScrollView style={styles.bottomSheetBody}>
               {mealDetailLoading ? (
                 <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
               ) : selectedMealForDetail ? (
@@ -2001,7 +2001,7 @@ export default function GuidanceScreen() {
                     ₹{selectedMealForDetail.calculated_price?.toFixed(2) || selectedMealForDetail.price?.toFixed(2) || '0.00'}
                   </Text>
 
-                  {selectedMealForDetail.ingredients && (
+                  {selectedMealForDetail.ingredients && selectedMealForDetail.ingredients.length > 0 && (
                     <>
                       <Text style={styles.sectionLabel}>Ingredients:</Text>
                       {selectedMealForDetail.ingredients.map((ing: any, index: number) => (
@@ -2015,7 +2015,7 @@ export default function GuidanceScreen() {
                     </>
                   )}
 
-                  {selectedMealForDetail.recipes && (
+                  {selectedMealForDetail.recipes && selectedMealForDetail.recipes.length > 0 && (
                     <>
                       <Text style={styles.sectionLabel}>Items:</Text>
                       {selectedMealForDetail.recipes.map((recipe: any, index: number) => (
@@ -2040,16 +2040,16 @@ export default function GuidanceScreen() {
                           quantity: 1,
                           customizations: selectedMealForDetail.ingredients || selectedMealForDetail.recipes || [],
                           guide_id: currentViewPlan?.guide_id || null,
-                          meal_time: null, // Will be set when adding from specific meal time
+                          meal_time: null,
                         };
                         await axios.post(`${API_URL}/cart`, cartItem, {
                           headers: { Authorization: `Bearer ${token}` },
                         });
                         Alert.alert('Success', `${selectedMealForDetail.name} added to cart!`);
                         setShowMealDetailModal(false);
-                      } catch (error) {
+                      } catch (error: any) {
                         console.error('Error adding to cart:', error);
-                        Alert.alert('Error', 'Failed to add item to cart');
+                        Alert.alert('Error', error.response?.data?.detail || 'Failed to add item to cart');
                       }
                     }}
                   >
