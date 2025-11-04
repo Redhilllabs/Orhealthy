@@ -117,6 +117,8 @@ export default function GuidanceScreen() {
   const [showMealDetailModal, setShowMealDetailModal] = useState(false);
   const [selectedMealForDetail, setSelectedMealForDetail] = useState<any>(null);
   const [mealDetailLoading, setMealDetailLoading] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Activity Log Modal States
   const [showActivityModal, setShowActivityModal] = useState(false);
