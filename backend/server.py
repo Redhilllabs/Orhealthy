@@ -1827,6 +1827,70 @@ async def delete_habit(habit_id: str, request: Request):
     
     return {"message": "Habit deleted"}
 
+# Meal Plan endpoints
+@api_router.post("/meal-plans")
+async def create_meal_plan(request: Request, meal_plan_data: dict):
+    """Create a meal plan request"""
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    meal_plan = {
+        "guidee_id": user["_id"],
+        "guidee_name": user.get("name", ""),
+        "guide_id": meal_plan_data.get("guide_id"),
+        "guide_name": meal_plan_data.get("guide_name"),
+        "plan_type": meal_plan_data["plan_type"],
+        "start_date": meal_plan_data["start_date"],
+        "meals_requested": meal_plan_data["meals_requested"],
+        "status": "requested",
+        "created_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.meal_plans.insert_one(meal_plan)
+    meal_plan["_id"] = str(result.inserted_id)
+    return meal_plan
+
+@api_router.get("/meal-plans")
+async def get_meal_plans(request: Request):
+    """Get meal plans for the logged-in user"""
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Get plans where user is either guidee or guide
+    plans = await db.meal_plans.find({
+        "$or": [
+            {"guidee_id": user["_id"]},
+            {"guide_id": user["_id"]}
+        ]
+    }).sort("created_at", -1).to_list(100)
+    
+    for plan in plans:
+        plan["_id"] = str(plan["_id"])
+    
+    return plans
+
+@api_router.delete("/meal-plans/{plan_id}")
+async def delete_meal_plan(request: Request, plan_id: str):
+    """Delete a meal plan"""
+    user = request.state.user
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        result = await db.meal_plans.delete_one({
+            "_id": ObjectId(plan_id),
+            "guidee_id": user["_id"]  # Only guidee can delete their own plans
+        })
+    except Exception:
+        raise HTTPException(status_code=404, detail="Plan not found")
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Plan not found or unauthorized")
+    
+    return {"message": "Plan deleted"}
+
 # Delivery Agent endpoints
 @api_router.get("/delivery-agents")
 async def get_delivery_agents():
