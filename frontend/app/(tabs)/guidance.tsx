@@ -2040,6 +2040,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   tabBar: {
+    maxHeight: 50,
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
     backgroundColor: '#fff',
