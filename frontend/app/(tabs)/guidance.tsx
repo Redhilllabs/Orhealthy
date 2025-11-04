@@ -1880,7 +1880,8 @@ export default function GuidanceScreen() {
                             </Picker>
                           )}
                         </View>
-                      ))}
+                        );
+                      })}
                     </View>
                   ))}
 
