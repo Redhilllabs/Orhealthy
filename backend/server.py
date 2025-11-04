@@ -33,6 +33,7 @@ class UserProfile(BaseModel):
     height: Optional[float] = None  # in cm
     weight: Optional[float] = None  # in kg
     allergies: List[str] = []
+    lifestyle_disorders: List[str] = []  # e.g., "Diabetes", "Hypertension", "PCOS"
     lifestyle_activity_level: Optional[str] = None  # "sedentary", "lightly_active", "moderately_active", "very_active", "extra_active"
     profession: Optional[str] = None
     fitness_activities: List[str] = []
