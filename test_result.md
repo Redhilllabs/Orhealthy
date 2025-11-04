@@ -1432,9 +1432,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Delete Activity Endpoint (DELETE /api/habits/{habit_id})"
-    - "Delete Plan Endpoint (DELETE /api/meal-plans/{plan_id})"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
