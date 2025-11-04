@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 """
-Backend Testing Script for Admin Panel - Meals & Combos Tab Fixes
-Testing the specific fixes mentioned in the review request:
-1. Meals not appearing in meals tab - Fixed by changing table ID from recipesBody to mealsBody
-2. Error message verification - Need to check if "error loading meals" flashes in combos tab (should say "error loading combos")
+Backend API Testing for OrHealthy App - Delete Functionality
+Testing DELETE /api/habits/{habit_id} and DELETE /api/meal-plans/{plan_id}
 """
 
 import requests
 import json
 import sys
-import time
-import re
-from datetime import datetime
+from datetime import datetime, timezone
 
-# Configuration
-BACKEND_URL = "https://health-planner-11.preview.emergentagent.com"
-ADMIN_EMAIL = "admin@admin.com"
-ADMIN_PASSWORD = "admin"
+# Backend URL from frontend environment
+BACKEND_URL = "https://health-planner-11.preview.emergentagent.com/api"
 
 class AdminPanelTester:
     def __init__(self):
