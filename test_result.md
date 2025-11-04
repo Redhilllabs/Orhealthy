@@ -1334,3 +1334,39 @@ agent_communication:
       - Frontend has been restarted
       - All changes are live
       - Need to verify all functionality works as expected
+  - agent: "main"
+    message: |
+      🔧 **PRESETS SUB-TAB CAROUSEL IMPLEMENTATION COMPLETE - 2025-06-01**
+      
+      **Changes Implemented in presets.tsx:**
+      1. ✅ Added sub-tab carousel between main tabs and search bar
+      2. ✅ Sub-tabs for Meals tab: "All Meals" and "My Meals"
+      3. ✅ Sub-tabs for Combos tab: "All Combos" and "My Combos"
+      4. ✅ Styling matches DIY screen (subTabContainer, subTab, activeSubTab styles)
+      5. ✅ No linting errors detected
+      6. ✅ Frontend bundled successfully without errors
+      
+      **Implementation Details:**
+      - Location: Lines 419-458 in presets.tsx
+      - Uses existing state variables: mealsSubTab, combosSubTab
+      - Conditional rendering: Shows correct sub-tabs based on active main tab
+      - Style consistency: Uses same design pattern as DIY screen
+      
+      **Expected Behavior:**
+      - When user selects "Meals" tab, sub-tabs "All Meals" and "My Meals" appear
+      - When user selects "Combos" tab, sub-tabs "All Combos" and "My Combos" appear
+      - Sub-tabs filter the displayed items accordingly
+      - Delete button appears only in "My Meals" and "My Combos" views
+      
+      **Testing Notes:**
+      - Frontend restarted successfully
+      - No JavaScript compilation errors
+      - No linting errors
+      - Web preview requires Google authentication
+      - Full functional testing pending user authentication
+      
+      **Potential Fixes Addressed:**
+      - Sub-tab carousel now present (was missing before)
+      - Tab structure matches DIY screen design
+      - Should resolve tab carousel height/width fluctuation issues
+      - Should eliminate "Unexpected text node" error (proper text wrapping)
