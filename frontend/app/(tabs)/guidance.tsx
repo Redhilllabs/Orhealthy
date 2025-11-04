@@ -1079,7 +1079,7 @@ export default function GuidanceScreen() {
                         </Text>
                       </View>
                       <TouchableOpacity
-                        style={styles.deleteButton}
+                        style={styles.deleteIconButton}
                         onPress={() => {
                           setDeleteTarget({ type: 'habit', id: item._id });
                           setShowDeleteConfirm(true);
