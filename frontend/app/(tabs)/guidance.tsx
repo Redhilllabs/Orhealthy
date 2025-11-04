@@ -2009,13 +2009,31 @@ export default function GuidanceScreen() {
                         {Object.entries(meals).map(([mealTime, mealId]: [string, any]) => {
                           const mealOption = mealOptions.find(m => m._id === mealId);
                           return (
-                            <View key={`${date}-${mealTime}`} style={styles.viewPlanMealRow}>
-                              <Text style={styles.mealTimeLabel}>
-                                {mealTime.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
-                              </Text>
-                              <Text style={styles.mealNameText}>
-                                {mealOption ? mealOption.name : 'Loading...'}
-                              </Text>
+                            <View key={`${date}-${mealTime}`} style={styles.viewPlanMealCard}>
+                              <View style={styles.viewPlanMealInfo}>
+                                <Text style={styles.mealTimeLabel}>
+                                  {mealTime.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </Text>
+                                <Text style={styles.mealNameText}>
+                                  {mealOption?.name || 'Meal Item'}
+                                </Text>
+                                {mealOption?.calculated_price && (
+                                  <Text style={styles.mealPriceText}>
+                                    ₹{mealOption.calculated_price.toFixed(2)}
+                                  </Text>
+                                )}
+                              </View>
+                              {mealOption && (
+                                <TouchableOpacity
+                                  style={styles.addToCartIconButton}
+                                  onPress={() => {
+                                    Alert.alert('Success', `${mealOption.name} added to cart!`);
+                                    // Here you would add the actual cart logic
+                                  }}
+                                >
+                                  <Ionicons name="cart" size={20} color="#ffd700" />
+                                </TouchableOpacity>
+                              )}
                             </View>
                           );
                         })}
