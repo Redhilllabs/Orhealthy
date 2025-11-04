@@ -1159,8 +1159,8 @@ export default function GuidanceScreen() {
                       <TouchableOpacity
                         style={styles.viewPlanButton}
                         onPress={() => {
-                          // Open view plan modal
-                          Alert.alert('Plan Details', 'View submitted plan details here');
+                          setCurrentViewPlan(item);
+                          setShowViewPlanModal(true);
                         }}
                       >
                         <Ionicons name="eye" size={18} color="#fff" />
