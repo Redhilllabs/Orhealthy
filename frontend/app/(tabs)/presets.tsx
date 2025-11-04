@@ -34,6 +34,7 @@ interface Meal {
   calculated_price?: number;
   total_price?: number;
   tags?: string[];
+  categories?: string[];
   ingredients?: Array<{
     ingredient_id?: string;
     ingredient_name?: string;
