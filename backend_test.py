@@ -384,12 +384,18 @@ class BackendTester:
             print("❌ Setup failed, cannot proceed with tests")
             return False
         
-        # Test unauthenticated requests first
+        # Test authentication requirements
         print("🔹 Testing Authentication Requirements:")
         self.test_unauthenticated_requests()
         
-        # Test with mock authentication to check error handling
-        self.test_delete_endpoints_with_mock_auth()
+        # Test endpoint existence and methods
+        self.test_endpoint_existence_and_methods()
+        
+        # Analyze backend implementation
+        self.test_backend_implementation_analysis()
+        
+        # Test error message format
+        self.test_error_message_format()
         
         # Print summary
         self.print_summary()
