@@ -1916,13 +1916,14 @@ async def delete_meal_plan(request: Request, plan_id: str):
             "_id": ObjectId(plan_id),
             "guidee_id": user["_id"]  # Only guidee can delete their own plans
         })
-    except Exception:
-        raise HTTPException(status_code=404, detail="Plan not found")
+    except Exception as e:
+        print(f"Error deleting meal plan: {e}")
+        raise HTTPException(status_code=400, detail="Invalid plan ID")
     
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Plan not found or unauthorized")
     
-    return {"message": "Plan deleted"}
+    return {"message": "Plan deleted successfully"}
 
 # Delivery Agent endpoints
 @api_router.get("/delivery-agents")
