@@ -2302,6 +2302,12 @@ export default function GuidanceScreen() {
           <View style={styles.successModalContent}>
             <Ionicons name="checkmark-circle" size={64} color="#10b981" />
             <Text style={styles.successModalText}>Added to cart!</Text>
+            <TouchableOpacity
+              style={styles.successModalButton}
+              onPress={() => setShowSuccessModal(false)}
+            >
+              <Text style={styles.successModalButtonText}>OK</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
