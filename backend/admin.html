@@ -2149,6 +2149,13 @@
                     source_quantity: parseFloat(e.source_quantity)
                 }));
             
+            // Get margin values
+            const productMargin = parseFloat(document.getElementById('productMargin').value) || 0;
+            const operationsMargin = parseFloat(document.getElementById('operationsMargin').value) || 0;
+            const brandingMargin = parseFloat(document.getElementById('brandingMargin').value) || 0;
+            const restMargins = parseFloat(document.getElementById('restMargins').value) || 0;
+            const miscellaneousMargins = parseFloat(document.getElementById('miscellaneousMargins').value) || 0;
+            
             const data = {
                 name: document.getElementById('ingredientName').value,
                 price_per_unit: parseFloat(document.getElementById('ingredientPrice').value),
@@ -2158,7 +2165,12 @@
                 images: ingredientImages,
                 step_size: parseFloat(document.getElementById('stepSize').value) || 1.0,
                 nutrition_profile: nutrition_profile,
-                source_ingredients: source_ingredients
+                source_ingredients: source_ingredients,
+                product_margin: productMargin,
+                operations_margin: operationsMargin,
+                branding_margin: brandingMargin,
+                rest_margins: restMargins,
+                miscellaneous_margins: miscellaneousMargins
             };
             
             try {
