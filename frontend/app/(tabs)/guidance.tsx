@@ -119,6 +119,10 @@ export default function GuidanceScreen() {
   });
   const [savingProfile, setSavingProfile] = useState(false);
 
+  // Delete Confirmation Modal States
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'habit' | 'plan', id: string } | null>(null);
+
   const mealOptions = [
     'Breakfast',
     'Brunch',
