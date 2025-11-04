@@ -121,6 +121,18 @@ user_problem_statement: |
      - Update admin.html label for recipe count
 
 backend:
+  - task: "GET /api/meals - Refresh Recipe Prices"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated GET /api/meals endpoint to refresh individual recipe prices within each meal's recipes array. Now fetches latest calculated_price for each recipe from db.meals and updates recipe_ref['price'] before calculating meal's total price. This ensures frontend selection modal shows updated prices."
+
   - task: "Delete Activity Endpoint (DELETE /api/habits/{habit_id})"
     implemented: true
     working: true
