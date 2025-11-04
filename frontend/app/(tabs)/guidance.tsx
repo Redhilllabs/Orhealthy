@@ -1969,16 +1969,22 @@ export default function GuidanceScreen() {
         </View>
       </Modal>
 
-      {/* Meal Detail Modal */}
+      {/* Meal Detail Modal - Bottom Sheet */}
       <Modal
         visible={showMealDetailModal}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setShowMealDetailModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '80%' }]}>
-            <View style={styles.modalHeader}>
+        <View style={styles.bottomSheetOverlay}>
+          <TouchableOpacity 
+            style={styles.bottomSheetBackdrop} 
+            activeOpacity={1}
+            onPress={() => setShowMealDetailModal(false)}
+          />
+          <View style={styles.bottomSheetContent}>
+            <View style={styles.bottomSheetHandle} />
+            <View style={styles.bottomSheetHeader}>
               <Text style={styles.modalTitle}>Meal Details</Text>
               <TouchableOpacity onPress={() => setShowMealDetailModal(false)}>
                 <Ionicons name="close" size={24} color="#666" />
