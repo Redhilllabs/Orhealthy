@@ -1498,6 +1498,7 @@ async def create_recipe(recipe_data: dict):
         "images": recipe_data.get("images", []),
         "ingredients": recipe_data["ingredients"],
         "tags": recipe_data.get("tags", []),
+        "categories": recipe_data.get("categories", []),
         "created_by": recipe_data.get("created_by", "admin"),
         "is_preset": recipe_data.get("is_preset", True),
         "created_at": datetime.now(timezone.utc)
@@ -1515,6 +1516,7 @@ async def update_recipe(recipe_id: str, recipe_data: dict):
         "images": recipe_data.get("images", []),
         "ingredients": recipe_data["ingredients"],
         "tags": recipe_data.get("tags", []),
+        "categories": recipe_data.get("categories", []),
         "created_by": recipe_data.get("created_by", "admin"),
         "updated_at": datetime.now(timezone.utc)
     }
