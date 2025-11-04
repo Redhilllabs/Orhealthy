@@ -2033,10 +2033,24 @@
                 }
             }
             
+            // Add margins to total price
+            const productMargin = parseFloat(document.getElementById('productMargin').value) || 0;
+            const operationsMargin = parseFloat(document.getElementById('operationsMargin').value) || 0;
+            const brandingMargin = parseFloat(document.getElementById('brandingMargin').value) || 0;
+            const restMargins = parseFloat(document.getElementById('restMargins').value) || 0;
+            const miscellaneousMargins = parseFloat(document.getElementById('miscellaneousMargins').value) || 0;
+            
+            const totalMargins = productMargin + operationsMargin + brandingMargin + restMargins + miscellaneousMargins;
+            const finalPrice = totalPrice + totalMargins;
+            
             if (calculations.length > 0) {
-                priceInput.value = totalPrice.toFixed(2);
+                priceInput.value = finalPrice.toFixed(2);
                 priceInput.readOnly = true;
-                priceInfo.textContent = `Auto-calculated: ${calculations.join(' + ')} = ₹${totalPrice.toFixed(2)}`;
+                let infoText = `Auto-calculated: ${calculations.join(' + ')} = ₹${totalPrice.toFixed(2)}`;
+                if (totalMargins > 0) {
+                    infoText += ` + Margins (₹${totalMargins.toFixed(2)}) = ₹${finalPrice.toFixed(2)}`;
+                }
+                priceInfo.textContent = infoText;
                 priceInfo.style.display = 'block';
             } else {
                 priceInfo.style.display = 'none';
