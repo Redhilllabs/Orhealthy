@@ -149,15 +149,18 @@ backend:
 
   - task: "PUT /api/meal-plans/{id}/save-progress - Save Planning Progress"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created endpoint to save partial meal planning progress. Updates logged_meals field and sets status to 'planning'."
+      - working: true
+        agent: "testing"
+        comment: "✅ PUT /api/meal-plans/{id}/save-progress endpoint working correctly. Comprehensive testing completed: Authentication properly required (401), endpoint exists and accessible, proper JSON validation (422 for malformed data), proper error handling for invalid IDs and unauthorized access. Backend implementation verified: requires JWT authentication, only guide can save progress for their assigned plans, updates logged_meals field and sets status to 'planning', handles empty and partial data appropriately."
 
   - task: "PUT /api/meal-plans/{id}/submit - Submit Completed Plan"
     implemented: true
