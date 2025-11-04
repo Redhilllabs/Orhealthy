@@ -2250,6 +2250,7 @@
                         <td>${recipe.name}</td>
                         <td>${recipe.description}</td>
                         <td>₹${recipe.calculated_price ? recipe.calculated_price.toFixed(2) : '0.00'}</td>
+                        <td><span style="background: #fef3c7; color: #92400e; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${recipe.categories ? recipe.categories.join(', ') : '-'}</span></td>
                         <td>${recipe.tags ? recipe.tags.join(', ') : '-'}</td>
                         <td class="actions">
                             <button class="btn" onclick="editMeal('${recipe._id}')">Edit</button>
