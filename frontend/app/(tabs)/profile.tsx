@@ -46,7 +46,7 @@ interface HabitLog {
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'posts' | 'guides' | 'guidees' | 'idols' | 'fans' | 'addresses' | 'habits'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'guides' | 'guidees' | 'idols' | 'fans' | 'addresses'>('posts');
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
   const [guides, setGuides] = useState<any[]>([]);
