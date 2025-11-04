@@ -36,21 +36,43 @@ class MealPlanningTester:
         if details and not success:
             print(f"   Details: {details}")
     
-    def authenticate_user(self):
-        """Skip authentication for direct endpoint testing"""
-        try:
-            # Since we can't easily create a real session, we'll test the endpoints
-            # directly to verify their error handling behavior
-            self.session.headers.update({
-                "Content-Type": "application/json"
-            })
-            
-            self.log_test("Authentication Setup", True, "Direct endpoint testing configured")
-            return True
-            
-        except Exception as e:
-            self.log_test("Authentication Setup", False, f"Error: {str(e)}")
-            return False
+    def test_authentication_required(self):
+        """Test that all endpoints require authentication"""
+        print("\n=== Testing Authentication Requirements ===")
+        
+        endpoints = [
+            ("GET", f"{API_BASE}/meal-plans/guide"),
+            ("PUT", f"{API_BASE}/meal-plans/dummy_id/accept"),
+            ("PUT", f"{API_BASE}/meal-plans/dummy_id/save-progress"),
+            ("PUT", f"{API_BASE}/meal-plans/dummy_id/submit")
+        ]
+        
+        for method, url in endpoints:
+            try:
+                if method == "GET":
+                    response = self.session.get(url)
+                else:
+                    response = self.session.put(url, json={})
+                
+                if response.status_code == 401:
+                    self.log_result(
+                        f"Auth Required - {method} {url.split('/')[-1]}", 
+                        True, 
+                        "Correctly requires authentication"
+                    )
+                else:
+                    self.log_result(
+                        f"Auth Required - {method} {url.split('/')[-1]}", 
+                        False, 
+                        f"Expected 401, got {response.status_code}",
+                        {"response": response.text[:200]}
+                    )
+            except Exception as e:
+                self.log_result(
+                    f"Auth Required - {method} {url.split('/')[-1]}", 
+                    False, 
+                    f"Request failed: {str(e)}"
+                )
     
     def create_test_habit(self):
         """Create a test habit for deletion testing"""
