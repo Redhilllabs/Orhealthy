@@ -118,6 +118,19 @@ class Conversation(BaseModel):
     unread_count_user2: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class MealPlan(BaseModel):
+    guidee_id: str  # User requesting the plan
+    guidee_name: str
+    guide_id: Optional[str] = None  # Preferred guide (optional)
+    guide_name: Optional[str] = None
+    plan_type: str  # "single_meal", "1_day", "3_day", "week", "fortnight", "month"
+    start_date: str  # ISO date string
+    meals_requested: List[str] = []  # ["breakfast", "brunch", "lunch", "evening_snacks", "dinner", "supper"]
+    status: str = "requested"  # "requested", "accepted", "completed", "cancelled"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+
+
 
 class SavedMeal(BaseModel):
     guide_id: str
