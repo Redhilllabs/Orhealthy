@@ -2412,6 +2412,23 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     textDecorationLine: 'underline',
   },
+  guideeNameButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#eff6ff',
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#3b82f6',
+  },
+  guideeNameText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3b82f6',
+  },
   planType: {
     fontSize: 18,
     fontWeight: '600',
