@@ -82,12 +82,28 @@ export default function GuidanceScreen() {
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planType, setPlanType] = useState('');
   const [startDate, setStartDate] = useState(new Date());
+  const [startDateText, setStartDateText] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [selectedGuide, setSelectedGuide] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Activity Log Modal States
+  const [showActivityModal, setShowActivityModal] = useState(false);
+  const [activityType, setActivityType] = useState('');
+  const [activityData, setActivityData] = useState({
+    name: '',
+    value: '',
+    unit: '',
+    hours: '',
+    startTime: '',
+    endTime: '',
+    note: '',
+  });
+  const [loggingActivity, setLoggingActivity] = useState(false);
+
   // About Tab States
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileData, setProfileData] = useState({
     age: '',
     gender: '',
@@ -119,6 +135,15 @@ export default function GuidanceScreen() {
     { value: 'month', label: 'Month' },
   ];
 
+  const activityTypes = [
+    { value: 'exercise', label: 'Exercise', icon: 'fitness' },
+    { value: 'meals', label: 'Meal', icon: 'restaurant' },
+    { value: 'sleep', label: 'Sleep', icon: 'moon' },
+    { value: 'habit', label: 'Habit', icon: 'checkmark-circle' },
+    { value: 'water', label: 'Water Intake', icon: 'water' },
+    { value: 'note', label: 'Note', icon: 'document-text' },
+  ];
+
   const activityLevels = [
     { value: 'sedentary', label: 'Sedentary' },
     { value: 'lightly_active', label: 'Lightly Active' },
@@ -132,6 +157,7 @@ export default function GuidanceScreen() {
       fetchHabits();
     } else if (activeTab === 'messages') {
       fetchConversations();
+      fetchGuides();
     } else if (activeTab === 'plans') {
       fetchMealPlans();
       fetchGuides();
@@ -254,6 +280,107 @@ export default function GuidanceScreen() {
     }
   };
 
+  const logActivity = async () => {
+    if (!activityType) {
+      Alert.alert('Error', 'Please select an activity type');
+      return;
+    }
+
+    let description = '';
+    let value: number | undefined;
+    let unit: string | undefined;
+
+    switch (activityType) {
+      case 'exercise':
+        if (!activityData.name || !activityData.value) {
+          Alert.alert('Error', 'Please enter exercise name and value');
+          return;
+        }
+        description = activityData.name;
+        value = parseFloat(activityData.value);
+        unit = activityData.unit || 'minutes';
+        break;
+      case 'meals':
+        if (!activityData.name) {
+          Alert.alert('Error', 'Please enter meal name');
+          return;
+        }
+        description = activityData.name;
+        break;
+      case 'sleep':
+        if (!activityData.hours) {
+          Alert.alert('Error', 'Please enter hours of sleep');
+          return;
+        }
+        description = `${activityData.startTime || 'Night'} to ${activityData.endTime || 'Morning'}`;
+        value = parseFloat(activityData.hours);
+        unit = 'hours';
+        break;
+      case 'habit':
+        if (!activityData.name || !activityData.value) {
+          Alert.alert('Error', 'Please enter habit activity and value');
+          return;
+        }
+        description = activityData.name;
+        value = parseFloat(activityData.value);
+        unit = activityData.unit || 'times';
+        break;
+      case 'water':
+        if (!activityData.value) {
+          Alert.alert('Error', 'Please enter water intake value');
+          return;
+        }
+        description = 'Water intake';
+        value = parseFloat(activityData.value);
+        unit = activityData.unit || 'glasses';
+        break;
+      case 'note':
+        if (!activityData.note) {
+          Alert.alert('Error', 'Please enter a note');
+          return;
+        }
+        description = activityData.note;
+        break;
+    }
+
+    setLoggingActivity(true);
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.post(
+        `${API_URL}/habits`,
+        {
+          habit_type: activityType,
+          description,
+          value,
+          unit,
+          date: new Date().toISOString(),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      Alert.alert('Success', 'Activity logged successfully');
+      setShowActivityModal(false);
+      setActivityType('');
+      setActivityData({
+        name: '',
+        value: '',
+        unit: '',
+        hours: '',
+        startTime: '',
+        endTime: '',
+        note: '',
+      });
+      fetchHabits();
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      Alert.alert('Error', 'Failed to log activity');
+    } finally {
+      setLoggingActivity(false);
+    }
+  };
+
   const submitPlanRequest = async () => {
     if (!planType || selectedMeals.length === 0) {
       Alert.alert('Error', 'Please select plan type and at least one meal');
@@ -265,11 +392,15 @@ export default function GuidanceScreen() {
       const token = await storage.getItemAsync('session_token');
       const guide = guides.find(g => g._id === selectedGuide);
       
+      const dateToUse = Platform.OS === 'web' && startDateText 
+        ? startDateText 
+        : startDate.toISOString();
+
       await axios.post(
         `${API_URL}/meal-plans`,
         {
           plan_type: planType,
-          start_date: startDate.toISOString(),
+          start_date: dateToUse,
           meals_requested: selectedMeals.map(m => m.toLowerCase().replace(/ /g, '_')),
           guide_id: selectedGuide || null,
           guide_name: guide?.name || null,
@@ -284,6 +415,7 @@ export default function GuidanceScreen() {
       setPlanType('');
       setSelectedMeals([]);
       setSelectedGuide('');
+      setStartDateText('');
       fetchMealPlans();
     } catch (error) {
       console.error('Error submitting plan:', error);
@@ -315,6 +447,7 @@ export default function GuidanceScreen() {
         }
       );
       Alert.alert('Success', 'Profile updated successfully');
+      setIsEditingProfile(false);
     } catch (error) {
       console.error('Error saving profile:', error);
       Alert.alert('Error', 'Failed to save profile');
@@ -324,10 +457,16 @@ export default function GuidanceScreen() {
   };
 
   const toggleMealSelection = (meal: string) => {
-    if (selectedMeals.includes(meal)) {
-      setSelectedMeals(selectedMeals.filter(m => m !== meal));
+    if (planType === 'single_meal') {
+      // For single meal, only allow one selection
+      setSelectedMeals([meal]);
     } else {
-      setSelectedMeals([...selectedMeals, meal]);
+      // For other types, allow multiple
+      if (selectedMeals.includes(meal)) {
+        setSelectedMeals(selectedMeals.filter(m => m !== meal));
+      } else {
+        setSelectedMeals([...selectedMeals, meal]);
+      }
     }
   };
 
@@ -416,11 +555,181 @@ export default function GuidanceScreen() {
     );
   };
 
+  const renderActivityForm = () => {
+    switch (activityType) {
+      case 'exercise':
+        return (
+          <>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Exercise Name *</Text>
+              <TextInput
+                style={styles.input}
+                value={activityData.name}
+                onChangeText={(text) => setActivityData({ ...activityData, name: text })}
+                placeholder="e.g., Running, Yoga"
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                <Text style={styles.inputLabel}>Duration *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={activityData.value}
+                  onChangeText={(text) => setActivityData({ ...activityData, value: text })}
+                  keyboardType="numeric"
+                  placeholder="30"
+                />
+              </View>
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                <Text style={styles.inputLabel}>Unit</Text>
+                <TextInput
+                  style={styles.input}
+                  value={activityData.unit}
+                  onChangeText={(text) => setActivityData({ ...activityData, unit: text })}
+                  placeholder="minutes"
+                />
+              </View>
+            </View>
+          </>
+        );
+      case 'meals':
+        return (
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Meal Name *</Text>
+            <TextInput
+              style={styles.input}
+              value={activityData.name}
+              onChangeText={(text) => setActivityData({ ...activityData, name: text })}
+              placeholder="e.g., Grilled Chicken Salad"
+            />
+          </View>
+        );
+      case 'sleep':
+        return (
+          <>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Hours of Sleep *</Text>
+              <TextInput
+                style={styles.input}
+                value={activityData.hours}
+                onChangeText={(text) => setActivityData({ ...activityData, hours: text })}
+                keyboardType="numeric"
+                placeholder="8"
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                <Text style={styles.inputLabel}>Start Time</Text>
+                <TextInput
+                  style={styles.input}
+                  value={activityData.startTime}
+                  onChangeText={(text) => setActivityData({ ...activityData, startTime: text })}
+                  placeholder="10:00 PM"
+                />
+              </View>
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                <Text style={styles.inputLabel}>End Time</Text>
+                <TextInput
+                  style={styles.input}
+                  value={activityData.endTime}
+                  onChangeText={(text) => setActivityData({ ...activityData, endTime: text })}
+                  placeholder="6:00 AM"
+                />
+              </View>
+            </View>
+          </>
+        );
+      case 'habit':
+        return (
+          <>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Habit Activity *</Text>
+              <TextInput
+                style={styles.input}
+                value={activityData.name}
+                onChangeText={(text) => setActivityData({ ...activityData, name: text })}
+                placeholder="e.g., Meditation, Reading"
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                <Text style={styles.inputLabel}>Value *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={activityData.value}
+                  onChangeText={(text) => setActivityData({ ...activityData, value: text })}
+                  keyboardType="numeric"
+                  placeholder="10"
+                />
+              </View>
+              <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                <Text style={styles.inputLabel}>Unit</Text>
+                <TextInput
+                  style={styles.input}
+                  value={activityData.unit}
+                  onChangeText={(text) => setActivityData({ ...activityData, unit: text })}
+                  placeholder="minutes"
+                />
+              </View>
+            </View>
+          </>
+        );
+      case 'water':
+        return (
+          <View style={styles.inputRow}>
+            <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+              <Text style={styles.inputLabel}>Amount *</Text>
+              <TextInput
+                style={styles.input}
+                value={activityData.value}
+                onChangeText={(text) => setActivityData({ ...activityData, value: text })}
+                keyboardType="numeric"
+                placeholder="8"
+              />
+            </View>
+            <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+              <Text style={styles.inputLabel}>Unit</Text>
+              <TextInput
+                style={styles.input}
+                value={activityData.unit}
+                onChangeText={(text) => setActivityData({ ...activityData, unit: text })}
+                placeholder="glasses"
+              />
+            </View>
+          </View>
+        );
+      case 'note':
+        return (
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Note *</Text>
+            <TextInput
+              style={[styles.input, styles.bioInput]}
+              value={activityData.note}
+              onChangeText={(text) => setActivityData({ ...activityData, note: text })}
+              placeholder="Write your note here..."
+              multiline
+              numberOfLines={4}
+            />
+          </View>
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'timeline':
         return (
           <View style={styles.tabContent}>
+            <TouchableOpacity
+              style={styles.requestButton}
+              onPress={() => setShowActivityModal(true)}
+            >
+              <Ionicons name="add-circle" size={24} color="#fff" />
+              <Text style={styles.requestButtonText}>Log Activity</Text>
+            </TouchableOpacity>
+
             {loading ? (
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
             ) : habits.length === 0 ? (
@@ -581,14 +890,25 @@ export default function GuidanceScreen() {
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
             ) : (
               <>
+                {!isEditingProfile && (
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() => setIsEditingProfile(true)}
+                  >
+                    <Ionicons name="pencil" size={20} color="#fff" />
+                    <Text style={styles.editButtonText}>Edit Profile</Text>
+                  </TouchableOpacity>
+                )}
+
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Age</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
                     value={profileData.age}
                     onChangeText={(text) => setProfileData({ ...profileData, age: text })}
                     keyboardType="numeric"
                     placeholder="Enter your age"
+                    editable={isEditingProfile}
                   />
                 </View>
 
@@ -601,8 +921,10 @@ export default function GuidanceScreen() {
                         style={[
                           styles.genderButton,
                           profileData.gender === g.toLowerCase() && styles.genderButtonActive,
+                          !isEditingProfile && styles.buttonDisabled,
                         ]}
-                        onPress={() => setProfileData({ ...profileData, gender: g.toLowerCase() })}
+                        onPress={() => isEditingProfile && setProfileData({ ...profileData, gender: g.toLowerCase() })}
+                        disabled={!isEditingProfile}
                       >
                         <Text
                           style={[
@@ -621,21 +943,23 @@ export default function GuidanceScreen() {
                   <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
                     <Text style={styles.inputLabel}>Height (cm)</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, !isEditingProfile && styles.inputDisabled]}
                       value={profileData.height}
                       onChangeText={(text) => setProfileData({ ...profileData, height: text })}
                       keyboardType="numeric"
                       placeholder="170"
+                      editable={isEditingProfile}
                     />
                   </View>
                   <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
                     <Text style={styles.inputLabel}>Weight (kg)</Text>
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, !isEditingProfile && styles.inputDisabled]}
                       value={profileData.weight}
                       onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
                       keyboardType="numeric"
                       placeholder="70"
+                      editable={isEditingProfile}
                     />
                   </View>
                 </View>
@@ -643,10 +967,11 @@ export default function GuidanceScreen() {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Allergies (comma separated)</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
                     value={profileData.allergies}
                     onChangeText={(text) => setProfileData({ ...profileData, allergies: text })}
                     placeholder="e.g., Nuts, Dairy"
+                    editable={isEditingProfile}
                   />
                 </View>
 
@@ -660,8 +985,10 @@ export default function GuidanceScreen() {
                           style={[
                             styles.optionButton,
                             profileData.lifestyle_activity_level === level.value && styles.optionButtonActive,
+                            !isEditingProfile && styles.buttonDisabled,
                           ]}
-                          onPress={() => setProfileData({ ...profileData, lifestyle_activity_level: level.value })}
+                          onPress={() => isEditingProfile && setProfileData({ ...profileData, lifestyle_activity_level: level.value })}
+                          disabled={!isEditingProfile}
                         >
                           <Text
                             style={[
@@ -680,46 +1007,62 @@ export default function GuidanceScreen() {
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Profession</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
                     value={profileData.profession}
                     onChangeText={(text) => setProfileData({ ...profileData, profession: text })}
                     placeholder="Your profession"
+                    editable={isEditingProfile}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Fitness Activities (comma separated)</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
                     value={profileData.fitness_activities}
                     onChangeText={(text) => setProfileData({ ...profileData, fitness_activities: text })}
                     placeholder="e.g., Running, Yoga, Swimming"
+                    editable={isEditingProfile}
                   />
                 </View>
 
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Bio</Text>
                   <TextInput
-                    style={[styles.input, styles.bioInput]}
+                    style={[styles.input, styles.bioInput, !isEditingProfile && styles.inputDisabled]}
                     value={profileData.bio}
                     onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
                     placeholder="Tell us about yourself"
                     multiline
                     numberOfLines={4}
+                    editable={isEditingProfile}
                   />
                 </View>
 
-                <TouchableOpacity
-                  style={[styles.saveButton, savingProfile && styles.saveButtonDisabled]}
-                  onPress={saveProfile}
-                  disabled={savingProfile}
-                >
-                  {savingProfile ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.saveButtonText}>Save Profile</Text>
-                  )}
-                </TouchableOpacity>
+                {isEditingProfile && (
+                  <View style={styles.aboutButtonsContainer}>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => {
+                        setIsEditingProfile(false);
+                        fetchProfile();
+                      }}
+                    >
+                      <Text style={styles.cancelButtonText}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.saveButton, savingProfile && styles.saveButtonDisabled]}
+                      onPress={saveProfile}
+                      disabled={savingProfile}
+                    >
+                      {savingProfile ? (
+                        <ActivityIndicator color="#fff" />
+                      ) : (
+                        <Text style={styles.saveButtonText}>Save Profile</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                )}
               </>
             )}
           </ScrollView>
@@ -742,6 +1085,7 @@ export default function GuidanceScreen() {
                     onRefresh={() => {
                       setRefreshing(true);
                       fetchConversations();
+                      fetchGuides();
                     }}
                     colors={['#ffd700']}
                   />
@@ -809,6 +1153,83 @@ export default function GuidanceScreen() {
       {/* Tab Content */}
       {renderTabContent()}
 
+      {/* Activity Log Modal */}
+      <Modal
+        visible={showActivityModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowActivityModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Log Activity</Text>
+              <TouchableOpacity onPress={() => {
+                setShowActivityModal(false);
+                setActivityType('');
+                setActivityData({
+                  name: '',
+                  value: '',
+                  unit: '',
+                  hours: '',
+                  startTime: '',
+                  endTime: '',
+                  note: '',
+                });
+              }}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.sectionLabel}>Activity Type *</Text>
+              <View style={styles.activityTypeGrid}>
+                {activityTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type.value}
+                    style={[
+                      styles.activityTypeButton,
+                      activityType === type.value && styles.activityTypeButtonActive,
+                    ]}
+                    onPress={() => setActivityType(type.value)}
+                  >
+                    <Ionicons 
+                      name={type.icon as any} 
+                      size={24} 
+                      color={activityType === type.value ? '#fff' : '#666'} 
+                    />
+                    <Text
+                      style={[
+                        styles.activityTypeText,
+                        activityType === type.value && styles.activityTypeTextActive,
+                      ]}
+                    >
+                      {type.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {activityType && renderActivityForm()}
+
+              {activityType && (
+                <TouchableOpacity
+                  style={[styles.submitButton, loggingActivity && styles.submitButtonDisabled]}
+                  onPress={logActivity}
+                  disabled={loggingActivity}
+                >
+                  {loggingActivity ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.submitButtonText}>Log Activity</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       {/* Plan Request Modal */}
       <Modal
         visible={showPlanModal}
@@ -850,31 +1271,44 @@ export default function GuidanceScreen() {
               </View>
 
               <Text style={styles.sectionLabel}>Start Date</Text>
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Text style={styles.dateButtonText}>
-                  {startDate.toLocaleDateString()}
-                </Text>
-                <Ionicons name="calendar" size={20} color="#666" />
-              </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  value={startDate}
-                  mode="date"
-                  display="default"
-                  onChange={(event, selectedDate) => {
-                    setShowDatePicker(Platform.OS === 'ios');
-                    if (selectedDate) {
-                      setStartDate(selectedDate);
-                    }
-                  }}
-                  minimumDate={new Date()}
+              {Platform.OS === 'web' ? (
+                <TextInput
+                  style={styles.input}
+                  value={startDateText}
+                  onChangeText={setStartDateText}
+                  placeholder="YYYY-MM-DD"
                 />
+              ) : (
+                <>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={styles.dateButtonText}>
+                      {startDate.toLocaleDateString()}
+                    </Text>
+                    <Ionicons name="calendar" size={20} color="#666" />
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowDatePicker(Platform.OS === 'ios');
+                        if (selectedDate) {
+                          setStartDate(selectedDate);
+                        }
+                      }}
+                      minimumDate={new Date()}
+                    />
+                  )}
+                </>
               )}
 
-              <Text style={styles.sectionLabel}>Meals Requested *</Text>
+              <Text style={styles.sectionLabel}>
+                Meals Requested * {planType === 'single_meal' && '(Select one)'}
+              </Text>
               <View style={styles.mealsGrid}>
                 {mealOptions.map((meal) => (
                   <TouchableOpacity
@@ -1213,6 +1647,41 @@ const styles = StyleSheet.create({
   },
   aboutContent: {
     padding: 16,
+    paddingBottom: 100,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ffd700',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  editButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginLeft: 8,
+  },
+  aboutButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 32,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#94a3b8',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   inputGroup: {
     marginBottom: 16,
@@ -1231,6 +1700,10 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     color: '#1e293b',
+  },
+  inputDisabled: {
+    backgroundColor: '#f8fafc',
+    color: '#64748b',
   },
   bioInput: {
     height: 100,
@@ -1264,6 +1737,9 @@ const styles = StyleSheet.create({
   genderButtonTextActive: {
     color: '#fff',
   },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
   optionsRow: {
     flexDirection: 'row',
   },
@@ -1289,12 +1765,12 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   saveButton: {
+    flex: 1,
     backgroundColor: '#ffd700',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 32,
+    marginLeft: 8,
   },
   saveButtonDisabled: {
     opacity: 0.6,
@@ -1337,6 +1813,35 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginBottom: 12,
     marginTop: 8,
+  },
+  activityTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 16,
+  },
+  activityTypeButton: {
+    width: '48%',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginRight: '2%',
+    marginBottom: 8,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  activityTypeButtonActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  activityTypeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+    marginTop: 8,
+  },
+  activityTypeTextActive: {
+    color: '#fff',
   },
   planTypeGrid: {
     flexDirection: 'row',
