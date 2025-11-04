@@ -14,23 +14,26 @@ import uuid
 BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://health-planner-11.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-class BackendTester:
+class MealPlanningTester:
     def __init__(self):
         self.session = requests.Session()
-        self.auth_token = None
+        self.guidee_token = None
+        self.guide_token = None
+        self.test_plan_id = None
         self.test_results = []
         
-    def log_test(self, test_name, success, details=""):
-        """Log test results"""
-        status = "✅ PASS" if success else "❌ FAIL"
-        self.test_results.append({
+    def log_result(self, test_name, success, message, details=None):
+        """Log test result"""
+        result = {
             "test": test_name,
             "success": success,
-            "details": details,
-            "timestamp": datetime.now().isoformat()
-        })
-        print(f"{status}: {test_name}")
-        if details:
+            "message": message,
+            "details": details or {}
+        }
+        self.test_results.append(result)
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"{status}: {test_name} - {message}")
+        if details and not success:
             print(f"   Details: {details}")
     
     def authenticate_user(self):
