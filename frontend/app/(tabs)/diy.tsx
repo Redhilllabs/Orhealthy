@@ -1135,7 +1135,7 @@ export default function DIYScreen() {
                         <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty - stepSize)}>
                           <Ionicons name="remove-circle" size={28} color="#ffd700" />
                         </TouchableOpacity>
-                        <Text style={styles.selectedItemQty}>{qty}{ingredient.unit}</Text>
+                        <Text style={styles.selectedItemQty}>{qty}</Text>
                         <TouchableOpacity onPress={() => updateIngredientQuantity(id, qty + stepSize)}>
                           <Ionicons name="add-circle" size={28} color="#ffd700" />
                         </TouchableOpacity>
