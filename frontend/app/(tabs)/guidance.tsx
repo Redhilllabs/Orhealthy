@@ -1460,4 +1460,1275 @@ export default function GuidanceScreen() {
         </View>
       </Modal>
 
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Age</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.age}
+                  onChangeText={(text) => setProfileData({ ...profileData, age: text })}
+                  keyboardType="numeric"
+                  placeholder="Enter your age"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Gender</Text>
+                <View style={styles.genderRow}>
+                  {['Male', 'Female', 'Other'].map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      style={[
+                        styles.genderButton,
+                        profileData.gender === g.toLowerCase() && styles.genderButtonActive,
+                      ]}
+                      onPress={() => setProfileData({ ...profileData, gender: g.toLowerCase() })}
+                    >
+                      <Text
+                        style={[
+                          styles.genderButtonText,
+                          profileData.gender === g.toLowerCase() && styles.genderButtonTextActive,
+                        ]}
+                      >
+                        {g}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                  <Text style={styles.inputLabel}>Height (cm)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={profileData.height}
+                    onChangeText={(text) => setProfileData({ ...profileData, height: text })}
+                    keyboardType="numeric"
+                    placeholder="170"
+                  />
+                </View>
+                <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                  <Text style={styles.inputLabel}>Weight (kg)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={profileData.weight}
+                    onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
+                    keyboardType="numeric"
+                    placeholder="70"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Allergies (comma separated)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.allergies}
+                  onChangeText={(text) => setProfileData({ ...profileData, allergies: text })}
+                  placeholder="e.g., Nuts, Dairy"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Lifestyle Disorders (comma separated)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.lifestyle_disorders}
+                  onChangeText={(text) => setProfileData({ ...profileData, lifestyle_disorders: text })}
+                  placeholder="e.g., Diabetes, Hypertension"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Activity Level</Text>
+                <View style={styles.activityLevelPicker}>
+                  {activityLevels.map((level) => (
+                    <TouchableOpacity
+                      key={level.value}
+                      style={[
+                        styles.activityLevelButton,
+                        profileData.lifestyle_activity_level === level.value && styles.activityLevelButtonActive,
+                      ]}
+                      onPress={() => setProfileData({ ...profileData, lifestyle_activity_level: level.value })}
+                    >
+                      <Text
+                        style={[
+                          styles.activityLevelText,
+                          profileData.lifestyle_activity_level === level.value && styles.activityLevelTextActive,
+                        ]}
+                      >
+                        {level.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Profession</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.profession}
+                  onChangeText={(text) => setProfileData({ ...profileData, profession: text })}
+                  placeholder="e.g., Software Engineer"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Fitness Activities (comma separated)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.fitness_activities}
+                  onChangeText={(text) => setProfileData({ ...profileData, fitness_activities: text })}
+                  placeholder="e.g., Running, Yoga"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Bio</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={profileData.bio}
+                  onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
+                  placeholder="Tell us about yourself..."
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, savingProfile && styles.submitButtonDisabled]}
+                onPress={saveProfile}
+                disabled={savingProfile}
+              >
+                {savingProfile ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Save Changes</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Plan Request Modal */}
+      <Modal
+        visible={showPlanModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowPlanModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Request Meal Plan</Text>
+              <TouchableOpacity onPress={() => setShowPlanModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.sectionLabel}>Plan Type *</Text>
+              <View style={styles.planTypeGrid}>
+                {planTypes.map((type) => (
+                  <TouchableOpacity
+                    key={type.value}
+                    style={[
+                      styles.planTypeButton,
+                      planType === type.value && styles.planTypeButtonActive,
+                    ]}
+                    onPress={() => setPlanType(type.value)}
+                  >
+                    <Text
+                      style={[
+                        styles.planTypeText,
+                        planType === type.value && styles.planTypeTextActive,
+                      ]}
+                    >
+                      {type.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.sectionLabel}>Start Date *</Text>
+              {Platform.OS === 'web' ? (
+                <TextInput
+                  style={styles.input}
+                  value={startDateText}
+                  onChangeText={setStartDateText}
+                  placeholder="YYYY-MM-DD"
+                />
+              ) : (
+                <>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text style={styles.dateButtonText}>
+                      {startDate.toLocaleDateString()}
+                    </Text>
+                    <Ionicons name="calendar" size={20} color="#666" />
+                  </TouchableOpacity>
+                  {showDatePicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowDatePicker(Platform.OS === 'ios');
+                        if (selectedDate) {
+                          setStartDate(selectedDate);
+                        }
+                      }}
+                      minimumDate={new Date()}
+                    />
+                  )}
+                </>
+              )}
+
+              <Text style={styles.sectionLabel}>
+                Meals Requested * {planType === 'single_meal' && '(Select one)'}
+              </Text>
+              <View style={styles.mealsGrid}>
+                {mealOptionsArray.map((meal) => (
+                  <TouchableOpacity
+                    key={meal}
+                    style={[
+                      styles.mealCheckbox,
+                      selectedMeals.includes(meal) && styles.mealCheckboxActive,
+                    ]}
+                    onPress={() => toggleMealSelection(meal)}
+                  >
+                    <Ionicons
+                      name={selectedMeals.includes(meal) ? 'checkbox' : 'square-outline'}
+                      size={24}
+                      color={selectedMeals.includes(meal) ? '#ffd700' : '#999'}
+                    />
+                    <Text style={styles.mealLabel}>{meal}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.sectionLabel}>Select Guide *</Text>
+              <View style={styles.guidePicker}>
+                {guides.map((guide) => (
+                  <TouchableOpacity
+                    key={guide._id}
+                    style={[
+                      styles.guideOption,
+                      selectedGuide === guide._id && styles.guideOptionActive,
+                    ]}
+                    onPress={() => setSelectedGuide(guide._id)}
+                  >
+                    <Text
+                      style={[
+                        styles.guideOptionText,
+                        selectedGuide === guide._id && styles.guideOptionTextActive,
+                      ]}
+                    >
+                      {guide.name}
+                      {guide.average_rating && ` (★${guide.average_rating.toFixed(1)})`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+                onPress={submitPlanRequest}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Request Plan</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Planning Modal (for guides) */}
+      <Modal
+        visible={showPlanningModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowPlanningModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '90%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Plan Meals</Text>
+              <TouchableOpacity onPress={() => setShowPlanningModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {currentPlanForPlanning && (
+                <>
+                  <Text style={styles.planInfoText}>
+                    Plan for: {currentPlanForPlanning.guidee_name}
+                  </Text>
+                  <Text style={styles.planInfoText}>
+                    Type: {planTypes.find(p => p.value === currentPlanForPlanning.plan_type)?.label}
+                  </Text>
+
+                  {generateDatesForPlan(currentPlanForPlanning).map((date) => (
+                    <View key={date} style={styles.dateSection}>
+                      <Text style={styles.dateSectionTitle}>
+                        {new Date(date).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </Text>
+
+                      {currentPlanForPlanning.meals_requested.map((meal) => (
+                        <View key={`${date}-${meal}`} style={styles.mealPlanRow}>
+                          <Text style={styles.mealTimeLabel}>
+                            {meal.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </Text>
+                          
+                          {Platform.OS === 'web' ? (
+                            <select
+                              style={{
+                                flex: 1,
+                                padding: 12,
+                                borderWidth: 1,
+                                borderColor: '#e2e8f0',
+                                borderRadius: 8,
+                                fontSize: 14,
+                              }}
+                              value={planningMealSelections[date]?.[meal] || ''}
+                              onChange={(e) => {
+                                setPlanningMealSelections({
+                                  ...planningMealSelections,
+                                  [date]: {
+                                    ...planningMealSelections[date],
+                                    [meal]: e.target.value,
+                                  },
+                                });
+                              }}
+                            >
+                              <option value="">Select a meal option</option>
+                              {mealOptions.map((option) => (
+                                <option key={option._id} value={option._id}>
+                                  {option.name} - ₹{option.calculated_price?.toFixed(2) || '0.00'} ({option.type.replace('_', ' ')})
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <Picker
+                              selectedValue={planningMealSelections[date]?.[meal] || ''}
+                              style={styles.mealPicker}
+                              onValueChange={(itemValue) => {
+                                setPlanningMealSelections({
+                                  ...planningMealSelections,
+                                  [date]: {
+                                    ...planningMealSelections[date],
+                                    [meal]: itemValue,
+                                  },
+                                });
+                              }}
+                            >
+                              <Picker.Item label="Select a meal option" value="" />
+                              {mealOptions.map((option) => (
+                                <Picker.Item
+                                  key={option._id}
+                                  label={`${option.name} - ₹${option.calculated_price?.toFixed(2) || '0.00'} (${option.type.replace('_', ' ')})`}
+                                  value={option._id}
+                                />
+                              ))}
+                            </Picker>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+
+                  <View style={styles.planningButtonsRow}>
+                    <TouchableOpacity
+                      style={[styles.saveProgressButton, savingPlan && styles.submitButtonDisabled]}
+                      onPress={savePlanProgress}
+                      disabled={savingPlan}
+                    >
+                      {savingPlan ? (
+                        <ActivityIndicator color="#fff" size="small" />
+                      ) : (
+                        <>
+                          <Ionicons name="save" size={18} color="#fff" />
+                          <Text style={styles.saveProgressButtonText}>Save Progress</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.submitButton, savingPlan && styles.submitButtonDisabled]}
+                      onPress={submitCompletedPlan}
+                      disabled={savingPlan}
+                    >
+                      {savingPlan ? (
+                        <ActivityIndicator color="#fff" size="small" />
+                      ) : (
+                        <>
+                          <Ionicons name="checkmark-done" size={18} color="#fff" />
+                          <Text style={styles.submitButtonText}>Submit Plan</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteConfirm}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowDeleteConfirm(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <View style={styles.deleteModalHeader}>
+              <Ionicons name="warning" size={32} color="#ef4444" />
+              <Text style={styles.deleteModalTitle}>
+                {deleteTarget?.type === 'habit' ? 'Delete Activity' : 'Delete Plan'}
+              </Text>
+            </View>
+            
+            <Text style={styles.deleteModalMessage}>
+              {deleteTarget?.type === 'habit' 
+                ? 'Are you sure you want to delete this activity? This action cannot be undone.'
+                : 'Are you sure you want to delete this plan? This action cannot be undone.'
+              }
+            </Text>
+            
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteTarget(null);
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => {
+                  if (deleteTarget?.type === 'habit') {
+                    deleteHabit(deleteTarget.id);
+                  } else if (deleteTarget?.type === 'plan') {
+                    deletePlan(deleteTarget.id);
+                  }
+                  setShowDeleteConfirm(false);
+                  setDeleteTarget(null);
+                }}
+              >
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+  tabBar: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+    backgroundColor: '#fff',
+  },
+  tabBarContent: {
+    paddingHorizontal: 16,
+  },
+  tab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginRight: 8,
+    gap: 8,
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#ffd700',
+  },
+  tabLabel: {
+    fontSize: 14,
+    color: '#999',
+    fontWeight: '500',
+  },
+  activeTabLabel: {
+    color: '#ffd700',
+    fontWeight: '600',
+  },
+  tabContent: {
+    flex: 1,
+    padding: 16,
+  },
+  tabTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 16,
+  },
+  tabHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ffd700',
+  },
+  logButtonText: {
+    color: '#ffd700',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#94a3b8',
+    fontSize: 16,
+    marginTop: 32,
+  },
+  listContent: {
+    paddingBottom: 20,
+  },
+  habitCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  habitHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  habitTypeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  habitType: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#ffd700',
+    textTransform: 'capitalize',
+  },
+  habitDescription: {
+    fontSize: 16,
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  habitValue: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  habitDate: {
+    fontSize: 12,
+    color: '#94a3b8',
+  },
+  requestButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#ffd700',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  requestButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  planCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  planHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  planFromText: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  planType: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  planDate: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  statusBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    backgroundColor: '#e2e8f0',
+  },
+  statusRequested: {
+    backgroundColor: '#fef3c7',
+  },
+  statusAccepted: {
+    backgroundColor: '#dbeafe',
+  },
+  statusPlanning: {
+    backgroundColor: '#e0e7ff',
+  },
+  statusSubmitted: {
+    backgroundColor: '#dcfce7',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1e293b',
+    textTransform: 'capitalize',
+  },
+  planMeals: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 8,
+  },
+  planGuide: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 12,
+  },
+  acceptButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#10b981',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  acceptButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  planningButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#3b82f6',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  planningButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  viewPlanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#8b5cf6',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  viewPlanButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  deletePlanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+    marginTop: 8,
+  },
+  deletePlanText: {
+    color: '#ef4444',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  conversationCard: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  avatarPlaceholder: {
+    backgroundColor: '#ffd700',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  conversationInfo: {
+    flex: 1,
+  },
+  conversationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  nameRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400e',
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#94a3b8',
+  },
+  messageRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  lastMessage: {
+    flex: 1,
+    fontSize: 14,
+    color: '#64748b',
+  },
+  unreadMessage: {
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  unreadBadge: {
+    backgroundColor: '#ffd700',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    marginLeft: 8,
+  },
+  unreadBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  aboutContent: {
+    paddingBottom: 20,
+  },
+  aboutHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  editIconButton: {
+    padding: 8,
+  },
+  profileSection: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+  },
+  profileItem: {
+    flex: 1,
+  },
+  profileFullItem: {
+    marginBottom: 16,
+  },
+  profileLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  profileValue: {
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 500,
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    color: '#1e293b',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  genderRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  genderButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+  },
+  genderButtonActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  genderButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  genderButtonTextActive: {
+    color: '#fff',
+  },
+  activityLevelPicker: {
+    gap: 8,
+  },
+  activityLevelButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    alignItems: 'center',
+  },
+  activityLevelButtonActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  activityLevelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  activityLevelTextActive: {
+    color: '#fff',
+  },
+  activityTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  activityTypeButton: {
+    width: '30%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ffd700',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  activityTypeButtonActive: {
+    backgroundColor: '#ffd700',
+  },
+  activityTypeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#ffd700',
+    textAlign: 'center',
+  },
+  activityTypeTextActive: {
+    color: '#fff',
+  },
+  planTypeGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 16,
+  },
+  planTypeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  planTypeButtonActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  planTypeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  planTypeTextActive: {
+    color: '#fff',
+  },
+  dateButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  dateButtonText: {
+    fontSize: 14,
+    color: '#1e293b',
+  },
+  mealsGrid: {
+    gap: 12,
+    marginBottom: 16,
+  },
+  mealCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  mealCheckboxActive: {
+    backgroundColor: '#fef3c7',
+    borderColor: '#ffd700',
+  },
+  mealLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  guidePicker: {
+    gap: 12,
+    marginBottom: 16,
+  },
+  guideOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  guideOptionActive: {
+    backgroundColor: '#ffd700',
+    borderColor: '#ffd700',
+  },
+  guideOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  guideOptionTextActive: {
+    color: '#fff',
+  },
+  submitButton: {
+    backgroundColor: '#ffd700',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.6,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  planInfoText: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 8,
+  },
+  dateSection: {
+    marginBottom: 24,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  dateSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 12,
+  },
+  mealPlanRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  mealTimeLabel: {
+    width: 120,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  mealPicker: {
+    flex: 1,
+    height: 50,
+  },
+  planningButtonsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  saveProgressButton: {
+    flex: 1,
+    backgroundColor: '#64748b',
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  saveProgressButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  deleteModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    margin: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  deleteModalHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  deleteModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  deleteModalMessage: {
+    fontSize: 16,
+    color: '#64748b',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  deleteModalButtons: {
+    flexDirection: 'row',
+    width: '100%',
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    backgroundColor: '#ef4444',
+    alignItems: 'center',
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
+});
+
       {/* Edit Profile Modal - Continuing in next file chunk due to size */}
