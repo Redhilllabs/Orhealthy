@@ -2091,9 +2091,9 @@ export default function GuidanceScreen() {
                       <Text style={styles.sectionLabel}>Items:</Text>
                       {selectedMealForDetail.recipes.map((recipe: any, index: number) => (
                         <View key={index} style={styles.ingredientRow}>
-                          <Text style={styles.ingredientName}>{recipe.recipe_name}</Text>
+                          <Text style={styles.ingredientName}>{recipe.recipe_name || recipe.name || 'Item'}</Text>
                           <Text style={styles.ingredientQuantity}>
-                            Qty: {recipe.quantity}
+                            {recipe.quantity}
                           </Text>
                         </View>
                       ))}
