@@ -1656,18 +1656,98 @@ agent_communication:
       3. Check modal header says "Items" for combos
       4. Verify admin panel shows "recipe(s)" label
 
+  - agent: "main"
+    message: |
+      🚀 **COMPREHENSIVE MEAL PLANNING SYSTEM IMPLEMENTED - 2025-11-04**
+      
+      **Major Feature: Guide Meal Planning Interface**
+      
+      **Frontend Changes (guidance.tsx):**
+      
+      1. ✅ **Plan Requests Tab** (New first tab for guides)
+         - Shows meal plan requests from guidees
+         - Displays plan type, start date, meals requested, status
+         - Accept button for new requests
+         - Start Planning button for accepted requests
+      
+      2. ✅ **Date Picker Implementation**
+         - Native DateTimePicker for iOS/Android
+         - Text input fallback for web (YYYY-MM-DD format)
+         - Minimum date validation (today onwards)
+      
+      3. ✅ **Mandatory Guide Selection**
+         - Validation before plan submission
+         - Shows error if no guide selected
+         - Displays guide name with rating
+      
+      4. ✅ **Planning Modal** (Comprehensive)
+         - Generates date range based on plan type
+         - Shows all meal times for each date
+         - Dropdown/Picker with combined meal options:
+           * Preset Bowls (recipes)
+           * Preset Meals (combos)
+           * User's My Bowls
+           * User's My Meals
+         - Save Progress button (saves & allows continuation)
+         - Submit Plan button (validates all meals logged)
+      
+      5. ✅ **Meal Placeholder Update**
+         - Changed to "Sprouted Legumes Bowl"
+      
+      6. ✅ **Web-Compatible Delete Modals**
+         - Custom modal replaces Alert.alert
+         - Works on both web and mobile
+      
+      **Backend Changes (server.py):**
+      
+      1. ✅ **Updated MealPlan Model**
+         - Added `logged_meals` field: {date: {meal_time: meal_id}}
+         - Added statuses: "planning", "submitted"
+      
+      2. ✅ **New Endpoints:**
+         - GET /api/meal-plans/guide - Fetch plans for guide
+         - PUT /api/meal-plans/{id}/accept - Accept plan request
+         - PUT /api/meal-plans/{id}/save-progress - Save partial planning
+         - PUT /api/meal-plans/{id}/submit - Submit completed plan
+      
+      **Feature Flow:**
+      
+      **For Guidees:**
+      1. Open Guidance → My Plans
+      2. Click "Request New Plan"
+      3. Select plan type, date, meals, guide (mandatory)
+      4. Submit request
+      5. Wait for guide to accept & submit
+      6. View submitted plan
+      
+      **For Guides:**
+      1. Open Guidance → Plan Requests (first tab)
+      2. See incoming requests
+      3. Accept request
+      4. Click "Start Planning"
+      5. Select meals from dropdowns for each date/time
+      6. Save Progress (optional, continue later)
+      7. Submit Plan (when all meals logged)
+      
+      **Testing Required:**
+      1. Test plan request flow as guidee
+      2. Test plan acceptance as guide
+      3. Test meal selection with all 4 types
+      4. Test save progress functionality
+      5. Test submit validation (all meals required)
+      6. Test date picker on web and mobile
+
 metadata:
   created_by: "main_agent"
-  version: "4.0"
-  test_sequence: 5
+  version: "5.0"
+  test_sequence: 6
   run_ui: false
 
 test_plan:
   current_focus:
-    - "GET /api/meals - Refresh Recipe Prices"
-    - "Custom Delete Confirmation Modal - Guidance Tab"
-    - "Presets Selection Modal - Header Text Change"
-    - "Admin Panel - Recipe Count Label Fix"
+    - "Plan Requests Tab for Guides"
+    - "Planning Modal with Meal Selection"
+    - "Backend Guide Endpoints"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
