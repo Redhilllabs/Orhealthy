@@ -2436,11 +2436,12 @@
                 const meal = await response.json();
                 
                 document.getElementById('mealModal').classList.add('active');
-                document.querySelector('#mealModal .modal-title').textContent = 'Edit Meal';
+                document.querySelector('#mealModal .modal-title').textContent = 'Edit Recipe';
                 document.getElementById('mealName').value = meal.name;
                 document.getElementById('mealDescription').value = meal.description;
                 document.getElementById('mealPrice').value = meal.calculated_price || 0;
                 document.getElementById('mealTags').value = meal.tags ? meal.tags.join(', ') : '';
+                document.getElementById('mealCategories').value = meal.categories ? meal.categories.join(', ') : '';
                 
                 // Set existing images
                 mealImages = meal.images || [];
@@ -2458,7 +2459,7 @@
                 renderMealIngredients();
                 updateMealPrice();
             } catch (error) {
-                showAlert('meals', 'Error loading meal data', 'error');
+                showAlert('recipes', 'Error loading recipe data', 'error');
             }
         }
 
