@@ -814,7 +814,7 @@
     <div id="comboModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Add Combo</h2>
+                <h2 class="modal-title">Add Meal</h2>
                 <span class="close" onclick="closeModal('comboModal')">&times;</span>
             </div>
             <form id="comboForm" onsubmit="saveCombo(event)">
@@ -829,7 +829,7 @@
                     <div id="comboImagePreview" class="image-preview-grid"></div>
                 </div>
                 <div class="form-group">
-                    <label>Combo Name *</label>
+                    <label>Meal Name *</label>
                     <input type="text" id="comboName" required>
                 </div>
                 <div class="form-group">
@@ -837,23 +837,23 @@
                     <textarea id="comboDescription"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Price (Auto-calculated from meals)</label>
-                    <input type="number" step="0.01" id="comboPrice" readonly value="0.00">
-                    <small style="color: #64748b;">Price will be calculated based on selected meals</small>
-                </div>
-                <div class="form-group">
                     <label>Tags (comma separated)</label>
                     <input type="text" id="comboTags" placeholder="e.g. breakfast, lunch, dinner">
                 </div>
                 <div class="form-group">
-                    <label>Meals *</label>
+                    <label>Price (Auto-calculated from recipes)</label>
+                    <input type="number" step="0.01" id="comboPrice" readonly value="0.00">
+                    <small style="color: #64748b;">Price will be calculated based on selected recipes</small>
+                </div>
+                <div class="form-group">
+                    <label>Recipes *</label>
                     <select id="comboMealSelect">
-                        <option value="">-- Select meal --</option>
+                        <option value="">-- Select recipe --</option>
                     </select>
-                    <button type="button" class="btn btn-secondary" style="margin-top: 8px;" onclick="addMealToCombo()">Add Meal</button>
+                    <button type="button" class="btn btn-secondary" style="margin-top: 8px;" onclick="addMealToCombo()">Add Recipe</button>
                     <div class="ingredient-list" id="comboMeals"></div>
                 </div>
-                <button type="submit" class="btn">Save Combo</button>
+                <button type="submit" class="btn">Save Meal</button>
             </form>
         </div>
     </div>
