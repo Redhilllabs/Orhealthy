@@ -72,6 +72,7 @@ export default function GuidanceScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'timeline' | 'plans' | 'about' | 'messages'>('timeline');
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversationRatings, setConversationRatings] = useState<Record<string, number>>({});
   const [habits, setHabits] = useState<HabitLog[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -103,13 +104,14 @@ export default function GuidanceScreen() {
   const [loggingActivity, setLoggingActivity] = useState(false);
 
   // About Tab States
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [profileData, setProfileData] = useState({
     age: '',
     gender: '',
     height: '',
     weight: '',
     allergies: '',
+    lifestyle_disorders: '',
     lifestyle_activity_level: '',
     profession: '',
     fitness_activities: '',
@@ -157,7 +159,6 @@ export default function GuidanceScreen() {
       fetchHabits();
     } else if (activeTab === 'messages') {
       fetchConversations();
-      fetchGuides();
     } else if (activeTab === 'plans') {
       fetchMealPlans();
       fetchGuides();
@@ -172,7 +173,25 @@ export default function GuidanceScreen() {
       const response = await axios.get(`${API_URL}/conversations`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setConversations(response.data);
+      const convos = response.data;
+      setConversations(convos);
+      
+      // Fetch ratings for all conversation participants
+      const ratings: Record<string, number> = {};
+      for (const convo of convos) {
+        const otherUserId = convo.user1_id === user?._id ? convo.user2_id : convo.user1_id;
+        try {
+          const userResponse = await axios.get(`${API_URL}/users/${otherUserId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (userResponse.data.average_rating) {
+            ratings[otherUserId] = userResponse.data.average_rating;
+          }
+        } catch (error) {
+          console.log(`Could not fetch rating for user ${otherUserId}`);
+        }
+      }
+      setConversationRatings(ratings);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -242,6 +261,7 @@ export default function GuidanceScreen() {
         height: profile.height?.toString() || '',
         weight: profile.weight?.toString() || '',
         allergies: profile.allergies?.join(', ') || '',
+        lifestyle_disorders: profile.lifestyle_disorders?.join(', ') || '',
         lifestyle_activity_level: profile.lifestyle_activity_level || '',
         profession: profile.profession || '',
         fitness_activities: profile.fitness_activities?.join(', ') || '',
@@ -261,9 +281,11 @@ export default function GuidanceScreen() {
       await axios.delete(`${API_URL}/habits/${habitId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      Alert.alert('Success', 'Activity deleted successfully');
       fetchHabits();
     } catch (error) {
       console.error('Error deleting habit:', error);
+      Alert.alert('Error', 'Failed to delete activity');
     }
   };
 
@@ -273,6 +295,7 @@ export default function GuidanceScreen() {
       await axios.delete(`${API_URL}/meal-plans/${planId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      Alert.alert('Success', 'Plan deleted successfully');
       fetchMealPlans();
     } catch (error) {
       console.error('Error deleting plan:', error);
@@ -293,7 +316,7 @@ export default function GuidanceScreen() {
     switch (activityType) {
       case 'exercise':
         if (!activityData.name || !activityData.value) {
-          Alert.alert('Error', 'Please enter exercise name and value');
+          Alert.alert('Error', 'Please enter exercise name and duration');
           return;
         }
         description = activityData.name;
@@ -356,7 +379,10 @@ export default function GuidanceScreen() {
           date: new Date().toISOString(),
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
       );
 
@@ -373,9 +399,10 @@ export default function GuidanceScreen() {
         note: '',
       });
       fetchHabits();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error logging activity:', error);
-      Alert.alert('Error', 'Failed to log activity');
+      console.error('Error response:', error.response?.data);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to log activity');
     } finally {
       setLoggingActivity(false);
     }
@@ -437,6 +464,7 @@ export default function GuidanceScreen() {
           height: profileData.height ? parseFloat(profileData.height) : null,
           weight: profileData.weight ? parseFloat(profileData.weight) : null,
           allergies: profileData.allergies ? profileData.allergies.split(',').map(a => a.trim()) : [],
+          lifestyle_disorders: profileData.lifestyle_disorders ? profileData.lifestyle_disorders.split(',').map(a => a.trim()) : [],
           lifestyle_activity_level: profileData.lifestyle_activity_level || null,
           profession: profileData.profession || null,
           fitness_activities: profileData.fitness_activities ? profileData.fitness_activities.split(',').map(a => a.trim()) : [],
@@ -447,7 +475,8 @@ export default function GuidanceScreen() {
         }
       );
       Alert.alert('Success', 'Profile updated successfully');
-      setIsEditingProfile(false);
+      setShowEditModal(false);
+      fetchProfile();
     } catch (error) {
       console.error('Error saving profile:', error);
       Alert.alert('Error', 'Failed to save profile');
@@ -458,10 +487,8 @@ export default function GuidanceScreen() {
 
   const toggleMealSelection = (meal: string) => {
     if (planType === 'single_meal') {
-      // For single meal, only allow one selection
       setSelectedMeals([meal]);
     } else {
-      // For other types, allow multiple
       if (selectedMeals.includes(meal)) {
         setSelectedMeals(selectedMeals.filter(m => m !== meal));
       } else {
@@ -492,15 +519,10 @@ export default function GuidanceScreen() {
     return conversation.unread_count_user2;
   };
 
-  const getUserRating = (userId: string) => {
-    const guide = guides.find(g => g._id === userId);
-    return guide?.average_rating;
-  };
-
   const renderConversation = ({ item }: { item: Conversation }) => {
     const otherUser = getOtherUser(item);
     const unreadCount = getUnreadCount(item);
-    const rating = getUserRating(otherUser.id);
+    const rating = conversationRatings[otherUser.id];
 
     return (
       <TouchableOpacity
@@ -890,179 +912,95 @@ export default function GuidanceScreen() {
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
             ) : (
               <>
-                {!isEditingProfile && (
-                  <TouchableOpacity
-                    style={styles.editButton}
-                    onPress={() => setIsEditingProfile(true)}
-                  >
-                    <Ionicons name="pencil" size={20} color="#fff" />
-                    <Text style={styles.editButtonText}>Edit Profile</Text>
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => setShowEditModal(true)}
+                >
+                  <Ionicons name="pencil" size={20} color="#fff" />
+                  <Text style={styles.editButtonText}>Edit Profile</Text>
+                </TouchableOpacity>
 
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Age</Text>
-                  <TextInput
-                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
-                    value={profileData.age}
-                    onChangeText={(text) => setProfileData({ ...profileData, age: text })}
-                    keyboardType="numeric"
-                    placeholder="Enter your age"
-                    editable={isEditingProfile}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Gender</Text>
-                  <View style={styles.genderRow}>
-                    {['Male', 'Female', 'Other'].map((g) => (
-                      <TouchableOpacity
-                        key={g}
-                        style={[
-                          styles.genderButton,
-                          profileData.gender === g.toLowerCase() && styles.genderButtonActive,
-                          !isEditingProfile && styles.buttonDisabled,
-                        ]}
-                        onPress={() => isEditingProfile && setProfileData({ ...profileData, gender: g.toLowerCase() })}
-                        disabled={!isEditingProfile}
-                      >
-                        <Text
-                          style={[
-                            styles.genderButtonText,
-                            profileData.gender === g.toLowerCase() && styles.genderButtonTextActive,
-                          ]}
-                        >
-                          {g}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-
-                <View style={styles.inputRow}>
-                  <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                    <Text style={styles.inputLabel}>Height (cm)</Text>
-                    <TextInput
-                      style={[styles.input, !isEditingProfile && styles.inputDisabled]}
-                      value={profileData.height}
-                      onChangeText={(text) => setProfileData({ ...profileData, height: text })}
-                      keyboardType="numeric"
-                      placeholder="170"
-                      editable={isEditingProfile}
-                    />
-                  </View>
-                  <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                    <Text style={styles.inputLabel}>Weight (kg)</Text>
-                    <TextInput
-                      style={[styles.input, !isEditingProfile && styles.inputDisabled]}
-                      value={profileData.weight}
-                      onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
-                      keyboardType="numeric"
-                      placeholder="70"
-                      editable={isEditingProfile}
-                    />
-                  </View>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Allergies (comma separated)</Text>
-                  <TextInput
-                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
-                    value={profileData.allergies}
-                    onChangeText={(text) => setProfileData({ ...profileData, allergies: text })}
-                    placeholder="e.g., Nuts, Dairy"
-                    editable={isEditingProfile}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Lifestyle Activity Level</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View style={styles.optionsRow}>
-                      {activityLevels.map((level) => (
-                        <TouchableOpacity
-                          key={level.value}
-                          style={[
-                            styles.optionButton,
-                            profileData.lifestyle_activity_level === level.value && styles.optionButtonActive,
-                            !isEditingProfile && styles.buttonDisabled,
-                          ]}
-                          onPress={() => isEditingProfile && setProfileData({ ...profileData, lifestyle_activity_level: level.value })}
-                          disabled={!isEditingProfile}
-                        >
-                          <Text
-                            style={[
-                              styles.optionButtonText,
-                              profileData.lifestyle_activity_level === level.value && styles.optionButtonTextActive,
-                            ]}
-                          >
-                            {level.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                <View style={styles.profileCard}>
+                  <View style={styles.profileRow}>
+                    <Ionicons name="person" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Age</Text>
+                      <Text style={styles.profileValue}>{profileData.age || 'Not set'}</Text>
                     </View>
-                  </ScrollView>
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Profession</Text>
-                  <TextInput
-                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
-                    value={profileData.profession}
-                    onChangeText={(text) => setProfileData({ ...profileData, profession: text })}
-                    placeholder="Your profession"
-                    editable={isEditingProfile}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Fitness Activities (comma separated)</Text>
-                  <TextInput
-                    style={[styles.input, !isEditingProfile && styles.inputDisabled]}
-                    value={profileData.fitness_activities}
-                    onChangeText={(text) => setProfileData({ ...profileData, fitness_activities: text })}
-                    placeholder="e.g., Running, Yoga, Swimming"
-                    editable={isEditingProfile}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Bio</Text>
-                  <TextInput
-                    style={[styles.input, styles.bioInput, !isEditingProfile && styles.inputDisabled]}
-                    value={profileData.bio}
-                    onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
-                    placeholder="Tell us about yourself"
-                    multiline
-                    numberOfLines={4}
-                    editable={isEditingProfile}
-                  />
-                </View>
-
-                {isEditingProfile && (
-                  <View style={styles.aboutButtonsContainer}>
-                    <TouchableOpacity
-                      style={styles.cancelButton}
-                      onPress={() => {
-                        setIsEditingProfile(false);
-                        fetchProfile();
-                      }}
-                    >
-                      <Text style={styles.cancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.saveButton, savingProfile && styles.saveButtonDisabled]}
-                      onPress={saveProfile}
-                      disabled={savingProfile}
-                    >
-                      {savingProfile ? (
-                        <ActivityIndicator color="#fff" />
-                      ) : (
-                        <Text style={styles.saveButtonText}>Save Profile</Text>
-                      )}
-                    </TouchableOpacity>
                   </View>
-                )}
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="male-female" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Gender</Text>
+                      <Text style={styles.profileValue}>{profileData.gender ? profileData.gender.charAt(0).toUpperCase() + profileData.gender.slice(1) : 'Not set'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="resize" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Height</Text>
+                      <Text style={styles.profileValue}>{profileData.height ? `${profileData.height} cm` : 'Not set'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="scale" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Weight</Text>
+                      <Text style={styles.profileValue}>{profileData.weight ? `${profileData.weight} kg` : 'Not set'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="warning" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Allergies</Text>
+                      <Text style={styles.profileValue}>{profileData.allergies || 'None'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="medical" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Lifestyle Disorders</Text>
+                      <Text style={styles.profileValue}>{profileData.lifestyle_disorders || 'None'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="walk" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Activity Level</Text>
+                      <Text style={styles.profileValue}>{profileData.lifestyle_activity_level ? profileData.lifestyle_activity_level.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not set'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="briefcase" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Profession</Text>
+                      <Text style={styles.profileValue}>{profileData.profession || 'Not set'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="barbell" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Fitness Activities</Text>
+                      <Text style={styles.profileValue}>{profileData.fitness_activities || 'None'}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.profileRow}>
+                    <Ionicons name="document-text" size={24} color="#ffd700" />
+                    <View style={styles.profileRowText}>
+                      <Text style={styles.profileLabel}>Bio</Text>
+                      <Text style={styles.profileValue}>{profileData.bio || 'Not set'}</Text>
+                    </View>
+                  </View>
+                </View>
               </>
             )}
           </ScrollView>
@@ -1085,7 +1023,6 @@ export default function GuidanceScreen() {
                     onRefresh={() => {
                       setRefreshing(true);
                       fetchConversations();
-                      fetchGuides();
                     }}
                     colors={['#ffd700']}
                   />
@@ -1225,6 +1162,177 @@ export default function GuidanceScreen() {
                   )}
                 </TouchableOpacity>
               )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Age</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.age}
+                  onChangeText={(text) => setProfileData({ ...profileData, age: text })}
+                  keyboardType="numeric"
+                  placeholder="Enter your age"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Gender</Text>
+                <View style={styles.genderRow}>
+                  {['Male', 'Female', 'Other'].map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      style={[
+                        styles.genderButton,
+                        profileData.gender === g.toLowerCase() && styles.genderButtonActive,
+                      ]}
+                      onPress={() => setProfileData({ ...profileData, gender: g.toLowerCase() })}
+                    >
+                      <Text
+                        style={[
+                          styles.genderButtonText,
+                          profileData.gender === g.toLowerCase() && styles.genderButtonTextActive,
+                        ]}
+                      >
+                        {g}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
+                  <Text style={styles.inputLabel}>Height (cm)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={profileData.height}
+                    onChangeText={(text) => setProfileData({ ...profileData, height: text })}
+                    keyboardType="numeric"
+                    placeholder="170"
+                  />
+                </View>
+                <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
+                  <Text style={styles.inputLabel}>Weight (kg)</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={profileData.weight}
+                    onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
+                    keyboardType="numeric"
+                    placeholder="70"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Allergies (comma separated)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.allergies}
+                  onChangeText={(text) => setProfileData({ ...profileData, allergies: text })}
+                  placeholder="e.g., Nuts, Dairy"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Lifestyle Disorders (comma separated)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.lifestyle_disorders}
+                  onChangeText={(text) => setProfileData({ ...profileData, lifestyle_disorders: text })}
+                  placeholder="e.g., Diabetes, Hypertension, PCOS"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Lifestyle Activity Level</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.optionsRow}>
+                    {activityLevels.map((level) => (
+                      <TouchableOpacity
+                        key={level.value}
+                        style={[
+                          styles.optionButton,
+                          profileData.lifestyle_activity_level === level.value && styles.optionButtonActive,
+                        ]}
+                        onPress={() => setProfileData({ ...profileData, lifestyle_activity_level: level.value })}
+                      >
+                        <Text
+                          style={[
+                            styles.optionButtonText,
+                            profileData.lifestyle_activity_level === level.value && styles.optionButtonTextActive,
+                          ]}
+                        >
+                          {level.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Profession</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.profession}
+                  onChangeText={(text) => setProfileData({ ...profileData, profession: text })}
+                  placeholder="Your profession"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Fitness Activities (comma separated)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.fitness_activities}
+                  onChangeText={(text) => setProfileData({ ...profileData, fitness_activities: text })}
+                  placeholder="e.g., Running, Yoga, Swimming"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Bio</Text>
+                <TextInput
+                  style={[styles.input, styles.bioInput]}
+                  value={profileData.bio}
+                  onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
+                  placeholder="Tell us about yourself"
+                  multiline
+                  numberOfLines={4}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitButton, savingProfile && styles.submitButtonDisabled]}
+                onPress={saveProfile}
+                disabled={savingProfile}
+              >
+                {savingProfile ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitButtonText}>Save Profile</Text>
+                )}
+              </TouchableOpacity>
             </ScrollView>
           </View>
         </View>
@@ -1664,24 +1772,36 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginLeft: 8,
   },
-  aboutButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-    marginBottom: 32,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#94a3b8',
-    padding: 16,
+  profileCard: {
+    backgroundColor: '#fff',
     borderRadius: 12,
-    alignItems: 'center',
-    marginRight: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  cancelButtonText: {
+  profileRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  profileRowText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  profileLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginBottom: 4,
+  },
+  profileValue: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
+    color: '#1e293b',
+    fontWeight: '500',
   },
   inputGroup: {
     marginBottom: 16,
@@ -1700,10 +1820,6 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     color: '#1e293b',
-  },
-  inputDisabled: {
-    backgroundColor: '#f8fafc',
-    color: '#64748b',
   },
   bioInput: {
     height: 100,
@@ -1737,9 +1853,6 @@ const styles = StyleSheet.create({
   genderButtonTextActive: {
     color: '#fff',
   },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
   optionsRow: {
     flexDirection: 'row',
   },
@@ -1762,22 +1875,6 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   optionButtonTextActive: {
-    color: '#fff',
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#ffd700',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
     color: '#fff',
   },
   modalOverlay: {
