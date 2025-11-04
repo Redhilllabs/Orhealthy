@@ -2105,20 +2105,36 @@ export default function GuidanceScreen() {
                     onPress={async () => {
                       try {
                         const token = await storage.getItemAsync('session_token');
+                        
+                        // Format customizations to match MealIngredient model
+                        let customizations = [];
+                        if (selectedMealForDetail.ingredients && selectedMealForDetail.ingredients.length > 0) {
+                          customizations = selectedMealForDetail.ingredients.map((ing: any) => ({
+                            ingredient_id: ing.ingredient_id || ing._id,
+                            name: ing.ingredient_name || ing.name,
+                            price: ing.price || 0,
+                            default_quantity: ing.quantity,
+                            quantity: ing.quantity,
+                          }));
+                        }
+                        
                         const cartItem = {
                           meal_id: selectedMealForDetail._id,
                           meal_name: selectedMealForDetail.name,
                           quantity: 1,
                           price: selectedMealForDetail.calculated_price || selectedMealForDetail.price || 0,
-                          customizations: selectedMealForDetail.ingredients || [],
+                          customizations: customizations,
                         };
+                        
                         await axios.post(`${API_URL}/cart`, cartItem, {
                           headers: { Authorization: `Bearer ${token}` },
                         });
                         Alert.alert('Success', `${selectedMealForDetail.name} added to cart!`);
                         setShowMealDetailModal(false);
+                        setShowViewPlanModal(false);
                       } catch (error: any) {
                         console.error('Error adding to cart:', error);
+                        console.error('Error details:', error.response?.data);
                         Alert.alert('Error', error.response?.data?.detail || 'Failed to add item to cart');
                       }
                     }}
