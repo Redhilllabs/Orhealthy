@@ -2148,9 +2148,11 @@ export default function GuidanceScreen() {
                           headers: { Authorization: `Bearer ${token}` },
                         });
                         
+                        // Refresh cart to update badge count
+                        await refreshCart();
+                        
                         setShowMealDetailModal(false);
                         setShowSuccessModal(true);
-                        setTimeout(() => setShowSuccessModal(false), 2000);
                       } catch (error: any) {
                         console.error('Error adding to cart:', error);
                         console.error('Error details:', error.response?.data);
