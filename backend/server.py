@@ -1824,15 +1824,19 @@ async def delete_habit(habit_id: str, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    result = await db.habits.delete_one({
-        "_id": ObjectId(habit_id),
-        "user_id": user["_id"]
-    })
+    try:
+        result = await db.habits.delete_one({
+            "_id": ObjectId(habit_id),
+            "user_id": user["_id"]
+        })
+    except Exception as e:
+        print(f"Error deleting habit: {e}")
+        raise HTTPException(status_code=400, detail="Invalid habit ID")
     
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Habit not found")
+        raise HTTPException(status_code=404, detail="Habit not found or already deleted")
     
-    return {"message": "Habit deleted"}
+    return {"message": "Habit deleted successfully"}
 
 # Following/Guides endpoints
 @api_router.get("/following")
