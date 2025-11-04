@@ -196,14 +196,20 @@ class Ingredient(BaseModel):
     source_ingredients: List[SourceIngredientReference] = []  # Multiple source ingredients
     step_size: float = 1.0  # Default step size for frontend increment/decrement
     nutrition_profile: List[NutritionEntry] = []  # Nutrition per unit
-    # Price is auto-calculated from source ingredients
+    # Margin fields
+    product_margin: float = 0.0
+    operations_margin: float = 0.0
+    branding_margin: float = 0.0
+    rest_margins: float = 0.0
+    miscellaneous_margins: float = 0.0
+    # Price is auto-calculated from source ingredients + margins
     
     @property
     def price_per_unit(self):
-        """Calculate price from source ingredients"""
+        """Calculate price from source ingredients + margins"""
         if not self.source_ingredients:
             return 0
-        # This will be calculated based on source ingredient prices
+        # This will be calculated based on source ingredient prices + margins
         return 0  # Placeholder - will be calculated in endpoint
 
 class RecipeIngredient(BaseModel):
