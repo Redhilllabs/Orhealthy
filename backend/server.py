@@ -345,7 +345,7 @@ class Config(BaseModel):
 
 # Price calculation helpers
 async def calculate_processed_ingredient_price(ingredient_data: dict) -> float:
-    """Calculate price for processed ingredient from source ingredients"""
+    """Calculate price for processed ingredient from source ingredients + margins"""
     total_price = 0.0
     
     for source_ref in ingredient_data.get("source_ingredients", []):
@@ -359,6 +359,15 @@ async def calculate_processed_ingredient_price(ingredient_data: dict) -> float:
             latest_purchase = source["purchases"][-1]
             unit_price = latest_purchase.get("unit_price", 0)
             total_price += unit_price * source_quantity
+    
+    # Add margins
+    product_margin = ingredient_data.get("product_margin", 0)
+    operations_margin = ingredient_data.get("operations_margin", 0)
+    branding_margin = ingredient_data.get("branding_margin", 0)
+    rest_margins = ingredient_data.get("rest_margins", 0)
+    miscellaneous_margins = ingredient_data.get("miscellaneous_margins", 0)
+    
+    total_price += product_margin + operations_margin + branding_margin + rest_margins + miscellaneous_margins
     
     return total_price
 
