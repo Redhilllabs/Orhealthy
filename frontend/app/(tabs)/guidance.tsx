@@ -1967,6 +1967,94 @@ export default function GuidanceScreen() {
         </View>
       </Modal>
 
+      {/* Meal Detail Modal */}
+      <Modal
+        visible={showMealDetailModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowMealDetailModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '80%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Meal Details</Text>
+              <TouchableOpacity onPress={() => setShowMealDetailModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {mealDetailLoading ? (
+                <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
+              ) : selectedMealForDetail ? (
+                <>
+                  <Text style={styles.mealDetailName}>{selectedMealForDetail.name}</Text>
+                  <Text style={styles.mealDetailPrice}>
+                    ₹{selectedMealForDetail.calculated_price?.toFixed(2) || selectedMealForDetail.price?.toFixed(2) || '0.00'}
+                  </Text>
+
+                  {selectedMealForDetail.ingredients && (
+                    <>
+                      <Text style={styles.sectionLabel}>Ingredients:</Text>
+                      {selectedMealForDetail.ingredients.map((ing: any, index: number) => (
+                        <View key={index} style={styles.ingredientRow}>
+                          <Text style={styles.ingredientName}>{ing.ingredient_name}</Text>
+                          <Text style={styles.ingredientQuantity}>
+                            {ing.quantity} {ing.unit}
+                          </Text>
+                        </View>
+                      ))}
+                    </>
+                  )}
+
+                  {selectedMealForDetail.recipes && (
+                    <>
+                      <Text style={styles.sectionLabel}>Items:</Text>
+                      {selectedMealForDetail.recipes.map((recipe: any, index: number) => (
+                        <View key={index} style={styles.ingredientRow}>
+                          <Text style={styles.ingredientName}>{recipe.recipe_name}</Text>
+                          <Text style={styles.ingredientQuantity}>
+                            Qty: {recipe.quantity}
+                          </Text>
+                        </View>
+                      ))}
+                    </>
+                  )}
+
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={async () => {
+                      try {
+                        const token = await storage.getItemAsync('session_token');
+                        const cartItem = {
+                          item_id: selectedMealForDetail._id,
+                          item_type: selectedMealForDetail.type === 'preset_bowl' ? 'recipe' : 'meal',
+                          quantity: 1,
+                          customizations: selectedMealForDetail.ingredients || selectedMealForDetail.recipes || [],
+                          guide_id: currentViewPlan?.guide_id || null,
+                          meal_time: null, // Will be set when adding from specific meal time
+                        };
+                        await axios.post(`${API_URL}/cart`, cartItem, {
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        Alert.alert('Success', `${selectedMealForDetail.name} added to cart!`);
+                        setShowMealDetailModal(false);
+                      } catch (error) {
+                        console.error('Error adding to cart:', error);
+                        Alert.alert('Error', 'Failed to add item to cart');
+                      }
+                    }}
+                  >
+                    <Ionicons name="cart" size={20} color="#fff" />
+                    <Text style={styles.submitButtonText}>Add to Cart</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       {/* View Plan Modal (for guidees) */}
       <Modal
         visible={showViewPlanModal}
