@@ -1484,6 +1484,59 @@ export default function GuidanceScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        visible={showDeleteConfirm}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowDeleteConfirm(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <View style={styles.deleteModalHeader}>
+              <Ionicons name="warning" size={32} color="#ef4444" />
+              <Text style={styles.deleteModalTitle}>
+                {deleteTarget?.type === 'habit' ? 'Delete Activity' : 'Delete Plan'}
+              </Text>
+            </View>
+            
+            <Text style={styles.deleteModalMessage}>
+              {deleteTarget?.type === 'habit' 
+                ? 'Are you sure you want to delete this activity? This action cannot be undone.'
+                : 'Are you sure you want to delete this plan? This action cannot be undone.'
+              }
+            </Text>
+            
+            <View style={styles.deleteModalButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteTarget(null);
+                }}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => {
+                  if (deleteTarget?.type === 'habit') {
+                    deleteHabit(deleteTarget.id);
+                  } else if (deleteTarget?.type === 'plan') {
+                    deletePlan(deleteTarget.id);
+                  }
+                  setShowDeleteConfirm(false);
+                  setDeleteTarget(null);
+                }}
+              >
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
