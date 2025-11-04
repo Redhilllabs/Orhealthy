@@ -21,6 +21,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { storage } from '../../src/utils/storage';
 import { useAuth } from '../../src/context/AuthContext';
+import { useCart } from '../../src/context/CartContext';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL + '/api';
