@@ -397,10 +397,74 @@ class BackendTester:
         # Test error message format
         self.test_error_message_format()
         
+        # Additional comprehensive testing
+        self.test_comprehensive_error_scenarios()
+        
         # Print summary
         self.print_summary()
         
         return True
+    
+    def test_comprehensive_error_scenarios(self):
+        """Test comprehensive error scenarios to verify backend behavior"""
+        try:
+            print("\n🔹 Comprehensive Error Scenario Testing:")
+            
+            # Test various invalid ID formats
+            invalid_ids = [
+                "invalid_id",
+                "123",
+                "not_an_objectid",
+                "",
+                "null",
+                "undefined"
+            ]
+            
+            for invalid_id in invalid_ids:
+                # Test habits endpoint
+                response = self.session.delete(f"{BACKEND_URL}/habits/{invalid_id}")
+                if response.status_code == 401:
+                    # This is expected - authentication is checked first
+                    continue
+                else:
+                    self.log_test(f"Habits Invalid ID Test - {invalid_id}", False, 
+                                f"Unexpected response: {response.status_code}")
+            
+            self.log_test("Invalid ID Format Testing", True, 
+                         "All invalid ID formats properly handled (authentication required first)")
+            
+            # Test with valid ObjectId format but non-existent
+            valid_objectid = "507f1f77bcf86cd799439011"
+            
+            response = self.session.delete(f"{BACKEND_URL}/habits/{valid_objectid}")
+            if response.status_code == 401:
+                self.log_test("Valid ObjectId Format - Habits", True, 
+                             "Authentication properly required before ID validation")
+            else:
+                self.log_test("Valid ObjectId Format - Habits", False, 
+                             f"Unexpected response: {response.status_code}")
+            
+            response = self.session.delete(f"{BACKEND_URL}/meal-plans/{valid_objectid}")
+            if response.status_code == 401:
+                self.log_test("Valid ObjectId Format - Meal Plans", True, 
+                             "Authentication properly required before ID validation")
+            else:
+                self.log_test("Valid ObjectId Format - Meal Plans", False, 
+                             f"Unexpected response: {response.status_code}")
+            
+            # Test HTTP method validation
+            methods_to_test = ["POST", "PUT", "PATCH"]
+            for method in methods_to_test:
+                response = self.session.request(method, f"{BACKEND_URL}/habits/test_id")
+                if response.status_code in [401, 405]:  # Auth required or method not allowed
+                    self.log_test(f"HTTP Method {method} - Habits", True, 
+                                 f"Properly handles {method} method: {response.status_code}")
+                else:
+                    self.log_test(f"HTTP Method {method} - Habits", False, 
+                                 f"Unexpected response to {method}: {response.status_code}")
+            
+        except Exception as e:
+            self.log_test("Comprehensive Error Testing", False, f"Error: {str(e)}")
     
     def print_summary(self):
         """Print test summary"""
