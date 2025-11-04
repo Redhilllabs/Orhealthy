@@ -1039,8 +1039,12 @@ export default function GuidanceScreen() {
                   <View style={styles.planCard}>
                     <View style={styles.planHeader}>
                       <View>
-                        <TouchableOpacity onPress={() => router.push(`/user-profile/${item.guidee_id}`)}>
-                          <Text style={styles.planFromTextLink}>From: {item.guidee_name}</Text>
+                        <TouchableOpacity 
+                          style={styles.guideeNameButton}
+                          onPress={() => router.push(`/user-profile/${item.guidee_id}`)}
+                        >
+                          <Ionicons name="person-circle" size={16} color="#3b82f6" />
+                          <Text style={styles.guideeNameText}>{item.guidee_name}</Text>
                         </TouchableOpacity>
                         <Text style={styles.planType}>
                           {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
