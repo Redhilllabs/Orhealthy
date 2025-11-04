@@ -2103,12 +2103,11 @@ export default function GuidanceScreen() {
                       try {
                         const token = await storage.getItemAsync('session_token');
                         const cartItem = {
-                          item_id: selectedMealForDetail._id,
-                          item_type: selectedMealForDetail.type === 'preset_bowl' ? 'recipe' : 'meal',
+                          meal_id: selectedMealForDetail._id,
+                          meal_name: selectedMealForDetail.name,
                           quantity: 1,
-                          customizations: selectedMealForDetail.ingredients || selectedMealForDetail.recipes || [],
-                          guide_id: currentViewPlan?.guide_id || null,
-                          meal_time: null,
+                          price: selectedMealForDetail.calculated_price || selectedMealForDetail.price || 0,
+                          customizations: selectedMealForDetail.ingredients || [],
                         };
                         await axios.post(`${API_URL}/cart`, cartItem, {
                           headers: { Authorization: `Bearer ${token}` },
