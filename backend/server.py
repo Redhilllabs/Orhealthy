@@ -222,6 +222,7 @@ class Recipe(BaseModel):
     images: List[str] = []  # Base64 encoded images
     ingredients: List[RecipeIngredient]  # Processed ingredients
     tags: List[str] = []  # Tags for filtering
+    categories: List[str] = []  # Categories like "Bowls", "Salads" etc.
     created_by: str = "admin"  # Can be user ID for saved recipes
     # Nutrition and price auto-calculated from ingredients
     
