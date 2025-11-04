@@ -379,7 +379,6 @@ export default function ProfileScreen() {
     { key: 'idols', label: 'Idols', icon: 'heart' },
     { key: 'fans', label: 'Fans', icon: 'trophy' },
     { key: 'addresses', label: 'Addresses', icon: 'location' },
-    { key: 'habits', label: 'Habits', icon: 'fitness' },
   ];
 
   const renderTabContent = () => {
