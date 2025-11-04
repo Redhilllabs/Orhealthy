@@ -2085,6 +2085,13 @@
             document.getElementById('ingredientTags').value = ingredient.tags ? ingredient.tags.join(', ') : '';
             document.getElementById('stepSize').value = ingredient.step_size || 1;
             
+            // Load margin fields
+            document.getElementById('productMargin').value = ingredient.product_margin || 0;
+            document.getElementById('operationsMargin').value = ingredient.operations_margin || 0;
+            document.getElementById('brandingMargin').value = ingredient.branding_margin || 0;
+            document.getElementById('restMargins').value = ingredient.rest_margins || 0;
+            document.getElementById('miscellaneousMargins').value = ingredient.miscellaneous_margins || 0;
+            
             // Load source ingredients if not already loaded
             if (allSourceIngredients.length === 0) {
                 try {
