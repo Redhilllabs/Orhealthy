@@ -615,7 +615,8 @@ export default function DIYScreen() {
       });
 
       // Show success message
-      setSuccessMessage(`Saved to ${activeTab === 'diy-meals' ? 'My Meals' : 'My Combos'} in Presets!`);
+      const itemType = activeTab === 'diy-meals' ? 'My DIY Meals' : 'My DIY Combos';
+      setSuccessMessage(`Saved to ${itemType}`);
       setShowSuccessModal(true);
       
       // Reset
