@@ -2043,6 +2043,8 @@ export default function GuidanceScreen() {
         animationType="slide"
         transparent={true}
         onRequestClose={() => setShowMealDetailModal(false)}
+        presentationStyle="overFullScreen"
+        statusBarTranslucent
       >
         <View style={styles.bottomSheetOverlay}>
           <TouchableOpacity 
