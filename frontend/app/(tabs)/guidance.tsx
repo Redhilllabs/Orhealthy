@@ -1958,6 +1958,72 @@ export default function GuidanceScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* View Plan Modal (for guidees) */}
+      <Modal
+        visible={showViewPlanModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowViewPlanModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '90%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Meal Plan Details</Text>
+              <TouchableOpacity onPress={() => setShowViewPlanModal(false)}>
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {currentViewPlan && (
+                <>
+                  <Text style={styles.planInfoText}>
+                    Guide: {currentViewPlan.guide_name || 'Not assigned'}
+                  </Text>
+                  <Text style={styles.planInfoText}>
+                    Type: {planTypes.find(p => p.value === currentViewPlan.plan_type)?.label}
+                  </Text>
+                  <Text style={styles.planInfoText}>
+                    Start Date: {new Date(currentViewPlan.start_date).toLocaleDateString()}
+                  </Text>
+
+                  {currentViewPlan.logged_meals && Object.keys(currentViewPlan.logged_meals).length > 0 ? (
+                    Object.entries(currentViewPlan.logged_meals).map(([date, meals]: [string, any]) => (
+                      <View key={date} style={styles.dateSection}>
+                        <Text style={styles.dateSectionTitle}>
+                          {new Date(date).toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}
+                        </Text>
+
+                        {Object.entries(meals).map(([mealTime, mealId]: [string, any]) => {
+                          const mealOption = mealOptions.find(m => m._id === mealId);
+                          return (
+                            <View key={`${date}-${mealTime}`} style={styles.viewPlanMealRow}>
+                              <Text style={styles.mealTimeLabel}>
+                                {mealTime.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                              </Text>
+                              <Text style={styles.mealNameText}>
+                                {mealOption ? mealOption.name : 'Loading...'}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>No meals logged yet</Text>
+                  )}
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
