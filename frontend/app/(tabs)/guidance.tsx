@@ -2028,12 +2028,30 @@ export default function GuidanceScreen() {
                               {mealOption && (
                                 <TouchableOpacity
                                   style={styles.addToCartIconButton}
-                                  onPress={() => {
-                                    Alert.alert('Success', `${mealOption.name} added to cart!`);
-                                    // Here you would add the actual cart logic
+                                  onPress={async () => {
+                                    setSelectedMealForDetail(mealOption);
+                                    setShowMealDetailModal(true);
+                                    // Fetch full meal details
+                                    setMealDetailLoading(true);
+                                    try {
+                                      const token = await storage.getItemAsync('session_token');
+                                      let mealDetails;
+                                      if (mealOption.type === 'preset_bowl') {
+                                        const response = await axios.get(`${API_URL}/recipes/${mealOption._id}`);
+                                        mealDetails = response.data;
+                                      } else if (mealOption.type === 'preset_meal') {
+                                        const response = await axios.get(`${API_URL}/meals/${mealOption._id}`);
+                                        mealDetails = response.data;
+                                      }
+                                      setSelectedMealForDetail(mealDetails);
+                                    } catch (error) {
+                                      console.error('Error fetching meal details:', error);
+                                    } finally {
+                                      setMealDetailLoading(false);
+                                    }
                                   }}
                                 >
-                                  <Ionicons name="cart" size={20} color="#ffd700" />
+                                  <Ionicons name="eye" size={20} color="#ffd700" />
                                 </TouchableOpacity>
                               )}
                             </View>
