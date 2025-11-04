@@ -74,31 +74,59 @@ class MealPlanningTester:
                     f"Request failed: {str(e)}"
                 )
     
-    def create_test_habit(self):
-        """Create a test habit for deletion testing"""
+    def create_test_users_and_plan(self):
+        """Create test users and meal plan for testing"""
+        print("\n=== Setting Up Test Data ===")
+        
+        # For this test, we'll use mock authentication tokens
+        # In a real scenario, these would be obtained through proper auth flow
+        self.guidee_token = "mock_guidee_token_" + str(uuid.uuid4())
+        self.guide_token = "mock_guide_token_" + str(uuid.uuid4())
+        
+        # Create a test meal plan using the existing POST endpoint
         try:
-            habit_data = {
-                "activity_name": "Test Morning Workout",
-                "activity_type": "exercise",
-                "duration": 30,
-                "calories_burned": 200,
-                "notes": "Test habit for deletion testing"
+            # First, let's test if we can create a meal plan (this requires auth)
+            headers = {"Authorization": f"Bearer {self.guidee_token}"}
+            
+            meal_plan_data = {
+                "guide_id": "mock_guide_id_123",
+                "guide_name": "Test Guide",
+                "plan_type": "3_day",
+                "start_date": "2025-01-15",
+                "meals_requested": ["breakfast", "lunch", "dinner"]
             }
             
-            response = self.session.post(f"{BACKEND_URL}/habits", json=habit_data)
+            response = self.session.post(
+                f"{API_BASE}/meal-plans", 
+                json=meal_plan_data,
+                headers=headers
+            )
             
-            if response.status_code == 201:
-                result = response.json()
-                habit_id = result.get("id")
-                self.log_test("Create Test Habit", True, f"Created habit with ID: {habit_id}")
-                return habit_id
+            if response.status_code == 201 or response.status_code == 200:
+                plan_data = response.json()
+                self.test_plan_id = plan_data.get("_id") or plan_data.get("id")
+                self.log_result(
+                    "Create Test Meal Plan", 
+                    True, 
+                    f"Created test plan with ID: {self.test_plan_id}"
+                )
             else:
-                self.log_test("Create Test Habit", False, f"Status: {response.status_code}, Response: {response.text}")
-                return None
+                # If we can't create through API, we'll use a mock ID for testing
+                self.test_plan_id = "mock_plan_id_for_testing"
+                self.log_result(
+                    "Create Test Meal Plan", 
+                    False, 
+                    f"Could not create via API (status: {response.status_code}), using mock ID",
+                    {"response": response.text[:200]}
+                )
                 
         except Exception as e:
-            self.log_test("Create Test Habit", False, f"Error: {str(e)}")
-            return None
+            self.test_plan_id = "mock_plan_id_for_testing"
+            self.log_result(
+                "Create Test Meal Plan", 
+                False, 
+                f"Exception during creation: {str(e)}, using mock ID"
+            )
     
     def create_test_meal_plan(self):
         """Create a test meal plan for deletion testing"""
