@@ -677,7 +677,7 @@ export default function DIYScreen() {
 
         await addToCart({
           meal_id: 'diy-meal-' + Date.now(),
-          meal_name: 'DIY Meal',
+          meal_name: 'My DIY Bowl',
           customizations: customizations,
           quantity: 1,
           price: calculateTotal(),
@@ -700,7 +700,7 @@ export default function DIYScreen() {
 
         await addToCart({
           meal_id: 'diy-combo-' + Date.now(),
-          meal_name: 'DIY Combo',
+          meal_name: 'My DIY Meal',
           customizations: customizations,
           quantity: 1,
           price: calculateTotal(),
