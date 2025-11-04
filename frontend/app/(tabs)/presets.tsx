@@ -430,30 +430,27 @@ export default function PresetsScreen() {
 
       {/* Tag filters - Sticky */}
       {allTags.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tagsContainer}
-          contentContainerStyle={styles.tagsContent}
-        >
-          <TouchableOpacity
-            style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
-            onPress={() => setSelectedTag(null)}
-          >
-            <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
-          </TouchableOpacity>
-          {allTags.map((tag) => (
+        <View style={styles.tagsContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <TouchableOpacity
-              key={tag}
-              style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
-              onPress={() => setSelectedTag(tag)}
+              style={[styles.tagChip, !selectedTag && styles.tagChipActive]}
+              onPress={() => setSelectedTag(null)}
             >
-              <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>
-                {tag}
-              </Text>
+              <Text style={[styles.tagText, !selectedTag && styles.tagTextActive]}>All</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+            {allTags.map((tag) => (
+              <TouchableOpacity
+                key={tag}
+                style={[styles.tagChip, selectedTag === tag && styles.tagChipActive]}
+                onPress={() => setSelectedTag(tag)}
+              >
+                <Text style={[styles.tagText, selectedTag === tag && styles.tagTextActive]}>
+                  {tag}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
       )}
 
       {/* Items List */}
