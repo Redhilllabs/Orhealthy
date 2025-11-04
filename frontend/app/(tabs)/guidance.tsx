@@ -401,7 +401,22 @@ export default function GuidanceScreen() {
         type: 'preset_meal' as const,
       }));
 
-      setMealOptions([...presetBowls, ...presetMeals]);
+      // Fetch guide's own MyDIY items
+      const myRecipesResponse = await axios.get(`${API_URL}/recipes?user_id=${user?._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const myBowls = myRecipesResponse.data
+        .filter((r: any) => !r.is_preset)
+        .map((r: any) => ({ ...r, type: 'my_bowl' as const }));
+
+      const myMealsResponse = await axios.get(`${API_URL}/meals?user_id=${user?._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const myMeals = myMealsResponse.data
+        .filter((m: any) => !m.is_preset)
+        .map((m: any) => ({ ...m, type: 'my_meal' as const }));
+
+      setMealOptions([...presetBowls, ...presetMeals, ...myBowls, ...myMeals]);
     } catch (error) {
       console.error('Error fetching meal options:', error);
     }
