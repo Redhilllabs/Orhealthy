@@ -2387,11 +2387,15 @@
             const tags = document.getElementById('mealTags').value
                 .split(',').map(t => t.trim()).filter(Boolean);
             
+            const categories = document.getElementById('mealCategories').value
+                .split(',').map(t => t.trim()).filter(Boolean);
+            
             const data = {
                 name: document.getElementById('mealName').value,
                 description: document.getElementById('mealDescription').value,
                 ingredients: selectedMealIngredients,
                 tags: tags,
+                categories: categories,
                 images: mealImages,
                 created_by: 'admin'
             };
@@ -2414,14 +2418,14 @@
                 
                 if (response.ok) {
                     closeModal('mealModal');
-                    showAlert('meals', editingMealId ? 'Meal updated successfully' : 'Meal created successfully', 'success');
+                    showAlert('recipes', editingMealId ? 'Recipe updated successfully' : 'Recipe created successfully', 'success');
                     loadMeals();
                 } else {
                     const error = await response.json();
-                    showAlert('meals', error.detail || 'Error saving meal', 'error');
+                    showAlert('recipes', error.detail || 'Error saving recipe', 'error');
                 }
             } catch (error) {
-                showAlert('meals', 'Error saving meal', 'error');
+                showAlert('recipes', 'Error saving recipe', 'error');
             }
         }
 
