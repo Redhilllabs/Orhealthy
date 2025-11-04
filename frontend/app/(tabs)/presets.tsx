@@ -98,7 +98,16 @@ export default function PresetsScreen() {
     
     // Determine which items to show based on active tab and sub-tab
     if (activeTab === 'meals') {
-      items = mealsSubTab === 'all-meals' ? allMeals : myMeals;
+      // Filter recipes to only show those with "Bowls" category
+      const bowlsFilteredAllMeals = allMeals.filter(meal => {
+        const categories = meal.categories || [];
+        return categories.some(cat => cat.toLowerCase() === 'bowls');
+      });
+      const bowlsFilteredMyMeals = myMeals.filter(meal => {
+        const categories = meal.categories || [];
+        return categories.some(cat => cat.toLowerCase() === 'bowls');
+      });
+      items = mealsSubTab === 'all-meals' ? bowlsFilteredAllMeals : bowlsFilteredMyMeals;
     } else {
       items = combosSubTab === 'all-combos' ? allCombos : myCombos;
     }
