@@ -1837,7 +1837,7 @@ async def delete_habit(habit_id: str, request: Request):
 @api_router.get("/following")
 async def get_following(request: Request):
     """Get list of guides that the user follows with their ratings"""
-    user = request.state.user
+    user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
@@ -1862,7 +1862,7 @@ async def get_following(request: Request):
 @api_router.post("/meal-plans")
 async def create_meal_plan(request: Request, meal_plan_data: dict):
     """Create a meal plan request"""
-    user = request.state.user
+    user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
@@ -1885,7 +1885,7 @@ async def create_meal_plan(request: Request, meal_plan_data: dict):
 @api_router.get("/meal-plans")
 async def get_meal_plans(request: Request):
     """Get meal plans for the logged-in user"""
-    user = request.state.user
+    user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
@@ -1905,7 +1905,7 @@ async def get_meal_plans(request: Request):
 @api_router.delete("/meal-plans/{plan_id}")
 async def delete_meal_plan(request: Request, plan_id: str):
     """Delete a meal plan"""
-    user = request.state.user
+    user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
