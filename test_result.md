@@ -103,27 +103,22 @@
 #====================================================================================================
 
 user_problem_statement: |
-  OrHealthy Mobile App - Guidance Tab Delete Functions Fix:
+  OrHealthy Mobile App - Multiple UI/UX and Backend Fixes:
   
-  **Current Issue:**
-  - Delete functions for plans and activities in the Guidance tab are not working properly
-  - Need to wire them correctly with confirmation modals
+  **Issues to Fix:**
+  1. Delete buttons in Guidance tab not working on web (Alert.alert not visible)
+     - Replace with custom Modal components for web compatibility
+     - Add confirmation before deletion
   
-  **Requirements:**
-  1. Delete Activity (Timeline tab):
-     - Add confirmation modal before deletion
-     - Wire to DELETE /api/habits/{habit_id} endpoint
-     - Show success/error messages
+  2. Presets selection modal not showing updated item prices
+     - Backend needs to refresh recipe prices in GET /api/meals
+     - Ensure calculated_price is propagated to frontend
   
-  2. Delete Plan (My Plans tab):
-     - Add confirmation modal before deletion
-     - Wire to DELETE /api/meal-plans/{plan_id} endpoint  
-     - Show success/error messages
+  3. Selection modal header says "Meals" should be "Items"
+     - Change text in presets.tsx modal
   
-  3. Backend fixes needed:
-     - Improve error handling for invalid ObjectIds
-     - Add proper logging for debugging
-     - Return clear success messages
+  4. Admin panel meals section shows "meal(s)" should be "recipe(s)"
+     - Update admin.html label for recipe count
 
 backend:
   - task: "Delete Activity Endpoint (DELETE /api/habits/{habit_id})"
