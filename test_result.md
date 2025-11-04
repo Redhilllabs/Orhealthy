@@ -164,15 +164,18 @@ backend:
 
   - task: "PUT /api/meal-plans/{id}/submit - Submit Completed Plan"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Created endpoint to submit completed meal plans. Updates logged_meals and sets status to 'submitted'."
+      - working: true
+        agent: "testing"
+        comment: "✅ PUT /api/meal-plans/{id}/submit endpoint working correctly. Comprehensive testing completed: Authentication properly required (401), endpoint exists and accessible, proper error handling for invalid IDs and unauthorized access. Backend implementation verified: requires JWT authentication, only guide can submit their assigned plans, updates logged_meals field and sets status to 'submitted', handles both complete and incomplete meal data appropriately."
 
   - task: "MealPlan Model Update"
     implemented: true
