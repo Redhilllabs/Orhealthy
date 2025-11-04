@@ -70,7 +70,7 @@ export default function TabsLayout() {
           title: 'Guidance',
           tabBarIcon: ({ color }) => (
             <View style={styles.iconWrapper}>
-              <Ionicons name="chatbubbles" size={24} color={color} />
+              <Ionicons name="compass" size={24} color={color} />
               {messagesUnreadCount > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>
