@@ -2332,6 +2332,12 @@ const styles = StyleSheet.create({
     color: '#64748b',
     marginBottom: 4,
   },
+  planFromTextLink: {
+    fontSize: 14,
+    color: '#3b82f6',
+    marginBottom: 4,
+    textDecorationLine: 'underline',
+  },
   planType: {
     fontSize: 18,
     fontWeight: '600',
