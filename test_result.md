@@ -103,22 +103,18 @@
 #====================================================================================================
 
 user_problem_statement: |
-  OrHealthy Mobile App - Multiple UI/UX and Backend Fixes:
+  OrHealthy Mobile App - Meal Planning System for Guides:
   
-  **Issues to Fix:**
-  1. Delete buttons in Guidance tab not working on web (Alert.alert not visible)
-     - Replace with custom Modal components for web compatibility
-     - Add confirmation before deletion
-  
-  2. Presets selection modal not showing updated item prices
-     - Backend needs to refresh recipe prices in GET /api/meals
-     - Ensure calculated_price is propagated to frontend
-  
-  3. Selection modal header says "Meals" should be "Items"
-     - Change text in presets.tsx modal
-  
-  4. Admin panel meals section shows "meal(s)" should be "recipe(s)"
-     - Update admin.html label for recipe count
+  **Requirements:**
+  1. Proper date picker in meal plan request modal
+  2. Mandatory guide selection before submitting plan
+  3. Guide interface to accept and plan meal requests:
+     - New "Plan Requests" tab (first tab for guides)
+     - Accept plan requests
+     - Planning modal with dates and meal dropdowns
+     - Save progress and submit completed plans
+  4. Change meal placeholder to "Sprouted Legumes Bowl"
+  5. View submitted plans for guidees
 
 backend:
   - task: "GET /api/meals - Refresh Recipe Prices"
