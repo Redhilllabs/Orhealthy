@@ -133,6 +133,7 @@ class MealPlan(BaseModel):
     plan_type: str  # "single_meal", "1_day", "3_day", "week", "fortnight", "month"
     start_date: str  # ISO date string
     meals_requested: List[str] = []  # ["breakfast", "brunch", "lunch", "evening_snacks", "dinner", "supper"]
+    goal: Optional[str] = None  # Purpose/goal of the meal plan
     status: str = "requested"  # "requested", "accepted", "planning", "submitted", "cancelled"
     logged_meals: Optional[dict] = None  # {date: {meal_time: meal_id}}
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
