@@ -65,9 +65,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="guidance"
         options={{
-          title: 'Chats',
+          title: 'Guidance',
           tabBarIcon: ({ color }) => (
             <View style={styles.iconWrapper}>
               <Ionicons name="chatbubbles" size={24} color={color} />
@@ -80,6 +80,12 @@ export default function TabsLayout() {
               )}
             </View>
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="messages"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
