@@ -1830,6 +1830,18 @@ async def get_habits(request: Request, user_id: Optional[str] = None):
     
     return habits
 
+@api_router.get("/habits/user/{user_id}")
+async def get_habits_by_user(user_id: str, request: Request):
+    """Get all habits for a specific user (for guides viewing guidee timeline)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    habits = await db.habits.find({"user_id": ObjectId(user_id)}).sort("created_at", -1).to_list(100)
+    for habit in habits:
+        habit["_id"] = str(habit["_id"])
+    return habits
+
 @api_router.delete("/habits/{habit_id}")
 async def delete_habit(habit_id: str, request: Request):
     """Delete a habit entry"""
