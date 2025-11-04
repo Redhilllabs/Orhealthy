@@ -2523,7 +2523,7 @@
                 const combo = await response.json();
                 
                 document.getElementById('comboModal').classList.add('active');
-                document.querySelector('#comboModal .modal-title').textContent = 'Edit Combo';
+                document.querySelector('#comboModal .modal-title').textContent = 'Edit Meal';
                 document.getElementById('comboName').value = combo.name;
                 document.getElementById('comboDescription').value = combo.description;
                 document.getElementById('comboPrice').value = combo.calculated_price || 0;
@@ -2545,13 +2545,13 @@
                 renderComboMeals();
                 updateComboPrice();
             } catch (error) {
-                showAlert('combos', 'Error loading combo data', 'error');
+                showAlert('meals', 'Error loading meal data', 'error');
             }
         }
 
         function updateComboMealSelect() {
             const select = document.getElementById('comboMealSelect');
-            select.innerHTML = '<option value="">-- Select meal --</option>' +
+            select.innerHTML = '<option value="">-- Select recipe --</option>' +
                 allRecipes.map(meal => `<option value="${meal._id}">${meal.name} (₹${meal.calculated_price ? meal.calculated_price.toFixed(2) : '0.00'})</option>`).join('');
         }
 
