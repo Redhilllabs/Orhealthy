@@ -1383,3 +1383,52 @@ agent_communication:
       - Tab structure matches DIY screen design
       - Should resolve tab carousel height/width fluctuation issues
       - Should eliminate "Unexpected text node" error (proper text wrapping)
+
+agent_communication:
+  - agent: "main"
+    message: |
+      🔧 **GUIDANCE TAB DELETE FUNCTIONS FIX - 2025-06-01**
+      
+      **Issue Reported:**
+      User reported that delete functions for plans and activities in the Guidance tab are not working properly.
+      
+      **Backend Fixes Implemented:**
+      1. ✅ DELETE /api/habits/{habit_id} endpoint:
+         - Added try-catch for ObjectId validation errors
+         - Improved error handling (400 for invalid ID, 404 for not found)
+         - Added console logging for debugging
+         - Better success message: "Habit deleted successfully"
+      
+      2. ✅ DELETE /api/meal-plans/{plan_id} endpoint:
+         - Improved exception handling with logging
+         - Better error messages (400 for invalid ID)
+         - Added console logging for debugging
+         - Better success message: "Plan deleted successfully"
+      
+      **Frontend Verification:**
+      - Confirmation modals are already implemented using Alert.alert()
+      - Delete functions are properly wired (deleteHabit, deletePlan)
+      - Activity delete: Line 786 in guidance.tsx
+      - Plan delete: Line 869 in guidance.tsx
+      - Both show confirmation dialogs before deletion
+      
+      **Testing Required:**
+      1. Test DELETE /api/habits/{habit_id} with valid and invalid IDs
+      2. Test DELETE /api/meal-plans/{plan_id} with valid and invalid IDs
+      3. Verify confirmation modals appear before deletion
+      4. Verify success/error messages show correctly
+      5. Verify list refreshes after deletion
+
+metadata:
+  created_by: "main_agent"
+  version: "3.0"
+  test_sequence: 4
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Delete Activity Endpoint (DELETE /api/habits/{habit_id})"
+    - "Delete Plan Endpoint (DELETE /api/meal-plans/{plan_id})"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
