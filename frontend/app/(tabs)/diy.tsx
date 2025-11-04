@@ -1235,7 +1235,7 @@ export default function DIYScreen() {
                             <TouchableOpacity onPress={() => updateEditingCustomization(index, quantity - stepSize)}>
                               <Ionicons name="remove-circle" size={28} color="#ffd700" />
                             </TouchableOpacity>
-                            <Text style={styles.selectedItemQty}>{quantity}{ing.unit || ''}</Text>
+                            <Text style={styles.selectedItemQty}>{quantity}</Text>
                             <TouchableOpacity onPress={() => updateEditingCustomization(index, quantity + stepSize)}>
                               <Ionicons name="add-circle" size={28} color="#ffd700" />
                             </TouchableOpacity>
