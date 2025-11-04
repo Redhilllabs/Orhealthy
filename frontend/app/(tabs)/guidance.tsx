@@ -1048,11 +1048,11 @@ export default function GuidanceScreen() {
         return (
           <View style={styles.tabContent}>
             <TouchableOpacity
-              style={styles.logButtonHeader}
+              style={styles.requestButton}
               onPress={() => setShowActivityModal(true)}
             >
-              <Ionicons name="add-circle" size={24} color="#ffd700" />
-              <Text style={styles.logButtonText}>Log Activity</Text>
+              <Ionicons name="add-circle" size={24} color="#fff" />
+              <Text style={styles.requestButtonText}>Log Activity</Text>
             </TouchableOpacity>
 
             {loading ? (
