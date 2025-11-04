@@ -340,9 +340,11 @@ class BackendTester:
 
 def main():
     """Main test execution"""
-    tester = AdminPanelTester()
+    tester = BackendTester()
     success = tester.run_all_tests()
-    sys.exit(0 if success else 1)
+    
+    if not success:
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
