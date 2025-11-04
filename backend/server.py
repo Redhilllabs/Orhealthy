@@ -28,9 +28,15 @@ api_router = APIRouter(prefix="/api")
 
 # Pydantic models
 class UserProfile(BaseModel):
-    height: Optional[float] = None
-    weight: Optional[float] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None  # "male", "female", "other"
+    height: Optional[float] = None  # in cm
+    weight: Optional[float] = None  # in kg
     allergies: List[str] = []
+    lifestyle_activity_level: Optional[str] = None  # "sedentary", "lightly_active", "moderately_active", "very_active", "extra_active"
+    profession: Optional[str] = None
+    fitness_activities: List[str] = []
+    bio: Optional[str] = None
     expertise: Optional[str] = None
 
 class Address(BaseModel):
