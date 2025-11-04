@@ -196,6 +196,12 @@ export default function GuidanceScreen() {
     }
   }, [activeTab]);
 
+  useEffect(() => {
+    if (showViewPlanModal && mealOptions.length === 0) {
+      fetchMealOptionsForPlanning();
+    }
+  }, [showViewPlanModal]);
+
   const fetchConversations = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
