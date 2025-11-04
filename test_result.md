@@ -117,13 +117,73 @@ user_problem_statement: |
   5. View submitted plans for guidees
 
 backend:
-  - task: "GET /api/meals - Refresh Recipe Prices"
+  - task: "GET /api/meal-plans/guide - Fetch Guide Plans"
     implemented: true
     working: "NA"
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created endpoint to fetch meal plans for guides. Returns plans where user is the guide (guide_id matches). Used in Plan Requests tab."
+
+  - task: "PUT /api/meal-plans/{id}/accept - Accept Plan"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created endpoint for guides to accept plan requests. Updates status from 'requested' to 'accepted'."
+
+  - task: "PUT /api/meal-plans/{id}/save-progress - Save Planning Progress"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created endpoint to save partial meal planning progress. Updates logged_meals field and sets status to 'planning'."
+
+  - task: "PUT /api/meal-plans/{id}/submit - Submit Completed Plan"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created endpoint to submit completed meal plans. Updates logged_meals and sets status to 'submitted'."
+
+  - task: "MealPlan Model Update"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated MealPlan model to include 'logged_meals' field (dict with date->meal_time->meal_id mapping) and added 'planning' and 'submitted' to status values."
+
+  - task: "GET /api/meals - Refresh Recipe Prices"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
