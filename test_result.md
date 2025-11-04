@@ -345,6 +345,30 @@ backend:
 
 
 frontend:
+  - task: "Custom Delete Confirmation Modal - Guidance Tab"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/guidance.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Replaced Alert.alert with custom Modal component for delete confirmations. Added showDeleteConfirm state, deleteTarget state to track what's being deleted. Modal shows warning icon, clear messaging, and styled Cancel/Delete buttons. Works on web unlike Alert.alert. Delete buttons for both activities and plans trigger this modal."
+
+  - task: "Presets Selection Modal - Header Text Change"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/presets.tsx"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Changed selection modal header from 'Meals' to 'Items' for combos tab. Line 511 updated."
+
   - task: "Comment avatars with profile links"
     implemented: true
     working: "NA"
