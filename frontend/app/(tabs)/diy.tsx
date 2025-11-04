@@ -1159,6 +1159,7 @@ export default function DIYScreen() {
                   style={[styles.bottomSheetButton, styles.saveButton]}
                   onPress={() => {
                     setShowSelectedModal(false);
+                    setNameError(false);
                     setShowNameModal(true);
                   }}
                   disabled={saving}
