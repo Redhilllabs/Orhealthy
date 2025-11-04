@@ -99,6 +99,7 @@ export default function GuidanceScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [selectedGuide, setSelectedGuide] = useState('');
+  const [planGoal, setPlanGoal] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Planning Modal States (for guides)
