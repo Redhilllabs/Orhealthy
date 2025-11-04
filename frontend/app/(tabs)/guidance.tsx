@@ -2817,6 +2817,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#64748b',
   },
+  deleteIconButton: {
+    padding: 4,
+  },
   deleteButton: {
     flex: 1,
     paddingVertical: 12,
