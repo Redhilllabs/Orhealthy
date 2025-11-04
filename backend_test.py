@@ -128,7 +128,7 @@ class MealPlanningTester:
                 f"Exception during creation: {str(e)}, using mock ID"
             )
     
-    def create_test_meal_plan(self):
+    def test_get_guide_meal_plans(self):
         """Create a test meal plan for deletion testing"""
         try:
             plan_data = {
