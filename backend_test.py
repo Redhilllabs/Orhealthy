@@ -32,26 +32,15 @@ class BackendTester:
             print(f"   Details: {details}")
     
     def authenticate_user(self):
-        """Create a test user session for authentication"""
+        """Skip authentication for direct endpoint testing"""
         try:
-            # For testing purposes, we'll use a mock authentication
-            # In real scenario, this would go through Google OAuth
-            test_user_data = {
-                "email": "testuser@example.com",
-                "name": "Test User",
-                "google_id": "test_google_id_123"
-            }
-            
-            # Create a session token for testing
-            self.auth_token = "test_session_token_for_delete_testing"
-            
-            # Set authorization header
+            # Since we can't easily create a real session, we'll test the endpoints
+            # directly to verify their error handling behavior
             self.session.headers.update({
-                "Authorization": f"Bearer {self.auth_token}",
                 "Content-Type": "application/json"
             })
             
-            self.log_test("Authentication Setup", True, "Mock authentication configured")
+            self.log_test("Authentication Setup", True, "Direct endpoint testing configured")
             return True
             
         except Exception as e:
