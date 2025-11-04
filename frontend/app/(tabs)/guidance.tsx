@@ -2412,12 +2412,27 @@ const styles = StyleSheet.create({
   },
   aboutHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     marginBottom: 16,
   },
   editIconButton: {
     padding: 8,
+  },
+  viewPlanMealRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+  },
+  mealNameText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1e293b',
+    marginLeft: 8,
   },
   profileSection: {
     backgroundColor: '#fff',
