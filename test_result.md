@@ -1270,6 +1270,38 @@ frontend:
           - Check if the "Unexpected text node" error still appears
           - Verify combined selections display correctly when switching between "All Meals" and "My Meals" in DIY Combos
           - Test loading overlays during save, add-to-cart, and delete operations
+      - working: "NA"
+        agent: "main"
+        comment: |
+          **SUB-TAB CAROUSEL IMPLEMENTATION (NEW UPDATE - 2025-06-01)**
+          
+          **Changes Implemented:**
+          1. ✅ Added sub-tab carousel to Presets screen (presets.tsx lines 419-458)
+          2. ✅ Sub-tabs for Meals: "All Meals" and "My Meals"
+          3. ✅ Sub-tabs for Combos: "All Combos" and "My Combos"
+          4. ✅ Styling matches DIY screen's sub-tab design
+          5. ✅ State variables already existed (mealsSubTab, combosSubTab)
+          6. ✅ Styles already defined (subTabContainer, subTab, activeSubTab, etc.)
+          
+          **Structure:**
+          - Main tabs (Meals/Combos) at top
+          - Sub-tabs appear below main tabs
+          - Search bar below sub-tabs
+          - Tag filters below search
+          - Items list at bottom
+          
+          **Expected Behavior:**
+          - When "Meals" tab is active, shows "All Meals" and "My Meals" sub-tabs
+          - When "Combos" tab is active, shows "All Combos" and "My Combos" sub-tabs
+          - Sub-tabs filter the displayed items accordingly
+          - Delete button shows only in "My Meals" and "My Combos" views
+          
+          **Testing Required:**
+          - Verify sub-tabs appear correctly in Presets
+          - Verify switching between sub-tabs filters items properly
+          - Check if "Unexpected text node" error is resolved
+          - Verify tab carousel height/width is consistent (no fluctuation)
+          - Compare styling with DIY screen for consistency
 
 agent_communication:
   - agent: "main"
