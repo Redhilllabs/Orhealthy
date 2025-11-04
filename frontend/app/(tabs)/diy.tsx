@@ -1287,25 +1287,28 @@ export default function DIYScreen() {
           </ScrollView>
           
           <View style={styles.bottomSheetFooter}>
-            <Text style={styles.bottomSheetTotalLabel}>Total:</Text>
-            <Text style={styles.bottomSheetTotal}>
-              ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || item.calculated_price || 0) * (item.quantity || 0)), 0).toFixed(2)}
-            </Text>
-          </View>
-          
-          <View style={styles.bottomSheetActions}>
-            <TouchableOpacity
-              style={styles.bottomSheetSaveButton}
-              onPress={handleSaveMyDiyItem}
-            >
-              <Text style={styles.bottomSheetSaveButtonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.bottomSheetAddButton}
-              onPress={handleAddEditedItemToCart}
-            >
-              <Text style={styles.bottomSheetAddButtonText}>Add to Cart</Text>
-            </TouchableOpacity>
+            <View style={styles.totalSection}>
+              <Text style={styles.totalLabel}>Total</Text>
+              <Text style={styles.totalPrice}>
+                ₹{editingCustomizations.reduce((sum, item) => sum + ((item.price || item.price_per_unit || item.calculated_price || 0) * (item.quantity || 0)), 0).toFixed(2)}
+              </Text>
+            </View>
+            <View style={styles.bottomSheetActions}>
+              <TouchableOpacity
+                style={[styles.bottomSheetButton, styles.saveButton]}
+                onPress={handleSaveMyDiyItem}
+              >
+                <Ionicons name="bookmark" size={20} color="#333" />
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.bottomSheetButton, styles.cartButton]}
+                onPress={handleAddEditedItemToCart}
+              >
+                <Ionicons name="cart" size={20} color="#fff" />
+                <Text style={styles.cartButtonText}>Add to Cart</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
