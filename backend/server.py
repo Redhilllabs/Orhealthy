@@ -1436,7 +1436,21 @@ async def get_recipe(recipe_id: str):
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     recipe["_id"] = str(recipe["_id"])
-    # Calculate price from ingredients
+    
+    # Refresh ingredient prices with latest calculated prices
+    for ingredient_ref in recipe.get("ingredients", []):
+        ingredient_id = ingredient_ref.get("ingredient_id")
+        if ingredient_id:
+            try:
+                ingredient = await db.ingredients.find_one({"_id": ObjectId(ingredient_id)})
+                if ingredient:
+                    # Recalculate price from source ingredients
+                    calculated_price = await calculate_processed_ingredient_price(ingredient)
+                    ingredient_ref["price"] = calculated_price
+            except Exception:
+                pass
+    
+    # Calculate total price from refreshed ingredients
     recipe["calculated_price"] = await calculate_recipe_price(recipe)
     # Calculate nutrition profile
     recipe["nutrition_profile"] = await calculate_nutrition_profile(
