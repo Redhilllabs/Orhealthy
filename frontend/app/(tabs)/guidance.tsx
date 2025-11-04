@@ -1284,7 +1284,6 @@ export default function GuidanceScreen() {
       case 'messages':
         return (
           <View style={styles.tabContent}>
-            <Text style={styles.tabTitle}>Messages</Text>
             {loading ? (
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
             ) : conversations.length === 0 ? (
