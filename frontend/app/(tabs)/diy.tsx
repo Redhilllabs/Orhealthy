@@ -1077,7 +1077,7 @@ export default function DIYScreen() {
         <View style={styles.bottomSheetContent}>
           <View style={styles.bottomSheetHandle} />
           <Text style={styles.bottomSheetTitle}>
-            Selected {activeTab === 'diy-meals' ? 'Ingredients' : 'Meals'} ({selectedCount})
+            Selected {activeTab === 'diy-meals' ? 'Ingredients' : 'Items'} ({selectedCount})
           </Text>
           
           <ScrollView style={styles.selectedItemsList}>
