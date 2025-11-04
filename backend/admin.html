@@ -761,7 +761,7 @@
     <div id="mealModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Add Meal</h2>
+                <h2 class="modal-title">Add Recipe</h2>
                 <span class="close" onclick="closeModal('mealModal')">&times;</span>
             </div>
             <form id="mealForm" onsubmit="saveMeal(event)">
@@ -776,7 +776,7 @@
                     <div id="mealImagePreview" class="image-preview-grid"></div>
                 </div>
                 <div class="form-group">
-                    <label>Meal Name *</label>
+                    <label>Recipe Name *</label>
                     <input type="text" id="mealName" required>
                 </div>
                 <div class="form-group">
@@ -784,13 +784,18 @@
                     <textarea id="mealDescription" required></textarea>
                 </div>
                 <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="mealTags" placeholder="e.g. high-protein, low-carb, vegan">
+                </div>
+                <div class="form-group">
+                    <label>Categories (comma separated) *</label>
+                    <input type="text" id="mealCategories" placeholder="e.g. Bowls, Salads" required>
+                    <small style="color: #64748b;">Recipes with "Bowls" category will appear in Bowls tab</small>
+                </div>
+                <div class="form-group">
                     <label>Price (Auto-calculated from ingredients)</label>
                     <input type="number" step="0.01" id="mealPrice" readonly value="0.00">
                     <small style="color: #64748b;">Price will be calculated based on selected ingredients</small>
-                </div>
-                <div class="form-group">
-                    <label>Tags (comma separated)</label>
-                    <input type="text" id="mealTags" placeholder="e.g. high-protein, low-carb, vegan">
                 </div>
                 <div class="form-group">
                     <label>Ingredients *</label>
