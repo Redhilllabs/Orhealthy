@@ -3296,6 +3296,18 @@ const styles = StyleSheet.create({
     color: '#1e293b',
     marginTop: 16,
   },
+  successModalButton: {
+    marginTop: 24,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    backgroundColor: '#ffd700',
+    borderRadius: 8,
+  },
+  successModalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+  },
 });
 
       {/* Edit Profile Modal - Continuing in next file chunk due to size */}
