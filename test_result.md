@@ -1503,15 +1503,55 @@ agent_communication:
       - Actual deletion with valid data requires authenticated user session
       
       **BACKEND DELETE FUNCTIONALITY IS PROPERLY IMPLEMENTED AND READY FOR PRODUCTION USE**
+  - agent: "main"
+    message: |
+      🔧 **MULTIPLE UI/UX AND BACKEND FIXES COMPLETE - 2025-11-04**
+      
+      **Issue 1: Delete Buttons Not Working on Web ✅ FIXED**
+      - Problem: Alert.alert doesn't work properly on web browsers
+      - Solution: Replaced with custom Modal component in guidance.tsx
+      - Implementation:
+        * Added showDeleteConfirm and deleteTarget states
+        * Created custom modal with warning icon, clear messaging
+        * Styled Cancel and Delete buttons with proper colors
+        * Both activity and plan delete buttons now trigger custom modal
+      
+      **Issue 2: Selection Modal Not Showing Updated Prices ✅ FIXED**
+      - Problem: Recipe prices in meal selection modal were stale
+      - Solution: Updated GET /api/meals to refresh individual recipe prices
+      - Implementation:
+        * Added loop to fetch each recipe's latest calculated_price from db.meals
+        * Updates recipe_ref['price'] before calculating meal total
+        * Ensures frontend always shows current prices
+      
+      **Issue 3: Modal Header Text ✅ FIXED**
+      - Problem: Combos selection modal said "Meals" should say "Items"
+      - Solution: Changed line 511 in presets.tsx
+      - Text now reads "Items" instead of "Meals" for combos
+      
+      **Issue 4: Admin Panel Label ✅ FIXED**
+      - Problem: Meals section showed "meal(s)" should show "recipe(s)"
+      - Solution: Updated line 2496 in admin.html
+      - Recipe count now displays as "X recipe(s)" not "X meal(s)"
+      
+      **Testing Required:**
+      1. Test custom delete confirmation modal on web (guidance tab)
+      2. Verify meal selection modal shows updated recipe prices
+      3. Check modal header says "Items" for combos
+      4. Verify admin panel shows "recipe(s)" label
 
 metadata:
   created_by: "main_agent"
-  version: "3.0"
-  test_sequence: 4
+  version: "4.0"
+  test_sequence: 5
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "GET /api/meals - Refresh Recipe Prices"
+    - "Custom Delete Confirmation Modal - Guidance Tab"
+    - "Presets Selection Modal - Header Text Change"
+    - "Admin Panel - Recipe Count Label Fix"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
