@@ -12,6 +12,7 @@ import {
   TextInput,
   Modal,
   Platform,
+  Picker,
 } from 'react-native';
 import { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -59,6 +60,7 @@ interface MealPlan {
   meals_requested: string[];
   status: string;
   created_at: string;
+  logged_meals?: any;
 }
 
 interface Guide {
@@ -67,14 +69,24 @@ interface Guide {
   average_rating?: number;
 }
 
+interface MealOption {
+  _id: string;
+  name: string;
+  calculated_price?: number;
+  type: 'preset_bowl' | 'preset_meal' | 'my_bowl' | 'my_meal';
+}
+
 export default function GuidanceScreen() {
   const { user } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'timeline' | 'plans' | 'about' | 'messages'>('timeline');
+  const [activeTab, setActiveTab] = useState<'plan-requests' | 'timeline' | 'plans' | 'about' | 'messages'>(
+    user?.is_guide ? 'plan-requests' : 'timeline'
+  );
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [conversationRatings, setConversationRatings] = useState<Record<string, number>>({});
   const [habits, setHabits] = useState<HabitLog[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [guidePlans, setGuidePlans] = useState<MealPlan[]>([]); // Plans for guide
   const [guides, setGuides] = useState<Guide[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,6 +100,13 @@ export default function GuidanceScreen() {
   const [selectedMeals, setSelectedMeals] = useState<string[]>([]);
   const [selectedGuide, setSelectedGuide] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // Planning Modal States (for guides)
+  const [showPlanningModal, setShowPlanningModal] = useState(false);
+  const [currentPlanForPlanning, setCurrentPlanForPlanning] = useState<MealPlan | null>(null);
+  const [planningMealSelections, setPlanningMealSelections] = useState<Record<string, Record<string, string>>>({});
+  const [mealOptions, setMealOptions] = useState<MealOption[]>([]);
+  const [savingPlan, setSavingPlan] = useState(false);
 
   // Activity Log Modal States
   const [showActivityModal, setShowActivityModal] = useState(false);
@@ -123,7 +142,7 @@ export default function GuidanceScreen() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'habit' | 'plan', id: string } | null>(null);
 
-  const mealOptions = [
+  const mealOptionsArray = [
     'Breakfast',
     'Brunch',
     'Lunch',
@@ -168,6 +187,8 @@ export default function GuidanceScreen() {
       fetchGuides();
     } else if (activeTab === 'about') {
       fetchProfile();
+    } else if (activeTab === 'plan-requests' && user?.is_guide) {
+      fetchGuidePlans();
     }
   }, [activeTab]);
 
@@ -238,6 +259,23 @@ export default function GuidanceScreen() {
     }
   };
 
+  const fetchGuidePlans = async () => {
+    setLoading(true);
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/meal-plans/guide`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setGuidePlans(response.data || []);
+    } catch (error) {
+      console.error('Error fetching guide plans:', error);
+      setGuidePlans([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   const fetchGuides = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
@@ -279,6 +317,45 @@ export default function GuidanceScreen() {
     }
   };
 
+  const fetchMealOptionsForPlanning = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      
+      // Fetch preset bowls (recipes)
+      const recipesResponse = await axios.get(`${API_URL}/recipes`);
+      const presetBowls = recipesResponse.data.map((r: any) => ({
+        ...r,
+        type: 'preset_bowl' as const,
+      }));
+
+      // Fetch preset meals (combos)
+      const mealsResponse = await axios.get(`${API_URL}/meals`);
+      const presetMeals = mealsResponse.data.map((m: any) => ({
+        ...m,
+        type: 'preset_meal' as const,
+      }));
+
+      // Fetch user's saved bowls and meals
+      const savedResponse = await axios.get(`${API_URL}/recipes?user_id=${user?._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const myBowls = savedResponse.data
+        .filter((r: any) => !r.is_preset)
+        .map((r: any) => ({ ...r, type: 'my_bowl' as const }));
+
+      const savedMealsResponse = await axios.get(`${API_URL}/meals?user_id=${user?._id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const myMeals = savedMealsResponse.data
+        .filter((m: any) => !m.is_preset)
+        .map((m: any) => ({ ...m, type: 'my_meal' as const }));
+
+      setMealOptions([...presetBowls, ...presetMeals, ...myBowls, ...myMeals]);
+    } catch (error) {
+      console.error('Error fetching meal options:', error);
+    }
+  };
+
   const deleteHabit = async (habitId: string) => {
     try {
       const token = await storage.getItemAsync('session_token');
@@ -305,6 +382,137 @@ export default function GuidanceScreen() {
       console.error('Error deleting plan:', error);
       Alert.alert('Error', 'Failed to delete plan');
     }
+  };
+
+  const acceptPlan = async (planId: string) => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.put(
+        `${API_URL}/meal-plans/${planId}/accept`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      Alert.alert('Success', 'Plan accepted successfully');
+      fetchGuidePlans();
+    } catch (error) {
+      console.error('Error accepting plan:', error);
+      Alert.alert('Error', 'Failed to accept plan');
+    }
+  };
+
+  const startPlanning = async (plan: MealPlan) => {
+    setCurrentPlanForPlanning(plan);
+    await fetchMealOptionsForPlanning();
+    
+    // Initialize selections with existing logged meals if any
+    if (plan.logged_meals) {
+      setPlanningMealSelections(plan.logged_meals);
+    } else {
+      setPlanningMealSelections({});
+    }
+    
+    setShowPlanningModal(true);
+  };
+
+  const savePlanProgress = async () => {
+    if (!currentPlanForPlanning) return;
+    
+    setSavingPlan(true);
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.put(
+        `${API_URL}/meal-plans/${currentPlanForPlanning._id}/save-progress`,
+        { logged_meals: planningMealSelections },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      Alert.alert('Success', 'Progress saved successfully');
+    } catch (error) {
+      console.error('Error saving progress:', error);
+      Alert.alert('Error', 'Failed to save progress');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const submitCompletedPlan = async () => {
+    if (!currentPlanForPlanning) return;
+    
+    // Check if all meals are logged
+    const dates = generateDatesForPlan(currentPlanForPlanning);
+    let allLogged = true;
+    for (const date of dates) {
+      for (const meal of currentPlanForPlanning.meals_requested) {
+        if (!planningMealSelections[date]?.[meal]) {
+          allLogged = false;
+          break;
+        }
+      }
+      if (!allLogged) break;
+    }
+
+    if (!allLogged) {
+      Alert.alert('Incomplete Plan', 'Please log all meals before submitting');
+      return;
+    }
+
+    setSavingPlan(true);
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.put(
+        `${API_URL}/meal-plans/${currentPlanForPlanning._id}/submit`,
+        { logged_meals: planningMealSelections },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      Alert.alert('Success', 'Plan submitted successfully');
+      setShowPlanningModal(false);
+      fetchGuidePlans();
+    } catch (error) {
+      console.error('Error submitting plan:', error);
+      Alert.alert('Error', 'Failed to submit plan');
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
+  const generateDatesForPlan = (plan: MealPlan): string[] => {
+    const dates: string[] = [];
+    const startDate = new Date(plan.start_date);
+    let numDays = 1;
+
+    switch (plan.plan_type) {
+      case 'single_meal':
+        numDays = 1;
+        break;
+      case '1_day':
+        numDays = 1;
+        break;
+      case '3_day':
+        numDays = 3;
+        break;
+      case 'week':
+        numDays = 7;
+        break;
+      case 'fortnight':
+        numDays = 14;
+        break;
+      case 'month':
+        numDays = 30;
+        break;
+    }
+
+    for (let i = 0; i < numDays; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      dates.push(date.toISOString().split('T')[0]);
+    }
+
+    return dates;
   };
 
   const logActivity = async () => {
@@ -418,6 +626,11 @@ export default function GuidanceScreen() {
       return;
     }
 
+    if (!selectedGuide) {
+      Alert.alert('Error', 'Please select a guide');
+      return;
+    }
+
     setSubmitting(true);
     try {
       const token = await storage.getItemAsync('session_token');
@@ -433,7 +646,7 @@ export default function GuidanceScreen() {
           plan_type: planType,
           start_date: dateToUse,
           meals_requested: selectedMeals.map(m => m.toLowerCase().replace(/ /g, '_')),
-          guide_id: selectedGuide || null,
+          guide_id: selectedGuide,
           guide_name: guide?.name || null,
         },
         {
@@ -626,7 +839,7 @@ export default function GuidanceScreen() {
               style={styles.input}
               value={activityData.name}
               onChangeText={(text) => setActivityData({ ...activityData, name: text })}
-              placeholder="e.g., Grilled Chicken Salad"
+              placeholder="Sprouted Legumes Bowl"
             />
           </View>
         );
@@ -679,13 +892,13 @@ export default function GuidanceScreen() {
             </View>
             <View style={styles.inputRow}>
               <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                <Text style={styles.inputLabel}>Value *</Text>
+                <Text style={styles.inputLabel}>Count/Duration *</Text>
                 <TextInput
                   style={styles.input}
                   value={activityData.value}
                   onChangeText={(text) => setActivityData({ ...activityData, value: text })}
                   keyboardType="numeric"
-                  placeholder="10"
+                  placeholder="15"
                 />
               </View>
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
@@ -694,7 +907,7 @@ export default function GuidanceScreen() {
                   style={styles.input}
                   value={activityData.unit}
                   onChangeText={(text) => setActivityData({ ...activityData, unit: text })}
-                  placeholder="minutes"
+                  placeholder="times"
                 />
               </View>
             </View>
@@ -729,7 +942,7 @@ export default function GuidanceScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Note *</Text>
             <TextInput
-              style={[styles.input, styles.bioInput]}
+              style={[styles.input, styles.textArea]}
               value={activityData.note}
               onChangeText={(text) => setActivityData({ ...activityData, note: text })}
               placeholder="Write your note here..."
@@ -745,21 +958,99 @@ export default function GuidanceScreen() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'plan-requests':
+        return (
+          <View style={styles.tabContent}>
+            <Text style={styles.tabTitle}>Plan Requests</Text>
+            {loading ? (
+              <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
+            ) : guidePlans.length === 0 ? (
+              <Text style={styles.emptyText}>No plan requests yet</Text>
+            ) : (
+              <FlatList
+                data={guidePlans}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                  <View style={styles.planCard}>
+                    <View style={styles.planHeader}>
+                      <View>
+                        <Text style={styles.planFromText}>From: {item.guidee_name}</Text>
+                        <Text style={styles.planType}>
+                          {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
+                        </Text>
+                        <Text style={styles.planDate}>
+                          Starts: {new Date(item.start_date).toLocaleDateString()}
+                        </Text>
+                      </View>
+                      <View style={[
+                        styles.statusBadge,
+                        item.status === 'requested' && styles.statusRequested,
+                        item.status === 'accepted' && styles.statusAccepted,
+                        item.status === 'planning' && styles.statusPlanning,
+                        item.status === 'submitted' && styles.statusSubmitted,
+                      ]}>
+                        <Text style={styles.statusText}>{item.status}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.planMeals}>
+                      Meals: {item.meals_requested.map(m => m.replace(/_/g, ' ')).join(', ')}
+                    </Text>
+                    
+                    {item.status === 'requested' && (
+                      <TouchableOpacity
+                        style={styles.acceptButton}
+                        onPress={() => acceptPlan(item._id)}
+                      >
+                        <Ionicons name="checkmark-circle" size={18} color="#fff" />
+                        <Text style={styles.acceptButtonText}>Accept</Text>
+                      </TouchableOpacity>
+                    )}
+                    
+                    {(item.status === 'accepted' || item.status === 'planning') && (
+                      <TouchableOpacity
+                        style={styles.planningButton}
+                        onPress={() => startPlanning(item)}
+                      >
+                        <Ionicons name="create" size={18} color="#fff" />
+                        <Text style={styles.planningButtonText}>Start Planning</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+                contentContainerStyle={styles.listContent}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={() => {
+                      setRefreshing(true);
+                      fetchGuidePlans();
+                    }}
+                    colors={['#ffd700']}
+                  />
+                }
+              />
+            )}
+          </View>
+        );
+
       case 'timeline':
         return (
           <View style={styles.tabContent}>
-            <TouchableOpacity
-              style={styles.requestButton}
-              onPress={() => setShowActivityModal(true)}
-            >
-              <Ionicons name="add-circle" size={24} color="#fff" />
-              <Text style={styles.requestButtonText}>Log Activity</Text>
-            </TouchableOpacity>
+            <View style={styles.tabHeader}>
+              <Text style={styles.tabTitle}>Timeline</Text>
+              <TouchableOpacity
+                style={styles.logButton}
+                onPress={() => setShowActivityModal(true)}
+              >
+                <Ionicons name="add-circle" size={24} color="#ffd700" />
+                <Text style={styles.logButtonText}>Log Activity</Text>
+              </TouchableOpacity>
+            </View>
 
             {loading ? (
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
             ) : habits.length === 0 ? (
-              <Text style={styles.emptyText}>No timeline activities yet</Text>
+              <Text style={styles.emptyText}>No activities logged yet</Text>
             ) : (
               <FlatList
                 data={habits}
@@ -767,20 +1058,20 @@ export default function GuidanceScreen() {
                 renderItem={({ item }) => (
                   <View style={styles.habitCard}>
                     <View style={styles.habitHeader}>
-                      <View style={styles.habitTypeContainer}>
+                      <View style={styles.habitTypeRow}>
                         <Ionicons
                           name={
-                            item.habit_type === 'meals' ? 'restaurant' :
-                            item.habit_type === 'exercise' ? 'fitness' :
-                            item.habit_type === 'water' ? 'water' :
-                            item.habit_type === 'sleep' ? 'moon' : 'document-text'
+                            activityTypes.find(t => t.value === item.habit_type)?.icon as any || 'fitness'
                           }
-                          size={24}
+                          size={20}
                           color="#ffd700"
                         />
-                        <Text style={styles.habitType}>{item.habit_type}</Text>
+                        <Text style={styles.habitType}>
+                          {activityTypes.find(t => t.value === item.habit_type)?.label || item.habit_type}
+                        </Text>
                       </View>
                       <TouchableOpacity
+                        style={styles.deleteButton}
                         onPress={() => {
                           setDeleteTarget({ type: 'habit', id: item._id });
                           setShowDeleteConfirm(true);
@@ -846,7 +1137,12 @@ export default function GuidanceScreen() {
                           Starts: {new Date(item.start_date).toLocaleDateString()}
                         </Text>
                       </View>
-                      <View style={[styles.statusBadge, item.status === 'requested' && styles.statusRequested]}>
+                      <View style={[
+                        styles.statusBadge,
+                        item.status === 'requested' && styles.statusRequested,
+                        item.status === 'accepted' && styles.statusAccepted,
+                        item.status === 'submitted' && styles.statusSubmitted,
+                      ]}>
                         <Text style={styles.statusText}>{item.status}</Text>
                       </View>
                     </View>
@@ -856,6 +1152,20 @@ export default function GuidanceScreen() {
                     {item.guide_name && (
                       <Text style={styles.planGuide}>Guide: {item.guide_name}</Text>
                     )}
+                    
+                    {item.status === 'submitted' && (
+                      <TouchableOpacity
+                        style={styles.viewPlanButton}
+                        onPress={() => {
+                          // Open view plan modal
+                          Alert.alert('Plan Details', 'View submitted plan details here');
+                        }}
+                      >
+                        <Ionicons name="eye" size={18} color="#fff" />
+                        <Text style={styles.viewPlanButtonText}>View Plan</Text>
+                      </TouchableOpacity>
+                    )}
+                    
                     <TouchableOpacity
                       style={styles.deletePlanButton}
                       onPress={() => {
@@ -900,114 +1210,89 @@ export default function GuidanceScreen() {
               />
             }
           >
-            {loading ? (
-              <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
-            ) : (
-              <>
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() => setShowEditModal(true)}
-                >
-                  <Ionicons name="pencil" size={20} color="#fff" />
-                  <Text style={styles.editButtonText}>Edit Profile</Text>
-                </TouchableOpacity>
+            <View style={styles.aboutHeader}>
+              <Text style={styles.tabTitle}>About Me</Text>
+              <TouchableOpacity
+                style={styles.editIconButton}
+                onPress={() => setShowEditModal(true)}
+              >
+                <Ionicons name="create-outline" size={24} color="#ffd700" />
+              </TouchableOpacity>
+            </View>
 
-                <View style={styles.profileCard}>
-                  <View style={styles.profileRow}>
-                    <Ionicons name="person" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Age</Text>
-                      <Text style={styles.profileValue}>{profileData.age || 'Not set'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="male-female" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Gender</Text>
-                      <Text style={styles.profileValue}>{profileData.gender ? profileData.gender.charAt(0).toUpperCase() + profileData.gender.slice(1) : 'Not set'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="resize" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Height</Text>
-                      <Text style={styles.profileValue}>{profileData.height ? `${profileData.height} cm` : 'Not set'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="scale" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Weight</Text>
-                      <Text style={styles.profileValue}>{profileData.weight ? `${profileData.weight} kg` : 'Not set'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="warning" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Allergies</Text>
-                      <Text style={styles.profileValue}>{profileData.allergies || 'None'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="medical" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Lifestyle Disorders</Text>
-                      <Text style={styles.profileValue}>{profileData.lifestyle_disorders || 'None'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="walk" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Activity Level</Text>
-                      <Text style={styles.profileValue}>{profileData.lifestyle_activity_level ? profileData.lifestyle_activity_level.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Not set'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="briefcase" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Profession</Text>
-                      <Text style={styles.profileValue}>{profileData.profession || 'Not set'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="barbell" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Fitness Activities</Text>
-                      <Text style={styles.profileValue}>{profileData.fitness_activities || 'None'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.profileRow}>
-                    <Ionicons name="document-text" size={24} color="#ffd700" />
-                    <View style={styles.profileRowText}>
-                      <Text style={styles.profileLabel}>Bio</Text>
-                      <Text style={styles.profileValue}>{profileData.bio || 'Not set'}</Text>
-                    </View>
-                  </View>
+            <View style={styles.profileSection}>
+              <View style={styles.profileRow}>
+                <View style={styles.profileItem}>
+                  <Text style={styles.profileLabel}>Age</Text>
+                  <Text style={styles.profileValue}>{profileData.age || '-'}</Text>
                 </View>
-              </>
-            )}
+                <View style={styles.profileItem}>
+                  <Text style={styles.profileLabel}>Gender</Text>
+                  <Text style={styles.profileValue}>
+                    {profileData.gender ? profileData.gender.charAt(0).toUpperCase() + profileData.gender.slice(1) : '-'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.profileRow}>
+                <View style={styles.profileItem}>
+                  <Text style={styles.profileLabel}>Height</Text>
+                  <Text style={styles.profileValue}>{profileData.height ? `${profileData.height} cm` : '-'}</Text>
+                </View>
+                <View style={styles.profileItem}>
+                  <Text style={styles.profileLabel}>Weight</Text>
+                  <Text style={styles.profileValue}>{profileData.weight ? `${profileData.weight} kg` : '-'}</Text>
+                </View>
+              </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Allergies</Text>
+                <Text style={styles.profileValue}>{profileData.allergies || '-'}</Text>
+              </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Lifestyle Disorders</Text>
+                <Text style={styles.profileValue}>{profileData.lifestyle_disorders || '-'}</Text>
+              </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Activity Level</Text>
+                <Text style={styles.profileValue}>
+                  {activityLevels.find(a => a.value === profileData.lifestyle_activity_level)?.label || '-'}
+                </Text>
+              </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Profession</Text>
+                <Text style={styles.profileValue}>{profileData.profession || '-'}</Text>
+              </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Fitness Activities</Text>
+                <Text style={styles.profileValue}>{profileData.fitness_activities || '-'}</Text>
+              </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Bio</Text>
+                <Text style={styles.profileValue}>{profileData.bio || '-'}</Text>
+              </View>
+            </View>
           </ScrollView>
         );
 
       case 'messages':
         return (
           <View style={styles.tabContent}>
+            <Text style={styles.tabTitle}>Messages</Text>
             {loading ? (
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
+            ) : conversations.length === 0 ? (
+              <Text style={styles.emptyText}>No conversations yet</Text>
             ) : (
               <FlatList
                 data={conversations}
-                renderItem={renderConversation}
                 keyExtractor={(item) => item._id}
+                renderItem={renderConversation}
                 contentContainerStyle={styles.listContent}
                 refreshControl={
                   <RefreshControl
@@ -1018,9 +1303,6 @@ export default function GuidanceScreen() {
                     }}
                     colors={['#ffd700']}
                   />
-                }
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No conversations yet</Text>
                 }
               />
             )}
@@ -1033,51 +1315,82 @@ export default function GuidanceScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Tab Carousel */}
-      <View style={styles.tabCarouselContainer}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.tabCarousel}
+    <SafeAreaView style={styles.container}>
+      {/* Tab Navigation */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabBar}
+        contentContainerStyle={styles.tabBarContent}
+      >
+        {user?.is_guide && (
+          <TouchableOpacity
+            style={[styles.tab, activeTab === 'plan-requests' && styles.activeTab]}
+            onPress={() => setActiveTab('plan-requests')}
+          >
+            <Ionicons
+              name="clipboard"
+              size={20}
+              color={activeTab === 'plan-requests' ? '#ffd700' : '#999'}
+            />
+            <Text style={[styles.tabLabel, activeTab === 'plan-requests' && styles.activeTabLabel]}>
+              Plan Requests
+            </Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'timeline' && styles.activeTab]}
+          onPress={() => setActiveTab('timeline')}
         >
-          <TouchableOpacity
-            style={[styles.tabItem, activeTab === 'timeline' && styles.activeTabItem]}
-            onPress={() => setActiveTab('timeline')}
-          >
-            <Text style={[styles.tabText, activeTab === 'timeline' && styles.activeTabText]}>
-              Timeline
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tabItem, activeTab === 'plans' && styles.activeTabItem]}
-            onPress={() => setActiveTab('plans')}
-          >
-            <Text style={[styles.tabText, activeTab === 'plans' && styles.activeTabText]}>
-              My Plans
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tabItem, activeTab === 'about' && styles.activeTabItem]}
-            onPress={() => setActiveTab('about')}
-          >
-            <Text style={[styles.tabText, activeTab === 'about' && styles.activeTabText]}>
-              About
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.tabItem, activeTab === 'messages' && styles.activeTabItem]}
-            onPress={() => setActiveTab('messages')}
-          >
-            <Text style={[styles.tabText, activeTab === 'messages' && styles.activeTabText]}>
-              Messages
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+          <Ionicons
+            name="time"
+            size={20}
+            color={activeTab === 'timeline' ? '#ffd700' : '#999'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'timeline' && styles.activeTabLabel]}>
+            Timeline
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'plans' && styles.activeTab]}
+          onPress={() => setActiveTab('plans')}
+        >
+          <Ionicons
+            name="calendar"
+            size={20}
+            color={activeTab === 'plans' ? '#ffd700' : '#999'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'plans' && styles.activeTabLabel]}>
+            My Plans
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'about' && styles.activeTab]}
+          onPress={() => setActiveTab('about')}
+        >
+          <Ionicons
+            name="person"
+            size={20}
+            color={activeTab === 'about' ? '#ffd700' : '#999'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'about' && styles.activeTabLabel]}>
+            About
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'messages' && styles.activeTab]}
+          onPress={() => setActiveTab('messages')}
+        >
+          <Ionicons
+            name="chatbubbles"
+            size={20}
+            color={activeTab === 'messages' ? '#ffd700' : '#999'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'messages' && styles.activeTabLabel]}>
+            Messages
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
 
       {/* Tab Content */}
       {renderTabContent()}
@@ -1093,19 +1406,7 @@ export default function GuidanceScreen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Log Activity</Text>
-              <TouchableOpacity onPress={() => {
-                setShowActivityModal(false);
-                setActivityType('');
-                setActivityData({
-                  name: '',
-                  value: '',
-                  unit: '',
-                  hours: '',
-                  startTime: '',
-                  endTime: '',
-                  note: '',
-                });
-              }}>
+              <TouchableOpacity onPress={() => setShowActivityModal(false)}>
                 <Ionicons name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
@@ -1122,10 +1423,10 @@ export default function GuidanceScreen() {
                     ]}
                     onPress={() => setActivityType(type.value)}
                   >
-                    <Ionicons 
-                      name={type.icon as any} 
-                      size={24} 
-                      color={activityType === type.value ? '#fff' : '#666'} 
+                    <Ionicons
+                      name={type.icon as any}
+                      size={24}
+                      color={activityType === type.value ? '#fff' : '#ffd700'}
                     />
                     <Text
                       style={[
@@ -1159,1000 +1460,4 @@ export default function GuidanceScreen() {
         </View>
       </Modal>
 
-      {/* Edit Profile Modal */}
-      <Modal
-        visible={showEditModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowEditModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBody}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Age</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.age}
-                  onChangeText={(text) => setProfileData({ ...profileData, age: text })}
-                  keyboardType="numeric"
-                  placeholder="Enter your age"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Gender</Text>
-                <View style={styles.genderRow}>
-                  {['Male', 'Female', 'Other'].map((g) => (
-                    <TouchableOpacity
-                      key={g}
-                      style={[
-                        styles.genderButton,
-                        profileData.gender === g.toLowerCase() && styles.genderButtonActive,
-                      ]}
-                      onPress={() => setProfileData({ ...profileData, gender: g.toLowerCase() })}
-                    >
-                      <Text
-                        style={[
-                          styles.genderButtonText,
-                          profileData.gender === g.toLowerCase() && styles.genderButtonTextActive,
-                        ]}
-                      >
-                        {g}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-
-              <View style={styles.inputRow}>
-                <View style={[styles.inputGroup, { flex: 1, marginRight: 8 }]}>
-                  <Text style={styles.inputLabel}>Height (cm)</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={profileData.height}
-                    onChangeText={(text) => setProfileData({ ...profileData, height: text })}
-                    keyboardType="numeric"
-                    placeholder="170"
-                  />
-                </View>
-                <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
-                  <Text style={styles.inputLabel}>Weight (kg)</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={profileData.weight}
-                    onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
-                    keyboardType="numeric"
-                    placeholder="70"
-                  />
-                </View>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Allergies (comma separated)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.allergies}
-                  onChangeText={(text) => setProfileData({ ...profileData, allergies: text })}
-                  placeholder="e.g., Nuts, Dairy"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Lifestyle Disorders (comma separated)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.lifestyle_disorders}
-                  onChangeText={(text) => setProfileData({ ...profileData, lifestyle_disorders: text })}
-                  placeholder="e.g., Diabetes, Hypertension, PCOS"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Lifestyle Activity Level</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View style={styles.optionsRow}>
-                    {activityLevels.map((level) => (
-                      <TouchableOpacity
-                        key={level.value}
-                        style={[
-                          styles.optionButton,
-                          profileData.lifestyle_activity_level === level.value && styles.optionButtonActive,
-                        ]}
-                        onPress={() => setProfileData({ ...profileData, lifestyle_activity_level: level.value })}
-                      >
-                        <Text
-                          style={[
-                            styles.optionButtonText,
-                            profileData.lifestyle_activity_level === level.value && styles.optionButtonTextActive,
-                          ]}
-                        >
-                          {level.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </ScrollView>
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Profession</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.profession}
-                  onChangeText={(text) => setProfileData({ ...profileData, profession: text })}
-                  placeholder="Your profession"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Fitness Activities (comma separated)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={profileData.fitness_activities}
-                  onChangeText={(text) => setProfileData({ ...profileData, fitness_activities: text })}
-                  placeholder="e.g., Running, Yoga, Swimming"
-                />
-              </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Bio</Text>
-                <TextInput
-                  style={[styles.input, styles.bioInput]}
-                  value={profileData.bio}
-                  onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
-                  placeholder="Tell us about yourself"
-                  multiline
-                  numberOfLines={4}
-                />
-              </View>
-
-              <TouchableOpacity
-                style={[styles.submitButton, savingProfile && styles.submitButtonDisabled]}
-                onPress={saveProfile}
-                disabled={savingProfile}
-              >
-                {savingProfile ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.submitButtonText}>Save Profile</Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Plan Request Modal */}
-      <Modal
-        visible={showPlanModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowPlanModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Request Meal Plan</Text>
-              <TouchableOpacity onPress={() => setShowPlanModal(false)}>
-                <Ionicons name="close" size={24} color="#666" />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView style={styles.modalBody}>
-              <Text style={styles.sectionLabel}>Plan Type *</Text>
-              <View style={styles.planTypeGrid}>
-                {planTypes.map((type) => (
-                  <TouchableOpacity
-                    key={type.value}
-                    style={[
-                      styles.planTypeButton,
-                      planType === type.value && styles.planTypeButtonActive,
-                    ]}
-                    onPress={() => setPlanType(type.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.planTypeText,
-                        planType === type.value && styles.planTypeTextActive,
-                      ]}
-                    >
-                      {type.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={styles.sectionLabel}>Start Date</Text>
-              {Platform.OS === 'web' ? (
-                <TextInput
-                  style={styles.input}
-                  value={startDateText}
-                  onChangeText={setStartDateText}
-                  placeholder="YYYY-MM-DD"
-                />
-              ) : (
-                <>
-                  <TouchableOpacity
-                    style={styles.dateButton}
-                    onPress={() => setShowDatePicker(true)}
-                  >
-                    <Text style={styles.dateButtonText}>
-                      {startDate.toLocaleDateString()}
-                    </Text>
-                    <Ionicons name="calendar" size={20} color="#666" />
-                  </TouchableOpacity>
-                  {showDatePicker && (
-                    <DateTimePicker
-                      value={startDate}
-                      mode="date"
-                      display="default"
-                      onChange={(event, selectedDate) => {
-                        setShowDatePicker(Platform.OS === 'ios');
-                        if (selectedDate) {
-                          setStartDate(selectedDate);
-                        }
-                      }}
-                      minimumDate={new Date()}
-                    />
-                  )}
-                </>
-              )}
-
-              <Text style={styles.sectionLabel}>
-                Meals Requested * {planType === 'single_meal' && '(Select one)'}
-              </Text>
-              <View style={styles.mealsGrid}>
-                {mealOptions.map((meal) => (
-                  <TouchableOpacity
-                    key={meal}
-                    style={[
-                      styles.mealCheckbox,
-                      selectedMeals.includes(meal) && styles.mealCheckboxActive,
-                    ]}
-                    onPress={() => toggleMealSelection(meal)}
-                  >
-                    <Ionicons
-                      name={selectedMeals.includes(meal) ? 'checkbox' : 'square-outline'}
-                      size={24}
-                      color={selectedMeals.includes(meal) ? '#ffd700' : '#999'}
-                    />
-                    <Text style={styles.mealLabel}>{meal}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={styles.sectionLabel}>Preferred Guide (Optional)</Text>
-              <View style={styles.guidePicker}>
-                <TouchableOpacity
-                  style={[
-                    styles.guideOption,
-                    selectedGuide === '' && styles.guideOptionActive,
-                  ]}
-                  onPress={() => setSelectedGuide('')}
-                >
-                  <Text
-                    style={[
-                      styles.guideOptionText,
-                      selectedGuide === '' && styles.guideOptionTextActive,
-                    ]}
-                  >
-                    No Preference
-                  </Text>
-                </TouchableOpacity>
-                {guides.map((guide) => (
-                  <TouchableOpacity
-                    key={guide._id}
-                    style={[
-                      styles.guideOption,
-                      selectedGuide === guide._id && styles.guideOptionActive,
-                    ]}
-                    onPress={() => setSelectedGuide(guide._id)}
-                  >
-                    <Text
-                      style={[
-                        styles.guideOptionText,
-                        selectedGuide === guide._id && styles.guideOptionTextActive,
-                      ]}
-                    >
-                      {guide.name}
-                      {guide.average_rating && ` (★${guide.average_rating.toFixed(1)})`}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <TouchableOpacity
-                style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
-                onPress={submitPlanRequest}
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.submitButtonText}>Request Plan</Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={showDeleteConfirm}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShowDeleteConfirm(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.deleteModalContent}>
-            <View style={styles.deleteModalHeader}>
-              <Ionicons name="warning" size={32} color="#ef4444" />
-              <Text style={styles.deleteModalTitle}>
-                {deleteTarget?.type === 'habit' ? 'Delete Activity' : 'Delete Plan'}
-              </Text>
-            </View>
-            
-            <Text style={styles.deleteModalMessage}>
-              {deleteTarget?.type === 'habit' 
-                ? 'Are you sure you want to delete this activity? This action cannot be undone.'
-                : 'Are you sure you want to delete this plan? This action cannot be undone.'
-              }
-            </Text>
-            
-            <View style={styles.deleteModalButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setShowDeleteConfirm(false);
-                  setDeleteTarget(null);
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => {
-                  if (deleteTarget?.type === 'habit') {
-                    deleteHabit(deleteTarget.id);
-                  } else if (deleteTarget?.type === 'plan') {
-                    deletePlan(deleteTarget.id);
-                  }
-                  setShowDeleteConfirm(false);
-                  setDeleteTarget(null);
-                }}
-              >
-                <Text style={styles.deleteButtonText}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  tabCarouselContainer: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    height: 60,
-  },
-  tabCarousel: {
-    paddingHorizontal: 8,
-    alignItems: 'center',
-  },
-  tabItem: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginHorizontal: 4,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  activeTabItem: {
-    backgroundColor: '#ffd700',
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-  },
-  activeTabText: {
-    color: '#333',
-  },
-  tabContent: {
-    flex: 1,
-  },
-  listContent: {
-    padding: 16,
-  },
-  conversationCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-  },
-  avatarPlaceholder: {
-    backgroundColor: '#ffd700',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  conversationInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  conversationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  nameRatingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginRight: 8,
-  },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fef3c7',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  ratingText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#92400e',
-    marginLeft: 2,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#94a3b8',
-  },
-  messageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  lastMessage: {
-    flex: 1,
-    fontSize: 14,
-    color: '#64748b',
-  },
-  unreadMessage: {
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  unreadBadge: {
-    backgroundColor: '#ffd700',
-    borderRadius: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    marginLeft: 8,
-  },
-  unreadBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  habitCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  habitHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  habitTypeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  habitType: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginLeft: 8,
-    textTransform: 'capitalize',
-  },
-  habitDescription: {
-    fontSize: 14,
-    color: '#64748b',
-    marginBottom: 8,
-  },
-  habitValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#ffd700',
-    marginBottom: 4,
-  },
-  habitDate: {
-    fontSize: 12,
-    color: '#94a3b8',
-  },
-  requestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffd700',
-    padding: 16,
-    borderRadius: 12,
-    margin: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  requestButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginLeft: 8,
-  },
-  planCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  planType: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  planDate: {
-    fontSize: 14,
-    color: '#64748b',
-    marginTop: 4,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    backgroundColor: '#22c55e',
-  },
-  statusRequested: {
-    backgroundColor: '#ffd700',
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#fff',
-    textTransform: 'capitalize',
-  },
-  planMeals: {
-    fontSize: 14,
-    color: '#64748b',
-    marginBottom: 4,
-    textTransform: 'capitalize',
-  },
-  planGuide: {
-    fontSize: 14,
-    color: '#64748b',
-    marginBottom: 8,
-  },
-  deletePlanButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  deletePlanText: {
-    fontSize: 14,
-    color: '#ef4444',
-    marginLeft: 4,
-    fontWeight: '600',
-  },
-  aboutContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffd700',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  editButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginLeft: 8,
-  },
-  profileCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f1f5f9',
-  },
-  profileRowText: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  profileLabel: {
-    fontSize: 12,
-    color: '#64748b',
-    marginBottom: 4,
-  },
-  profileValue: {
-    fontSize: 16,
-    color: '#1e293b',
-    fontWeight: '500',
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: '#1e293b',
-  },
-  bioInput: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  inputRow: {
-    flexDirection: 'row',
-  },
-  genderRow: {
-    flexDirection: 'row',
-  },
-  genderButton: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginRight: 8,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  genderButtonActive: {
-    backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
-  },
-  genderButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  genderButtonTextActive: {
-    color: '#fff',
-  },
-  optionsRow: {
-    flexDirection: 'row',
-  },
-  optionButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginRight: 8,
-    backgroundColor: '#fff',
-  },
-  optionButtonActive: {
-    backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
-  },
-  optionButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  optionButtonTextActive: {
-    color: '#fff',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '90%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1e293b',
-  },
-  modalBody: {
-    padding: 16,
-  },
-  sectionLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1e293b',
-    marginBottom: 12,
-    marginTop: 8,
-  },
-  activityTypeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  activityTypeButton: {
-    width: '48%',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginRight: '2%',
-    marginBottom: 8,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  activityTypeButtonActive: {
-    backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
-  },
-  activityTypeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-    marginTop: 8,
-  },
-  activityTypeTextActive: {
-    color: '#fff',
-  },
-  planTypeGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 16,
-  },
-  planTypeButton: {
-    width: '48%',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginRight: '2%',
-    marginBottom: 8,
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  planTypeButtonActive: {
-    backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
-  },
-  planTypeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  planTypeTextActive: {
-    color: '#fff',
-  },
-  dateButton: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
-  },
-  dateButtonText: {
-    fontSize: 16,
-    color: '#1e293b',
-  },
-  mealsGrid: {
-    marginBottom: 16,
-  },
-  mealCheckbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 8,
-    backgroundColor: '#f8fafc',
-  },
-  mealCheckboxActive: {
-    backgroundColor: '#fef3c7',
-  },
-  mealLabel: {
-    fontSize: 16,
-    color: '#1e293b',
-    marginLeft: 12,
-  },
-  guidePicker: {
-    marginBottom: 16,
-  },
-  guideOption: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    marginBottom: 8,
-    backgroundColor: '#fff',
-  },
-  guideOptionActive: {
-    backgroundColor: '#ffd700',
-    borderColor: '#ffd700',
-  },
-  guideOptionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  guideOptionTextActive: {
-    color: '#fff',
-  },
-  submitButton: {
-    backgroundColor: '#ffd700',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 32,
-  },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginTop: 32,
-  },
-  deleteModalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
-    margin: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  deleteModalHeader: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  deleteModalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1e293b',
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  deleteModalMessage: {
-    fontSize: 16,
-    color: '#64748b',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  deleteModalButtons: {
-    flexDirection: 'row',
-    width: '100%',
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  deleteButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    backgroundColor: '#ef4444',
-    alignItems: 'center',
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-});
+      {/* Edit Profile Modal - Continuing in next file chunk due to size */}
