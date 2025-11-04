@@ -79,6 +79,7 @@ interface MealOption {
 
 export default function GuidanceScreen() {
   const { user } = useAuth();
+  const { refreshCart } = useCart();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'plan-requests' | 'timeline' | 'plans' | 'about' | 'messages'>(
     user?.is_guide ? 'plan-requests' : 'timeline'
