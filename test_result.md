@@ -179,15 +179,18 @@ backend:
 
   - task: "MealPlan Model Update"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated MealPlan model to include 'logged_meals' field (dict with date->meal_time->meal_id mapping) and added 'planning' and 'submitted' to status values."
+      - working: true
+        agent: "testing"
+        comment: "✅ MealPlan model update working correctly. Verified through comprehensive endpoint testing: logged_meals field properly accepts dict structure with date->meal_time->meal_id mapping, new status values 'planning' and 'submitted' are properly handled by all endpoints, model validation working correctly with proper error handling for malformed data."
 
   - task: "GET /api/meals - Refresh Recipe Prices"
     implemented: true
