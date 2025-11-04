@@ -2714,6 +2714,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
     justifyContent: 'flex-end',
+    zIndex: 9998,
   },
   bottomSheetBackdrop: {
     position: 'absolute',
@@ -2722,6 +2723,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 9998,
   },
   bottomSheetContent: {
     backgroundColor: '#fff',
