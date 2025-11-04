@@ -928,10 +928,10 @@ export default function DIYScreen() {
               activeTab === 'diy-meals' 
                 ? 'Search ingredients...' 
                 : activeTab === 'diy-combos'
-                ? 'Search meals...'
+                ? 'Search items...'
                 : myDiySubTab === 'my-meals'
-                ? 'Search meals...'
-                : 'Search combos...'
+                ? 'Search bowls...'
+                : 'Search meals...'
             }
             value={searchQuery}
             onChangeText={setSearchQuery}
