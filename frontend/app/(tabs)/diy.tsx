@@ -329,18 +329,48 @@ export default function DIYScreen() {
     }
   };
 
-  const handleEditMyDiyItem = (item: Recipe) => {
+  const handleEditMyDiyItem = async (item: Recipe) => {
     console.log('Editing item:', item);
     console.log('Item meals:', item.meals);
     console.log('Item recipes:', item.recipes);
-    setEditingItem(item);
-    // Initialize customizations from the item
-    if (myDiySubTab === 'my-meals') {
-      setEditingCustomizations(item.ingredients || []);
-    } else {
-      // Backend might use 'recipes' field instead of 'meals' for combos
-      setEditingCustomizations(item.meals || item.recipes || []);
+    
+    // Fetch the latest version of this item with updated prices
+    try {
+      const token = await storage.getItemAsync('session_token');
+      let response;
+      
+      if (myDiySubTab === 'my-meals') {
+        // Fetch the latest recipe with recalculated prices
+        response = await axios.get(`${API_URL}/recipes/${item._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        // Fetch the latest meal with recalculated prices
+        response = await axios.get(`${API_URL}/meals/${item._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      
+      const latestItem = response.data;
+      setEditingItem(latestItem);
+      
+      // Initialize customizations from the latest item with updated prices
+      if (myDiySubTab === 'my-meals') {
+        setEditingCustomizations(latestItem.ingredients || []);
+      } else {
+        setEditingCustomizations(latestItem.meals || latestItem.recipes || []);
+      }
+    } catch (error) {
+      console.error('Error fetching latest item:', error);
+      // Fallback to old data if fetch fails
+      setEditingItem(item);
+      if (myDiySubTab === 'my-meals') {
+        setEditingCustomizations(item.ingredients || []);
+      } else {
+        setEditingCustomizations(item.meals || item.recipes || []);
+      }
     }
+    
     setShowEditModal(true);
   };
 
