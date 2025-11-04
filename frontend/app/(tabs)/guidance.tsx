@@ -1041,16 +1041,13 @@ export default function GuidanceScreen() {
       case 'timeline':
         return (
           <View style={styles.tabContent}>
-            <View style={styles.tabHeader}>
-              <Text style={styles.tabTitle}>Timeline</Text>
-              <TouchableOpacity
-                style={styles.logButton}
-                onPress={() => setShowActivityModal(true)}
-              >
-                <Ionicons name="add-circle" size={24} color="#ffd700" />
-                <Text style={styles.logButtonText}>Log Activity</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.logButtonHeader}
+              onPress={() => setShowActivityModal(true)}
+            >
+              <Ionicons name="add-circle" size={24} color="#ffd700" />
+              <Text style={styles.logButtonText}>Log Activity</Text>
+            </TouchableOpacity>
 
             {loading ? (
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
