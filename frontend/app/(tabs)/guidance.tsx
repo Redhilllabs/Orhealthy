@@ -2080,7 +2080,7 @@ export default function GuidanceScreen() {
                       <Text style={styles.sectionLabel}>Ingredients:</Text>
                       {selectedMealForDetail.ingredients.map((ing: any, index: number) => (
                         <View key={index} style={styles.ingredientRow}>
-                          <Text style={styles.ingredientName}>{ing.ingredient_name}</Text>
+                          <Text style={styles.ingredientName}>{ing.ingredient_name || ing.name || 'Ingredient'}</Text>
                           <Text style={styles.ingredientQuantity}>
                             {ing.quantity} {ing.unit}
                           </Text>
