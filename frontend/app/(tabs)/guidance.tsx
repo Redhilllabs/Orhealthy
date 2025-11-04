@@ -2104,13 +2104,16 @@ export default function GuidanceScreen() {
                   )}
 
                   <TouchableOpacity
-                    style={styles.submitButton}
+                    style={[styles.submitButton, addingToCart && styles.submitButtonDisabled]}
                     onPress={async () => {
+                      setAddingToCart(true);
                       try {
                         const token = await storage.getItemAsync('session_token');
                         
                         // Format customizations to match MealIngredient model
                         let customizations = [];
+                        
+                        // For bowls/recipes - use ingredients
                         if (selectedMealForDetail.ingredients && selectedMealForDetail.ingredients.length > 0) {
                           customizations = selectedMealForDetail.ingredients.map((ing: any) => ({
                             ingredient_id: ing.ingredient_id || ing._id,
@@ -2118,6 +2121,16 @@ export default function GuidanceScreen() {
                             price: ing.price || 0,
                             default_quantity: ing.quantity,
                             quantity: ing.quantity,
+                          }));
+                        }
+                        // For meals - use recipes as customizations
+                        else if (selectedMealForDetail.recipes && selectedMealForDetail.recipes.length > 0) {
+                          customizations = selectedMealForDetail.recipes.map((recipe: any) => ({
+                            ingredient_id: recipe.recipe_id || recipe._id,
+                            name: recipe.recipe_name || recipe.name,
+                            price: recipe.price || 0,
+                            default_quantity: recipe.quantity,
+                            quantity: recipe.quantity,
                           }));
                         }
                         
@@ -2132,18 +2145,28 @@ export default function GuidanceScreen() {
                         await axios.post(`${API_URL}/cart`, cartItem, {
                           headers: { Authorization: `Bearer ${token}` },
                         });
-                        Alert.alert('Success', `${selectedMealForDetail.name} added to cart!`);
+                        
                         setShowMealDetailModal(false);
-                        setShowViewPlanModal(false);
+                        setShowSuccessModal(true);
+                        setTimeout(() => setShowSuccessModal(false), 2000);
                       } catch (error: any) {
                         console.error('Error adding to cart:', error);
                         console.error('Error details:', error.response?.data);
                         Alert.alert('Error', error.response?.data?.detail || 'Failed to add item to cart');
+                      } finally {
+                        setAddingToCart(false);
                       }
                     }}
+                    disabled={addingToCart}
                   >
-                    <Ionicons name="cart" size={20} color="#fff" />
-                    <Text style={styles.submitButtonText}>Add to Cart</Text>
+                    {addingToCart ? (
+                      <ActivityIndicator color="#fff" size="small" />
+                    ) : (
+                      <>
+                        <Ionicons name="cart" size={20} color="#fff" />
+                        <Text style={styles.submitButtonText}>Add to Cart</Text>
+                      </>
+                    )}
                   </TouchableOpacity>
                 </>
               ) : null}
