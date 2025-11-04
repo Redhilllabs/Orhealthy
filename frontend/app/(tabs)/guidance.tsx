@@ -297,10 +297,6 @@ export default function GuidanceScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Guidance</Text>
-      </View>
-
       {/* Tab Carousel */}
       <View style={styles.tabCarouselContainer}>
         <ScrollView
