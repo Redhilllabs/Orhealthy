@@ -102,13 +102,21 @@ export default function PresetsScreen() {
       // Filter recipes to only show those with "Bowls" category
       const bowlsFilteredAllMeals = allMeals.filter(meal => {
         const categories = meal.categories || [];
-        return categories.some(cat => cat.toLowerCase() === 'bowls');
+        // Debug: log categories for each meal
+        console.log('Meal:', meal.name, 'Categories:', categories);
+        return categories.some(cat => cat.toLowerCase().trim() === 'bowls');
       });
       const bowlsFilteredMyMeals = myMeals.filter(meal => {
         const categories = meal.categories || [];
-        return categories.some(cat => cat.toLowerCase() === 'bowls');
+        return categories.some(cat => cat.toLowerCase().trim() === 'bowls');
       });
       items = mealsSubTab === 'all-meals' ? bowlsFilteredAllMeals : bowlsFilteredMyMeals;
+      
+      // Debug: If no items found, show all meals temporarily
+      if (items.length === 0) {
+        console.warn('No recipes with Bowls category found. Showing all recipes for debugging.');
+        items = mealsSubTab === 'all-meals' ? allMeals : myMeals;
+      }
     } else {
       items = combosSubTab === 'all-combos' ? allCombos : myCombos;
     }
