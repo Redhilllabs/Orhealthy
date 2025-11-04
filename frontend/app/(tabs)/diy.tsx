@@ -1628,6 +1628,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: '#f9f9f9',
   },
+  nameInputError: {
+    borderColor: '#ef4444',
+    borderWidth: 2,
+  },
   tagsLabel: {
     fontSize: 14,
     fontWeight: '600',
