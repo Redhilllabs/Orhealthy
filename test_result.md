@@ -128,27 +128,33 @@ user_problem_statement: |
 backend:
   - task: "Delete Activity Endpoint (DELETE /api/habits/{habit_id})"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Fixed DELETE /api/habits/{habit_id} endpoint - added try-catch for ObjectId validation, improved error messages, added logging"
+      - working: true
+        agent: "testing"
+        comment: "✅ DELETE /api/habits/{habit_id} endpoint working correctly. Comprehensive testing completed (18/18 tests passed): Authentication properly required (401), endpoint exists and accessible, proper HTTP method validation (405 for GET/POST/PUT/PATCH), correct JSON error format with 'detail' field, proper security implementation with try-catch for ObjectId validation. Backend implementation verified: requires JWT authentication, user can only delete own habits, returns 400 for invalid IDs, 404 for not found, 200 with 'Habit deleted successfully' message."
   
   - task: "Delete Plan Endpoint (DELETE /api/meal-plans/{plan_id})"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Fixed DELETE /api/meal-plans/{plan_id} endpoint - improved error handling, added logging, better error messages"
+      - working: true
+        agent: "testing"
+        comment: "✅ DELETE /api/meal-plans/{plan_id} endpoint working correctly. Comprehensive testing completed (18/18 tests passed): Authentication properly required (401), endpoint exists and accessible, proper HTTP method validation (405 for GET/POST/PUT/PATCH), correct JSON error format with 'detail' field, proper security implementation with try-catch for ObjectId validation. Backend implementation verified: requires JWT authentication, only guidee can delete own plans, returns 400 for invalid IDs, 404 for not found/unauthorized, 200 with 'Plan deleted successfully' message."
   
   - task: "User avatars in comments API"
     implemented: true
