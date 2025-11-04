@@ -1884,17 +1884,14 @@ async def create_meal_plan(request: Request, meal_plan_data: dict):
 
 @api_router.get("/meal-plans")
 async def get_meal_plans(request: Request):
-    """Get meal plans for the logged-in user"""
+    """Get meal plans for the logged-in user (only their own plans)"""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    # Get plans where user is either guidee or guide
+    # Get only plans where user is the guidee (creator)
     plans = await db.meal_plans.find({
-        "$or": [
-            {"guidee_id": user["_id"]},
-            {"guide_id": user["_id"]}
-        ]
+        "guidee_id": user["_id"]
     }).sort("created_at", -1).to_list(100)
     
     for plan in plans:
