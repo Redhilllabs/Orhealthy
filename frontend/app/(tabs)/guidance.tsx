@@ -2615,6 +2615,38 @@ const styles = StyleSheet.create({
     color: '#64748b',
     marginTop: 4,
   },
+  mealDetailName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  mealDetailPrice: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#10b981',
+    marginBottom: 20,
+  },
+  ingredientRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  ingredientName: {
+    fontSize: 16,
+    color: '#1e293b',
+    flex: 1,
+  },
+  ingredientQuantity: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '600',
+  },
   profileSection: {
     backgroundColor: '#fff',
     borderRadius: 12,
