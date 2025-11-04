@@ -859,14 +859,8 @@ export default function GuidanceScreen() {
                     <TouchableOpacity
                       style={styles.deletePlanButton}
                       onPress={() => {
-                        Alert.alert(
-                          'Delete Plan',
-                          'Are you sure you want to delete this plan?',
-                          [
-                            { text: 'Cancel', style: 'cancel' },
-                            { text: 'Delete', style: 'destructive', onPress: () => deletePlan(item._id) },
-                          ]
-                        );
+                        setDeleteTarget({ type: 'plan', id: item._id });
+                        setShowDeleteConfirm(true);
                       }}
                     >
                       <Ionicons name="trash-outline" size={18} color="#ef4444" />
