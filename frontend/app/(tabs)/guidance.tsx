@@ -975,7 +975,9 @@ export default function GuidanceScreen() {
                   <View style={styles.planCard}>
                     <View style={styles.planHeader}>
                       <View>
-                        <Text style={styles.planFromText}>From: {item.guidee_name}</Text>
+                        <TouchableOpacity onPress={() => router.push(`/user-profile/${item.guidee_id}`)}>
+                          <Text style={styles.planFromTextLink}>From: {item.guidee_name}</Text>
+                        </TouchableOpacity>
                         <Text style={styles.planType}>
                           {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
                         </Text>
