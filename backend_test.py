@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for OrHealthy App - Delete Functionality
-Testing DELETE /api/habits/{habit_id} and DELETE /api/meal-plans/{plan_id}
+Backend API Testing for OrHealthy Meal Planning System
+Tests the new meal planning endpoints for guides and guidees
 """
 
 import requests
 import json
-import sys
+import os
 from datetime import datetime, timezone
+import uuid
 
-# Backend URL from frontend environment
-BACKEND_URL = "https://health-planner-11.preview.emergentagent.com/api"
+# Get backend URL from environment
+BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://health-planner-11.preview.emergentagent.com')
+API_BASE = f"{BACKEND_URL}/api"
 
 class BackendTester:
     def __init__(self):
