@@ -734,6 +734,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
     height: 60,
+    overflow: 'hidden',
   },
   tagsContent: {
     paddingHorizontal: 12,
