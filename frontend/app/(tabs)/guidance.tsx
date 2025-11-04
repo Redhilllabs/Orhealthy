@@ -202,10 +202,59 @@ export default function GuidanceScreen() {
   }, [activeTab]);
 
   useEffect(() => {
-    if (showViewPlanModal && mealOptions.length === 0) {
-      fetchMealOptionsForPlanning();
+    if (showViewPlanModal && currentViewPlan) {
+      fetchMealOptionsForViewPlan();
     }
-  }, [showViewPlanModal]);
+  }, [showViewPlanModal, currentViewPlan]);
+
+  const fetchMealOptionsForViewPlan = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      
+      // Fetch preset bowls (recipes with "Bowls" category)
+      const recipesResponse = await axios.get(`${API_URL}/recipes`);
+      const presetBowls = recipesResponse.data
+        .filter((r: any) => r.categories && r.categories.includes('Bowls'))
+        .map((r: any) => ({
+          ...r,
+          type: 'preset_bowl' as const,
+        }));
+
+      // Fetch preset meals (combos)
+      const mealsResponse = await axios.get(`${API_URL}/meals`);
+      const presetMeals = mealsResponse.data.map((m: any) => ({
+        ...m,
+        type: 'preset_meal' as const,
+      }));
+
+      // Fetch guide's MyDIY items if guide exists
+      let guideBowls: any[] = [];
+      let guideMeals: any[] = [];
+      if (currentViewPlan?.guide_id) {
+        try {
+          const guideRecipesResponse = await axios.get(`${API_URL}/recipes?user_id=${currentViewPlan.guide_id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          guideBowls = guideRecipesResponse.data
+            .filter((r: any) => !r.is_preset)
+            .map((r: any) => ({ ...r, type: 'my_bowl' as const }));
+
+          const guideMealsResponse = await axios.get(`${API_URL}/meals?user_id=${currentViewPlan.guide_id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          guideMeals = guideMealsResponse.data
+            .filter((m: any) => !m.is_preset)
+            .map((m: any) => ({ ...m, type: 'my_meal' as const }));
+        } catch (error) {
+          console.error('Error fetching guide MyDIY items:', error);
+        }
+      }
+
+      setMealOptions([...presetBowls, ...presetMeals, ...guideBowls, ...guideMeals]);
+    } catch (error) {
+      console.error('Error fetching meal options:', error);
+    }
+  };
 
   const fetchConversations = async () => {
     try {
