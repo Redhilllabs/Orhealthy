@@ -402,7 +402,7 @@ export default function PresetsScreen() {
           onPress={() => setActiveTab('meals')}
         >
           <Text style={[styles.tabText, activeTab === 'meals' && styles.activeTabText]}>
-            Meals
+            Bowls
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -410,7 +410,7 @@ export default function PresetsScreen() {
           onPress={() => setActiveTab('combos')}
         >
           <Text style={[styles.tabText, activeTab === 'combos' && styles.activeTabText]}>
-            Combos
+            Meals
           </Text>
         </TouchableOpacity>
       </View>
