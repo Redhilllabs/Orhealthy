@@ -710,6 +710,40 @@
                     </small>
                 </div>
                 
+                <!-- Margin Fields Section -->
+                <div style="background: #fef3c7; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <h4 style="margin: 0 0 16px 0; color: #92400e; font-size: 14px;">💰 Additional Margins (₹)</h4>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 12px;">Product Margin</label>
+                        <input type="number" step="0.01" id="productMargin" value="0">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 12px;">Operations Margin</label>
+                        <input type="number" step="0.01" id="operationsMargin" value="0">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 12px;">Branding Margin</label>
+                        <input type="number" step="0.01" id="brandingMargin" value="0">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 12px;">Rest Margins</label>
+                        <input type="number" step="0.01" id="restMargins" value="0">
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px;">Miscellaneous Margins</label>
+                        <input type="number" step="0.01" id="miscellaneousMargins" value="0">
+                    </div>
+                    
+                    <small style="color: #92400e; font-size: 11px; margin-top: 12px; display: block;">
+                        These margins will be added to the calculated price from source ingredients
+                    </small>
+                </div>
+                
                 <div class="form-group">
                     <label>Price per Unit (₹) *</label>
                     <input type="number" step="0.01" id="ingredientPrice" required>
