@@ -126,6 +126,30 @@ user_problem_statement: |
      - Return clear success messages
 
 backend:
+  - task: "Delete Activity Endpoint (DELETE /api/habits/{habit_id})"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed DELETE /api/habits/{habit_id} endpoint - added try-catch for ObjectId validation, improved error messages, added logging"
+  
+  - task: "Delete Plan Endpoint (DELETE /api/meal-plans/{plan_id})"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed DELETE /api/meal-plans/{plan_id} endpoint - improved error handling, added logging, better error messages"
+  
   - task: "User avatars in comments API"
     implemented: true
     working: true
