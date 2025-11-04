@@ -415,49 +415,6 @@ export default function PresetsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Sub-tabs for Meals and Combos */}
-      <View style={styles.subTabContainer}>
-        {activeTab === 'meals' ? (
-          <>
-            <TouchableOpacity
-              style={[styles.subTab, mealsSubTab === 'all-meals' && styles.activeSubTab]}
-              onPress={() => setMealsSubTab('all-meals')}
-            >
-              <Text style={[styles.subTabText, mealsSubTab === 'all-meals' && styles.activeSubTabText]}>
-                All Meals
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.subTab, mealsSubTab === 'my-meals' && styles.activeSubTab]}
-              onPress={() => setMealsSubTab('my-meals')}
-            >
-              <Text style={[styles.subTabText, mealsSubTab === 'my-meals' && styles.activeSubTabText]}>
-                My Meals
-              </Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <TouchableOpacity
-              style={[styles.subTab, combosSubTab === 'all-combos' && styles.activeSubTab]}
-              onPress={() => setCombosSubTab('all-combos')}
-            >
-              <Text style={[styles.subTabText, combosSubTab === 'all-combos' && styles.activeSubTabText]}>
-                All Combos
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.subTab, combosSubTab === 'my-combos' && styles.activeSubTab]}
-              onPress={() => setCombosSubTab('my-combos')}
-            >
-              <Text style={[styles.subTabText, combosSubTab === 'my-combos' && styles.activeSubTabText]}>
-                My Combos
-              </Text>
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
-
       {/* Search - Sticky */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
