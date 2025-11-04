@@ -2732,7 +2732,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.25,
     shadowRadius: 8,
-    elevation: 10,
+    elevation: 20,
+    zIndex: 9999,
   },
   bottomSheetHandle: {
     width: 40,
