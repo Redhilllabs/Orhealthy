@@ -1045,10 +1045,15 @@
                 console.error('Section not found:', tabName);
             }
             
-            // Update page title
+            // Update page title (show only for dashboard)
             const titleElement = document.getElementById('pageTitle');
             if (titleElement) {
-                titleElement.textContent = pageTitles[tabName] || tabName;
+                if (tabName === 'dashboard') {
+                    titleElement.textContent = pageTitles[tabName] || tabName;
+                    titleElement.style.display = 'block';
+                } else {
+                    titleElement.style.display = 'none';
+                }
             }
 
             // Load data for the selected tab
