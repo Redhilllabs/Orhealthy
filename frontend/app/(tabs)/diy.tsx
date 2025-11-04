@@ -1001,13 +1001,18 @@ export default function DIYScreen() {
         >
           <View style={styles.nameModalContent}>
             <Text style={styles.nameModalTitle}>
-              Name your {activeTab === 'diy-meals' ? 'meal' : 'combo'}
+              Name your {activeTab === 'diy-meals' ? 'bowl' : 'meal'}
             </Text>
             <TextInput
-              style={styles.nameInput}
-              placeholder={`Enter ${activeTab === 'diy-meals' ? 'meal' : 'combo'} name`}
+              style={[styles.nameInput, nameError && styles.nameInputError]}
+              placeholder={`Enter ${activeTab === 'diy-meals' ? 'bowl' : 'meal'} name*`}
               value={mealName}
-              onChangeText={setMealName}
+              onChangeText={(text) => {
+                setMealName(text);
+                if (nameError && text.trim()) {
+                  setNameError(false);
+                }
+              }}
               autoFocus
             />
             
