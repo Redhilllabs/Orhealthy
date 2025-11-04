@@ -745,11 +745,11 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 14,
+    fontWeight: '600',
     color: '#666',
-    fontWeight: '500',
   },
   tagTextActive: {
-    color: '#fff',
+    color: '#333',
   },
   listContent: {
     paddingTop: 12,
