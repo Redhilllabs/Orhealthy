@@ -103,38 +103,27 @@
 #====================================================================================================
 
 user_problem_statement: |
-  OrHealthy Mobile App - Complete Feature Upgrades:
+  OrHealthy Mobile App - Guidance Tab Delete Functions Fix:
   
-  **Home Screen (Posts):**
-  - Comment system with modal UI
-  - Edit post functionality  
-  - Delete post functionality with confirmation
-  - Clickable user profiles
+  **Current Issue:**
+  - Delete functions for plans and activities in the Guidance tab are not working properly
+  - Need to wire them correctly with confirmation modals
   
-  **Presets & DIY Screens:**
-  - Horizontal image scrollers for meals
-  - Tags display and filtering with horizontal carousel
-  - Rupee (₹) currency throughout
+  **Requirements:**
+  1. Delete Activity (Timeline tab):
+     - Add confirmation modal before deletion
+     - Wire to DELETE /api/habits/{habit_id} endpoint
+     - Show success/error messages
   
-  **Cart Screen:**
-  - Cart counter badge on tab
-  - Rupee pricing
+  2. Delete Plan (My Plans tab):
+     - Add confirmation modal before deletion
+     - Wire to DELETE /api/meal-plans/{plan_id} endpoint  
+     - Show success/error messages
   
-  **Checkout Screen:**
-  - Cash on Delivery payment option
-  - Online payment (coming soon)
-  - Billing and shipping address forms
-  
-  **User Profile Screen:**
-  - Star rating display
-  - Points display
-  - Follow/Unfollow (Fan/Idol) functionality
-  - Tabs for Posts, Following, Fans
-  - User stats cards
-  
-  **Bottom Navigation:**
-  - Cart badge with count
-  - Fixed label truncation
+  3. Backend fixes needed:
+     - Improve error handling for invalid ObjectIds
+     - Add proper logging for debugging
+     - Return clear success messages
 
 backend:
   - task: "User avatars in comments API"
