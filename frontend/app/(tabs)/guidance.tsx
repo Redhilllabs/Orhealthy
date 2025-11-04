@@ -2286,6 +2286,21 @@ export default function GuidanceScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Success Modal */}
+      <Modal
+        visible={showSuccessModal}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowSuccessModal(false)}
+      >
+        <View style={styles.successModalOverlay}>
+          <View style={styles.successModalContent}>
+            <Ionicons name="checkmark-circle" size={64} color="#10b981" />
+            <Text style={styles.successModalText}>Added to cart!</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
