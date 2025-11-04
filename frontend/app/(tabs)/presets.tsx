@@ -507,7 +507,7 @@ export default function PresetsScreen() {
             )}
 
             <Text style={styles.sectionTitle}>
-              {activeTab === 'combos' ? 'Meals' : 'Ingredients'}
+              {activeTab === 'combos' ? 'Items' : 'Ingredients'}
             </Text>
             {customizations.map((ing, index) => (
               <View key={index} style={styles.ingredientRow}>
