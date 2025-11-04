@@ -904,7 +904,7 @@ export default function DIYScreen() {
             onPress={() => setMyDiySubTab('my-meals')}
           >
             <Text style={[styles.subTabText, myDiySubTab === 'my-meals' && styles.activeSubTabText]}>
-              My Meals
+              My Bowls
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -912,7 +912,7 @@ export default function DIYScreen() {
             onPress={() => setMyDiySubTab('my-combos')}
           >
             <Text style={[styles.subTabText, myDiySubTab === 'my-combos' && styles.activeSubTabText]}>
-              My Combos
+              My Meals
             </Text>
           </TouchableOpacity>
         </View>
