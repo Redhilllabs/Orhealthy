@@ -465,16 +465,7 @@ export default function PresetsScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="restaurant-outline" size={64} color="#ccc" />
-            <Text style={styles.emptyText}>
-              {((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
-                (activeTab === 'combos' && combosSubTab === 'my-combos')) 
-                ? 'No saved items yet' 
-                : 'No items available'}
-            </Text>
-            {((activeTab === 'meals' && mealsSubTab === 'my-meals') || 
-              (activeTab === 'combos' && combosSubTab === 'my-combos')) && (
-              <Text style={styles.emptySubtext}>Save items from DIY to see them here</Text>
-            )}
+            <Text style={styles.emptyText}>No items available</Text>
           </View>
         }
       />
