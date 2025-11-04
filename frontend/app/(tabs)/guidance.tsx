@@ -782,14 +782,8 @@ export default function GuidanceScreen() {
                       </View>
                       <TouchableOpacity
                         onPress={() => {
-                          Alert.alert(
-                            'Delete Activity',
-                            'Are you sure you want to delete this activity?',
-                            [
-                              { text: 'Cancel', style: 'cancel' },
-                              { text: 'Delete', style: 'destructive', onPress: () => deleteHabit(item._id) },
-                            ]
-                          );
+                          setDeleteTarget({ type: 'habit', id: item._id });
+                          setShowDeleteConfirm(true);
                         }}
                       >
                         <Ionicons name="trash-outline" size={20} color="#ef4444" />
