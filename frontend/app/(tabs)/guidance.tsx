@@ -1811,11 +1811,21 @@ export default function GuidanceScreen() {
                         })}
                       </Text>
 
-                      {currentPlanForPlanning.meals_requested.map((meal) => (
-                        <View key={`${date}-${meal}`} style={styles.mealPlanRow}>
-                          <Text style={styles.mealTimeLabel}>
-                            {meal.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                          </Text>
+                      {currentPlanForPlanning.meals_requested.map((meal) => {
+                        const selectedMealId = planningMealSelections[date]?.[meal];
+                        const selectedMeal = mealOptions.find(m => m._id === selectedMealId);
+                        return (
+                        <View key={`${date}-${meal}`} style={styles.mealPlanCard}>
+                          <View style={styles.mealPlanHeader}>
+                            <Text style={styles.mealTimeLabel}>
+                              {meal.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </Text>
+                            {selectedMeal && (
+                              <Text style={styles.selectedMealName}>
+                                {selectedMeal.name} - ₹{selectedMeal.calculated_price?.toFixed(2) || '0.00'}
+                              </Text>
+                            )}
+                          </View>
                           
                           {Platform.OS === 'web' ? (
                             <select
