@@ -1938,6 +1938,113 @@ async def delete_meal_plan(request: Request, plan_id: str):
     
     return {"message": "Plan deleted successfully"}
 
+@api_router.get("/meal-plans/guide")
+async def get_guide_meal_plans(request: Request):
+    """Get meal plans for a guide (plans where they are the guide)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Get plans where user is the guide
+    plans = await db.meal_plans.find({
+        "guide_id": user["_id"]
+    }).sort("created_at", -1).to_list(100)
+    
+    for plan in plans:
+        plan["_id"] = str(plan["_id"])
+    
+    return plans
+
+@api_router.put("/meal-plans/{plan_id}/accept")
+async def accept_meal_plan(request: Request, plan_id: str):
+    """Accept a meal plan request (guide only)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        result = await db.meal_plans.update_one(
+            {
+                "_id": ObjectId(plan_id),
+                "guide_id": user["_id"],
+                "status": "requested"
+            },
+            {
+                "$set": {
+                    "status": "accepted",
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+    except Exception as e:
+        print(f"Error accepting meal plan: {e}")
+        raise HTTPException(status_code=400, detail="Invalid plan ID")
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Plan not found or already accepted")
+    
+    return {"message": "Plan accepted successfully"}
+
+@api_router.put("/meal-plans/{plan_id}/save-progress")
+async def save_meal_plan_progress(request: Request, plan_id: str, data: dict):
+    """Save planning progress for a meal plan (guide only)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        result = await db.meal_plans.update_one(
+            {
+                "_id": ObjectId(plan_id),
+                "guide_id": user["_id"]
+            },
+            {
+                "$set": {
+                    "logged_meals": data.get("logged_meals", {}),
+                    "status": "planning",
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+    except Exception as e:
+        print(f"Error saving meal plan progress: {e}")
+        raise HTTPException(status_code=400, detail="Invalid plan ID")
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Plan not found or unauthorized")
+    
+    return {"message": "Progress saved successfully"}
+
+@api_router.put("/meal-plans/{plan_id}/submit")
+async def submit_meal_plan(request: Request, plan_id: str, data: dict):
+    """Submit completed meal plan (guide only)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    try:
+        result = await db.meal_plans.update_one(
+            {
+                "_id": ObjectId(plan_id),
+                "guide_id": user["_id"]
+            },
+            {
+                "$set": {
+                    "logged_meals": data.get("logged_meals", {}),
+                    "status": "submitted",
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+    except Exception as e:
+        print(f"Error submitting meal plan: {e}")
+        raise HTTPException(status_code=400, detail="Invalid plan ID")
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Plan not found or unauthorized")
+    
+    return {"message": "Plan submitted successfully"}
+
 # Delivery Agent endpoints
 @api_router.get("/delivery-agents")
 async def get_delivery_agents():
