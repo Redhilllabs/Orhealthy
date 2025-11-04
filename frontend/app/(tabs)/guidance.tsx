@@ -965,7 +965,6 @@ export default function GuidanceScreen() {
       case 'plan-requests':
         return (
           <View style={styles.tabContent}>
-            <Text style={styles.tabTitle}>Plan Requests</Text>
             {loading ? (
               <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
             ) : guidePlans.length === 0 ? (
@@ -1016,7 +1015,9 @@ export default function GuidanceScreen() {
                         onPress={() => startPlanning(item)}
                       >
                         <Ionicons name="create" size={18} color="#fff" />
-                        <Text style={styles.planningButtonText}>Start Planning</Text>
+                        <Text style={styles.planningButtonText}>
+                          {item.logged_meals && Object.keys(item.logged_meals).length > 0 ? 'Keep Planning' : 'Start Planning'}
+                        </Text>
                       </TouchableOpacity>
                     )}
                   </View>
