@@ -1218,14 +1218,13 @@ export default function GuidanceScreen() {
               />
             }
           >
-            <View style={styles.aboutHeader}>
-              <TouchableOpacity
-                style={styles.editIconButton}
-                onPress={() => setShowEditModal(true)}
-              >
-                <Ionicons name="create-outline" size={24} color="#ffd700" />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={styles.requestButton}
+              onPress={() => setShowEditModal(true)}
+            >
+              <Ionicons name="create-outline" size={24} color="#fff" />
+              <Text style={styles.requestButtonText}>Edit Profile</Text>
+            </TouchableOpacity>
 
             <View style={styles.profileSection}>
               <View style={styles.profileRow}>
