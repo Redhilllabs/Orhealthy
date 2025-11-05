@@ -2658,13 +2658,23 @@ const styles = StyleSheet.create({
   planMeals: {
     fontSize: 14,
     color: '#64748b',
-    marginTop: 2,
+    marginTop: 8,
     marginBottom: 8,
   },
   planGuide: {
     fontSize: 14,
     color: '#64748b',
     marginBottom: 12,
+  },
+  planGoalLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  planGoalValue: {
+    fontSize: 14,
+    color: '#1e293b',
+    fontWeight: '500',
   },
   acceptButton: {
     flexDirection: 'row',
