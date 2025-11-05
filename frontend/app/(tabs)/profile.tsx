@@ -49,8 +49,6 @@ export default function ProfileScreen() {
   const [activeTab, setActiveTab] = useState<'posts' | 'idols' | 'fans' | 'addresses'>('posts');
   const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState<any[]>([]);
-  const [guides, setGuides] = useState<any[]>([]);
-  const [guidees, setGuidees] = useState<any[]>([]);
   const [idols, setIdols] = useState<any[]>([]);
   const [fans, setFans] = useState<any[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
