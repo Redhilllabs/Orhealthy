@@ -2560,6 +2560,12 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   planGoal: {
+    fontSize: 13,
+    color: '#64748b',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  planGoal: {
     fontSize: 14,
     color: '#64748b',
     fontStyle: 'italic',
