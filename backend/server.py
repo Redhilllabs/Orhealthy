@@ -1950,6 +1950,58 @@ async def get_guidees(request: Request):
     
     return guidees
 
+# Configuration endpoints
+@api_router.get("/config/store-timings")
+async def get_store_timings():
+    """Get store opening and closing times"""
+    config = await db.config.find_one({"type": "store_timings"})
+    if not config:
+        # Default timings
+        return {"opening_time": "6:00 AM", "closing_time": "9:00 PM"}
+    return {"opening_time": config.get("opening_time"), "closing_time": config.get("closing_time")}
+
+@api_router.put("/config/store-timings")
+async def update_store_timings(timings: StoreTimingsConfig):
+    """Update store timings (admin only)"""
+    await db.config.update_one(
+        {"type": "store_timings"},
+        {"$set": {
+            "type": "store_timings",
+            "opening_time": timings.opening_time,
+            "closing_time": timings.closing_time,
+            "updated_at": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
+    return {"success": True, "message": "Store timings updated"}
+
+@api_router.get("/config/delivery")
+async def get_delivery_config():
+    """Get delivery configuration"""
+    config = await db.config.find_one({"type": "delivery"})
+    if not config:
+        # Default delivery config
+        return {"delivery_price": 50.0, "min_order_for_free_delivery": 500.0}
+    return {
+        "delivery_price": config.get("delivery_price"),
+        "min_order_for_free_delivery": config.get("min_order_for_free_delivery")
+    }
+
+@api_router.put("/config/delivery")
+async def update_delivery_config(delivery_config: DeliveryConfig):
+    """Update delivery configuration (admin only)"""
+    await db.config.update_one(
+        {"type": "delivery"},
+        {"$set": {
+            "type": "delivery",
+            "delivery_price": delivery_config.delivery_price,
+            "min_order_for_free_delivery": delivery_config.min_order_for_free_delivery,
+            "updated_at": datetime.now(timezone.utc)
+        }},
+        upsert=True
+    )
+    return {"success": True, "message": "Delivery configuration updated"}
+
 # Meal Plan endpoints
 @api_router.post("/meal-plans")
 async def create_meal_plan(request: Request, meal_plan_data: dict):
