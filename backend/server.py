@@ -350,6 +350,8 @@ class Order(BaseModel):
 class StoreTimingsConfig(BaseModel):
     opening_time: str  # Format: "6:00 AM"
     closing_time: str  # Format: "9:00 PM"
+    preorder_before_time: int = 120  # Minutes before delivery time for preorders
+    preorder_cutoff_time: str = "10:00 PM"  # Cut-off time for next day preorders
     
 class DeliveryConfig(BaseModel):
     delivery_price: float
