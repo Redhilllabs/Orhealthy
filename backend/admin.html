@@ -3194,6 +3194,8 @@
         async function saveStoreTimings() {
             const openingTime = document.getElementById('openingTime').value;
             const closingTime = document.getElementById('closingTime').value;
+            const preorderBeforeTime = document.getElementById('preorderBeforeTime').value;
+            const preorderCutoffTime = document.getElementById('preorderCutoffTime').value;
             
             // Convert "06:00" (24-hour) to "6:00 AM" format
             const convertTo12Hour = (time24) => {
@@ -3206,7 +3208,9 @@
             
             const config = {
                 opening_time: convertTo12Hour(openingTime),
-                closing_time: convertTo12Hour(closingTime)
+                closing_time: convertTo12Hour(closingTime),
+                preorder_before_time: parseInt(preorderBeforeTime),
+                preorder_cutoff_time: convertTo12Hour(preorderCutoffTime)
             };
             
             try {
