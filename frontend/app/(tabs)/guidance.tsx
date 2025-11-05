@@ -374,6 +374,45 @@ export default function GuidanceScreen() {
     }
   };
 
+  const fetchAllGuides = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/guides/all`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAllGuides(response.data || []);
+    } catch (error) {
+      console.error('Error fetching all guides:', error);
+      setAllGuides([]);
+    }
+  };
+
+  const fetchMyGuides = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/following`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyGuides(response.data || []);
+    } catch (error) {
+      console.error('Error fetching my guides:', error);
+      setMyGuides([]);
+    }
+  };
+
+  const fetchMyGuidees = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/guides/guidees`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setMyGuidees(response.data || []);
+    } catch (error) {
+      console.error('Error fetching guidees:', error);
+      setMyGuidees([]);
+    }
+  };
+
   const fetchProfile = async () => {
     setLoading(true);
     try {
