@@ -1838,7 +1838,9 @@ async def get_habits_by_user(user_id: str, request: Request):
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    habits = await db.habits.find({"user_id": ObjectId(user_id)}).sort("created_at", -1).to_list(100)
+    print(f"Fetching habits for user_id: {user_id}")
+    habits = await db.habits.find({"user_id": ObjectId(user_id)}).sort("date", -1).to_list(100)
+    print(f"Found {len(habits)} habits")
     for habit in habits:
         habit["_id"] = str(habit["_id"])
     return habits
