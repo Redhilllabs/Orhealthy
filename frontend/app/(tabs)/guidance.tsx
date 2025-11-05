@@ -1372,6 +1372,11 @@ export default function GuidanceScreen() {
                 <Text style={styles.profileLabel}>Bio</Text>
                 <Text style={styles.profileValue}>{profileData.bio || '-'}</Text>
               </View>
+
+              <View style={styles.profileFullItem}>
+                <Text style={styles.profileLabel}>Current Goal</Text>
+                <Text style={styles.profileValue}>{profileData.current_goal || '-'}</Text>
+              </View>
             </View>
           </ScrollView>
         );
