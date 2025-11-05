@@ -1255,7 +1255,7 @@ export default function GuidanceScreen() {
                       </View>
                     </View>
                     <Text style={styles.planMeals}>
-                      Meals: {item.meals_requested.map(m => m.replace(/_/g, ' ')).join(', ')}
+                      Meals: {sortMealsChronologically(item.meals_requested).map(m => m.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')).join(', ')}
                     </Text>
                     {item.guide_name && (
                       <Text style={styles.planGuide}>Guide: {item.guide_name}</Text>
