@@ -391,64 +391,7 @@ export default function ProfileScreen() {
           />
         );
 
-      case 'guides':
-        return (
-          <FlatList
-            data={guides}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.userCard}
-                onPress={() => router.push(`/user/${item._id}`)}
-              >
-                {item.picture ? (
-                  <Image source={{ uri: item.picture }} style={styles.userAvatar} />
-                ) : (
-                  <View style={[styles.userAvatar, styles.avatarPlaceholder]}>
-                    <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
-                  </View>
-                )}
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{item.name}</Text>
-                  {item.star_rating && item.star_rating > 0 && (
-                    <Text style={styles.userRating}>{item.star_rating}⭐</Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>No guides yet</Text>
-            }
-          />
-        );
-
-      case 'guidees':
-        return (
-          <FlatList
-            data={guidees}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.userCard}
-                onPress={() => router.push(`/user/${item._id}`)}
-              >
-                {item.picture ? (
-                  <Image source={{ uri: item.picture }} style={styles.userAvatar} />
-                ) : (
-                  <View style={[styles.userAvatar, styles.avatarPlaceholder]}>
-                    <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
-                  </View>
-                )}
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{item.name}</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>No guidees yet</Text>
-            }
-          />
-        );
+ 
 
       case 'idols':
         return (
