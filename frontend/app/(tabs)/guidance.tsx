@@ -1060,6 +1060,9 @@ export default function GuidanceScreen() {
                         <Text style={styles.planDate}>
                           Starts: {new Date(item.start_date).toLocaleDateString()}
                         </Text>
+                        {item.goal && (
+                          <Text style={styles.planGoal}>Goal: {item.goal}</Text>
+                        )}
                       </View>
                       <View style={[
                         styles.statusBadge,
