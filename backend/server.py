@@ -329,6 +329,7 @@ class Order(BaseModel):
     total_price: float
     discount_amount: float = 0.0
     coupon_code: Optional[str] = None
+    delivery_charge: float = 0.0  # Delivery charge (0 if free delivery)
     final_price: float
     status: str = "arrived"  # arrived, accepted, preparing, ready, out_for_delivery, delivered, cancelled
     billing_address: Address
@@ -341,6 +342,9 @@ class Order(BaseModel):
     assigned_agent_id: Optional[str] = None  # Delivery agent assigned to this order
     agent_assigned_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
+    is_preorder: bool = False  # Whether this is a preorder
+    preorder_date: Optional[str] = None  # Delivery date for preorder (YYYY-MM-DD)
+    preorder_time: Optional[str] = None  # Delivery time for preorder (e.g., "6:00 AM")
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class StoreTimingsConfig(BaseModel):
