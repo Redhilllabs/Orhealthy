@@ -1744,11 +1744,24 @@ export default function GuidanceScreen() {
 
               <Text style={styles.sectionLabel}>Start Date *</Text>
               {Platform.OS === 'web' ? (
-                <TextInput
-                  style={styles.input}
+                <input
+                  type="date"
+                  style={{
+                    width: '100%',
+                    padding: 12,
+                    borderWidth: 1,
+                    borderColor: '#e2e8f0',
+                    borderRadius: 8,
+                    fontSize: 14,
+                    marginBottom: 16,
+                  }}
                   value={startDateText}
-                  onChangeText={setStartDateText}
-                  placeholder="YYYY-MM-DD"
+                  onChange={(e) => setStartDateText(e.target.value)}
+                  min={(() => {
+                    const date = new Date();
+                    date.setDate(date.getDate() + 2); // Day after tomorrow
+                    return date.toISOString().split('T')[0];
+                  })()}
                 />
               ) : (
                 <>
@@ -1772,11 +1785,26 @@ export default function GuidanceScreen() {
                           setStartDate(selectedDate);
                         }
                       }}
-                      minimumDate={new Date()}
+                      minimumDate={(() => {
+                        const date = new Date();
+                        date.setDate(date.getDate() + 2); // Day after tomorrow
+                        return date;
+                      })()}
                     />
                   )}
                 </>
               )}
+
+              <Text style={styles.sectionLabel}>Goal / Purpose</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={planGoal}
+                onChangeText={setPlanGoal}
+                placeholder="E.g., Weight loss, Muscle gain, Better health..."
+                placeholderTextColor="#94a3b8"
+                multiline
+                numberOfLines={3}
+              />
 
               <Text style={styles.sectionLabel}>
                 Meals Requested * {planType === 'single_meal' && '(Select one)'}
