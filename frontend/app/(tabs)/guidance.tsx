@@ -1525,6 +1525,19 @@ export default function GuidanceScreen() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          style={[styles.tab, activeTab === 'my-guides' && styles.activeTab]}
+          onPress={() => setActiveTab('my-guides')}
+        >
+          <Ionicons
+            name="people"
+            size={20}
+            color={activeTab === 'my-guides' ? '#ffd700' : '#999'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'my-guides' && styles.activeTabLabel]}>
+            My Guides
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.tab, activeTab === 'about' && styles.activeTab]}
           onPress={() => setActiveTab('about')}
         >
