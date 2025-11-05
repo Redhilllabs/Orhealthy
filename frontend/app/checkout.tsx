@@ -756,7 +756,7 @@ export default function CheckoutScreen() {
 
         <View style={styles.footer}>
           <View style={styles.footerPriceInfo}>
-            <Text style={styles.footerLabel}>Total</Text>
+            <Text style={styles.footerLabel}>To Pay</Text>
             <Text style={styles.footerPrice}>₹{finalPrice.toFixed(2)}</Text>
           </View>
           <TouchableOpacity
