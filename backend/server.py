@@ -18,6 +18,14 @@ import hashlib
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
+# IST timezone helper
+def get_ist_time():
+    """Get current time in IST (UTC+5:30)"""
+    utc_time = datetime.now(timezone.utc)
+    ist_offset = timedelta(hours=5, minutes=30)
+    ist_time = utc_time + ist_offset
+    return ist_time.replace(tzinfo=timezone.utc)  # Keep UTC timezone but with IST time
+
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
