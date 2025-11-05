@@ -3184,6 +3184,8 @@
                 
                 document.getElementById('openingTime').value = convertTo24Hour(data.opening_time);
                 document.getElementById('closingTime').value = convertTo24Hour(data.closing_time);
+                document.getElementById('preorderBeforeTime').value = data.preorder_before_time || 120;
+                document.getElementById('preorderCutoffTime').value = convertTo24Hour(data.preorder_cutoff_time || '10:00 PM');
             } catch (error) {
                 console.error('Error loading store timings:', error);
             }
