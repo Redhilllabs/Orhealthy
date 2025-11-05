@@ -880,6 +880,7 @@ export default function GuidanceScreen() {
                 value={activityData.name}
                 onChangeText={(text) => setActivityData({ ...activityData, name: text })}
                 placeholder="e.g., Running, Yoga"
+                placeholderTextColor="#94a3b8"
               />
             </View>
             <View style={styles.inputRow}>
