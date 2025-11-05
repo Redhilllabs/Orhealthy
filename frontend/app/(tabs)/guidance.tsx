@@ -300,8 +300,8 @@ export default function GuidanceScreen() {
           const userResponse = await axios.get(`${API_URL}/users/${otherUserId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          if (userResponse.data.average_rating) {
-            ratings[otherUserId] = userResponse.data.average_rating;
+          if (userResponse.data.star_rating) {
+            ratings[otherUserId] = userResponse.data.star_rating;
           }
         } catch (error) {
           console.log(`Could not fetch rating for user ${otherUserId}`);
