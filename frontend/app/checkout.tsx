@@ -68,6 +68,15 @@ export default function CheckoutScreen() {
   const [newAddressZip, setNewAddressZip] = useState('');
   const [newAddressPhone, setNewAddressPhone] = useState('');
 
+  // Preorder and delivery state
+  const [isPreorder, setIsPreorder] = useState(false);
+  const [showPreorderModal, setShowPreorderModal] = useState(false);
+  const [preorderDate, setPreorderDate] = useState('');
+  const [preorderTime, setPreorderTime] = useState('');
+  const [deliveryConfig, setDeliveryConfig] = useState({ delivery_price: 50, min_order_for_free_delivery: 500 });
+  const [storeTimings, setStoreTimings] = useState({ opening_time: '6:00 AM', closing_time: '9:00 PM' });
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+
   useEffect(() => {
     fetchAddresses();
     if (user?.is_guide) {
