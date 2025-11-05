@@ -1708,8 +1708,20 @@ export default function GuidanceScreen() {
                   value={profileData.bio}
                   onChangeText={(text) => setProfileData({ ...profileData, bio: text })}
                   placeholder="Tell us about yourself..."
+                  placeholderTextColor="#94a3b8"
                   multiline
                   numberOfLines={4}
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Current Goal</Text>
+                <TextInput
+                  style={styles.input}
+                  value={profileData.current_goal}
+                  onChangeText={(text) => setProfileData({ ...profileData, current_goal: text })}
+                  placeholder="e.g., Lose 5kg in 3 months"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
 
