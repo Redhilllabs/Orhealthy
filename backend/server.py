@@ -1909,6 +1909,7 @@ async def create_meal_plan(request: Request, meal_plan_data: dict):
         "plan_type": meal_plan_data["plan_type"],
         "start_date": meal_plan_data["start_date"],
         "meals_requested": meal_plan_data["meals_requested"],
+        "goal": meal_plan_data.get("goal"),
         "status": "requested",
         "created_at": datetime.now(timezone.utc)
     }
