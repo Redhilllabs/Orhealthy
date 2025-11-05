@@ -1929,6 +1929,9 @@ async def get_meal_plans(request: Request):
     
     for plan in plans:
         plan["_id"] = str(plan["_id"])
+        plan["guidee_id"] = str(plan["guidee_id"])
+        if plan.get("guide_id"):
+            plan["guide_id"] = str(plan["guide_id"])
     
     return plans
 
