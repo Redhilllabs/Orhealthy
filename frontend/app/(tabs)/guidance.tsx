@@ -1646,6 +1646,7 @@ export default function GuidanceScreen() {
                   value={profileData.allergies}
                   onChangeText={(text) => setProfileData({ ...profileData, allergies: text })}
                   placeholder="e.g., Nuts, Dairy"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
 
@@ -1656,6 +1657,7 @@ export default function GuidanceScreen() {
                   value={profileData.lifestyle_disorders}
                   onChangeText={(text) => setProfileData({ ...profileData, lifestyle_disorders: text })}
                   placeholder="e.g., Diabetes, Hypertension"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
 
