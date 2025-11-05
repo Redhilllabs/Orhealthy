@@ -953,6 +953,7 @@ export default function GuidanceScreen() {
                   value={activityData.endTime}
                   onChangeText={(text) => setActivityData({ ...activityData, endTime: text })}
                   placeholder="6:00 AM"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
             </View>
