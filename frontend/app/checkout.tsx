@@ -773,6 +773,85 @@ export default function CheckoutScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Preorder Modal */}
+      <Modal
+        visible={showPreorderModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowPreorderModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.preorderModalContent}>
+            <Text style={styles.preorderModalTitle}>Select Preorder Details</Text>
+            
+            <View style={styles.preorderInputGroup}>
+              <Text style={styles.preorderInputLabel}>Delivery Date</Text>
+              <input
+                type="date"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                }}
+                value={preorderDate}
+                onChange={(e) => setPreorderDate(e.target.value)}
+                min={(() => {
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  return tomorrow.toISOString().split('T')[0];
+                })()}
+              />
+            </View>
+
+            <View style={styles.preorderInputGroup}>
+              <Text style={styles.preorderInputLabel}>Delivery Time</Text>
+              <ScrollView style={styles.timeSlotsList}>
+                {timeSlots.map((slot) => (
+                  <TouchableOpacity
+                    key={slot}
+                    style={[
+                      styles.timeSlotButton,
+                      preorderTime === slot && styles.timeSlotButtonActive,
+                    ]}
+                    onPress={() => setPreorderTime(slot)}
+                  >
+                    <Text
+                      style={[
+                        styles.timeSlotText,
+                        preorderTime === slot && styles.timeSlotTextActive,
+                      ]}
+                    >
+                      {slot}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            <View style={styles.preorderModalActions}>
+              <TouchableOpacity
+                style={styles.preorderCancelButton}
+                onPress={() => {
+                  setShowPreorderModal(false);
+                  setIsPreorder(false);
+                }}
+              >
+                <Text style={styles.preorderCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.preorderSaveButton}
+                onPress={savePreorderDetails}
+              >
+                <Text style={styles.preorderSaveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
