@@ -1925,7 +1925,14 @@ export default function GuidanceScreen() {
                         })}
                       </Text>
 
-                      {currentPlanForPlanning.meals_requested.map((meal) => {
+                      {(() => {
+                        // Sort meals in chronological order
+                        const mealOrder = ['breakfast', 'brunch', 'lunch', 'evening_snacks', 'dinner', 'supper'];
+                        const sortedMeals = [...currentPlanForPlanning.meals_requested].sort((a, b) => {
+                          return mealOrder.indexOf(a) - mealOrder.indexOf(b);
+                        });
+                        return sortedMeals;
+                      })().map((meal) => {
                         const selectedMealId = planningMealSelections[date]?.[meal];
                         const selectedMeal = mealOptions.find(m => m._id === selectedMealId);
                         return (
