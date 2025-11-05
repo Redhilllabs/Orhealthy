@@ -1793,6 +1793,8 @@ export default function GuidanceScreen() {
                     fontSize: '14px',
                     marginBottom: '16px',
                     fontFamily: 'inherit',
+                    color: '#1e293b',
+                    boxSizing: 'border-box',
                   }}
                   value={startDateText}
                   onChange={(e) => setStartDateText(e.target.value)}
