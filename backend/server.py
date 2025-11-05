@@ -353,7 +353,7 @@ class Order(BaseModel):
     is_preorder: bool = False  # Whether this is a preorder
     preorder_date: Optional[str] = None  # Delivery date for preorder (YYYY-MM-DD)
     preorder_time: Optional[str] = None  # Delivery time for preorder (e.g., "6:00 AM")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=get_ist_time)
 
 class StoreTimingsConfig(BaseModel):
     opening_time: str  # Format: "6:00 AM"
