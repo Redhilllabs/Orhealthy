@@ -926,6 +926,44 @@ export default function CheckoutScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Store Closed Alert Modal */}
+      <Modal
+        visible={showStoreClosedAlert}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowStoreClosedAlert(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.storeClosedModalContent}>
+            <Ionicons name="time-outline" size={60} color="#ef4444" />
+            <Text style={styles.storeClosedTitle}>Store is Closed</Text>
+            <Text style={styles.storeClosedMessage}>
+              We're currently closed. You can place a preorder for tomorrow or visit us during our operating hours:
+            </Text>
+            <Text style={styles.storeHours}>
+              {storeTimings.opening_time} - {storeTimings.closing_time}
+            </Text>
+            <View style={styles.storeClosedActions}>
+              <TouchableOpacity
+                style={styles.preorderNowButton}
+                onPress={() => {
+                  setShowStoreClosedAlert(false);
+                  handlePreorderToggle(true);
+                }}
+              >
+                <Text style={styles.preorderNowButtonText}>Preorder Now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.okButton}
+                onPress={() => setShowStoreClosedAlert(false)}
+              >
+                <Text style={styles.okButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
