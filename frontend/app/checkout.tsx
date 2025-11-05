@@ -648,6 +648,41 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
             )}
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>Delivery Charge</Text>
+              <Text style={styles.priceValue}>
+                {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
+              </Text>
+            </View>
+            {deliveryCharge === 0 && totalPrice - couponDiscount >= deliveryConfig.min_order_for_free_delivery && (
+              <Text style={styles.freeDeliveryText}>
+                🎉 You've unlocked free delivery!
+              </Text>
+            )}
+            
+            {/* Preorder Checkbox */}
+            <View style={styles.preorderContainer}>
+              <View style={styles.preorderRow}>
+                <Text style={styles.preorderLabel}>Preorder for tomorrow?</Text>
+                <Switch
+                  value={isPreorder}
+                  onValueChange={handlePreorderToggle}
+                  trackColor={{ false: '#d1d5db', true: '#fcd34d' }}
+                  thumbColor={isPreorder ? '#ffd700' : '#f4f3f4'}
+                />
+              </View>
+              {isPreorder && preorderDate && preorderTime && (
+                <View style={styles.preorderDetails}>
+                  <Text style={styles.preorderDetailsText}>
+                    📅 {preorderDate} at {preorderTime}
+                  </Text>
+                  <TouchableOpacity onPress={() => setShowPreorderModal(true)}>
+                    <Text style={styles.changePreorderText}>Change</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
             <View style={[styles.priceRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>₹{finalPrice.toFixed(2)}</Text>
