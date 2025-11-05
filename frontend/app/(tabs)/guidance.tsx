@@ -720,6 +720,7 @@ export default function GuidanceScreen() {
           meals_requested: selectedMeals.map(m => m.toLowerCase().replace(/ /g, '_')),
           guide_id: selectedGuide,
           guide_name: guide?.name || null,
+          goal: planGoal || null,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -731,6 +732,7 @@ export default function GuidanceScreen() {
       setPlanType('');
       setSelectedMeals([]);
       setSelectedGuide('');
+      setPlanGoal('');
       setStartDateText('');
       fetchMealPlans();
     } catch (error) {
