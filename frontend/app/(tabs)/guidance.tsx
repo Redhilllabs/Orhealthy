@@ -3698,6 +3698,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: '#1e293b',
+    outlineStyle: 'none',
   },
   guidesListContainer: {
     flex: 1,
