@@ -2839,20 +2839,31 @@ async def create_order(order_data: dict, request: Request):
     billing_address = transform_address(order_data["billing_address"])
     shipping_address = transform_address(order_data["shipping_address"])
     
+    # Check if this is a preorder
+    is_preorder = order_data.get("is_preorder", False)
+    preorder_date = order_data.get("preorder_date")
+    preorder_time = order_data.get("preorder_time")
+    delivery_charge = order_data.get("delivery_charge", 0.0)
+    
     order = Order(
         user_id=ordered_for_guidee_id if ordered_for_guidee_id else user["_id"],
         items=order_data["items"],
         total_price=total_price,
         discount_amount=discount_amount,
         coupon_code=order_data.get("coupon_code"),
-        final_price=final_price,
+        delivery_charge=delivery_charge,
+        final_price=final_price + delivery_charge,
         billing_address=billing_address,
         shipping_address=shipping_address,
         payment_id=order_data.get("payment_id"),
         ordered_by_guide_id=ordered_by_guide_id,
         ordered_for_guidee_id=ordered_for_guidee_id,
         commission_earned=commission_earned,
-        commission_rate=commission_rate
+        commission_rate=commission_rate,
+        is_preorder=is_preorder,
+        preorder_date=preorder_date,
+        preorder_time=preorder_time,
+        status="arrived"  # Preorders still start at arrived but can be filtered by is_preorder flag
     )
     
     result = await db.orders.insert_one(order.dict())
