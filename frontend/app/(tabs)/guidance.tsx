@@ -2548,6 +2548,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#64748b',
   },
+  planGoal: {
+    fontSize: 14,
+    color: '#64748b',
+    fontStyle: 'italic',
+  },
   statusBadge: {
     paddingVertical: 4,
     paddingHorizontal: 12,
