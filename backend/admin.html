@@ -1706,9 +1706,8 @@
                 `;
                 }).join('');
             } else if (currentOrderStatusFilter === 'all') {
-                // All orders tab - simplified view (exclude preorders)
-                const nonPreorders = orders.filter(order => !order.is_preorder);
-                tbody.innerHTML = nonPreorders.map(order => {
+                // All orders tab - show all details including status column (include preorders)
+                tbody.innerHTML = orders.map(order => {
                     return `
                     <tr>
                         <td>${order._id.slice(-8)}</td>
