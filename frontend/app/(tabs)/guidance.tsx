@@ -1078,15 +1078,15 @@ export default function GuidanceScreen() {
                           <Ionicons name="person-circle" size={16} color="#3b82f6" />
                           <Text style={styles.guideeNameText}>{item.guidee_name}</Text>
                         </TouchableOpacity>
-                        {item.goal && (
-                          <Text style={styles.planName}>{item.goal}</Text>
-                        )}
                         <Text style={styles.planType}>
                           {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
                         </Text>
                         <Text style={styles.planDate}>
                           Starts: {new Date(item.start_date).toLocaleDateString()}
                         </Text>
+                        {item.goal && (
+                          <Text style={styles.planName}>{item.goal}</Text>
+                        )}
                       </View>
                       <View style={[
                         styles.statusBadge,
