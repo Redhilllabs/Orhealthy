@@ -1594,56 +1594,6 @@ export default function GuidanceScreen() {
                     ))
                   )
                 )}
-
-                {guidesSubTab === 'my' && (
-                  filteredMyGuides.length === 0 ? (
-                    <Text style={styles.emptyText}>No guides yet</Text>
-                  ) : (
-                    filteredMyGuides.map((guide) => (
-                      <TouchableOpacity
-                        key={guide._id}
-                        style={styles.guideCard}
-                        onPress={() => router.push(`/user-profile/${guide._id}`)}
-                      >
-                        <View style={styles.guideInfo}>
-                          <View style={styles.guideHeader}>
-                            <Text style={styles.guideName}>{guide.name}</Text>
-                            {guide.star_rating && guide.star_rating > 0 && (
-                              <View style={styles.ratingContainer}>
-                                <Text style={styles.ratingText}>
-                                  {guide.star_rating}
-                                </Text>
-                                <Ionicons name="star" size={16} color="#ffd700" style={{ marginLeft: 4 }} />
-                              </View>
-                            )}
-                          </View>
-                          <Text style={styles.guideEmail}>{guide.email}</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-                      </TouchableOpacity>
-                    ))
-                  )
-                )}
-
-                {guidesSubTab === 'guidees' && (
-                  filteredGuidees.length === 0 ? (
-                    <Text style={styles.emptyText}>No guidees yet</Text>
-                  ) : (
-                    filteredGuidees.map((guidee) => (
-                      <TouchableOpacity
-                        key={guidee._id}
-                        style={styles.guideCard}
-                        onPress={() => router.push(`/user-profile/${guidee._id}`)}
-                      >
-                        <View style={styles.guideInfo}>
-                          <Text style={styles.guideName}>{guidee.name}</Text>
-                          <Text style={styles.guideEmail}>{guidee.email}</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-                      </TouchableOpacity>
-                    ))
-                  )
-                )}
               </ScrollView>
             )}
           </View>
