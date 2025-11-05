@@ -1641,19 +1641,6 @@ export default function GuidanceScreen() {
         style={styles.tabBar}
         contentContainerStyle={styles.tabBarContent}
       >
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'my-guidance' && styles.activeTab]}
-          onPress={() => setActiveTab('my-guidance')}
-        >
-          <Ionicons
-            name="people"
-            size={20}
-            color={activeTab === 'my-guidance' ? '#ffd700' : '#999'}
-          />
-          <Text style={[styles.tabLabel, activeTab === 'my-guidance' && styles.activeTabLabel]}>
-            My Guidance
-          </Text>
-        </TouchableOpacity>
         {user?.is_guide && (
           <TouchableOpacity
             style={[styles.tab, activeTab === 'plan-requests' && styles.activeTab]}
@@ -1669,6 +1656,19 @@ export default function GuidanceScreen() {
             </Text>
           </TouchableOpacity>
         )}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'my-guidance' && styles.activeTab]}
+          onPress={() => setActiveTab('my-guidance')}
+        >
+          <Ionicons
+            name="people"
+            size={20}
+            color={activeTab === 'my-guidance' ? '#ffd700' : '#999'}
+          />
+          <Text style={[styles.tabLabel, activeTab === 'my-guidance' && styles.activeTabLabel]}>
+            My Guidance
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === 'timeline' && styles.activeTab]}
           onPress={() => setActiveTab('timeline')}
