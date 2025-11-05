@@ -863,8 +863,6 @@ export default function CheckoutScreen() {
               <Text style={styles.preorderInputLabel}>Delivery Date</Text>
               <input
                 type="date"
-                readOnly
-                onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                 style={{
                   width: '100%',
                   padding: '12px',
