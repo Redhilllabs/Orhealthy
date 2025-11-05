@@ -943,6 +943,7 @@ export default function GuidanceScreen() {
                   value={activityData.startTime}
                   onChangeText={(text) => setActivityData({ ...activityData, startTime: text })}
                   placeholder="10:00 PM"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
