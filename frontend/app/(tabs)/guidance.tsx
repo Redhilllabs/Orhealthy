@@ -1441,6 +1441,162 @@ export default function GuidanceScreen() {
           </ScrollView>
         );
 
+      case 'my-guides':
+        const filteredAllGuides = allGuides.filter(guide =>
+          guide.name.toLowerCase().includes(guideSearchQuery.toLowerCase()) ||
+          guide.email.toLowerCase().includes(guideSearchQuery.toLowerCase())
+        );
+        const filteredMyGuides = myGuides.filter(guide =>
+          guide.name.toLowerCase().includes(guideSearchQuery.toLowerCase()) ||
+          guide.email.toLowerCase().includes(guideSearchQuery.toLowerCase())
+        );
+        const filteredGuidees = myGuidees.filter(guidee =>
+          guidee.name.toLowerCase().includes(guideSearchQuery.toLowerCase()) ||
+          guidee.email.toLowerCase().includes(guideSearchQuery.toLowerCase())
+        );
+
+        return (
+          <View style={styles.tabContent}>
+            {/* Sub-tabs for All Guides, My Guides, My Guidees */}
+            <View style={styles.subTabContainer}>
+              <TouchableOpacity
+                style={[styles.subTab, guidesSubTab === 'all' && styles.subTabActive]}
+                onPress={() => setGuidesSubTab('all')}
+              >
+                <Text style={[styles.subTabText, guidesSubTab === 'all' && styles.subTabTextActive]}>
+                  All Guides
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.subTab, guidesSubTab === 'my' && styles.subTabActive]}
+                onPress={() => setGuidesSubTab('my')}
+              >
+                <Text style={[styles.subTabText, guidesSubTab === 'my' && styles.subTabTextActive]}>
+                  My Guides
+                </Text>
+              </TouchableOpacity>
+              {user?.is_guide && (
+                <TouchableOpacity
+                  style={[styles.subTab, guidesSubTab === 'guidees' && styles.subTabActive]}
+                  onPress={() => setGuidesSubTab('guidees')}
+                >
+                  <Text style={[styles.subTabText, guidesSubTab === 'guidees' && styles.subTabTextActive]}>
+                    My Guidees
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Search Bar */}
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color="#94a3b8" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder={
+                  guidesSubTab === 'all' ? 'Search all guides...' :
+                  guidesSubTab === 'my' ? 'Search my guides...' :
+                  'Search my guidees...'
+                }
+                placeholderTextColor="#94a3b8"
+                value={guideSearchQuery}
+                onChangeText={setGuideSearchQuery}
+              />
+              {guideSearchQuery ? (
+                <TouchableOpacity onPress={() => setGuideSearchQuery('')}>
+                  <Ionicons name="close-circle" size={20} color="#94a3b8" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
+            {/* Content based on sub-tab */}
+            {loading ? (
+              <ActivityIndicator size="large" color="#ffd700" style={{ marginTop: 20 }} />
+            ) : (
+              <ScrollView style={styles.guidesListContainer}>
+                {guidesSubTab === 'all' && (
+                  filteredAllGuides.length === 0 ? (
+                    <Text style={styles.emptyText}>No guides found</Text>
+                  ) : (
+                    filteredAllGuides.map((guide) => (
+                      <TouchableOpacity
+                        key={guide._id}
+                        style={styles.guideCard}
+                        onPress={() => router.push(`/user-profile/${guide._id}`)}
+                      >
+                        <View style={styles.guideInfo}>
+                          <View style={styles.guideHeader}>
+                            <Text style={styles.guideName}>{guide.name}</Text>
+                            {guide.average_rating && (
+                              <View style={styles.ratingContainer}>
+                                <Ionicons name="star" size={16} color="#ffd700" />
+                                <Text style={styles.ratingText}>
+                                  {guide.average_rating.toFixed(1)}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={styles.guideEmail}>{guide.email}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+                      </TouchableOpacity>
+                    ))
+                  )
+                )}
+
+                {guidesSubTab === 'my' && (
+                  filteredMyGuides.length === 0 ? (
+                    <Text style={styles.emptyText}>No guides yet</Text>
+                  ) : (
+                    filteredMyGuides.map((guide) => (
+                      <TouchableOpacity
+                        key={guide._id}
+                        style={styles.guideCard}
+                        onPress={() => router.push(`/user-profile/${guide._id}`)}
+                      >
+                        <View style={styles.guideInfo}>
+                          <View style={styles.guideHeader}>
+                            <Text style={styles.guideName}>{guide.name}</Text>
+                            {guide.average_rating && (
+                              <View style={styles.ratingContainer}>
+                                <Ionicons name="star" size={16} color="#ffd700" />
+                                <Text style={styles.ratingText}>
+                                  {guide.average_rating.toFixed(1)}
+                                </Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={styles.guideEmail}>{guide.email}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+                      </TouchableOpacity>
+                    ))
+                  )
+                )}
+
+                {guidesSubTab === 'guidees' && (
+                  filteredGuidees.length === 0 ? (
+                    <Text style={styles.emptyText}>No guidees yet</Text>
+                  ) : (
+                    filteredGuidees.map((guidee) => (
+                      <TouchableOpacity
+                        key={guidee._id}
+                        style={styles.guideCard}
+                        onPress={() => router.push(`/user-profile/${guidee._id}`)}
+                      >
+                        <View style={styles.guideInfo}>
+                          <Text style={styles.guideName}>{guidee.name}</Text>
+                          <Text style={styles.guideEmail}>{guidee.email}</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
+                      </TouchableOpacity>
+                    ))
+                  )
+                )}
+              </ScrollView>
+            )}
+          </View>
+        );
+
       case 'messages':
         return (
           <View style={styles.tabContent}>
