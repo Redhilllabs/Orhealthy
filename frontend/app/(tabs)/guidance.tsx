@@ -895,10 +895,10 @@ export default function GuidanceScreen() {
           <View style={styles.conversationHeader}>
             <View style={styles.nameRatingRow}>
               <Text style={styles.userName}>{otherUser.name}</Text>
-              {rating && (
+              {rating && rating > 0 && (
                 <View style={styles.ratingBadge}>
                   <Ionicons name="star" size={12} color="#ffd700" />
-                  <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+                  <Text style={styles.ratingText}>{rating}</Text>
                 </View>
               )}
             </View>
