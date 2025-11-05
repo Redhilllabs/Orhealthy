@@ -440,57 +440,120 @@
 
 
             <div id="settings" class="section">
-                <div class="card">
-                    <h2 class="card-title" style="margin-bottom: 20px;">Star Rating Configuration</h2>
-                    <p style="color: #64748b; margin-bottom: 24px;">Configure the points required for each star rating level. Users with 1+ stars become Guides.</p>
-                    <div id="alert-settings"></div>
-                    
-                    <div id="starRatingsList"></div>
-                    
-                    <button class="btn btn-secondary" style="margin-top: 16px; margin-right: 12px;" onclick="addStarRating()">+ Add Rating Level</button>
-                    <button class="btn" style="margin-top: 16px;" onclick="saveStarConfig()">Save Configuration</button>
+                <!-- Settings Tabs -->
+                <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0;">
+                    <button class="status-tab active" onclick="switchSettingsTab('rating')">Rating Configuration</button>
+                    <button class="status-tab" onclick="switchSettingsTab('timings')">Store Timings</button>
+                    <button class="status-tab" onclick="switchSettingsTab('delivery')">Delivery</button>
                 </div>
 
-                <div class="card" style="margin-top: 24px;">
-                    <h2 class="card-title" style="margin-bottom: 20px;">Points Configuration</h2>
-                    <p style="color: #64748b; margin-bottom: 24px;">Configure points earned for different actions.</p>
-                    <div id="alert-points"></div>
-                    
-                    <div style="display: grid; gap: 16px;">
-                        <div class="config-item">
-                            <div style="min-width: 200px;">
-                                <span class="config-label">📝 Per Post</span>
-                            </div>
-                            <input type="number" class="config-input" id="pointsPerPost" value="5" min="0" style="width: 150px;">
-                            <span style="color: #64748b; font-size: 13px;">points</span>
-                        </div>
-
-                        <div class="config-item">
-                            <div style="min-width: 200px;">
-                                <span class="config-label">❤️ Per Like Received</span>
-                            </div>
-                            <input type="number" class="config-input" id="pointsPerLike" value="2" min="0" style="width: 150px;">
-                            <span style="color: #64748b; font-size: 13px;">points</span>
-                        </div>
-
-                        <div class="config-item">
-                            <div style="min-width: 200px;">
-                                <span class="config-label">👥 Per New Fan</span>
-                            </div>
-                            <input type="number" class="config-input" id="pointsPerFan" value="3" min="0" style="width: 150px;">
-                            <span style="color: #64748b; font-size: 13px;">points</span>
-                        </div>
-
-                        <div class="config-item">
-                            <div style="min-width: 200px;">
-                                <span class="config-label">🎓 Per New Guidee</span>
-                            </div>
-                            <input type="number" class="config-input" id="pointsPerGuidee" value="5" min="0" style="width: 150px;">
-                            <span style="color: #64748b; font-size: 13px;">points</span>
-                        </div>
+                <!-- Rating Configuration Tab -->
+                <div id="rating-settings" class="settings-tab-content">
+                    <div class="card">
+                        <h2 class="card-title" style="margin-bottom: 20px;">⭐ Star Rating Configuration</h2>
+                        <p style="color: #64748b; margin-bottom: 24px;">Configure the points required for each star rating level. Users with 1+ stars become Guides.</p>
+                        <div id="alert-settings"></div>
+                        
+                        <div id="starRatingsList"></div>
+                        
+                        <button class="btn btn-secondary" style="margin-top: 16px; margin-right: 12px;" onclick="addStarRating()">+ Add Rating Level</button>
+                        <button class="btn" style="margin-top: 16px;" onclick="saveStarConfig()">Save Configuration</button>
                     </div>
-                    
-                    <button class="btn" style="margin-top: 24px;" onclick="savePointsConfig()">Save Points Configuration</button>
+
+                    <div class="card" style="margin-top: 24px;">
+                        <h2 class="card-title" style="margin-bottom: 20px;">🎯 Points Configuration</h2>
+                        <p style="color: #64748b; margin-bottom: 24px;">Configure points earned for different actions.</p>
+                        <div id="alert-points"></div>
+                        
+                        <div style="display: grid; gap: 16px;">
+                            <div class="config-item">
+                                <div style="min-width: 200px;">
+                                    <span class="config-label">📝 Per Post</span>
+                                </div>
+                                <input type="number" class="config-input" id="pointsPerPost" value="5" min="0" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">points</span>
+                            </div>
+
+                            <div class="config-item">
+                                <div style="min-width: 200px;">
+                                    <span class="config-label">❤️ Per Like Received</span>
+                                </div>
+                                <input type="number" class="config-input" id="pointsPerLike" value="2" min="0" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">points</span>
+                            </div>
+
+                            <div class="config-item">
+                                <div style="min-width: 200px;">
+                                    <span class="config-label">👥 Per New Fan</span>
+                                </div>
+                                <input type="number" class="config-input" id="pointsPerFan" value="3" min="0" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">points</span>
+                            </div>
+
+                            <div class="config-item">
+                                <div style="min-width: 200px;">
+                                    <span class="config-label">🎓 Per New Guidee</span>
+                                </div>
+                                <input type="number" class="config-input" id="pointsPerGuidee" value="5" min="0" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">points</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" style="margin-top: 24px;" onclick="savePointsConfig()">Save Points Configuration</button>
+                    </div>
+                </div>
+
+                <!-- Store Timings Tab -->
+                <div id="timings-settings" class="settings-tab-content" style="display: none;">
+                    <div class="card">
+                        <h2 class="card-title" style="margin-bottom: 20px;">🕒 Kitchen Hours</h2>
+                        <p style="color: #64748b; margin-bottom: 24px;">Configure store opening and closing times. These times will be used for preorder time slots.</p>
+                        <div id="alert-timings"></div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                            <div class="form-group">
+                                <label>Opening Time</label>
+                                <input type="time" id="openingTime" class="config-input" style="width: 100%;">
+                            </div>
+                            <div class="form-group">
+                                <label>Closing Time</label>
+                                <input type="time" id="closingTime" class="config-input" style="width: 100%;">
+                            </div>
+                        </div>
+                        
+                        <button class="btn" style="margin-top: 24px;" onclick="saveStoreTimings()">Save Store Timings</button>
+                    </div>
+                </div>
+
+                <!-- Delivery Configuration Tab -->
+                <div id="delivery-settings" class="settings-tab-content" style="display: none;">
+                    <div class="card">
+                        <h2 class="card-title" style="margin-bottom: 20px;">🚚 Delivery Configuration</h2>
+                        <p style="color: #64748b; margin-bottom: 24px;">Configure delivery charges and minimum order value for free delivery.</p>
+                        <div id="alert-delivery"></div>
+                        
+                        <div style="display: grid; gap: 16px;">
+                            <div class="config-item">
+                                <div style="min-width: 250px;">
+                                    <span class="config-label">💵 Delivery Charge</span>
+                                    <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Charge per delivery</p>
+                                </div>
+                                <input type="number" class="config-input" id="deliveryPrice" value="50" min="0" step="0.01" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">₹</span>
+                            </div>
+
+                            <div class="config-item">
+                                <div style="min-width: 250px;">
+                                    <span class="config-label">📦 Minimum Order for Free Delivery</span>
+                                    <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Orders above this value get free delivery</p>
+                                </div>
+                                <input type="number" class="config-input" id="minOrderForFree" value="500" min="0" step="0.01" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">₹</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn" style="margin-top: 24px;" onclick="saveDeliveryConfig()">Save Delivery Configuration</button>
+                    </div>
                 </div>
 
                 <div class="card" style="margin-top: 24px;">
