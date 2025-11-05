@@ -359,10 +359,14 @@ export default function CheckoutScreen() {
         total_price: totalPrice,
         discount_amount: couponDiscount,
         coupon_code: couponApplied ? couponCode : null,
-        final_price: totalPrice - couponDiscount,
+        delivery_charge: deliveryCharge,
+        final_price: totalPrice - couponDiscount + deliveryCharge,
         billing_address: deliveryAddress,
         shipping_address: deliveryAddress,
         payment_id: 'COD',
+        is_preorder: isPreorder,
+        preorder_date: isPreorder ? preorderDate : null,
+        preorder_time: isPreorder ? preorderTime : null,
       };
 
       if (orderingForGuidee && selectedGuidee) {
