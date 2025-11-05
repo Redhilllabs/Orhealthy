@@ -1070,12 +1070,12 @@ export default function GuidanceScreen() {
                         <Text style={styles.planType}>
                           {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
                         </Text>
+                        {item.goal && (
+                          <Text style={styles.planName}>{item.goal}</Text>
+                        )}
                         <Text style={styles.planDate}>
                           Starts: {new Date(item.start_date).toLocaleDateString()}
                         </Text>
-                        {item.goal && (
-                          <Text style={styles.planGoal}>Goal: {item.goal}</Text>
-                        )}
                       </View>
                       <View style={[
                         styles.statusBadge,
@@ -1088,7 +1088,7 @@ export default function GuidanceScreen() {
                       </View>
                     </View>
                     <Text style={styles.planMeals}>
-                      Meals: {item.meals_requested.map(m => m.replace(/_/g, ' ')).join(', ')}
+                      Meals: {item.meals_requested.map(m => m.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')).join(', ')}
                     </Text>
                     
                     {item.status === 'requested' && (
