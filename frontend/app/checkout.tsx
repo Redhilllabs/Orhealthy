@@ -1281,8 +1281,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   footerLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 17,
+    fontWeight: '500',
+    color: '#475569',
+    letterSpacing: 0.5,
   },
   footerPrice: {
     fontSize: 24,
