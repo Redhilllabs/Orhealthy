@@ -67,7 +67,7 @@ interface MealPlan {
 interface Guide {
   _id: string;
   name: string;
-  average_rating?: number;
+  star_rating?: number;
 }
 
 interface MealOption {
