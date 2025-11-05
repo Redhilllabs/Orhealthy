@@ -892,6 +892,7 @@ export default function GuidanceScreen() {
                   onChangeText={(text) => setActivityData({ ...activityData, value: text })}
                   keyboardType="numeric"
                   placeholder="30"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
               <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
@@ -901,6 +902,7 @@ export default function GuidanceScreen() {
                   value={activityData.unit}
                   onChangeText={(text) => setActivityData({ ...activityData, unit: text })}
                   placeholder="minutes"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
             </View>
