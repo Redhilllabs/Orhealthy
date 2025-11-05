@@ -267,33 +267,87 @@ export default function CheckoutScreen() {
     }
   };
 
+  const parseTime = (timeStr: string) => {
+    const [time, period] = timeStr.split(' ');
+    let [hours, minutes] = time.split(':').map(Number);
+    if (period === 'PM' && hours !== 12) hours += 12;
+    if (period === 'AM' && hours === 12) hours = 0;
+    return hours * 60 + minutes;
+  };
+
+  const formatTime = (minutes: number) => {
+    let hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    const period = hours >= 12 ? 'PM' : 'AM';
+    if (hours > 12) hours -= 12;
+    if (hours === 0) hours = 12;
+    return `${hours}:${mins.toString().padStart(2, '0')} ${period}`;
+  };
+
+  const getISTTime = () => {
+    const now = new Date();
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istTime = new Date(utcTime + (3600000 * 5.5)); // IST is UTC+5:30
+    return istTime;
+  };
+
+  const checkStoreHours = () => {
+    const istNow = getISTTime();
+    const currentMinutes = istNow.getHours() * 60 + istNow.getMinutes();
+    const openMinutes = parseTime(storeTimings.opening_time);
+    const closeMinutes = parseTime(storeTimings.closing_time);
+    
+    return currentMinutes >= openMinutes && currentMinutes <= closeMinutes;
+  };
+
   const generateTimeSlots = () => {
     const slots: string[] = [];
-    const parseTime = (timeStr: string) => {
-      const [time, period] = timeStr.split(' ');
-      let [hours, minutes] = time.split(':').map(Number);
-      if (period === 'PM' && hours !== 12) hours += 12;
-      if (period === 'AM' && hours === 12) hours = 0;
-      return hours * 60 + minutes;
-    };
-
-    const formatTime = (minutes: number) => {
-      let hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      const period = hours >= 12 ? 'PM' : 'AM';
-      if (hours > 12) hours -= 12;
-      if (hours === 0) hours = 12;
-      return `${hours}:${mins.toString().padStart(2, '0')} ${period}`;
-    };
-
-    const startMinutes = parseTime(storeTimings.opening_time);
+    const istNow = getISTTime();
+    const currentMinutes = istNow.getHours() * 60 + istNow.getMinutes();
+    
+    let startMinutes = parseTime(storeTimings.opening_time);
     const endMinutes = parseTime(storeTimings.closing_time);
+
+    // If ordering for today and is preorder, adjust start time
+    if (preorderDate === getISTTime().toISOString().split('T')[0]) {
+      const minStartTime = currentMinutes + storeTimings.preorder_before_time;
+      startMinutes = Math.max(startMinutes, Math.ceil(minStartTime / 30) * 30);
+    }
 
     for (let i = startMinutes; i <= endMinutes; i += 30) {
       slots.push(formatTime(i));
     }
 
     setTimeSlots(slots);
+  };
+
+  const getMinDate = () => {
+    const istNow = getISTTime();
+    const cutoffMinutes = parseTime(storeTimings.preorder_cutoff_time);
+    const currentMinutes = istNow.getHours() * 60 + istNow.getMinutes();
+    
+    // If past cutoff time, minimum date is day after tomorrow
+    if (currentMinutes >= cutoffMinutes) {
+      const dayAfterTomorrow = new Date(istNow);
+      dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+      return dayAfterTomorrow.toISOString().split('T')[0];
+    }
+    
+    // Check if can order for today
+    const openMinutes = parseTime(storeTimings.opening_time);
+    const closeMinutes = parseTime(storeTimings.closing_time);
+    const earliestOrderTime = openMinutes - storeTimings.preorder_before_time;
+    const latestOrderTime = closeMinutes - storeTimings.preorder_before_time;
+    
+    if (currentMinutes >= earliestOrderTime && currentMinutes <= latestOrderTime) {
+      // Can order for today
+      return istNow.toISOString().split('T')[0];
+    }
+    
+    // Default: tomorrow
+    const tomorrow = new Date(istNow);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
   };
 
   const handlePreorderToggle = (value: boolean) => {
