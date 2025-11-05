@@ -3016,6 +3016,23 @@
             }
         }
 
+        async function movePreorderToAccepted(orderId) {
+            try {
+                await fetch(`${API_URL}/admin/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: 'accepted' })
+                });
+                showAlert('orders', 'Preorder moved to Accepted!', 'success');
+                
+                // Reload orders to refresh the view
+                const orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
+                renderOrders(orders);
+            } catch (error) {
+                showAlert('orders', 'Error updating preorder', 'error');
+            }
+        }
+
         let starRatings = {};
         let commissionRates = {};
 
