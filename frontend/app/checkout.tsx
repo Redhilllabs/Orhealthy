@@ -74,8 +74,15 @@ export default function CheckoutScreen() {
   const [preorderDate, setPreorderDate] = useState('');
   const [preorderTime, setPreorderTime] = useState('');
   const [deliveryConfig, setDeliveryConfig] = useState({ delivery_price: 50, min_order_for_free_delivery: 500 });
-  const [storeTimings, setStoreTimings] = useState({ opening_time: '6:00 AM', closing_time: '9:00 PM' });
+  const [storeTimings, setStoreTimings] = useState({ 
+    opening_time: '6:00 AM', 
+    closing_time: '9:00 PM',
+    preorder_before_time: 120, // minutes
+    preorder_cutoff_time: '10:00 PM'
+  });
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  const [showStoreClosedAlert, setShowStoreClosedAlert] = useState(false);
+  const [isWithinStoreHours, setIsWithinStoreHours] = useState(true);
 
   useEffect(() => {
     fetchAddresses();
