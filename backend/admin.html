@@ -1676,7 +1676,7 @@
             
             if (currentOrderStatusFilter === 'preorders') {
                 // Preorders tab - show only preorders with special columns
-                const preorders = orders.filter(order => order.is_preorder);
+                const preorders = orders.filter(order => order.is_preorder === true);
                 tbody.innerHTML = preorders.map(order => {
                     return `
                     <tr>
