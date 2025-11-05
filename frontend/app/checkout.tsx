@@ -409,7 +409,7 @@ export default function CheckoutScreen() {
     );
   }
 
-  const finalPrice = totalPrice - couponDiscount;
+  const finalPrice = totalPrice - couponDiscount + deliveryCharge;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
