@@ -537,9 +537,9 @@ export default function CheckoutScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Coupon Code</Text>
             {!couponApplied ? (
-              <View style={styles.couponInput}>
+              <View style={styles.couponInputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={styles.couponTextInput}
                   placeholder="Enter coupon code"
                   value={couponCode}
                   onChangeText={setCouponCode}
@@ -567,6 +567,29 @@ export default function CheckoutScreen() {
                 </View>
                 <TouchableOpacity onPress={removeCoupon}>
                   <Ionicons name="close-circle" size={24} color="#ef4444" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Preorder Section */}
+          <View style={styles.preorderContainer}>
+            <View style={styles.preorderRow}>
+              <Text style={styles.preorderLabel}>Preorder?</Text>
+              <Switch
+                value={isPreorder}
+                onValueChange={handlePreorderToggle}
+                trackColor={{ false: '#d1d5db', true: '#fcd34d' }}
+                thumbColor={isPreorder ? '#ffd700' : '#f4f3f4'}
+              />
+            </View>
+            {isPreorder && preorderDate && preorderTime && (
+              <View style={styles.preorderDetails}>
+                <Text style={styles.preorderDetailsText}>
+                  📅 {preorderDate} at {preorderTime}
+                </Text>
+                <TouchableOpacity onPress={() => setShowPreorderModal(true)}>
+                  <Text style={styles.changePreorderText}>Change</Text>
                 </TouchableOpacity>
               </View>
             )}
