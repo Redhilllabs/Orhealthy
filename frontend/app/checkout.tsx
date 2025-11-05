@@ -1077,9 +1077,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffd700',
   },
-  couponInput: {
+  couponInputContainer: {
     flexDirection: 'row',
     gap: 8,
+    alignItems: 'stretch',
+  },
+  couponTextInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
   },
   input: {
     flex: 1,
@@ -1097,6 +1106,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
+    minWidth: 80,
   },
   applyButtonText: {
     color: '#fff',
