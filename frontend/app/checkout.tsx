@@ -96,6 +96,17 @@ export default function CheckoutScreen() {
     }
   }, [orderingForGuidee, couponDiscount, totalPrice]);
 
+  useEffect(() => {
+    fetchDeliveryConfig();
+    fetchStoreTimings();
+  }, []);
+
+  useEffect(() => {
+    if (storeTimings.opening_time && storeTimings.closing_time) {
+      generateTimeSlots();
+    }
+  }, [storeTimings]);
+
   const fetchAddresses = async () => {
     try {
       const token = await storage.getItemAsync('session_token');
