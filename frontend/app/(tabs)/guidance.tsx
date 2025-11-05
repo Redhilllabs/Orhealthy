@@ -1939,7 +1939,7 @@ export default function GuidanceScreen() {
                         <View key={`${date}-${meal}`} style={styles.mealPlanCard}>
                           <View style={styles.mealPlanHeader}>
                             <Text style={styles.mealTimeLabel}>
-                              {meal.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {meal.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                             </Text>
                             {selectedMeal && (
                               <Text style={styles.selectedMealName}>
