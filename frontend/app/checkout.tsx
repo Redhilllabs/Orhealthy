@@ -722,22 +722,10 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
             )}
-            <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Delivery Charge</Text>
-              <Text style={styles.priceValue}>
-                {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
-              </Text>
-            </View>
-            {deliveryCharge === 0 && totalPrice - couponDiscount >= deliveryConfig.min_order_for_free_delivery && (
-              <Text style={styles.freeDeliveryText}>
-                🎉 You've unlocked free delivery!
-              </Text>
-            )}
-            
             {/* Preorder Checkbox */}
             <View style={styles.preorderContainer}>
               <View style={styles.preorderRow}>
-                <Text style={styles.preorderLabel}>Preorder for tomorrow?</Text>
+                <Text style={styles.preorderLabel}>Preorder?</Text>
                 <Switch
                   value={isPreorder}
                   onValueChange={handlePreorderToggle}
@@ -757,6 +745,18 @@ export default function CheckoutScreen() {
               )}
             </View>
 
+            <View style={styles.priceRow}>
+              <Text style={styles.priceLabel}>Delivery Charge</Text>
+              <Text style={styles.priceValue}>
+                {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
+              </Text>
+            </View>
+            {deliveryCharge === 0 && totalPrice - couponDiscount >= deliveryConfig.min_order_for_free_delivery && (
+              <Text style={styles.freeDeliveryText}>
+                🎉 You've unlocked free delivery!
+              </Text>
+            )}
+            
             <View style={[styles.priceRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>₹{finalPrice.toFixed(2)}</Text>
