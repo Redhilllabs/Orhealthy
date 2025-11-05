@@ -897,8 +897,8 @@ export default function GuidanceScreen() {
               <Text style={styles.userName}>{otherUser.name}</Text>
               {rating && rating > 0 && (
                 <View style={styles.ratingBadge}>
-                  <Ionicons name="star" size={12} color="#ffd700" />
                   <Text style={styles.ratingText}>{rating}</Text>
+                  <Ionicons name="star" size={12} color="#ffd700" style={{ marginLeft: 2 }} />
                 </View>
               )}
             </View>
