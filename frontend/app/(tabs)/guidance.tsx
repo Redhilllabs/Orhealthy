@@ -166,6 +166,16 @@ export default function GuidanceScreen() {
     'Supper',
   ];
 
+  // Helper function to sort meals chronologically
+  const sortMealsChronologically = (meals: string[]) => {
+    const mealOrder = ['breakfast', 'brunch', 'lunch', 'evening_snacks', 'dinner', 'supper'];
+    return [...meals].sort((a, b) => {
+      const indexA = mealOrder.indexOf(a.toLowerCase());
+      const indexB = mealOrder.indexOf(b.toLowerCase());
+      return indexA - indexB;
+    });
+  };
+
   const planTypes = [
     { value: 'single_meal', label: 'Single Meal' },
     { value: '1_day', label: '1 Day' },
