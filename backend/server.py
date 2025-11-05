@@ -1886,12 +1886,57 @@ async def get_following(request: Request):
                 guides.append({
                     "_id": str(guide["_id"]),
                     "name": guide.get("name", ""),
-                    "average_rating": guide.get("average_rating")
+                    "email": guide.get("email", ""),
+                    "average_rating": guide.get("average_rating", 0)
                 })
         except Exception:
             continue
     
     return guides
+
+@api_router.get("/guides/all")
+async def get_all_guides(request: Request):
+    """Get all users who are guides"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Find all users with is_guide flag
+    guides_cursor = db.users.find({"is_guide": True})
+    guides = []
+    
+    async for guide in guides_cursor:
+        guides.append({
+            "_id": str(guide["_id"]),
+            "name": guide.get("name", ""),
+            "email": guide.get("email", ""),
+            "average_rating": guide.get("average_rating", 0)
+        })
+    
+    return guides
+
+@api_router.get("/guides/guidees")
+async def get_guidees(request: Request):
+    """Get all guidees for the current guide"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    if not user.get("is_guide"):
+        return []
+    
+    # Get all users who have this guide in their guides list
+    guidees_cursor = db.users.find({"guides": user["_id"]})
+    guidees = []
+    
+    async for guidee in guidees_cursor:
+        guidees.append({
+            "_id": str(guidee["_id"]),
+            "name": guidee.get("name", ""),
+            "email": guidee.get("email", "")
+        })
+    
+    return guidees
 
 # Meal Plan endpoints
 @api_router.post("/meal-plans")
