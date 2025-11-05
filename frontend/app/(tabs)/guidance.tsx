@@ -1761,12 +1761,12 @@ export default function GuidanceScreen() {
                   type="date"
                   style={{
                     width: '100%',
-                    padding: 12,
-                    borderWidth: 1,
-                    borderColor: '#e2e8f0',
-                    borderRadius: 8,
-                    fontSize: 14,
-                    marginBottom: 16,
+                    padding: '12px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    marginBottom: '16px',
+                    fontFamily: 'inherit',
                   }}
                   value={startDateText}
                   onChange={(e) => setStartDateText(e.target.value)}
