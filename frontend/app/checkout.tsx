@@ -242,6 +242,93 @@ export default function CheckoutScreen() {
     setCouponDiscount(0);
   };
 
+  const fetchDeliveryConfig = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/config/delivery`);
+      setDeliveryConfig(response.data);
+    } catch (error) {
+      console.error('Error fetching delivery config:', error);
+    }
+  };
+
+  const fetchStoreTimings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/config/store-timings`);
+      setStoreTimings(response.data);
+    } catch (error) {
+      console.error('Error fetching store timings:', error);
+    }
+  };
+
+  const generateTimeSlots = () => {
+    const slots: string[] = [];
+    const parseTime = (timeStr: string) => {
+      const [time, period] = timeStr.split(' ');
+      let [hours, minutes] = time.split(':').map(Number);
+      if (period === 'PM' && hours !== 12) hours += 12;
+      if (period === 'AM' && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    };
+
+    const formatTime = (minutes: number) => {
+      let hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      const period = hours >= 12 ? 'PM' : 'AM';
+      if (hours > 12) hours -= 12;
+      if (hours === 0) hours = 12;
+      return `${hours}:${mins.toString().padStart(2, '0')} ${period}`;
+    };
+
+    const startMinutes = parseTime(storeTimings.opening_time);
+    const endMinutes = parseTime(storeTimings.closing_time);
+
+    for (let i = startMinutes; i <= endMinutes; i += 30) {
+      slots.push(formatTime(i));
+    }
+
+    setTimeSlots(slots);
+  };
+
+  const handlePreorderToggle = (value: boolean) => {
+    if (value) {
+      // Check if current time is before 10 PM IST
+      const now = new Date();
+      const istOffset = 5.5 * 60 * 60 * 1000;
+      const istTime = new Date(now.getTime() + istOffset);
+      const istHours = istTime.getUTCHours();
+      
+      if (istHours >= 22) {
+        Alert.alert('Preorder Closed', 'Preorders must be placed before 10 PM IST');
+        return;
+      }
+      setShowPreorderModal(true);
+    } else {
+      setIsPreorder(false);
+      setPreorderDate('');
+      setPreorderTime('');
+    }
+  };
+
+  const savePreorderDetails = () => {
+    if (!preorderDate || !preorderTime) {
+      Alert.alert('Error', 'Please select both date and time');
+      return;
+    }
+    setIsPreorder(true);
+    setShowPreorderModal(false);
+    Alert.alert('Success', 'Preorder details saved');
+  };
+
+  const calculateDeliveryCharge = () => {
+    const subtotal = totalPrice - couponDiscount;
+    if (subtotal >= deliveryConfig.min_order_for_free_delivery) {
+      return 0;
+    }
+    return deliveryConfig.delivery_price;
+  };
+
+  const deliveryCharge = calculateDeliveryCharge();
+
   const handlePlaceOrder = async () => {
     let deliveryAddress: Address;
 
