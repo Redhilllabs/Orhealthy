@@ -114,27 +114,7 @@ export default function ProfileScreen() {
       
       const data = response.data;
       
-      // Fetch guides
-      if (data.guides && data.guides.length > 0) {
-        const guidePromises = data.guides.map((id: string) =>
-          axios.get(`${API_URL}/users/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        );
-        const guideResponses = await Promise.all(guidePromises);
-        setGuides(guideResponses.map(r => r.data));
-      }
-
-      // Fetch guidees
-      if (data.guidees && data.guidees.length > 0) {
-        const guideePromises = data.guidees.map((id: string) =>
-          axios.get(`${API_URL}/users/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        );
-        const guideeResponses = await Promise.all(guideePromises);
-        setGuidees(guideeResponses.map(r => r.data));
-      }
+      
 
       // Fetch idols (people user follows)
       if (data.idols && data.idols.length > 0) {
