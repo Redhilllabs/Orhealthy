@@ -3651,6 +3651,103 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  subTabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    padding: 4,
+    marginBottom: 16,
+  },
+  subTab: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  subTabActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  subTabText: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  subTabTextActive: {
+    color: '#1e293b',
+    fontWeight: '600',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 16,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1e293b',
+  },
+  guidesListContainer: {
+    flex: 1,
+  },
+  guideCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  guideInfo: {
+    flex: 1,
+  },
+  guideHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  guideName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginRight: 8,
+  },
+  guideEmail: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  ratingText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#92400e',
+    marginLeft: 4,
+  },
 });
 
       {/* Edit Profile Modal - Continuing in next file chunk due to size */}
