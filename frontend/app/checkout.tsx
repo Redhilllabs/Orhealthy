@@ -110,9 +110,16 @@ export default function CheckoutScreen() {
 
   useEffect(() => {
     if (storeTimings.opening_time && storeTimings.closing_time) {
+      setIsWithinStoreHours(checkStoreHours());
       generateTimeSlots();
     }
   }, [storeTimings]);
+
+  useEffect(() => {
+    if (preorderDate) {
+      generateTimeSlots();
+    }
+  }, [preorderDate]);
 
   const fetchAddresses = async () => {
     try {
