@@ -2578,6 +2578,17 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 4,
   },
+  planName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  planMeals: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 4,
+  },
   planGoal: {
     fontSize: 14,
     color: '#64748b',
