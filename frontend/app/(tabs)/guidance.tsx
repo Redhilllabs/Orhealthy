@@ -219,6 +219,12 @@ export default function GuidanceScreen() {
       fetchProfile();
     } else if (activeTab === 'plan-requests' && user?.is_guide) {
       fetchGuidePlans();
+    } else if (activeTab === 'my-guides') {
+      fetchAllGuides();
+      fetchMyGuides();
+      if (user?.is_guide) {
+        fetchMyGuidees();
+      }
     }
   }, [activeTab]);
 
