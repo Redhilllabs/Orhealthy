@@ -2023,8 +2023,6 @@ export default function GuidanceScreen() {
               {Platform.OS === 'web' ? (
                 <input
                   type="date"
-                  readOnly
-                  onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                   style={{
                     width: '100%',
                     padding: '12px',
