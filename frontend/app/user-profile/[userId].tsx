@@ -27,7 +27,8 @@ interface HabitLog {
 }
 
 export default function UserProfileScreen() {
-  const { userId } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId;
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'timeline' | 'about'>('timeline');
   const [loading, setLoading] = useState(true);
