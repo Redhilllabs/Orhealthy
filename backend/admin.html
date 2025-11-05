@@ -3322,12 +3322,12 @@
                 });
                 
                 if (response.ok) {
-                    showAlert('delivery', 'Delivery configuration saved successfully!', 'success');
+                    showAlert('delivery-config', 'Delivery configuration saved successfully!', 'success');
                 } else {
-                    showAlert('delivery', 'Error saving delivery configuration', 'error');
+                    showAlert('delivery-config', 'Error saving delivery configuration', 'error');
                 }
             } catch (error) {
-                showAlert('delivery', 'Error saving delivery configuration', 'error');
+                showAlert('delivery-config', 'Error saving delivery configuration', 'error');
                 console.error('Error saving delivery config:', error);
             }
         }
