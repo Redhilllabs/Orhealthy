@@ -1639,21 +1639,6 @@ export default function GuidanceScreen() {
         style={styles.tabBar}
         contentContainerStyle={styles.tabBarContent}
       >
-        {!user?.is_guide && (
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'plans' && styles.activeTab]}
-            onPress={() => setActiveTab('plans')}
-          >
-            <Ionicons
-              name="calendar"
-              size={20}
-              color={activeTab === 'plans' ? '#ffd700' : '#999'}
-            />
-            <Text style={[styles.tabLabel, activeTab === 'plans' && styles.activeTabLabel]}>
-              Plan Requests
-            </Text>
-          </TouchableOpacity>
-        )}
         <TouchableOpacity
           style={[styles.tab, activeTab === 'my-guidance' && styles.activeTab]}
           onPress={() => setActiveTab('my-guidance')}
@@ -1695,10 +1680,9 @@ export default function GuidanceScreen() {
             Timeline
           </Text>
         </TouchableOpacity>
-        {user?.is_guide && (
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'plans' && styles.activeTab]}
-            onPress={() => setActiveTab('plans')}
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'plans' && styles.activeTab]}
+          onPress={() => setActiveTab('plans')}
         >
           <Ionicons
             name="calendar"
@@ -1706,7 +1690,7 @@ export default function GuidanceScreen() {
             color={activeTab === 'plans' ? '#ffd700' : '#999'}
           />
           <Text style={[styles.tabLabel, activeTab === 'plans' && styles.activeTabLabel]}>
-            My Plans
+            {user?.is_guide ? 'My Plans' : 'Plan Requests'}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
