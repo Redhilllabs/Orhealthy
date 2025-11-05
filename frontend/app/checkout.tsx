@@ -359,16 +359,6 @@ export default function CheckoutScreen() {
 
   const handlePreorderToggle = (value: boolean) => {
     if (value) {
-      // Check if current time is before 10 PM IST
-      const now = new Date();
-      const istOffset = 5.5 * 60 * 60 * 1000;
-      const istTime = new Date(now.getTime() + istOffset);
-      const istHours = istTime.getUTCHours();
-      
-      if (istHours >= 22) {
-        Alert.alert('Preorder Closed', 'Preorders must be placed before 10 PM IST');
-        return;
-      }
       setShowPreorderModal(true);
     } else {
       setIsPreorder(false);
