@@ -1459,24 +1459,8 @@ export default function GuidanceScreen() {
 
         return (
           <View style={styles.tabContent}>
-            {/* Sub-tabs for All Guides, My Guides, My Guidees */}
+            {/* Sub-tabs for My Guidees (guides only), My Guides, All Guides */}
             <View style={styles.subTabContainer}>
-              <TouchableOpacity
-                style={[styles.subTab, guidesSubTab === 'all' && styles.subTabActive]}
-                onPress={() => setGuidesSubTab('all')}
-              >
-                <Text style={[styles.subTabText, guidesSubTab === 'all' && styles.subTabTextActive]}>
-                  All Guides
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.subTab, guidesSubTab === 'my' && styles.subTabActive]}
-                onPress={() => setGuidesSubTab('my')}
-              >
-                <Text style={[styles.subTabText, guidesSubTab === 'my' && styles.subTabTextActive]}>
-                  My Guides
-                </Text>
-              </TouchableOpacity>
               {user?.is_guide && (
                 <TouchableOpacity
                   style={[styles.subTab, guidesSubTab === 'guidees' && styles.subTabActive]}
@@ -1487,6 +1471,22 @@ export default function GuidanceScreen() {
                   </Text>
                 </TouchableOpacity>
               )}
+              <TouchableOpacity
+                style={[styles.subTab, guidesSubTab === 'my' && styles.subTabActive]}
+                onPress={() => setGuidesSubTab('my')}
+              >
+                <Text style={[styles.subTabText, guidesSubTab === 'my' && styles.subTabTextActive]}>
+                  My Guides
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.subTab, guidesSubTab === 'all' && styles.subTabActive]}
+                onPress={() => setGuidesSubTab('all')}
+              >
+                <Text style={[styles.subTabText, guidesSubTab === 'all' && styles.subTabTextActive]}>
+                  All Guides
+                </Text>
+              </TouchableOpacity>
             </View>
 
             {/* Search Bar */}
