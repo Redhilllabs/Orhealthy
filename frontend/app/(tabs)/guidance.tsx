@@ -82,9 +82,11 @@ export default function GuidanceScreen() {
   const { refreshCart } = useCart();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'plan-requests' | 'my-guidance' | 'timeline' | 'plans' | 'about' | 'messages'>(
-    'my-guidance'
+    user?.is_guide ? 'plan-requests' : 'my-guidance'
   );
-  const [guidesSubTab, setGuidesSubTab] = useState<'all' | 'my' | 'guidees'>('all');
+  const [guidesSubTab, setGuidesSubTab] = useState<'all' | 'my' | 'guidees'>(
+    user?.is_guide ? 'guidees' : 'my'
+  );
   const [allGuides, setAllGuides] = useState<any[]>([]);
   const [myGuides, setMyGuides] = useState<any[]>([]);
   const [myGuidees, setMyGuidees] = useState<any[]>([]);
