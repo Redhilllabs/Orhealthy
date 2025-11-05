@@ -1585,6 +1585,7 @@ export default function GuidanceScreen() {
                   onChangeText={(text) => setProfileData({ ...profileData, age: text })}
                   keyboardType="numeric"
                   placeholder="Enter your age"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
 
