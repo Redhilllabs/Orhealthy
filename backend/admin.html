@@ -1730,7 +1730,9 @@
                 }).join('');
             } else {
                 // Specific status tabs - simplified view with action buttons
-                tbody.innerHTML = orders.map(order => {
+                // Filter out preorders from regular status tabs
+                const regularOrders = orders.filter(order => !order.is_preorder);
+                tbody.innerHTML = regularOrders.map(order => {
                     const nextStatus = getNextStatus(order.status);
                     
                     return `
