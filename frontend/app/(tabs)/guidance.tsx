@@ -1816,15 +1816,13 @@ export default function GuidanceScreen() {
                 </>
               )}
 
-              <Text style={styles.sectionLabel}>Goal / Purpose</Text>
+              <Text style={styles.sectionLabel}>Plan Name (Optional)</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={styles.input}
                 value={planGoal}
                 onChangeText={setPlanGoal}
-                placeholder="E.g., Weight loss, Muscle gain, Better health..."
+                placeholder="e.g., My Weight Loss Plan"
                 placeholderTextColor="#94a3b8"
-                multiline
-                numberOfLines={3}
               />
 
               <Text style={styles.sectionLabel}>
