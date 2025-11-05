@@ -964,6 +964,45 @@ export default function CheckoutScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Store Closed Alert Modal */}
+      <Modal
+        visible={showStoreClosedAlert}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={() => setShowStoreClosedAlert(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.alertModalContent}>
+            <Text style={styles.alertModalTitle}>🕒 Kitchen Closed</Text>
+            <Text style={styles.alertModalMessage}>
+              Our kitchen is currently closed.{'\n\n'}
+              <Text style={{ fontWeight: '600' }}>Opening Hours:</Text>{'\n'}
+              {storeTimings.opening_time} - {storeTimings.closing_time}
+            </Text>
+            <Text style={styles.alertModalSubtext}>
+              Would you like to place a preorder instead?
+            </Text>
+            <View style={styles.alertModalActions}>
+              <TouchableOpacity
+                style={styles.alertModalCancelButton}
+                onPress={() => setShowStoreClosedAlert(false)}
+              >
+                <Text style={styles.alertModalCancelButtonText}>OK</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.alertModalConfirmButton}
+                onPress={() => {
+                  setShowStoreClosedAlert(false);
+                  handlePreorderToggle(true);
+                }}
+              >
+                <Text style={styles.alertModalConfirmButtonText}>Preorder Now</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
