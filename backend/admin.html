@@ -3127,6 +3127,118 @@
             }
         }
 
+        // Settings Tab Management
+        function switchSettingsTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.settings-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('#settings .status-tab').forEach(el => el.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(`${tab}-settings`).style.display = 'block';
+            event.target.classList.add('active');
+            
+            // Load data for the tab
+            if (tab === 'timings') {
+                loadStoreTimings();
+            } else if (tab === 'delivery') {
+                loadDeliveryConfig();
+            }
+        }
+
+        async function loadStoreTimings() {
+            try {
+                const response = await fetch(`${API_URL}/config/store-timings`);
+                const data = await response.json();
+                
+                // Convert "6:00 AM" format to "06:00" (24-hour)
+                const convertTo24Hour = (timeStr) => {
+                    const [time, period] = timeStr.split(' ');
+                    let [hours, minutes] = time.split(':');
+                    hours = parseInt(hours);
+                    if (period === 'PM' && hours !== 12) hours += 12;
+                    if (period === 'AM' && hours === 12) hours = 0;
+                    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+                };
+                
+                document.getElementById('openingTime').value = convertTo24Hour(data.opening_time);
+                document.getElementById('closingTime').value = convertTo24Hour(data.closing_time);
+            } catch (error) {
+                console.error('Error loading store timings:', error);
+            }
+        }
+
+        async function saveStoreTimings() {
+            const openingTime = document.getElementById('openingTime').value;
+            const closingTime = document.getElementById('closingTime').value;
+            
+            // Convert "06:00" (24-hour) to "6:00 AM" format
+            const convertTo12Hour = (time24) => {
+                let [hours, minutes] = time24.split(':').map(Number);
+                const period = hours >= 12 ? 'PM' : 'AM';
+                if (hours > 12) hours -= 12;
+                if (hours === 0) hours = 12;
+                return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+            };
+            
+            const config = {
+                opening_time: convertTo12Hour(openingTime),
+                closing_time: convertTo12Hour(closingTime)
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/config/store-timings`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                if (response.ok) {
+                    showAlert('timings', 'Store timings saved successfully!', 'success');
+                } else {
+                    showAlert('timings', 'Error saving store timings', 'error');
+                }
+            } catch (error) {
+                showAlert('timings', 'Error saving store timings', 'error');
+                console.error('Error saving store timings:', error);
+            }
+        }
+
+        async function loadDeliveryConfig() {
+            try {
+                const response = await fetch(`${API_URL}/config/delivery`);
+                const data = await response.json();
+                
+                document.getElementById('deliveryPrice').value = data.delivery_price;
+                document.getElementById('minOrderForFree').value = data.min_order_for_free_delivery;
+            } catch (error) {
+                console.error('Error loading delivery config:', error);
+            }
+        }
+
+        async function saveDeliveryConfig() {
+            const config = {
+                delivery_price: parseFloat(document.getElementById('deliveryPrice').value),
+                min_order_for_free_delivery: parseFloat(document.getElementById('minOrderForFree').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/config/delivery`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                if (response.ok) {
+                    showAlert('delivery', 'Delivery configuration saved successfully!', 'success');
+                } else {
+                    showAlert('delivery', 'Error saving delivery configuration', 'error');
+                }
+            } catch (error) {
+                showAlert('delivery', 'Error saving delivery configuration', 'error');
+                console.error('Error saving delivery config:', error);
+            }
+        }
+
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
