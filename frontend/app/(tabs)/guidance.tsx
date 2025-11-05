@@ -149,6 +149,7 @@ export default function GuidanceScreen() {
     profession: '',
     fitness_activities: '',
     bio: '',
+    current_goal: '',
   });
   const [savingProfile, setSavingProfile] = useState(false);
 
