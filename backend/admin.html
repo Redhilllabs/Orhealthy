@@ -1674,7 +1674,38 @@
             const tbody = document.getElementById('ordersBody');
             const showAgent = (currentOrderStatusFilter === 'ready' || currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
             
-            if (currentOrderStatusFilter === 'all') {
+            if (currentOrderStatusFilter === 'preorders') {
+                // Preorders tab - show only preorders with special columns
+                const preorders = orders.filter(order => order.is_preorder);
+                tbody.innerHTML = preorders.map(order => {
+                    return `
+                    <tr>
+                        <td>${order._id.slice(-8)}</td>
+                        <td>
+                            <strong>${order.user_name || 'Unknown'}</strong><br>
+                            <small>${order.user_email || ''}</small>
+                        </td>
+                        <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
+                        <td><strong>📅 ${order.preorder_date || '-'}</strong></td>
+                        <td><strong>🕒 ${order.preorder_time || '-'}</strong></td>
+                        <td>
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
+                        </td>
+                        <td class="actions">
+                            ${order.status === 'arrived' ? `
+                                <button class="btn" style="font-size: 12px; padding: 6px 12px; background: #10b981; margin-bottom: 4px;" onclick="movePreorderToAccepted('${order._id}')">
+                                    ✓ Move to Accepted
+                                </button><br>
+                            ` : ''}
+                            ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+                                <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px;" onclick="cancelOrder('${order._id}')">Cancel</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            } else if (currentOrderStatusFilter === 'all') {
                 // All orders tab - simplified view
                 tbody.innerHTML = orders.map(order => {
                     return `
