@@ -1526,11 +1526,11 @@ export default function GuidanceScreen() {
                         <View style={styles.guideInfo}>
                           <View style={styles.guideHeader}>
                             <Text style={styles.guideName}>{guide.name}</Text>
-                            {guide.average_rating && (
+                            {guide.star_rating && (
                               <View style={styles.ratingContainer}>
                                 <Ionicons name="star" size={16} color="#ffd700" />
                                 <Text style={styles.ratingText}>
-                                  {guide.average_rating.toFixed(1)}
+                                  {guide.star_rating.toFixed(1)}
                                 </Text>
                               </View>
                             )}
@@ -1556,11 +1556,11 @@ export default function GuidanceScreen() {
                         <View style={styles.guideInfo}>
                           <View style={styles.guideHeader}>
                             <Text style={styles.guideName}>{guide.name}</Text>
-                            {guide.average_rating && (
+                            {guide.star_rating && (
                               <View style={styles.ratingContainer}>
                                 <Ionicons name="star" size={16} color="#ffd700" />
                                 <Text style={styles.ratingText}>
-                                  {guide.average_rating.toFixed(1)}
+                                  {guide.star_rating.toFixed(1)}
                                 </Text>
                               </View>
                             )}
@@ -2122,7 +2122,7 @@ export default function GuidanceScreen() {
                       ]}
                     >
                       {guide.name}
-                      {guide.average_rating && ` (★${guide.average_rating.toFixed(1)})`}
+                      {guide.star_rating && ` (★${guide.star_rating.toFixed(1)})`}
                     </Text>
                   </TouchableOpacity>
                 ))}
