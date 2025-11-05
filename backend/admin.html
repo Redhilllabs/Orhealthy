@@ -520,6 +520,28 @@
                                 <input type="time" id="closingTime" class="config-input" style="width: 100%;">
                             </div>
                         </div>
+
+                        <h3 style="margin-top: 32px; margin-bottom: 16px; font-size: 18px; font-weight: 600; color: #1e293b;">⏰ Preorder Settings</h3>
+                        <p style="color: #64748b; margin-bottom: 20px;">Configure preorder timing constraints.</p>
+                        
+                        <div style="display: grid; gap: 20px;">
+                            <div class="config-item">
+                                <div style="min-width: 300px;">
+                                    <span class="config-label">⏱️ Preorder Before Time</span>
+                                    <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Minimum minutes before delivery time for preorders</p>
+                                </div>
+                                <input type="number" class="config-input" id="preorderBeforeTime" value="120" min="0" step="15" style="width: 150px;">
+                                <span style="color: #64748b; font-size: 13px;">minutes</span>
+                            </div>
+
+                            <div class="config-item">
+                                <div style="min-width: 300px;">
+                                    <span class="config-label">🔔 Preorder Cut-off Time</span>
+                                    <p style="font-size: 12px; color: #64748b; margin-top: 4px;">Orders for next day must be placed before this time</p>
+                                </div>
+                                <input type="time" class="config-input" id="preorderCutoffTime" style="width: 150px;">
+                            </div>
+                        </div>
                         
                         <button class="btn" style="margin-top: 24px;" onclick="saveStoreTimings()">Save Store Timings</button>
                     </div>
