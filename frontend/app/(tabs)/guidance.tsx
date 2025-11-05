@@ -917,6 +917,7 @@ export default function GuidanceScreen() {
               value={activityData.name}
               onChangeText={(text) => setActivityData({ ...activityData, name: text })}
               placeholder="Sprouted Legumes Bowl"
+              placeholderTextColor="#94a3b8"
             />
           </View>
         );
@@ -931,6 +932,7 @@ export default function GuidanceScreen() {
                 onChangeText={(text) => setActivityData({ ...activityData, hours: text })}
                 keyboardType="numeric"
                 placeholder="8"
+                placeholderTextColor="#94a3b8"
               />
             </View>
             <View style={styles.inputRow}>
