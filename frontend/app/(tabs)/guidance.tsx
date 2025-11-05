@@ -1238,12 +1238,12 @@ export default function GuidanceScreen() {
                         <Text style={styles.planType}>
                           {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
                         </Text>
+                        {item.goal && (
+                          <Text style={styles.planGoalLabel}>Plan Name: <Text style={styles.planGoalValue}>{item.goal}</Text></Text>
+                        )}
                         <Text style={styles.planDate}>
                           Starts: {new Date(item.start_date).toLocaleDateString()}
                         </Text>
-                        {item.goal && (
-                          <Text style={styles.planName}>{item.goal}</Text>
-                        )}
                       </View>
                       <View style={[
                         styles.statusBadge,
