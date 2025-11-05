@@ -1910,7 +1910,7 @@ async def get_all_guides(request: Request):
             "_id": str(guide["_id"]),
             "name": guide.get("name", ""),
             "email": guide.get("email", ""),
-            "average_rating": guide.get("average_rating", 0)
+            "star_rating": guide.get("star_rating", 0)
         })
     
     return guides
