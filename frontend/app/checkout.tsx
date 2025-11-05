@@ -1264,9 +1264,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   totalLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 17,
+    fontWeight: '500',
+    color: '#475569',
+    letterSpacing: 0.5,
   },
   totalValue: {
     fontSize: 18,
