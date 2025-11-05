@@ -1441,7 +1441,7 @@ export default function GuidanceScreen() {
           </ScrollView>
         );
 
-      case 'my-guides':
+      case 'my-guidance':
         const filteredAllGuides = allGuides.filter(guide =>
           guide.name.toLowerCase().includes(guideSearchQuery.toLowerCase()) ||
           guide.email.toLowerCase().includes(guideSearchQuery.toLowerCase())
