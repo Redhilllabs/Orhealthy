@@ -1631,7 +1631,19 @@
             const thead = document.querySelector('#ordersBody').parentElement.querySelector('thead tr');
             const showAgent = (status === 'ready' || status === 'out_for_delivery' || status === 'delivered' || status === 'all');
             
-            if (status === 'all') {
+            if (status === 'preorders') {
+                // Preorders tab: show preorder-specific columns
+                thead.innerHTML = `
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Preorder Date</th>
+                    <th>Preorder Time</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                `;
+            } else if (status === 'all') {
                 // All orders: show status column AND actions (delete)
                 thead.innerHTML = `
                     <th>Order ID</th>
