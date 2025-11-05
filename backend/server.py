@@ -343,6 +343,14 @@ class Order(BaseModel):
     delivered_at: Optional[datetime] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class StoreTimingsConfig(BaseModel):
+    opening_time: str  # Format: "6:00 AM"
+    closing_time: str  # Format: "9:00 PM"
+    
+class DeliveryConfig(BaseModel):
+    delivery_price: float
+    min_order_for_free_delivery: float
+
 class DeliveryAgent(BaseModel):
     email: str
     name: str
