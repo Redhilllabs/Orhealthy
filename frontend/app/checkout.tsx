@@ -927,7 +927,7 @@ export default function CheckoutScreen() {
             <Ionicons name="time-outline" size={60} color="#ef4444" />
             <Text style={styles.storeClosedTitle}>Store is Closed</Text>
             <Text style={styles.storeClosedMessage}>
-              We're currently closed. You can place a preorder for tomorrow or visit us during our operating hours:
+              We're currently closed. You can place a preorder or visit us during our operating hours:
             </Text>
             <Text style={styles.storeHours}>
               {storeTimings.opening_time} - {storeTimings.closing_time}
