@@ -863,6 +863,8 @@ export default function CheckoutScreen() {
               <Text style={styles.preorderInputLabel}>Delivery Date</Text>
               <input
                 type="date"
+                readOnly
+                onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -870,14 +872,12 @@ export default function CheckoutScreen() {
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  boxSizing: 'border-box',
                 }}
                 value={preorderDate}
                 onChange={(e) => setPreorderDate(e.target.value)}
-                min={(() => {
-                  const tomorrow = new Date();
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-                  return tomorrow.toISOString().split('T')[0];
-                })()}
+                min={getMinDate()}
               />
             </View>
 
