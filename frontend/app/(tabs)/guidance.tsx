@@ -1693,6 +1693,7 @@ export default function GuidanceScreen() {
                   value={profileData.profession}
                   onChangeText={(text) => setProfileData({ ...profileData, profession: text })}
                   placeholder="e.g., Software Engineer"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
 
@@ -1703,6 +1704,7 @@ export default function GuidanceScreen() {
                   value={profileData.fitness_activities}
                   onChangeText={(text) => setProfileData({ ...profileData, fitness_activities: text })}
                   placeholder="e.g., Running, Yoga"
+                  placeholderTextColor="#94a3b8"
                 />
               </View>
 
