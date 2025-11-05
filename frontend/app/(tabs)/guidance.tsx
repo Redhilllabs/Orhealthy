@@ -2621,6 +2621,7 @@ const styles = StyleSheet.create({
   planMeals: {
     fontSize: 14,
     color: '#64748b',
+    marginTop: 2,
     marginBottom: 8,
   },
   planGuide: {
