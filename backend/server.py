@@ -1981,6 +1981,8 @@ async def update_store_timings(timings: StoreTimingsConfig):
             "type": "store_timings",
             "opening_time": timings.opening_time,
             "closing_time": timings.closing_time,
+            "preorder_before_time": timings.preorder_before_time,
+            "preorder_cutoff_time": timings.preorder_cutoff_time,
             "updated_at": datetime.now(timezone.utc)
         }},
         upsert=True
