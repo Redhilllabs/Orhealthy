@@ -1528,10 +1528,10 @@ export default function GuidanceScreen() {
                             <Text style={styles.guideName}>{guide.name}</Text>
                             {guide.star_rating && guide.star_rating > 0 && (
                               <View style={styles.ratingContainer}>
-                                <Ionicons name="star" size={16} color="#ffd700" />
                                 <Text style={styles.ratingText}>
                                   {guide.star_rating}
                                 </Text>
+                                <Ionicons name="star" size={16} color="#ffd700" style={{ marginLeft: 4 }} />
                               </View>
                             )}
                           </View>
@@ -1558,10 +1558,10 @@ export default function GuidanceScreen() {
                             <Text style={styles.guideName}>{guide.name}</Text>
                             {guide.star_rating && guide.star_rating > 0 && (
                               <View style={styles.ratingContainer}>
-                                <Ionicons name="star" size={16} color="#ffd700" />
                                 <Text style={styles.ratingText}>
                                   {guide.star_rating}
                                 </Text>
+                                <Ionicons name="star" size={16} color="#ffd700" style={{ marginLeft: 4 }} />
                               </View>
                             )}
                           </View>
