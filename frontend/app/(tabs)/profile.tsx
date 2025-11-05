@@ -350,8 +350,6 @@ export default function ProfileScreen() {
 
   const tabs = [
     { key: 'posts', label: 'Posts', icon: 'list' },
-    { key: 'guides', label: 'Guides', icon: 'star' },
-    { key: 'guidees', label: 'Guidees', icon: 'people' },
     { key: 'idols', label: 'Idols', icon: 'heart' },
     { key: 'fans', label: 'Fans', icon: 'trophy' },
     { key: 'addresses', label: 'Addresses', icon: 'location' },
