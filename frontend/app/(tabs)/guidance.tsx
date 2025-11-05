@@ -2023,6 +2023,8 @@ export default function GuidanceScreen() {
               {Platform.OS === 'web' ? (
                 <input
                   type="date"
+                  readOnly
+                  onFocus={(e) => e.target.showPicker && e.target.showPicker()}
                   style={{
                     width: '100%',
                     padding: '12px',
@@ -2033,13 +2035,16 @@ export default function GuidanceScreen() {
                     fontFamily: 'inherit',
                     color: '#1e293b',
                     boxSizing: 'border-box',
+                    cursor: 'pointer',
                   }}
                   value={startDateText}
                   onChange={(e) => setStartDateText(e.target.value)}
                   min={(() => {
-                    const date = new Date();
-                    date.setDate(date.getDate() + 2); // Day after tomorrow
-                    return date.toISOString().split('T')[0];
+                    const now = new Date();
+                    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+                    const istTime = new Date(utcTime + (3600000 * 5.5));
+                    istTime.setDate(istTime.getDate() + 2); // Day after tomorrow in IST
+                    return istTime.toISOString().split('T')[0];
                   })()}
                 />
               ) : (
