@@ -1235,15 +1235,15 @@ export default function GuidanceScreen() {
                   <View style={styles.planCard}>
                     <View style={styles.planHeader}>
                       <View>
-                        {item.goal && (
-                          <Text style={styles.planName}>{item.goal}</Text>
-                        )}
                         <Text style={styles.planType}>
                           {planTypes.find(p => p.value === item.plan_type)?.label || item.plan_type}
                         </Text>
                         <Text style={styles.planDate}>
                           Starts: {new Date(item.start_date).toLocaleDateString()}
                         </Text>
+                        {item.goal && (
+                          <Text style={styles.planName}>{item.goal}</Text>
+                        )}
                       </View>
                       <View style={[
                         styles.statusBadge,
