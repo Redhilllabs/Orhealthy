@@ -38,6 +38,7 @@ class UserProfile(BaseModel):
     profession: Optional[str] = None
     fitness_activities: List[str] = []
     bio: Optional[str] = None
+    current_goal: Optional[str] = None  # User's current health/fitness goal
     expertise: Optional[str] = None
 
 class Address(BaseModel):
