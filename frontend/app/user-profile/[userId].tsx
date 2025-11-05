@@ -75,10 +75,12 @@ export default function UserProfileScreen() {
     setLoading(true);
     try {
       const token = await storage.getItemAsync('session_token');
-      // We need to create an endpoint to fetch habits by user_id
+      console.log('Fetching habits for userId:', userId);
       const response = await axios.get(`${API_URL}/habits/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('Habits response:', response.data);
+      console.log('Number of habits:', response.data?.length || 0);
       setHabits(response.data || []);
     } catch (error) {
       console.error('Error fetching habits:', error);
