@@ -1959,8 +1959,18 @@ async def get_store_timings():
     config = await db.config.find_one({"type": "store_timings"})
     if not config:
         # Default timings
-        return {"opening_time": "6:00 AM", "closing_time": "9:00 PM"}
-    return {"opening_time": config.get("opening_time"), "closing_time": config.get("closing_time")}
+        return {
+            "opening_time": "6:00 AM", 
+            "closing_time": "9:00 PM",
+            "preorder_before_time": 120,
+            "preorder_cutoff_time": "10:00 PM"
+        }
+    return {
+        "opening_time": config.get("opening_time"),
+        "closing_time": config.get("closing_time"),
+        "preorder_before_time": config.get("preorder_before_time", 120),
+        "preorder_cutoff_time": config.get("preorder_cutoff_time", "10:00 PM")
+    }
 
 @api_router.put("/config/store-timings")
 async def update_store_timings(timings: StoreTimingsConfig):
