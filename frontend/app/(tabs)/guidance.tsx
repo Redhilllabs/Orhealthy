@@ -1623,6 +1623,7 @@ export default function GuidanceScreen() {
                     onChangeText={(text) => setProfileData({ ...profileData, height: text })}
                     keyboardType="numeric"
                     placeholder="170"
+                    placeholderTextColor="#94a3b8"
                   />
                 </View>
                 <View style={[styles.inputGroup, { flex: 1, marginLeft: 8 }]}>
@@ -1633,6 +1634,7 @@ export default function GuidanceScreen() {
                     onChangeText={(text) => setProfileData({ ...profileData, weight: text })}
                     keyboardType="numeric"
                     placeholder="70"
+                    placeholderTextColor="#94a3b8"
                   />
                 </View>
               </View>
