@@ -745,29 +745,6 @@ export default function CheckoutScreen() {
                 </Text>
               </View>
             )}
-            {/* Preorder Checkbox */}
-            <View style={styles.preorderContainer}>
-              <View style={styles.preorderRow}>
-                <Text style={styles.preorderLabel}>Preorder?</Text>
-                <Switch
-                  value={isPreorder}
-                  onValueChange={handlePreorderToggle}
-                  trackColor={{ false: '#d1d5db', true: '#fcd34d' }}
-                  thumbColor={isPreorder ? '#ffd700' : '#f4f3f4'}
-                />
-              </View>
-              {isPreorder && preorderDate && preorderTime && (
-                <View style={styles.preorderDetails}>
-                  <Text style={styles.preorderDetailsText}>
-                    📅 {preorderDate} at {preorderTime}
-                  </Text>
-                  <TouchableOpacity onPress={() => setShowPreorderModal(true)}>
-                    <Text style={styles.changePreorderText}>Change</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-
             <View style={styles.priceRow}>
               <Text style={styles.priceLabel}>Delivery Charge</Text>
               <Text style={styles.priceValue}>
