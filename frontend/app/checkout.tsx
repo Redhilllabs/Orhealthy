@@ -418,6 +418,12 @@ export default function CheckoutScreen() {
       deliveryAddress = addresses[selectedAddressIndex];
     }
 
+    // Check if outside store hours and not preorder
+    if (!isWithinStoreHours && !isPreorder) {
+      setShowStoreClosedAlert(true);
+      return;
+    }
+
     try {
       setLoading(true);
       const token = await storage.getItemAsync('session_token');
