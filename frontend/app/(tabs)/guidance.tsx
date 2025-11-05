@@ -1742,7 +1742,7 @@ export default function GuidanceScreen() {
             color={activeTab === 'plans' ? '#ffd700' : '#999'}
           />
           <Text style={[styles.tabLabel, activeTab === 'plans' && styles.activeTabLabel]}>
-            {user?.is_guide ? 'My Plans' : 'Plan Requests'}
+            My Plans
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
