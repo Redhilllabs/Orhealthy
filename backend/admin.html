@@ -2041,8 +2041,8 @@
                 }).join('');
             } else {
                 // Other status tabs (arrived, out_for_delivery, cancelled)
-                const regularOrders = orders.filter(order => !order.is_preorder);
-                tbody.innerHTML = regularOrders.map(order => {
+                // Include both regular orders and preorders
+                tbody.innerHTML = orders.map(order => {
                     const nextStatus = getNextStatus(order.status);
                     
                     return `
