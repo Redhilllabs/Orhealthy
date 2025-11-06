@@ -1896,11 +1896,10 @@
                 }).join('');
             } else if (showTTD) {
                 // Accepted, Preparing, Ready tabs - show TTD column with live countdown
-                // Filter out preorders from regular status tabs
-                const regularOrders = orders.filter(order => !order.is_preorder);
+                // Include both regular orders and preorders
                 
                 // Sort by TTD (ascending - most urgent first)
-                const sortedOrders = regularOrders.sort((a, b) => {
+                const sortedOrders = orders.sort((a, b) => {
                     const ttdA = calculateTTD(a, window.deliveryConfigCache);
                     const ttdB = calculateTTD(b, window.deliveryConfigCache);
                     if (!ttdA) return 1;
