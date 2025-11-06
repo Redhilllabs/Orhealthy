@@ -747,6 +747,23 @@ async def update_profile(profile_data: dict, request: Request):
     
     return {"message": "Profile updated successfully"}
 
+@api_router.get("/commission-history")
+async def get_commission_history(request: Request):
+    """Get commission history for the authenticated guide"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    if not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can access commission history")
+    
+    # Fetch commission history
+    history = await db.commission_history.find(
+        {"guide_id": user["_id"]}
+    ).sort("created_at", -1).to_list(length=100)
+    
+    return {"history": history}
+
 @api_router.get("/users/{user_id}")
 async def get_user(user_id: str):
     """Get user by ID"""
