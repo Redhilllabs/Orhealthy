@@ -3844,11 +3844,26 @@
         }
 
         async function approveWithdrawal(withdrawalId) {
-            if (!confirm('Are you sure you want to approve this withdrawal request?')) return;
+            // Prompt for transaction ID
+            const transactionId = prompt('Enter Transaction ID:');
+            
+            if (!transactionId || transactionId.trim() === '') {
+                showAlert('withdrawals', 'Transaction ID is required', 'error');
+                return;
+            }
+            
+            if (!confirm(`Approve withdrawal with Transaction ID: ${transactionId}?`)) return;
 
             try {
-                const response = await fetch(`${API_URL}/admin/withdrawals/${withdrawalId}/approve`, {
-                    method: 'PUT'
+                const response = await fetch(`${API_URL}/admin/withdrawal-requests/${withdrawalId}/process`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'approved',
+                        transaction_id: transactionId
+                    })
                 });
 
                 if (response.ok) {
