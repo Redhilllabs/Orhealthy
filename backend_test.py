@@ -14,7 +14,7 @@ import sys
 BACKEND_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://guide-delivery.preview.emergentagent.com')
 API_BASE = f"{BACKEND_URL}/api"
 
-class TTDSystemTester:
+class DeliveryAgentPortalTester:
     def __init__(self):
         self.session = requests.Session()
         self.test_results = []
