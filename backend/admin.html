@@ -1613,9 +1613,11 @@
             
             try {
                 let orders;
-                if (status === 'all') {
+                if (status === 'all' || status === 'preorders') {
+                    // For 'all' and 'preorders', fetch all orders and filter in renderOrders
                     orders = await fetch(`${API_URL}/admin/orders`).then(r => r.json());
                 } else {
+                    // For specific statuses, use status endpoint
                     orders = await fetch(`${API_URL}/orders/by-status/${status}`).then(r => r.json());
                 }
                 
