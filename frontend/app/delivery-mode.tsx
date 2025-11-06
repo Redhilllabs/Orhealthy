@@ -244,17 +244,19 @@ export default function DeliveryModeScreen() {
     }
     
     const remainingMs = expectedTime.getTime() - now.getTime();
+    const isOverdue = remainingMs < 0;
+    const absMs = Math.abs(remainingMs);
     
-    if (remainingMs <= 0) {
-      return '00:00:00';
-    }
-    
-    const totalSeconds = Math.floor(remainingMs / 1000);
+    const totalSeconds = Math.floor(absMs / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
     
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    return {
+      time: `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
+      isOverdue,
+      totalSeconds
+    };
   };
 
   const undoDelivery = async (orderId: string) => {
