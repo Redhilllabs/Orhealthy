@@ -30,6 +30,12 @@ interface Order {
   shipping_address: any;
   created_at: string;
   user_email?: string;
+  user_name?: string;
+  payment_id?: string;
+  is_preorder?: boolean;
+  preorder_date?: string;
+  preorder_time?: string;
+  accepted_at?: string;
 }
 
 interface CreditRecord {
