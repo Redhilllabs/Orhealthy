@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
 """
-Backend Testing for OrHealthy TTD (Time to Deliver) System
-Testing Focus: Delivery Config Endpoints, Order Status Updates, Admin Panel Integration
+Backend API Testing for Delivery Agent Portal
+Testing payment method and order timestamp display functionality
 """
 
 import requests
 import json
-import time
+import os
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional
+import sys
 
-# Configuration
-BASE_URL = "https://guide-delivery.preview.emergentagent.com/api"
-ADMIN_PANEL_URL = "https://guide-delivery.preview.emergentagent.com/api/admin-panel"
-ADMIN_CREDENTIALS = {
-    "email": "admin@admin.com",
-    "password": "admin"
-}
+# Get backend URL from environment
+BACKEND_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://guide-delivery.preview.emergentagent.com')
+API_BASE = f"{BACKEND_URL}/api"
 
 class TTDSystemTester:
     def __init__(self):
