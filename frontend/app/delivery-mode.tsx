@@ -932,6 +932,33 @@ const styles = StyleSheet.create({
     color: '#333',
     lineHeight: 20,
   },
+  ttdSection: {
+    backgroundColor: '#fff3e0',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ffb74d',
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  ttdHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  ttdLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#e65100',
+  },
+  ttdValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ff6b35',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
   deliveredButton: {
     backgroundColor: '#4caf50',
     paddingVertical: 12,
