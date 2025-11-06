@@ -2876,11 +2876,11 @@ async def create_order(order_data: dict, request: Request):
     # Check if guide is ordering for guidee
     ordered_by_guide_id = order_data.get("ordered_by_guide_id")
     ordered_for_guidee_id = order_data.get("ordered_for_guidee_id")
-    commission_earned = 0.0
     commission_rate = 0.0
     guide_id_for_commission = None
     meal_plan_id = None
     
+    # Determine which guide should get commission (but don't credit yet - wait for delivery)
     # Calculate commission if guide is ordering for guidee (direct order)
     if ordered_by_guide_id and ordered_for_guidee_id:
         guide_id_for_commission = ordered_by_guide_id
@@ -2896,19 +2896,12 @@ async def create_order(order_data: dict, request: Request):
                     guide_id_for_commission = meal_plan["guide_id"]
                     break  # Use the first meal plan found
     
-    # If we have a guide to credit commission to
+    # Calculate commission rate (but don't credit yet - commission will be credited on delivery)
     if guide_id_for_commission:
         guide = await db.users.find_one({"_id": ObjectId(guide_id_for_commission)})
         if guide and guide.get("is_guide"):
             star_rating = guide.get("star_rating", 0)
             commission_rate = await calculate_commission_rate(star_rating)
-            commission_earned = (final_price * commission_rate) / 100
-            
-            # Update guide's commission balance
-            await db.users.update_one(
-                {"_id": ObjectId(guide_id_for_commission)},
-                {"$inc": {"commission_balance": commission_earned}}
-            )
     
     # Transform address from User Address format to Order Address format
     def transform_address(addr):
