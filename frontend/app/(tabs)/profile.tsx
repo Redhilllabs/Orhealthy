@@ -582,6 +582,67 @@ export default function ProfileScreen() {
           />
         );
 
+      case 'orders':
+        return (
+          <View style={styles.ordersContainer}>
+            {orders.length === 0 ? (
+              <Text style={styles.emptyText}>No orders yet</Text>
+            ) : (
+              <FlatList
+                data={orders}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => {
+                  const statusColors = {
+                    arrived: { bg: '#e3f2fd', border: '#2196f3', text: '#1565c0' },
+                    accepted: { bg: '#fff3e0', border: '#ff9800', text: '#e65100' },
+                    preparing: { bg: '#fff3e0', border: '#ff9800', text: '#e65100' },
+                    ready: { bg: '#f3e5f5', border: '#9c27b0', text: '#6a1b9a' },
+                    out_for_delivery: { bg: '#fce4ec', border: '#e91e63', text: '#880e4f' },
+                    delivered: { bg: '#e8f5e9', border: '#4caf50', text: '#2e7d32' },
+                    cancelled: { bg: '#ffebee', border: '#f44336', text: '#c62828' },
+                  };
+                  const statusColor = statusColors[item.status as keyof typeof statusColors] || statusColors.arrived;
+                  const statusText = item.status.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+
+                  return (
+                    <TouchableOpacity
+                      style={styles.orderCard}
+                      onPress={() => {
+                        setSelectedOrder(item);
+                        setShowOrderModal(true);
+                      }}
+                    >
+                      <View style={styles.orderHeader}>
+                        <Text style={styles.orderIdText}>#{item.order_id || item._id.slice(-8)}</Text>
+                        <View style={[styles.orderStatusBadge, { backgroundColor: statusColor.bg, borderColor: statusColor.border }]}>
+                          <Text style={[styles.orderStatusText, { color: statusColor.text }]}>{statusText}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.orderItemCount}>{item.items?.length || 0} items</Text>
+                      <View style={styles.orderFooter}>
+                        <Text style={styles.orderPrice}>₹{item.final_price?.toFixed(2)}</Text>
+                        <Text style={styles.orderDate}>
+                          {new Date(item.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </Text>
+                      </View>
+                      <View style={styles.orderPaymentRow}>
+                        <Ionicons 
+                          name={item.payment_method === 'online' ? "card" : "cash"} 
+                          size={14} 
+                          color="#666" 
+                        />
+                        <Text style={styles.orderPaymentText}>
+                          {item.payment_method === 'online' ? 'Online' : 'Pay on Delivery'}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }}
+              />
+            )}
+          </View>
+        );
+
       case 'addresses':
         return (
           <View style={styles.addressesContainer}>
