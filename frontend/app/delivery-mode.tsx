@@ -345,6 +345,13 @@ export default function DeliveryModeScreen() {
         const data = await response.json();
         console.log('Undo successful:', data);
         
+        // Remove from deliveringOrders set so button isn't stuck
+        setDeliveringOrders(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(orderId);
+          return newSet;
+        });
+        
         if (Platform.OS === 'web') {
           alert('Success: Delivery undone successfully. Order moved back to Assigned tab.');
         } else {
