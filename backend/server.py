@@ -750,7 +750,7 @@ async def update_profile(profile_data: dict, request: Request):
 
 @api_router.get("/commission-history")
 async def get_commission_history(request: Request):
-    """Get commission history for the authenticated guide"""
+    """Get commission history for the authenticated guide (includes commissions and withdrawals)"""
     user = await get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -758,14 +758,16 @@ async def get_commission_history(request: Request):
     if not user.get("is_guide"):
         raise HTTPException(status_code=403, detail="Only guides can access commission history")
     
-    # Fetch commission history
+    # Fetch commission history (both earnings and withdrawals)
     history = await db.commission_history.find(
         {"guide_id": user["_id"]}
-    ).sort("created_at", -1).to_list(length=100)
+    ).sort("created_at", -1).to_list(length=200)
     
     # Convert ObjectId to string
     for item in history:
         item["_id"] = str(item["_id"])
+        # Add display type
+        item["display_type"] = "withdrawal" if item.get("type") == "withdrawal" else "commission"
     
     return {"history": history}
 
