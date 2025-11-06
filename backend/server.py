@@ -764,6 +764,61 @@ async def get_commission_history(request: Request):
     
     return {"history": history}
 
+@api_router.post("/withdrawal-requests")
+async def create_withdrawal_request(request_data: dict, request: Request):
+    """Create a withdrawal request"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    if not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can request withdrawals")
+    
+    amount = request_data.get("amount")
+    if not amount or amount <= 0:
+        raise HTTPException(status_code=400, detail="Invalid amount")
+    
+    # Check if user has sufficient balance
+    commission_balance = user.get("commission_balance", 0)
+    if amount > commission_balance:
+        raise HTTPException(status_code=400, detail="Insufficient balance")
+    
+    # Create withdrawal request
+    withdrawal_request = {
+        "guide_id": user["_id"],
+        "guide_name": user.get("name", "Unknown"),
+        "guide_email": user.get("email", ""),
+        "amount": amount,
+        "status": "pending",  # pending, approved, rejected
+        "created_at": get_ist_time(),
+        "processed_at": None,
+        "processed_by": None
+    }
+    
+    result = await db.withdrawal_requests.insert_one(withdrawal_request)
+    
+    return {
+        "message": "Withdrawal request created successfully",
+        "id": str(result.inserted_id)
+    }
+
+@api_router.get("/withdrawal-requests/my")
+async def get_my_withdrawal_requests(request: Request):
+    """Get withdrawal requests for the authenticated guide"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    if not user.get("is_guide"):
+        raise HTTPException(status_code=403, detail="Only guides can access withdrawal requests")
+    
+    # Fetch withdrawal requests
+    requests = await db.withdrawal_requests.find(
+        {"guide_id": user["_id"]}
+    ).sort("created_at", -1).to_list(length=100)
+    
+    return {"requests": requests}
+
 @api_router.get("/users/{user_id}")
 async def get_user(user_id: str):
     """Get user by ID"""
