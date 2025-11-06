@@ -955,15 +955,19 @@ export default function ProfileScreen() {
 
       {/* Withdrawal Request Modal */}
       <Modal visible={showWithdrawalModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Request Withdrawal</Text>
-              <TouchableOpacity onPress={() => setShowWithdrawalModal(false)}>
-                <Ionicons name="close" size={28} color="#333" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.modalBody}>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalContent, { maxHeight: '85%' }]}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Request Withdrawal</Text>
+                <TouchableOpacity onPress={() => setShowWithdrawalModal(false)}>
+                  <Ionicons name="close" size={28} color="#333" />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
               <View style={{ padding: 16, backgroundColor: '#eef2ff', borderRadius: 8, marginBottom: 20 }}>
                 <Text style={{ fontSize: 12, color: '#4338ca' }}>Available Balance</Text>
                 <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#4338ca' }}>
