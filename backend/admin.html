@@ -1641,6 +1641,8 @@
         function updateOrderTableHeaders(status) {
             const thead = document.querySelector('#ordersBody').parentElement.querySelector('thead tr');
             const showAgent = (status === 'ready' || status === 'out_for_delivery' || status === 'delivered' || status === 'all');
+            const showTTD = (status === 'accepted' || status === 'preparing' || status === 'ready');
+            const showADT = (status === 'delivered');
             
             if (status === 'preorders') {
                 // Preorders tab: show preorder-specific columns
@@ -1666,8 +1668,35 @@
                     <th>Details</th>
                     <th>Actions</th>
                 `;
+            } else if (showTTD) {
+                // Accepted, Preparing, Ready: show TTD column
+                thead.innerHTML = `
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    ${showAgent ? '<th>Agent</th>' : ''}
+                    <th>TTD</th>
+                    <th>Date</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                `;
+            } else if (showADT) {
+                // Delivered: show Expected Time, Actual Time, TTD Snapshot
+                thead.innerHTML = `
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                    <th>Agent</th>
+                    <th>Expected Time</th>
+                    <th>Actual Time</th>
+                    <th>TTD Snapshot</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                `;
             } else {
-                // Specific status tabs: show actions, no status column
+                // Other status tabs: show actions, no status column
                 thead.innerHTML = `
                     <th>Order ID</th>
                     <th>User</th>
