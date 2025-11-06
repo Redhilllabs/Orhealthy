@@ -1188,12 +1188,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   withdrawButton: {
+    flex: 1,
     backgroundColor: '#6366f1',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingVertical: 12,
+    borderRadius: 10,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
   },
   withdrawButtonText: {
