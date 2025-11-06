@@ -1032,6 +1032,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
   },
+  deliveredButtonDisabled: {
+    backgroundColor: '#9ca3af',
+    opacity: 0.6,
+  },
   deliveredButtonText: {
     color: '#fff',
     fontWeight: 'bold',
