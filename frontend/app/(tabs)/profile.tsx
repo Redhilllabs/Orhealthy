@@ -591,21 +591,34 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Commission Section for Guides */}
+      {/* Wallet Credit Section for Guides */}
       {user.is_guide && (
         <View style={styles.commissionSection}>
           <View style={styles.commissionInfo}>
-            <Text style={styles.commissionLabel}>Commission Balance</Text>
+            <Text style={styles.commissionLabel}>💰 Wallet Credit</Text>
             <Text style={styles.commissionAmount}>
               ₹{(user.commission_balance || 0).toFixed(2)}
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.withdrawButton}
-            onPress={() => setShowWithdrawModal(true)}
-          >
-            <Text style={styles.withdrawButtonText}>Withdraw</Text>
-          </TouchableOpacity>
+          <View style={styles.walletButtons}>
+            <TouchableOpacity
+              style={styles.historyButton}
+              onPress={() => {
+                fetchCommissionHistory();
+                setShowWalletModal(true);
+              }}
+            >
+              <Ionicons name="time-outline" size={16} color="#6366f1" />
+              <Text style={styles.historyButtonText}>History</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.withdrawButton}
+              onPress={() => setShowWithdrawalModal(true)}
+            >
+              <Ionicons name="cash-outline" size={16} color="#fff" />
+              <Text style={styles.withdrawButtonText}>Withdraw</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 
