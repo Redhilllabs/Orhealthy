@@ -87,6 +87,15 @@ export default function DeliveryModeScreen() {
     };
   }, []); // Empty dependency array - run once on mount
 
+  // Update current time every second for live TTD countdown
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000); // Update every second
+    
+    return () => clearInterval(timer);
+  }, []);
+
   const loadData = async () => {
     try {
       setLoading(true);
