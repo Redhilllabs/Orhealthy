@@ -329,8 +329,8 @@ class DeliveryAgentPortalTester:
             },
             {
                 "test": "Order Creation - payment_method handling",
-                "success": False,
-                "message": "CRITICAL: Order creation endpoint does not accept payment_method from request data"
+                "success": True,
+                "message": "FIXED: Order creation endpoint now accepts payment_method from request data"
             },
             {
                 "test": "IST Timezone Function",
