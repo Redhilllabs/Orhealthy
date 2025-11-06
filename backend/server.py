@@ -2875,12 +2875,24 @@ async def create_order(order_data: dict, request: Request):
     # Check if guide is ordering for guidee
     ordered_by_guide_id = order_data.get("ordered_by_guide_id")
     ordered_for_guidee_id = order_data.get("ordered_for_guidee_id")
+    meal_plan_id = order_data.get("meal_plan_id")
     commission_earned = 0.0
     commission_rate = 0.0
+    guide_id_for_commission = None
     
-    # Calculate commission if guide is ordering for guidee
+    # Calculate commission if guide is ordering for guidee (direct order)
     if ordered_by_guide_id and ordered_for_guidee_id:
-        guide = await db.users.find_one({"_id": ObjectId(ordered_by_guide_id)})
+        guide_id_for_commission = ordered_by_guide_id
+    
+    # Calculate commission if guidee ordered from a meal plan submitted by their guide
+    elif meal_plan_id:
+        meal_plan = await db.meal_plans.find_one({"_id": ObjectId(meal_plan_id)})
+        if meal_plan and meal_plan.get("guide_id"):
+            guide_id_for_commission = meal_plan["guide_id"]
+    
+    # If we have a guide to credit commission to
+    if guide_id_for_commission:
+        guide = await db.users.find_one({"_id": ObjectId(guide_id_for_commission)})
         if guide and guide.get("is_guide"):
             star_rating = guide.get("star_rating", 0)
             commission_rate = await calculate_commission_rate(star_rating)
@@ -2888,7 +2900,7 @@ async def create_order(order_data: dict, request: Request):
             
             # Update guide's commission balance
             await db.users.update_one(
-                {"_id": ObjectId(ordered_by_guide_id)},
+                {"_id": ObjectId(guide_id_for_commission)},
                 {"$inc": {"commission_balance": commission_earned}}
             )
     
