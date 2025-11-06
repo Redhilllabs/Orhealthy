@@ -779,8 +779,17 @@ async def create_withdrawal_request(request_data: dict, request: Request):
         raise HTTPException(status_code=403, detail="Only guides can request withdrawals")
     
     amount = request_data.get("amount")
+    upi_id = request_data.get("upi_id")
+    contact_number = request_data.get("contact_number")
+    
     if not amount or amount <= 0:
         raise HTTPException(status_code=400, detail="Invalid amount")
+    
+    if not upi_id:
+        raise HTTPException(status_code=400, detail="UPI ID is required")
+    
+    if not contact_number:
+        raise HTTPException(status_code=400, detail="Contact number is required")
     
     # Check if user has sufficient balance
     commission_balance = user.get("commission_balance", 0)
@@ -793,6 +802,8 @@ async def create_withdrawal_request(request_data: dict, request: Request):
         "guide_name": user.get("name", "Unknown"),
         "guide_email": user.get("email", ""),
         "amount": amount,
+        "upi_id": upi_id,
+        "contact_number": contact_number,
         "status": "pending",  # pending, approved, rejected
         "created_at": get_ist_time(),
         "processed_at": None,
