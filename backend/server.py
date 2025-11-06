@@ -2991,7 +2991,7 @@ async def create_order(order_data: dict, request: Request):
     return {
         "message": "Order created",
         "id": str(result.inserted_id),
-        "commission_earned": commission_earned if commission_earned > 0 else None
+        "commission_rate": commission_rate if commission_rate > 0 else None
     }
 
 @api_router.get("/orders")
