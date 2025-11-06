@@ -16,8 +16,7 @@ BACKEND_URL = "https://guide-delivery.preview.emergentagent.com/api"
 class OrderTestSuite:
     def __init__(self):
         self.session = requests.Session()
-        self.user_token = None
-        self.agent_token = None
+        self.auth_token = None
         self.test_results = []
         
     def log_result(self, test_name, success, message, details=None):
@@ -26,7 +25,8 @@ class OrderTestSuite:
             "test": test_name,
             "success": success,
             "message": message,
-            "details": details or {}
+            "details": details or {},
+            "timestamp": datetime.now().isoformat()
         }
         self.test_results.append(result)
         status = "✅ PASS" if success else "❌ FAIL"
@@ -34,7 +34,7 @@ class OrderTestSuite:
         if details and not success:
             print(f"   Details: {details}")
     
-    def create_test_user_session(self):
+    def authenticate_user(self):
         """Create a test user session for authentication"""
         try:
             # Try to authenticate with a test session
