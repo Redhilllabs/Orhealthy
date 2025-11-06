@@ -1834,10 +1834,21 @@
                 console.log('Preorders found:', preorders.length);
                 console.log('Sample order is_preorder:', orders[0]?.is_preorder, typeof orders[0]?.is_preorder);
                 
-                if (preorders.length === 0) {
+                // Sort preorders by expected delivery date/time (ascending - earliest first)
+                const sortedPreorders = preorders.sort((a, b) => {
+                    if (!a.preorder_date || !a.preorder_time) return 1;
+                    if (!b.preorder_date || !b.preorder_time) return -1;
+                    
+                    const dateTimeA = new Date(`${a.preorder_date} ${a.preorder_time}`);
+                    const dateTimeB = new Date(`${b.preorder_date} ${b.preorder_time}`);
+                    
+                    return dateTimeA - dateTimeB;
+                });
+                
+                if (sortedPreorders.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">No preorders found</td></tr>';
                 } else {
-                    tbody.innerHTML = preorders.map(order => {
+                    tbody.innerHTML = sortedPreorders.map(order => {
                         return `
                         <tr>
                             <td>${order._id.slice(-8)}</td>
