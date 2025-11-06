@@ -917,38 +917,60 @@ export default function ProfileScreen() {
                 <View style={{ padding: 40, alignItems: 'center' }}>
                   <Ionicons name="wallet-outline" size={64} color="#ccc" />
                   <Text style={{ marginTop: 16, color: '#666', textAlign: 'center' }}>
-                    No commission history yet
+                    No wallet history yet
                   </Text>
                 </View>
               ) : (
-                commissionHistory.map((item) => (
-                  <View key={item._id} style={styles.historyItem}>
-                    <View style={styles.historyItemHeader}>
-                      <Text style={styles.historyGuideeName}>{item.guidee_name}</Text>
-                      <Text style={styles.historyAmount}>
-                        +₹{item.commission_amount.toFixed(2)}
+                commissionHistory.map((item) => {
+                  const isWithdrawal = item.display_type === 'withdrawal';
+                  return (
+                    <View 
+                      key={item._id} 
+                      style={[
+                        styles.historyItem,
+                        isWithdrawal && { borderLeftColor: '#ef4444' }
+                      ]}
+                    >
+                      <View style={styles.historyItemHeader}>
+                        <Text style={styles.historyGuideeName}>
+                          {isWithdrawal ? '💸 Withdrawal' : item.guidee_name}
+                        </Text>
+                        <Text style={[
+                          styles.historyAmount,
+                          isWithdrawal && { color: '#ef4444' }
+                        ]}>
+                          {isWithdrawal ? '-' : '+'}₹{(item.amount || item.commission_amount).toFixed(2)}
+                        </Text>
+                      </View>
+                      {isWithdrawal ? (
+                        <View style={styles.historyItemDetails}>
+                          <Text style={styles.historyDetail}>TXN: {item.transaction_id}</Text>
+                          <Text style={styles.historyDetail}>•</Text>
+                          <Text style={styles.historyDetail}>UPI: {item.upi_id}</Text>
+                        </View>
+                      ) : (
+                        <View style={styles.historyItemDetails}>
+                          <Text style={styles.historyDetail}>
+                            Order: ₹{item.order_amount.toFixed(2)}
+                          </Text>
+                          <Text style={styles.historyDetail}>•</Text>
+                          <Text style={styles.historyDetail}>
+                            {item.commission_rate}% commission
+                          </Text>
+                        </View>
+                      )}
+                      <Text style={styles.historyDate}>
+                        {new Date(item.created_at).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
                       </Text>
                     </View>
-                    <View style={styles.historyItemDetails}>
-                      <Text style={styles.historyDetail}>
-                        Order: ₹{item.order_amount.toFixed(2)}
-                      </Text>
-                      <Text style={styles.historyDetail}>•</Text>
-                      <Text style={styles.historyDetail}>
-                        {item.commission_rate}% commission
-                      </Text>
-                    </View>
-                    <Text style={styles.historyDate}>
-                      {new Date(item.created_at).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                  </View>
-                ))
+                  );
+                })
               )}
             </ScrollView>
           </View>
