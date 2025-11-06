@@ -351,7 +351,9 @@ class Order(BaseModel):
     agent_assigned_at: Optional[datetime] = None
     accepted_at: Optional[datetime] = None  # When order was accepted (for TTD calculation)
     delivered_at: Optional[datetime] = None
-    delivered_at_ttd: Optional[str] = None  # TTD value snapshot when delivered (for ADT)
+    ttd_minutes_snapshot: Optional[int] = None  # TTD remaining minutes when marked delivered
+    actual_delivery_time: Optional[datetime] = None  # Actual delivery timestamp
+    delivery_status_timestamp: Optional[dict] = {}  # Track status change timestamps
     is_preorder: bool = False  # Whether this is a preorder
     preorder_date: Optional[str] = None  # Delivery date for preorder (YYYY-MM-DD)
     preorder_time: Optional[str] = None  # Delivery time for preorder (e.g., "6:00 AM")
