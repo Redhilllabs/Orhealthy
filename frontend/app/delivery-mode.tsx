@@ -532,15 +532,35 @@ export default function DeliveryModeScreen() {
                   </View>
                   
                   {/* Time to Deliver (TTD) */}
-                  {calculateTTD(order) && (
-                    <View style={styles.ttdSection}>
-                      <View style={styles.ttdHeader}>
-                        <Ionicons name="time" size={18} color="#ff6b35" />
-                        <Text style={styles.ttdLabel}>Time to Deliver:</Text>
+                  {(() => {
+                    const ttdData = calculateTTD(order);
+                    if (!ttdData) return null;
+                    
+                    // Color coding: green (>17min), amber (<17min), red (overdue)
+                    let backgroundColor = '#d1fae5'; // light green
+                    let borderColor = '#10b981'; // green
+                    let textColor = '#065f46'; // dark green
+                    
+                    if (ttdData.isOverdue) {
+                      backgroundColor = '#fee2e2'; // light red
+                      borderColor = '#ef4444'; // red
+                      textColor = '#991b1b'; // dark red
+                    } else if (ttdData.totalSeconds < 1020) { // less than 17 minutes
+                      backgroundColor = '#fef3c7'; // light amber
+                      borderColor = '#f59e0b'; // amber
+                      textColor = '#92400e'; // dark amber
+                    }
+                    
+                    return (
+                      <View style={[styles.ttdSection, { backgroundColor, borderColor }]}>
+                        <View style={styles.ttdHeader}>
+                          <Ionicons name="time" size={18} color={textColor} />
+                          <Text style={[styles.ttdLabel, { color: textColor }]}>Time to Deliver:</Text>
+                        </View>
+                        <Text style={[styles.ttdValue, { color: textColor }]}>{ttdData.time}</Text>
                       </View>
-                      <Text style={styles.ttdValue}>{calculateTTD(order)}</Text>
-                    </View>
-                  )}
+                    );
+                  })()}
                   
                   <TouchableOpacity 
                     style={styles.deliveredButton}
