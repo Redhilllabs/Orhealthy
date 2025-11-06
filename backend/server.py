@@ -2008,11 +2008,11 @@ async def get_delivery_config():
     config = await db.config.find_one({"type": "delivery"})
     if not config:
         # Default delivery config
-        return {"delivery_price": 50.0, "min_order_for_free_delivery": 500.0, "ttd_regular_orders": 45}
+        return {"delivery_price": 50.0, "min_order_for_free_delivery": 500.0, "regular_order_ttd_minutes": 45}
     return {
         "delivery_price": config.get("delivery_price"),
         "min_order_for_free_delivery": config.get("min_order_for_free_delivery"),
-        "ttd_regular_orders": config.get("ttd_regular_orders", 45)
+        "regular_order_ttd_minutes": config.get("regular_order_ttd_minutes", config.get("ttd_regular_orders", 45))
     }
 
 @api_router.put("/config/delivery")
