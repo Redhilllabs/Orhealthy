@@ -216,6 +216,14 @@ export default function DeliveryModeScreen() {
   };
 
   const markAsDelivered = async (orderId: string) => {
+    // Prevent multiple clicks
+    if (deliveringOrders.has(orderId)) {
+      return;
+    }
+    
+    // Mark as being processed
+    setDeliveringOrders(prev => new Set(prev).add(orderId));
+    
     try {
       const token = await storage.getItemAsync('session_token');
       const response = await fetch(`${BACKEND_URL}/api/orders/${orderId}/status`, {
@@ -229,13 +237,25 @@ export default function DeliveryModeScreen() {
       
       if (response.ok) {
         Alert.alert('Success', 'Order marked as delivered!');
-        loadData(); // Reload to update wallet balance
+        await loadData(); // Reload to update wallet balance
       } else {
         Alert.alert('Error', 'Failed to mark order as delivered');
+        // Remove from set if failed
+        setDeliveringOrders(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(orderId);
+          return newSet;
+        });
       }
     } catch (error) {
       console.error('Error marking order as delivered:', error);
       Alert.alert('Error', 'Failed to mark order as delivered');
+      // Remove from set if failed
+      setDeliveringOrders(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
     }
   };
 
