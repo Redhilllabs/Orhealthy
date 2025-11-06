@@ -1861,9 +1861,15 @@
                                 <strong>${order.user_name || 'Unknown'}</strong><br>
                                 <small>${order.user_email || ''}</small>
                             </td>
-                            <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                            <td>
+                                ₹${(order.final_price || order.total_price || 0).toFixed(2)}<br>
+                                <small style="color: #6b7280;">${order.payment_method === 'pay_on_delivery' ? '💵 POD' : '💳 Online'}</small>
+                            </td>
                             <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
-                            <td><strong>📅 ${order.preorder_date || '-'}</strong></td>
+                            <td>
+                                <strong>📅 ${order.preorder_date || '-'}</strong><br>
+                                <small style="color: #6b7280;">${new Date(order.created_at).toLocaleTimeString('en-IN', { hour12: false })}</small>
+                            </td>
                             <td><strong>🕒 ${order.preorder_time || '-'}</strong></td>
                             <td>
                                 <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
