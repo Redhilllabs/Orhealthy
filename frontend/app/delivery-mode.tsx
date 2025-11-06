@@ -216,6 +216,38 @@ export default function DeliveryModeScreen() {
     }
   };
 
+  // Calculate TTD for an order
+  const calculateTTD = (order: Order) => {
+    const now = new Date();
+    let expectedTime: Date;
+    
+    if (order.is_preorder && order.preorder_date && order.preorder_time) {
+      // For preorders, expected time is preorder_time
+      const preorderDateTimeStr = `${order.preorder_date} ${order.preorder_time}`;
+      expectedTime = new Date(preorderDateTimeStr);
+    } else if (order.accepted_at) {
+      // For regular orders, expected time is accepted_at + 45 minutes (default TTD)
+      // TODO: Fetch actual TTD from config
+      const ttdMinutes = 45;
+      expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
+    } else {
+      return null;
+    }
+    
+    const remainingMs = expectedTime.getTime() - now.getTime();
+    
+    if (remainingMs <= 0) {
+      return '00:00:00';
+    }
+    
+    const totalSeconds = Math.floor(remainingMs / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
+
   const undoDelivery = async (orderId: string) => {
     console.log('Undo delivery called for order:', orderId);
     
