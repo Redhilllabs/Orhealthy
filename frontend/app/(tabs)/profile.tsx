@@ -964,14 +964,15 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
             <View style={styles.modalBody}>
-              <View style={{ padding: 16, backgroundColor: '#f3f4f6', borderRadius: 8, marginBottom: 16 }}>
-                <Text style={{ fontSize: 12, color: '#666' }}>Available Balance</Text>
-                <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1f2937' }}>
+              <View style={{ padding: 16, backgroundColor: '#eef2ff', borderRadius: 8, marginBottom: 20 }}>
+                <Text style={{ fontSize: 12, color: '#4338ca' }}>Available Balance</Text>
+                <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#4338ca' }}>
                   ₹{(user?.commission_balance || 0).toFixed(2)}
                 </Text>
               </View>
-              <Text style={{ fontSize: 14, marginBottom: 8, color: '#374151' }}>
-                Withdrawal Amount
+              
+              <Text style={{ fontSize: 14, marginBottom: 8, color: '#374151', fontWeight: '600' }}>
+                Withdrawal Amount *
               </Text>
               <TextInput
                 style={styles.input}
@@ -980,11 +981,95 @@ export default function ProfileScreen() {
                 value={withdrawalAmount}
                 onChangeText={setWithdrawalAmount}
               />
+              
+              <Text style={{ fontSize: 14, marginBottom: 8, marginTop: 16, color: '#374151', fontWeight: '600' }}>
+                UPI ID *
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="yourname@upi"
+                value={withdrawalUpiId}
+                onChangeText={setWithdrawalUpiId}
+                autoCapitalize="none"
+              />
+              
+              <Text style={{ fontSize: 14, marginBottom: 8, marginTop: 16, color: '#374151', fontWeight: '600' }}>
+                Contact Number *
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="10-digit mobile number"
+                keyboardType="phone-pad"
+                value={withdrawalContact}
+                onChangeText={setWithdrawalContact}
+                maxLength={10}
+              />
+              
               <TouchableOpacity
-                style={[styles.saveButton, { marginTop: 16 }]}
-                onPress={handleWithdrawalRequest}
+                style={[styles.saveButton, { marginTop: 24, backgroundColor: '#6366f1' }]}
+                onPress={validateWithdrawal}
               >
-                <Text style={styles.saveButtonText}>Submit Request</Text>
+                <Text style={styles.saveButtonText}>Continue</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal visible={showConfirmWithdrawal} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxWidth: 400 }]}>
+            <View style={{ padding: 24, alignItems: 'center' }}>
+              <Ionicons name="warning" size={64} color="#f59e0b" />
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 16, textAlign: 'center' }}>
+                Confirm Withdrawal
+              </Text>
+              <View style={{ marginTop: 20, padding: 16, backgroundColor: '#f9fafb', borderRadius: 8, width: '100%' }}>
+                <Text style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>Amount</Text>
+                <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1f2937' }}>₹{withdrawalAmount}</Text>
+                <Text style={{ fontSize: 14, color: '#6b7280', marginTop: 12, marginBottom: 4 }}>UPI ID</Text>
+                <Text style={{ fontSize: 16, color: '#1f2937' }}>{withdrawalUpiId}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 24, width: '100%' }}>
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 14, backgroundColor: '#f3f4f6', borderRadius: 8, alignItems: 'center' }}
+                  onPress={() => {
+                    setShowConfirmWithdrawal(false);
+                    setShowWithdrawalModal(true);
+                  }}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#6b7280' }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 14, backgroundColor: '#6366f1', borderRadius: 8, alignItems: 'center' }}
+                  onPress={handleWithdrawalRequest}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Success Modal */}
+      <Modal visible={showWithdrawalSuccess} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxWidth: 400 }]}>
+            <View style={{ padding: 24, alignItems: 'center' }}>
+              <Ionicons name="checkmark-circle" size={64} color="#10b981" />
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 16, textAlign: 'center' }}>
+                Withdrawal Request Sent!
+              </Text>
+              <Text style={{ fontSize: 14, color: '#6b7280', marginTop: 8, textAlign: 'center' }}>
+                Your withdrawal request has been submitted. You'll be notified once it's processed.
+              </Text>
+              <TouchableOpacity
+                style={{ marginTop: 24, padding: 14, backgroundColor: '#6366f1', borderRadius: 8, width: '100%', alignItems: 'center' }}
+                onPress={() => setShowWithdrawalSuccess(false)}
+              >
+                <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Done</Text>
               </TouchableOpacity>
             </View>
           </View>
