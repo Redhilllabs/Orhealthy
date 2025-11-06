@@ -117,6 +117,8 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (activeTab === 'posts') {
       fetchPosts();
+    } else if (activeTab === 'orders') {
+      fetchOrders();
     }
   }, [activeTab]);
 
