@@ -587,6 +587,41 @@ export default function CheckoutScreen() {
             )}
           </View>
 
+          {/* Payment Method Section */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Payment Method</Text>
+            <TouchableOpacity
+              style={[
+                styles.paymentOption,
+                paymentMethod === 'pay_on_delivery' && styles.paymentOptionSelected,
+              ]}
+              onPress={() => setPaymentMethod('pay_on_delivery')}
+            >
+              <View style={styles.paymentOptionLeft}>
+                <Ionicons
+                  name={paymentMethod === 'pay_on_delivery' ? 'radio-button-on' : 'radio-button-off'}
+                  size={24}
+                  color={paymentMethod === 'pay_on_delivery' ? '#6366f1' : '#9ca3af'}
+                />
+                <Text style={styles.paymentOptionText}>💵 Pay on Delivery</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.paymentOption, styles.paymentOptionDisabled]}
+              disabled
+            >
+              <View style={styles.paymentOptionLeft}>
+                <Ionicons name="radio-button-off" size={24} color="#d1d5db" />
+                <Text style={[styles.paymentOptionText, { color: '#9ca3af' }]}>
+                  💳 Online Payment
+                </Text>
+              </View>
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>Coming Soon</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
           {/* Guide Ordering Section */}
           {user?.is_guide && guidees.length > 0 && (
             <View style={styles.section}>
