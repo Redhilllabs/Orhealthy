@@ -2524,8 +2524,26 @@ async def update_order_status(order_id: str, status_data: dict, request: Request
         if order.get("guide_id_for_commission") and not order.get("commission_credited"):
             guide_id = order["guide_id_for_commission"]
             commission_rate = order.get("commission_rate", 0)
-            final_price = order.get("final_price", 0)
-            commission_earned = (final_price * commission_rate) / 100
+            
+            # Calculate commission amount based on order type
+            commission_amount_to_credit = 0
+            
+            # If direct order (guide ordered for guidee), calculate on total_price (excluding delivery)
+            if order.get("ordered_by_guide_id") and order.get("ordered_for_guidee_id"):
+                total_price = order.get("total_price", 0)
+                commission_amount_to_credit = total_price
+            
+            # If meal plan order, calculate only on meal plan items (excluding delivery)
+            elif order.get("meal_plan_id"):
+                meal_plan_id = order["meal_plan_id"]
+                # Sum up only items that have this meal_plan_id
+                for item in order.get("items", []):
+                    if item.get("meal_plan_id") == meal_plan_id:
+                        item_total = item.get("price", 0) * item.get("quantity", 1)
+                        commission_amount_to_credit += item_total
+            
+            # Calculate commission
+            commission_earned = (commission_amount_to_credit * commission_rate) / 100
             
             # Update guide's commission balance
             await db.users.update_one(
@@ -2540,7 +2558,7 @@ async def update_order_status(order_id: str, status_data: dict, request: Request
                 "order_id": str(order["_id"]),
                 "guidee_id": order["user_id"],
                 "guidee_name": guidee_user.get("name", "Unknown") if guidee_user else "Unknown",
-                "order_amount": final_price,
+                "order_amount": commission_amount_to_credit,  # Amount commission was calculated on
                 "commission_amount": commission_earned,
                 "commission_rate": commission_rate,
                 "created_at": current_time
