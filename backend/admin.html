@@ -1658,7 +1658,7 @@
             }
             
             // Only start countdown for TTD tabs
-            if (status === 'accepted' || status === 'preparing' || status === 'ready') {
+            if (status === 'accepted' || status === 'preparing' || status === 'ready' || status === 'out_for_delivery') {
                 ttdCountdownInterval = setInterval(() => {
                     updateTTDDisplay();
                 }, 1000); // Update every second
