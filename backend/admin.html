@@ -3882,15 +3882,22 @@
             if (!confirm('Are you sure you want to reject this withdrawal request?')) return;
 
             try {
-                const response = await fetch(`${API_URL}/admin/withdrawals/${withdrawalId}/reject`, {
-                    method: 'PUT'
+                const response = await fetch(`${API_URL}/admin/withdrawal-requests/${withdrawalId}/process`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'rejected'
+                    })
                 });
 
                 if (response.ok) {
                     showAlert('withdrawals', 'Withdrawal rejected successfully!', 'success');
                     loadWithdrawals();
                 } else {
-                    showAlert('withdrawals', 'Error rejecting withdrawal', 'error');
+                    const error = await response.json();
+                    showAlert('withdrawals', error.detail || 'Error rejecting withdrawal', 'error');
                 }
             } catch (error) {
                 showAlert('withdrawals', 'Error rejecting withdrawal', 'error');
