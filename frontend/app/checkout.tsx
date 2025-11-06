@@ -430,6 +430,7 @@ export default function CheckoutScreen() {
         billing_address: deliveryAddress,
         shipping_address: deliveryAddress,
         payment_id: 'COD',
+        payment_method: paymentMethod,
         is_preorder: isPreorder,
         preorder_date: isPreorder ? preorderDate : null,
         preorder_time: isPreorder ? preorderTime : null,
