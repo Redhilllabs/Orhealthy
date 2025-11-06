@@ -2024,7 +2024,7 @@ async def update_delivery_config(delivery_config: DeliveryConfig):
             "type": "delivery",
             "delivery_price": delivery_config.delivery_price,
             "min_order_for_free_delivery": delivery_config.min_order_for_free_delivery,
-            "ttd_regular_orders": delivery_config.ttd_regular_orders,
+            "regular_order_ttd_minutes": delivery_config.regular_order_ttd_minutes,
             "updated_at": datetime.now(timezone.utc)
         }},
         upsert=True
