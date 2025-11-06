@@ -32,6 +32,7 @@ interface Order {
   user_email?: string;
   user_name?: string;
   payment_id?: string;
+  payment_method?: string;
   is_preorder?: boolean;
   preorder_date?: string;
   preorder_time?: string;
