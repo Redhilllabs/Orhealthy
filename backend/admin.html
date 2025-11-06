@@ -1685,7 +1685,7 @@
         function updateOrderTableHeaders(status) {
             const thead = document.querySelector('#ordersBody').parentElement.querySelector('thead tr');
             const showAgent = (status === 'ready' || status === 'out_for_delivery' || status === 'delivered' || status === 'all');
-            const showTTD = (status === 'accepted' || status === 'preparing' || status === 'ready');
+            const showTTD = (status === 'accepted' || status === 'preparing' || status === 'ready' || status === 'out_for_delivery');
             const showADT = (status === 'delivered');
             
             if (status === 'preorders') {
