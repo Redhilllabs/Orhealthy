@@ -1784,21 +1784,23 @@
         
         // Helper function to format time as HH:MM:SS
         function formatTTD(milliseconds) {
-            if (milliseconds <= 0) {
-                return '<span style="color: #ef4444; font-weight: 600;">00:00:00</span>';
-            }
+            const isOverdue = milliseconds < 0;
+            const absMilliseconds = Math.abs(milliseconds);
             
-            const totalSeconds = Math.floor(milliseconds / 1000);
+            const totalSeconds = Math.floor(absMilliseconds / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
             const seconds = totalSeconds % 60;
             
             const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             
-            // Color code: red if less than 10 minutes, orange if less than 20, green otherwise
+            // Color code: red if overdue, amber if less than 17 minutes, green otherwise
             let color = '#10b981'; // green
-            if (totalSeconds < 600) color = '#ef4444'; // red if < 10 min
-            else if (totalSeconds < 1200) color = '#f59e0b'; // orange if < 20 min
+            if (isOverdue) {
+                color = '#ef4444'; // red if overdue
+            } else if (totalSeconds < 1020) { // less than 17 minutes
+                color = '#f59e0b'; // amber
+            }
             
             return `<span style="color: ${color}; font-weight: 600;">${formattedTime}</span>`;
         }
