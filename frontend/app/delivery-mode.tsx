@@ -652,14 +652,22 @@ export default function DeliveryModeScreen() {
                     </View>
                     <View style={styles.paymentBadge}>
                       <Ionicons 
-                        name={order.payment_id ? "card" : "cash"} 
+                        name={order.payment_method === 'online' ? "card" : "cash"} 
                         size={14} 
-                        color={order.payment_id ? "#4caf50" : "#ff9800"} 
+                        color={order.payment_method === 'online' ? "#4caf50" : "#ff9800"} 
                       />
-                      <Text style={[styles.paymentText, {color: order.payment_id ? "#4caf50" : "#ff9800"}]}>
-                        {order.payment_id ? 'Online' : 'COD'}
+                      <Text style={[styles.paymentText, {color: order.payment_method === 'online' ? "#4caf50" : "#ff9800"}]}>
+                        {order.payment_method === 'online' ? 'Online' : 'Pay on Delivery'}
                       </Text>
                     </View>
+                  </View>
+                  
+                  {/* Order Timestamp */}
+                  <View style={styles.timestampSection}>
+                    <Ionicons name="time-outline" size={14} color="#999" />
+                    <Text style={styles.timestampText}>
+                      Ordered at: {order.created_at ? new Date(order.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : 'N/A'}
+                    </Text>
                   </View>
                   
                   {/* Order Items */}
