@@ -346,6 +346,7 @@ class Order(BaseModel):
     billing_address: Address
     shipping_address: Address
     payment_id: Optional[str] = None
+    payment_method: str = "pay_on_delivery"  # pay_on_delivery or online
     ordered_by_guide_id: Optional[str] = None  # If guide ordered for guidee
     ordered_for_guidee_id: Optional[str] = None  # The guidee this order is for
     meal_plan_id: Optional[str] = None  # If order was placed from a meal plan
