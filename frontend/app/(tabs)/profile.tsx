@@ -628,7 +628,7 @@ export default function ProfileScreen() {
       {user.is_guide && (
         <View style={styles.commissionSection}>
           <View style={styles.walletHeader}>
-            <Text style={styles.commissionLabel}>💰 Wallet Credit</Text>
+            <Text style={styles.commissionLabel}>💰 Wallet Balance</Text>
             <Text style={styles.commissionAmount}>
               ₹{(user.commission_balance || 0).toFixed(2)}
             </Text>
