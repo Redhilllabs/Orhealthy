@@ -1948,36 +1948,75 @@
                 // Store orders data for countdown updates
                 window.currentOrdersData = sortedOrders;
             } else if (showADT) {
-                // Delivered tab - show Expected Time, Actual Time, TTD Snapshot
-                const regularOrders = orders.filter(order => !order.is_preorder);
+                // Delivered tab - show Expected Time, Actual Time, Timing
+                // Include both regular orders and preorders
                 
-                tbody.innerHTML = regularOrders.map(order => {
+                tbody.innerHTML = orders.map(order => {
                     // Calculate expected delivery time
+                    let expectedTime = null;
                     let expectedTimeStr = '-';
-                    if (order.accepted_at) {
+                    
+                    if (order.is_preorder && order.preorder_date && order.preorder_time) {
+                        // For preorders, expected time is preorder_time
+                        const preorderDateTimeStr = `${order.preorder_date} ${order.preorder_time}`;
+                        expectedTime = new Date(preorderDateTimeStr);
+                        expectedTimeStr = expectedTime.toLocaleTimeString('en-IN', { 
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        });
+                    } else if (order.accepted_at) {
+                        // For regular orders, expected time is accepted_at + TTD minutes
                         const ttdMinutes = window.deliveryConfigCache?.regular_order_ttd_minutes || 45;
-                        const expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
-                        expectedTimeStr = expectedTime.toLocaleString('en-IN', { 
-                            dateStyle: 'short', 
-                            timeStyle: 'short' 
+                        expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
+                        expectedTimeStr = expectedTime.toLocaleTimeString('en-IN', { 
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
                         });
                     }
                     
                     // Actual delivery time
-                    const actualTimeStr = order.actual_delivery_time 
-                        ? new Date(order.actual_delivery_time).toLocaleString('en-IN', { 
-                            dateStyle: 'short', 
-                            timeStyle: 'short' 
-                        })
-                        : (order.delivered_at 
-                            ? new Date(order.delivered_at).toLocaleString('en-IN', { 
-                                dateStyle: 'short', 
-                                timeStyle: 'short' 
-                            })
-                            : '-');
+                    let actualTime = null;
+                    let actualTimeStr = '-';
+                    if (order.actual_delivery_time) {
+                        actualTime = new Date(order.actual_delivery_time);
+                    } else if (order.delivered_at) {
+                        actualTime = new Date(order.delivered_at);
+                    }
                     
-                    // TTD Snapshot
-                    const ttdSnapshotDisplay = formatTTDSnapshot(order.ttd_minutes_snapshot);
+                    if (actualTime) {
+                        actualTimeStr = actualTime.toLocaleTimeString('en-IN', { 
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        });
+                    }
+                    
+                    // Calculate timing difference (Actual - Expected)
+                    let timingDisplay = '-';
+                    if (expectedTime && actualTime) {
+                        const diffMs = actualTime - expectedTime;
+                        const diffSeconds = Math.floor(Math.abs(diffMs) / 1000);
+                        const hours = Math.floor(diffSeconds / 3600);
+                        const minutes = Math.floor((diffSeconds % 3600) / 60);
+                        const seconds = diffSeconds % 60;
+                        
+                        const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        
+                        // Color coding
+                        let color = '#f59e0b'; // amber for exactly on time
+                        if (diffMs < 0) {
+                            color = '#10b981'; // green for early
+                        } else if (diffMs > 0) {
+                            color = '#ef4444'; // red for late
+                        }
+                        
+                        timingDisplay = `<span style="color: ${color}; font-weight: 600;">${timeStr}</span>`;
+                    }
                     
                     return `
                     <tr>
@@ -1989,9 +2028,9 @@
                         <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
                         <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
                         <td>${order.agent_name || '-'}</td>
-                        <td><small>${expectedTimeStr}</small></td>
-                        <td><small>${actualTimeStr}</small></td>
-                        <td>${ttdSnapshotDisplay}</td>
+                        <td><strong>${expectedTimeStr}</strong></td>
+                        <td><strong>${actualTimeStr}</strong></td>
+                        <td>${timingDisplay}</td>
                         <td>
                             <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
                         </td>
