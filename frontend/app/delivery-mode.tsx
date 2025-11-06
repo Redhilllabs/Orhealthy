@@ -70,6 +70,7 @@ export default function DeliveryModeScreen() {
   const [isBusy, setIsBusy] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [ttdMinutes, setTtdMinutes] = useState(45); // Default TTD value
+  const [deliveringOrders, setDeliveringOrders] = useState<Set<string>>(new Set()); // Track orders being marked as delivered
 
   useEffect(() => {
     loadData();
