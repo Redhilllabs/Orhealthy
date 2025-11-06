@@ -2065,7 +2065,13 @@
             } else {
                 // Other status tabs (arrived, out_for_delivery, cancelled)
                 // Include both regular orders and preorders
-                tbody.innerHTML = orders.map(order => {
+                
+                // For arrived tab, sort by latest first (descending order)
+                const sortedOrders = currentOrderStatusFilter === 'arrived' 
+                    ? orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                    : orders;
+                
+                tbody.innerHTML = sortedOrders.map(order => {
                     const nextStatus = getNextStatus(order.status);
                     
                     return `
@@ -2075,10 +2081,16 @@
                             <strong>${order.user_name || 'Unknown'}</strong><br>
                             <small>${order.user_email || ''}</small>
                         </td>
-                        <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                        <td>
+                            ₹${(order.final_price || order.total_price || 0).toFixed(2)}<br>
+                            <small style="color: #6b7280;">${order.payment_method === 'pay_on_delivery' ? '💵 POD' : '💳 Online'}</small>
+                        </td>
                         <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
                         ${showAgent ? `<td>${order.agent_name || '-'}</td>` : ''}
-                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>
+                            ${new Date(order.created_at).toLocaleDateString()}<br>
+                            <small style="color: #6b7280;">${new Date(order.created_at).toLocaleTimeString('en-IN', { hour12: false })}</small>
+                        </td>
                         <td>
                             <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
                         </td>
