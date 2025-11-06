@@ -1135,6 +1135,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
+  timestampSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 6,
+  },
+  timestampText: {
+    fontSize: 12,
+    color: '#666',
+    fontWeight: '500',
+  },
   emptyState: {
     alignItems: 'center',
     paddingVertical: 40,
