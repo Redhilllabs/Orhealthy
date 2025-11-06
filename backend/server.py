@@ -3115,6 +3115,31 @@ async def get_orders(request: Request):
         order["_id"] = str(order["_id"])
     return orders
 
+@api_router.put("/orders/{order_id}/cancel")
+async def cancel_order(order_id: str, request: Request):
+    """Cancel an order (user can only cancel orders in 'arrived' status)"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Find the order
+    order = await db.orders.find_one({"_id": ObjectId(order_id), "user_id": user["_id"]})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found or not authorized")
+    
+    # Check if order can be cancelled (only 'arrived' status)
+    if order.get("status") != "arrived":
+        raise HTTPException(status_code=400, detail=f"Cannot cancel order with status: {order.get('status')}")
+    
+    # Update status to cancelled
+    await db.orders.update_one(
+        {"_id": ObjectId(order_id)},
+        {"$set": {"status": "cancelled", "cancelled_at": get_ist_time()}}
+    )
+    
+    return {"message": "Order cancelled successfully"}
+
+
 # Admin endpoints
 @api_router.post("/admin/ingredients")
 async def create_ingredient(ingredient: Ingredient, request: Request):
