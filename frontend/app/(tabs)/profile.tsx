@@ -58,7 +58,7 @@ interface CommissionHistory {
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'posts' | 'idols' | 'fans' | 'addresses'>('posts');
+  const [activeTab, setActiveTab] = useState<'posts' | 'idols' | 'fans' | 'orders' | 'addresses'>('posts');
   const [loading, setLoading] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
@@ -71,10 +71,15 @@ export default function ProfileScreen() {
   const [posts, setPosts] = useState<any[]>([]);
   const [idols, setIdols] = useState<any[]>([]);
   const [fans, setFans] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [habits, setHabits] = useState<HabitLog[]>([]);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   const [isDeliveryAgent, setIsDeliveryAgent] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  const [isTabSticky, setIsTabSticky] = useState(false);
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
