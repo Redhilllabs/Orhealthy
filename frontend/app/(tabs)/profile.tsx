@@ -263,6 +263,41 @@ export default function ProfileScreen() {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setOrders(response.data || []);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const cancelOrder = async (orderId: string) => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.put(
+        `${API_URL}/orders/${orderId}/cancel`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      Alert.alert('Success', 'Order cancelled successfully');
+      fetchOrders(); // Refresh orders list
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || 'Failed to cancel order';
+      Alert.alert('Error', errorMessage);
+    }
+  };
+
+
   const fetchHabits = async () => {
     try {
       setLoading(true);
