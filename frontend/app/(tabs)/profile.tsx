@@ -60,8 +60,12 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [showConfirmWithdrawal, setShowConfirmWithdrawal] = useState(false);
+  const [showWithdrawalSuccess, setShowWithdrawalSuccess] = useState(false);
   const [commissionHistory, setCommissionHistory] = useState<CommissionHistory[]>([]);
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
+  const [withdrawalUpiId, setWithdrawalUpiId] = useState('');
+  const [withdrawalContact, setWithdrawalContact] = useState('');
   const [posts, setPosts] = useState<any[]>([]);
   const [idols, setIdols] = useState<any[]>([]);
   const [fans, setFans] = useState<any[]>([]);
