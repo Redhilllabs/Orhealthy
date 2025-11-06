@@ -3329,6 +3329,7 @@
                 
                 document.getElementById('deliveryPrice').value = data.delivery_price;
                 document.getElementById('minOrderForFree').value = data.min_order_for_free_delivery;
+                document.getElementById('regularOrderTTD').value = data.regular_order_ttd_minutes || 45;
             } catch (error) {
                 console.error('Error loading delivery config:', error);
             }
@@ -3337,7 +3338,8 @@
         async function saveDeliveryConfig() {
             const config = {
                 delivery_price: parseFloat(document.getElementById('deliveryPrice').value),
-                min_order_for_free_delivery: parseFloat(document.getElementById('minOrderForFree').value)
+                min_order_for_free_delivery: parseFloat(document.getElementById('minOrderForFree').value),
+                regular_order_ttd_minutes: parseInt(document.getElementById('regularOrderTTD').value)
             };
             
             try {
