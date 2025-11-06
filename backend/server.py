@@ -2519,6 +2519,37 @@ async def update_order_status(order_id: str, status_data: dict, request: Request
                     "created_at": current_time
                 }
                 await db.delivery_credits.insert_one(credit_record)
+        
+        # Credit commission to guide (on delivery)
+        if order.get("guide_id_for_commission") and not order.get("commission_credited"):
+            guide_id = order["guide_id_for_commission"]
+            commission_rate = order.get("commission_rate", 0)
+            final_price = order.get("final_price", 0)
+            commission_earned = (final_price * commission_rate) / 100
+            
+            # Update guide's commission balance
+            await db.users.update_one(
+                {"_id": ObjectId(guide_id)},
+                {"$inc": {"commission_balance": commission_earned}}
+            )
+            
+            # Record commission transaction
+            guidee_user = await db.users.find_one({"_id": ObjectId(order["user_id"])})
+            commission_record = {
+                "guide_id": guide_id,
+                "order_id": str(order["_id"]),
+                "guidee_id": order["user_id"],
+                "guidee_name": guidee_user.get("name", "Unknown") if guidee_user else "Unknown",
+                "order_amount": final_price,
+                "commission_amount": commission_earned,
+                "commission_rate": commission_rate,
+                "created_at": current_time
+            }
+            await db.commission_history.insert_one(commission_record)
+            
+            # Mark commission as credited
+            update_data["commission_earned"] = commission_earned
+            update_data["commission_credited"] = True
     
     await db.orders.update_one(
         {"_id": ObjectId(order_id)},
