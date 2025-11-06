@@ -1850,9 +1850,115 @@
                     </tr>
                 `;
                 }).join('');
-            } else {
-                // Specific status tabs - simplified view with action buttons
+            } else if (showTTD) {
+                // Accepted, Preparing, Ready tabs - show TTD column with live countdown
                 // Filter out preorders from regular status tabs
+                const regularOrders = orders.filter(order => !order.is_preorder);
+                
+                // Sort by TTD (ascending - most urgent first)
+                const sortedOrders = regularOrders.sort((a, b) => {
+                    const ttdA = calculateTTD(a, window.deliveryConfigCache);
+                    const ttdB = calculateTTD(b, window.deliveryConfigCache);
+                    if (!ttdA) return 1;
+                    if (!ttdB) return -1;
+                    return ttdA.remainingMs - ttdB.remainingMs;
+                });
+                
+                tbody.innerHTML = sortedOrders.map(order => {
+                    const nextStatus = getNextStatus(order.status);
+                    const ttd = calculateTTD(order, window.deliveryConfigCache);
+                    const ttdDisplay = ttd ? formatTTD(ttd.remainingMs) : '-';
+                    
+                    return `
+                    <tr data-order-id="${order._id}">
+                        <td>${order._id.slice(-8)}</td>
+                        <td>
+                            <strong>${order.user_name || 'Unknown'}</strong><br>
+                            <small>${order.user_email || ''}</small>
+                        </td>
+                        <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
+                        ${showAgent ? `<td>${order.agent_name || '-'}</td>` : ''}
+                        <td class="ttd-cell">${ttdDisplay}</td>
+                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
+                        </td>
+                        <td class="actions">
+                            ${order.status === 'ready' && !order.assigned_agent_id ? `
+                                <button class="btn" style="font-size: 12px; padding: 6px 12px; margin-bottom: 4px;" onclick="showAssignAgentModal('${order._id}')">Assign Agent</button><br>
+                            ` : ''}
+                            ${nextStatus ? `
+                                <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="moveOrderForward('${order._id}', '${nextStatus}')">
+                                    Move to ${nextStatus.replace(/_/g, ' ')}
+                                </button><br>
+                            ` : ''}
+                            ${order.status !== 'delivered' && order.status !== 'cancelled' ? `
+                                <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px; margin-top: 4px;" onclick="cancelOrder('${order._id}')">Cancel</button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+                
+                // Store orders data for countdown updates
+                window.currentOrdersData = sortedOrders;
+            } else if (showADT) {
+                // Delivered tab - show Expected Time, Actual Time, TTD Snapshot
+                const regularOrders = orders.filter(order => !order.is_preorder);
+                
+                tbody.innerHTML = regularOrders.map(order => {
+                    // Calculate expected delivery time
+                    let expectedTimeStr = '-';
+                    if (order.accepted_at) {
+                        const ttdMinutes = window.deliveryConfigCache?.regular_order_ttd_minutes || 45;
+                        const expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
+                        expectedTimeStr = expectedTime.toLocaleString('en-IN', { 
+                            dateStyle: 'short', 
+                            timeStyle: 'short' 
+                        });
+                    }
+                    
+                    // Actual delivery time
+                    const actualTimeStr = order.actual_delivery_time 
+                        ? new Date(order.actual_delivery_time).toLocaleString('en-IN', { 
+                            dateStyle: 'short', 
+                            timeStyle: 'short' 
+                        })
+                        : (order.delivered_at 
+                            ? new Date(order.delivered_at).toLocaleString('en-IN', { 
+                                dateStyle: 'short', 
+                                timeStyle: 'short' 
+                            })
+                            : '-');
+                    
+                    // TTD Snapshot
+                    const ttdSnapshotDisplay = formatTTDSnapshot(order.ttd_minutes_snapshot);
+                    
+                    return `
+                    <tr>
+                        <td>${order._id.slice(-8)}</td>
+                        <td>
+                            <strong>${order.user_name || 'Unknown'}</strong><br>
+                            <small>${order.user_email || ''}</small>
+                        </td>
+                        <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
+                        <td>${order.agent_name || '-'}</td>
+                        <td><small>${expectedTimeStr}</small></td>
+                        <td><small>${actualTimeStr}</small></td>
+                        <td>${ttdSnapshotDisplay}</td>
+                        <td>
+                            <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
+                        </td>
+                        <td class="actions">
+                            <button class="btn btn-danger" style="font-size: 12px; padding: 6px 12px;" onclick="deleteOrder('${order._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                }).join('');
+            } else {
+                // Other status tabs (arrived, out_for_delivery, cancelled)
                 const regularOrders = orders.filter(order => !order.is_preorder);
                 tbody.innerHTML = regularOrders.map(order => {
                     const nextStatus = getNextStatus(order.status);
