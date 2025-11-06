@@ -520,6 +520,17 @@ export default function DeliveryModeScreen() {
                     </Text>
                   </View>
                   
+                  {/* Time to Deliver (TTD) */}
+                  {calculateTTD(order) && (
+                    <View style={styles.ttdSection}>
+                      <View style={styles.ttdHeader}>
+                        <Ionicons name="time" size={18} color="#ff6b35" />
+                        <Text style={styles.ttdLabel}>Time to Deliver:</Text>
+                      </View>
+                      <Text style={styles.ttdValue}>{calculateTTD(order)}</Text>
+                    </View>
+                  )}
+                  
                   <TouchableOpacity 
                     style={styles.deliveredButton}
                     onPress={() => markAsDelivered(order._id)}
