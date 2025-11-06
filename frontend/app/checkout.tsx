@@ -634,12 +634,12 @@ export default function CheckoutScreen() {
 
                   {selectedGuidee && commissionAmount > 0 && (
                     <View style={styles.commissionCard}>
-                      <Text style={styles.commissionTitle}>Your Commission</Text>
+                      <Text style={styles.commissionTitle}>Your Wallet Credit</Text>
                       <Text style={styles.commissionValue}>
                         ₹{commissionAmount.toFixed(2)}
                       </Text>
                       <Text style={styles.commissionRate}>
-                        {commissionRate}% on ₹{finalPrice.toFixed(2)}
+                        {commissionRate}% on ₹{(totalPrice - couponDiscount).toFixed(2)}
                       </Text>
                     </View>
                   )}
