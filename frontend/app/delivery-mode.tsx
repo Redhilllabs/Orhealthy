@@ -68,6 +68,7 @@ export default function DeliveryModeScreen() {
   const [credits, setCredits] = useState<CreditRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'assigned' | 'delivered' | 'history'>('assigned');
   const [isBusy, setIsBusy] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     loadData();
