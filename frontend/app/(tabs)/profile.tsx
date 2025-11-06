@@ -625,7 +625,7 @@ export default function ProfileScreen() {
       {/* Wallet Credit Section for Guides */}
       {user.is_guide && (
         <View style={styles.commissionSection}>
-          <View style={styles.commissionInfo}>
+          <View style={styles.walletHeader}>
             <Text style={styles.commissionLabel}>💰 Wallet Credit</Text>
             <Text style={styles.commissionAmount}>
               ₹{(user.commission_balance || 0).toFixed(2)}
@@ -639,14 +639,14 @@ export default function ProfileScreen() {
                 setShowWalletModal(true);
               }}
             >
-              <Ionicons name="time-outline" size={16} color="#6366f1" />
+              <Ionicons name="time-outline" size={18} color="#6366f1" />
               <Text style={styles.historyButtonText}>History</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.withdrawButton}
               onPress={() => setShowWithdrawalModal(true)}
             >
-              <Ionicons name="cash-outline" size={16} color="#fff" />
+              <Ionicons name="cash-outline" size={18} color="#fff" />
               <Text style={styles.withdrawButtonText}>Withdraw</Text>
             </TouchableOpacity>
           </View>
