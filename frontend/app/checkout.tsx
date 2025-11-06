@@ -218,8 +218,9 @@ export default function CheckoutScreen() {
       const rate = rates[`star${user.star_rating}`] || 0;
       setCommissionRate(rate);
       
-      const finalPrice = totalPrice - couponDiscount;
-      setCommissionAmount((finalPrice * rate) / 100);
+      // Calculate commission on meal price only (exclude delivery charge)
+      const mealPrice = totalPrice - couponDiscount;
+      setCommissionAmount((mealPrice * rate) / 100);
     } catch (error) {
       console.error('Error calculating commission:', error);
     }
