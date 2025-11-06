@@ -762,6 +762,10 @@ async def get_commission_history(request: Request):
         {"guide_id": user["_id"]}
     ).sort("created_at", -1).to_list(length=100)
     
+    # Convert ObjectId to string
+    for item in history:
+        item["_id"] = str(item["_id"])
+    
     return {"history": history}
 
 @api_router.post("/withdrawal-requests")
