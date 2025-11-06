@@ -1716,17 +1716,22 @@
             } else if (currentOrderStatusFilter === 'all') {
                 // All orders tab - show all details including status column (include preorders)
                 tbody.innerHTML = orders.map(order => {
+                    const isPreorder = order.is_preorder === true || order.is_preorder === 'true';
+                    const preorderBadge = isPreorder ? '<span style="background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 4px;">📅 PREORDER</span>' : '';
                     return `
-                    <tr>
+                    <tr style="${isPreorder ? 'background-color: #fffbeb;' : ''}">
                         <td>${order._id.slice(-8)}</td>
                         <td>
-                            <strong>${order.user_name || 'Unknown'}</strong><br>
+                            <strong>${order.user_name || 'Unknown'}</strong>${preorderBadge}<br>
                             <small>${order.user_email || ''}</small>
                         </td>
                         <td>₹${(order.final_price || order.total_price || 0).toFixed(2)}</td>
                         <td><span class="status-badge status-${order.status}">${order.status.replace(/_/g, ' ')}</span></td>
                         <td>${order.agent_name || '-'}</td>
-                        <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                        <td>
+                            ${new Date(order.created_at).toLocaleDateString()}
+                            ${isPreorder && order.preorder_date ? `<br><small style="color: #92400e; font-weight: 600;">📅 ${order.preorder_date}</small>` : ''}
+                        </td>
                         <td>
                             <button class="btn" style="font-size: 12px; padding: 6px 12px;" onclick="showOrderDetails('${order._id}')">View Details</button>
                         </td>
