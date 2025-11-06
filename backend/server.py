@@ -3354,55 +3354,7 @@ async def get_all_users(request: Request):
         user["_id"] = str(user["_id"])
     return users
 
-@api_router.get("/admin/withdrawal-requests")
-async def get_all_withdrawal_requests():
-    """Get all withdrawal requests (admin only)"""
-    requests = await db.withdrawal_requests.find().sort("created_at", -1).to_list(1000)
-    
-    for req in requests:
-        req["_id"] = str(req["_id"])
-    
-    return requests
-
-@api_router.put("/admin/withdrawal-requests/{request_id}/process")
-async def process_withdrawal_request(request_id: str, process_data: dict):
-    """Process a withdrawal request (admin only)"""
-    status = process_data.get("status")  # approved or rejected
-    
-    if status not in ["approved", "rejected"]:
-        raise HTTPException(status_code=400, detail="Status must be 'approved' or 'rejected'")
-    
-    # Get the withdrawal request
-    withdrawal_req = await db.withdrawal_requests.find_one({"_id": ObjectId(request_id)})
-    if not withdrawal_req:
-        raise HTTPException(status_code=404, detail="Withdrawal request not found")
-    
-    if withdrawal_req.get("status") != "pending":
-        raise HTTPException(status_code=400, detail="Request already processed")
-    
-    # Update withdrawal request
-    update_data = {
-        "status": status,
-        "processed_at": get_ist_time(),
-        "processed_by": "admin"
-    }
-    
-    await db.withdrawal_requests.update_one(
-        {"_id": ObjectId(request_id)},
-        {"$set": update_data}
-    )
-    
-    # If approved, deduct from guide's commission balance
-    if status == "approved":
-        guide_id = withdrawal_req["guide_id"]
-        amount = withdrawal_req["amount"]
-        
-        await db.users.update_one(
-            {"_id": ObjectId(guide_id)},
-            {"$inc": {"commission_balance": -amount}}
-        )
-    
-    return {"message": f"Withdrawal request {status}", "status": status}
+# Admin withdrawal endpoints already exist below
 
 @api_router.put("/admin/users/{user_id}/points")
 async def update_user_points(user_id: str, points_data: dict, request: Request):
