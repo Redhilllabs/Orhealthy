@@ -226,9 +226,8 @@ export default function DeliveryModeScreen() {
     }
   };
 
-  // Calculate TTD for an order
-  const calculateTTD = (order: Order) => {
-    const now = new Date();
+  // Calculate TTD for an order (synced with admin panel countdown)
+  const calculateTTD = (order: Order, now: Date = currentTime) => {
     let expectedTime: Date;
     
     if (order.is_preorder && order.preorder_date && order.preorder_time) {
