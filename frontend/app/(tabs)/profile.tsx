@@ -43,11 +43,25 @@ interface HabitLog {
   created_at: string;
 }
 
+interface CommissionHistory {
+  _id: string;
+  order_id: string;
+  guidee_name: string;
+  order_amount: number;
+  commission_amount: number;
+  commission_rate: number;
+  created_at: string;
+}
+
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'posts' | 'idols' | 'fans' | 'addresses'>('posts');
   const [loading, setLoading] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState(false);
+  const [commissionHistory, setCommissionHistory] = useState<CommissionHistory[]>([]);
+  const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [posts, setPosts] = useState<any[]>([]);
   const [idols, setIdols] = useState<any[]>([]);
   const [fans, setFans] = useState<any[]>([]);
