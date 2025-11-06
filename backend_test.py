@@ -11,8 +11,8 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional
 
 # Configuration
-BASE_URL = "https://preorder-meals.preview.emergentagent.com/api"
-ADMIN_PANEL_URL = "https://preorder-meals.preview.emergentagent.com/api/admin-panel"
+BASE_URL = "https://guide-delivery.preview.emergentagent.com/api"
+ADMIN_PANEL_URL = "https://guide-delivery.preview.emergentagent.com/api/admin-panel"
 ADMIN_CREDENTIALS = {
     "email": "admin@admin.com",
     "password": "admin"
