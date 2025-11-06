@@ -3046,6 +3046,7 @@ async def get_all_users():
 async def admin_update_order_status(order_id: str, status_data: dict):
     """Update order status (admin endpoint - no auth required)"""
     new_status = status_data["status"]
+    current_time = get_ist_time()
     update_data = {"status": new_status}
     
     # Get the order
@@ -3053,9 +3054,58 @@ async def admin_update_order_status(order_id: str, status_data: dict):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
-    # If status is delivered, set delivered_at and credit the agent
+    # Initialize delivery_status_timestamp if not exists
+    if "delivery_status_timestamp" not in order:
+        order["delivery_status_timestamp"] = {}
+    
+    # Track status change timestamp
+    update_data["delivery_status_timestamp"] = order.get("delivery_status_timestamp", {})
+    update_data["delivery_status_timestamp"][new_status] = current_time.isoformat()
+    
+    # If status is accepted, set accepted_at for TTD calculation
+    if new_status == "accepted":
+        update_data["accepted_at"] = current_time
+    
+    # If status is delivered, calculate TTD snapshot and set actual delivery time
     if new_status == "delivered":
-        update_data["delivered_at"] = datetime.now(timezone.utc)
+        update_data["delivered_at"] = current_time
+        update_data["actual_delivery_time"] = current_time
+        
+        # Calculate TTD snapshot (remaining time at delivery)
+        if order.get("is_preorder"):
+            # For preorders, expected time is preorder_time
+            # Parse preorder date and time to calculate expected delivery datetime
+            if order.get("preorder_date") and order.get("preorder_time"):
+                from datetime import datetime as dt
+                preorder_datetime_str = f"{order['preorder_date']} {order['preorder_time']}"
+                try:
+                    expected_time = dt.strptime(preorder_datetime_str, "%Y-%m-%d %I:%M %p")
+                    # Convert to timezone-aware datetime in IST
+                    ist_offset = timedelta(hours=5, minutes=30)
+                    expected_time = expected_time.replace(tzinfo=timezone.utc) + ist_offset
+                    
+                    # Calculate remaining minutes
+                    time_diff = (expected_time - current_time).total_seconds() / 60
+                    update_data["ttd_minutes_snapshot"] = int(time_diff)
+                except:
+                    update_data["ttd_minutes_snapshot"] = 0
+        else:
+            # For regular orders, expected time is accepted_at + regular_order_ttd_minutes
+            if order.get("accepted_at"):
+                # Get delivery config for TTD minutes
+                delivery_config = await db.config.find_one({"type": "delivery"})
+                ttd_minutes = 45  # default
+                if delivery_config:
+                    ttd_minutes = delivery_config.get("regular_order_ttd_minutes", delivery_config.get("ttd_regular_orders", 45))
+                
+                accepted_at = order["accepted_at"]
+                if isinstance(accepted_at, str):
+                    from datetime import datetime as dt
+                    accepted_at = dt.fromisoformat(accepted_at.replace('Z', '+00:00'))
+                
+                expected_time = accepted_at + timedelta(minutes=ttd_minutes)
+                time_diff = (expected_time - current_time).total_seconds() / 60
+                update_data["ttd_minutes_snapshot"] = int(time_diff)
         
         # Credit the delivery agent
         if order.get("assigned_agent_id"):
