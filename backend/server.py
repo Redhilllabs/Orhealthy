@@ -2876,20 +2876,25 @@ async def create_order(order_data: dict, request: Request):
     # Check if guide is ordering for guidee
     ordered_by_guide_id = order_data.get("ordered_by_guide_id")
     ordered_for_guidee_id = order_data.get("ordered_for_guidee_id")
-    meal_plan_id = order_data.get("meal_plan_id")
     commission_earned = 0.0
     commission_rate = 0.0
     guide_id_for_commission = None
+    meal_plan_id = None
     
     # Calculate commission if guide is ordering for guidee (direct order)
     if ordered_by_guide_id and ordered_for_guidee_id:
         guide_id_for_commission = ordered_by_guide_id
     
     # Calculate commission if guidee ordered from a meal plan submitted by their guide
-    elif meal_plan_id:
-        meal_plan = await db.meal_plans.find_one({"_id": ObjectId(meal_plan_id)})
-        if meal_plan and meal_plan.get("guide_id"):
-            guide_id_for_commission = meal_plan["guide_id"]
+    # Check if any cart items have a meal_plan_id
+    else:
+        for item in order_data["items"]:
+            if item.get("meal_plan_id"):
+                meal_plan_id = item["meal_plan_id"]
+                meal_plan = await db.meal_plans.find_one({"_id": ObjectId(meal_plan_id)})
+                if meal_plan and meal_plan.get("guide_id"):
+                    guide_id_for_commission = meal_plan["guide_id"]
+                    break  # Use the first meal plan found
     
     # If we have a guide to credit commission to
     if guide_id_for_commission:
