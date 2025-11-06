@@ -135,8 +135,8 @@ export default function ProfileScreen() {
     }
   };
 
-  // Handle withdrawal request
-  const handleWithdrawalRequest = async () => {
+  // Validate and show confirmation
+  const validateWithdrawal = () => {
     const amount = parseFloat(withdrawalAmount);
     
     if (!amount || amount <= 0) {
@@ -149,18 +149,45 @@ export default function ProfileScreen() {
       return;
     }
 
+    if (!withdrawalUpiId.trim()) {
+      Alert.alert('Error', 'Please enter UPI ID');
+      return;
+    }
+
+    if (!withdrawalContact.trim() || withdrawalContact.length < 10) {
+      Alert.alert('Error', 'Please enter valid contact number');
+      return;
+    }
+
+    setShowWithdrawalModal(false);
+    setShowConfirmWithdrawal(true);
+  };
+
+  // Handle withdrawal request
+  const handleWithdrawalRequest = async () => {
+    const amount = parseFloat(withdrawalAmount);
+
     try {
       const token = await storage.getItemAsync('session_token');
       await axios.post(
         `${API_URL}/withdrawal-requests`,
-        { amount },
+        { 
+          amount,
+          upi_id: withdrawalUpiId,
+          contact_number: withdrawalContact
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      Alert.alert('Success', 'Withdrawal request submitted successfully!');
+      setShowConfirmWithdrawal(false);
+      setShowWithdrawalSuccess(true);
+      
+      // Clear form
       setWithdrawalAmount('');
-      setShowWithdrawalModal(false);
+      setWithdrawalUpiId('');
+      setWithdrawalContact('');
     } catch (error: any) {
+      setShowConfirmWithdrawal(false);
       Alert.alert('Error', error.response?.data?.detail || 'Failed to submit withdrawal request');
     }
   };
