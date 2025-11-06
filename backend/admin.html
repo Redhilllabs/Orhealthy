@@ -1621,6 +1621,12 @@
             });
             
             try {
+                // Load delivery config for TTD calculation
+                if (!window.deliveryConfigCache) {
+                    const configResponse = await fetch(`${API_URL}/config/delivery`);
+                    window.deliveryConfigCache = await configResponse.json();
+                }
+                
                 let orders;
                 if (status === 'all' || status === 'preorders') {
                     // For 'all' and 'preorders', fetch all orders and filter in renderOrders
@@ -1632,10 +1638,48 @@
                 
                 updateOrderTableHeaders(status);
                 renderOrders(orders);
+                
+                // Start live countdown for TTD tabs
+                startTTDCountdown(status);
             } catch (error) {
                 console.error('Error loading orders:', error);
                 showAlert('orders', 'Error loading orders', 'error');
             }
+        }
+        
+        // Live countdown timer for TTD
+        let ttdCountdownInterval = null;
+        
+        function startTTDCountdown(status) {
+            // Clear existing interval
+            if (ttdCountdownInterval) {
+                clearInterval(ttdCountdownInterval);
+                ttdCountdownInterval = null;
+            }
+            
+            // Only start countdown for TTD tabs
+            if (status === 'accepted' || status === 'preparing' || status === 'ready') {
+                ttdCountdownInterval = setInterval(() => {
+                    updateTTDDisplay();
+                }, 1000); // Update every second
+            }
+        }
+        
+        function updateTTDDisplay() {
+            if (!window.currentOrdersData) return;
+            
+            // Update each TTD cell
+            window.currentOrdersData.forEach(order => {
+                const row = document.querySelector(`tr[data-order-id="${order._id}"]`);
+                if (row) {
+                    const ttdCell = row.querySelector('.ttd-cell');
+                    if (ttdCell) {
+                        const ttd = calculateTTD(order, window.deliveryConfigCache);
+                        const ttdDisplay = ttd ? formatTTD(ttd.remainingMs) : '-';
+                        ttdCell.innerHTML = ttdDisplay;
+                    }
+                }
+            });
         }
         
         function updateOrderTableHeaders(status) {
