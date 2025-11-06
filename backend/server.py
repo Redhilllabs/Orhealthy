@@ -3075,6 +3075,7 @@ async def create_order(order_data: dict, request: Request):
         billing_address=billing_address,
         shipping_address=shipping_address,
         payment_id=order_data.get("payment_id"),
+        payment_method=order_data.get("payment_method", "pay_on_delivery"),  # Accept payment_method from request
         ordered_by_guide_id=ordered_by_guide_id,
         ordered_for_guidee_id=ordered_for_guidee_id,
         meal_plan_id=meal_plan_id,
