@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Delivery Agent Portal
-Testing payment method and order timestamp display functionality
+Backend API Testing for Order History and Cancel Order Functionality
+Tests the GET /api/orders and PUT /api/orders/{order_id}/cancel endpoints
 """
 
 import requests
 import json
-import os
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import sys
+import os
 
-# Get backend URL from environment
-BACKEND_URL = os.environ.get('EXPO_PUBLIC_BACKEND_URL', 'https://guide-delivery.preview.emergentagent.com')
-API_BASE = f"{BACKEND_URL}/api"
+# Backend URL from frontend environment
+BACKEND_URL = "https://guide-delivery.preview.emergentagent.com/api"
 
-class DeliveryAgentPortalTester:
+class OrderTestSuite:
     def __init__(self):
         self.session = requests.Session()
         self.user_token = None
