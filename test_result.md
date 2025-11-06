@@ -1813,3 +1813,201 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+
+backend:
+  - task: "TTD System - Order Model Updates"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Updated Order model to support TTD tracking:
+          - Changed delivered_at_ttd to ttd_minutes_snapshot (int)
+          - Added actual_delivery_time (datetime)
+          - Added delivery_status_timestamp (dict) to track all status changes
+          
+  - task: "TTD System - DeliveryConfig Model Updates"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Updated DeliveryConfig model:
+          - Changed ttd_regular_orders to regular_order_ttd_minutes
+          - Updated GET /api/config/delivery endpoint to return new field
+          - Updated PUT /api/config/delivery endpoint to save new field
+          - Added backward compatibility for old field name
+          
+  - task: "TTD System - Order Status Update Logic"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Updated PUT /api/admin/orders/{order_id}/status endpoint:
+          - Track delivery_status_timestamp for all status changes
+          - Set accepted_at when status changes to "accepted"
+          - Calculate ttd_minutes_snapshot when status changes to "delivered"
+          - Set actual_delivery_time when status changes to "delivered"
+          - For preorders: TTD snapshot = remaining time to preorder_time
+          - For regular orders: TTD snapshot = remaining time to (accepted_at + regular_order_ttd_minutes)
+          - Color coding: Green for early/on-time, Red for late
+
+admin:
+  - task: "TTD System - Admin Panel Delivery Settings"
+    implemented: true
+    working: "NA"
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Added Regular Order TTD input field in Delivery Settings tab:
+          - Added HTML input field with ID "regularOrderTTD"
+          - Updated loadDeliveryConfig() to load regular_order_ttd_minutes
+          - Updated saveDeliveryConfig() to save regular_order_ttd_minutes
+          - Default value: 45 minutes
+          
+  - task: "TTD System - Admin Panel Table Headers"
+    implemented: true
+    working: "NA"
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Updated updateOrderTableHeaders() function:
+          - For accepted/preparing/ready tabs: Added "TTD" column
+          - For delivered tab: Added "Expected Time", "Actual Time", "TTD Snapshot" columns
+          - Maintains existing columns for other tabs
+          
+  - task: "TTD System - Admin Panel TTD Display & Countdown"
+    implemented: true
+    working: "NA"
+    file: "backend/admin.html"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Implemented live TTD countdown system:
+          1. Added helper functions:
+             - calculateTTD(): Calculates remaining time to expected delivery
+             - formatTTD(): Formats time as HH:MM:SS with color coding
+             - formatTTDSnapshot(): Formats snapshot with early/late indicator
+          
+          2. Updated renderOrders() function:
+             - For accepted/preparing/ready tabs:
+               * Display live TTD countdown in HH:MM:SS format
+               * Sort orders by TTD (ascending - most urgent first)
+               * Color coding: Red (<10min), Orange (<20min), Green (>20min)
+             - For delivered tab:
+               * Display Expected Delivery Time
+               * Display Actual Delivery Time
+               * Display TTD Snapshot with color coding (green=early, red=late)
+          
+          3. Added live countdown timer:
+             - startTTDCountdown(): Starts 1-second interval for TTD tabs
+             - updateTTDDisplay(): Updates all TTD cells every second
+             - Clears interval when switching tabs
+             - Caches delivery config for performance
+          
+          4. TTD calculation logic:
+             - For preorders: Expected time = preorder_date + preorder_time
+             - For regular orders: Expected time = accepted_at + regular_order_ttd_minutes
+             - Live countdown updates every second showing remaining time
+
+metadata:
+  created_by: "main_agent"
+  version: "3.0"
+  test_sequence: 4
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "TTD System - Order Model Updates"
+    - "TTD System - DeliveryConfig Model Updates"
+    - "TTD System - Order Status Update Logic"
+    - "TTD System - Admin Panel Delivery Settings"
+    - "TTD System - Admin Panel Table Headers"
+    - "TTD System - Admin Panel TTD Display & Countdown"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      🚀 **TTD (Time to Deliver) System Implementation Complete**
+      
+      **Backend Changes:**
+      1. ✅ Updated Order model with TTD tracking fields:
+         - ttd_minutes_snapshot (int) - stores remaining minutes at delivery
+         - actual_delivery_time (datetime) - actual delivery timestamp
+         - delivery_status_timestamp (dict) - tracks all status changes
+      
+      2. ✅ Updated DeliveryConfig model:
+         - Renamed ttd_regular_orders to regular_order_ttd_minutes
+         - Updated config endpoints with backward compatibility
+      
+      3. ✅ Enhanced order status update logic:
+         - Tracks accepted_at when order moves to "accepted"
+         - Calculates TTD snapshot when order is delivered
+         - For preorders: TTD based on preorder_time
+         - For regular orders: TTD based on accepted_at + regular_order_ttd_minutes
+      
+      **Admin Panel Changes:**
+      1. ✅ Added "Regular Order TTD" input field in Delivery Settings
+      
+      2. ✅ Updated order table headers:
+         - Accepted/Preparing/Ready tabs: Show "TTD" column
+         - Delivered tab: Show "Expected Time", "Actual Time", "TTD Snapshot"
+      
+      3. ✅ Implemented live TTD countdown:
+         - Displays time in HH:MM:SS format
+         - Updates every second automatically
+         - Color coding: Red (<10min), Orange (<20min), Green (>20min)
+         - Sorts orders by TTD (most urgent first)
+      
+      4. ✅ Implemented ADT (Actual Delivery Time) display:
+         - Shows expected vs actual delivery times
+         - TTD snapshot with early/late indicator
+         - Color coding: Green (early/on-time), Red (late)
+      
+      **Testing Required:**
+      - Test delivery config save/load with new TTD field
+      - Test order status updates (arrived → accepted → preparing → ready → delivered)
+      - Test TTD calculation for regular orders
+      - Test TTD countdown display and updates
+      - Test order sorting by TTD
+      - Test ADT display for delivered orders
+      - Test TTD snapshot calculation (early/late)
+      - Verify live countdown updates every second
+      - Verify color coding works correctly
+      
+      **Admin Panel URL:** /api/admin-panel
+      **Default credentials:** admin@admin.com / admin
+
