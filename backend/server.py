@@ -3590,6 +3590,65 @@ async def reject_withdrawal(withdrawal_id: str):
     
     return {"message": "Withdrawal rejected"}
 
+@api_router.put("/admin/withdrawal-requests/{request_id}/process")
+async def process_withdrawal_request(request_id: str, process_data: dict):
+    """Process a withdrawal request (admin only)"""
+    status = process_data.get("status")  # approved or rejected
+    transaction_id = process_data.get("transaction_id")
+    
+    if status not in ["approved", "rejected"]:
+        raise HTTPException(status_code=400, detail="Status must be 'approved' or 'rejected'")
+    
+    if status == "approved" and not transaction_id:
+        raise HTTPException(status_code=400, detail="Transaction ID is required for approval")
+    
+    # Get the withdrawal request
+    withdrawal_req = await db.withdrawal_requests.find_one({"_id": ObjectId(request_id)})
+    if not withdrawal_req:
+        raise HTTPException(status_code=404, detail="Withdrawal request not found")
+    
+    if withdrawal_req.get("status") != "pending":
+        raise HTTPException(status_code=400, detail="Request already processed")
+    
+    # Update withdrawal request
+    update_data = {
+        "status": status,
+        "processed_at": get_ist_time(),
+        "processed_by": "admin"
+    }
+    
+    if status == "approved":
+        update_data["transaction_id"] = transaction_id
+    
+    await db.withdrawal_requests.update_one(
+        {"_id": ObjectId(request_id)},
+        {"$set": update_data}
+    )
+    
+    # If approved, deduct from guide's commission balance and create history entry
+    if status == "approved":
+        guide_id = withdrawal_req["guide_id"]
+        amount = withdrawal_req["amount"]
+        
+        await db.users.update_one(
+            {"_id": ObjectId(guide_id)},
+            {"$inc": {"commission_balance": -amount}}
+        )
+        
+        # Create withdrawal history entry
+        withdrawal_history = {
+            "guide_id": guide_id,
+            "type": "withdrawal",
+            "amount": amount,
+            "transaction_id": transaction_id,
+            "upi_id": withdrawal_req.get("upi_id"),
+            "contact_number": withdrawal_req.get("contact_number"),
+            "created_at": get_ist_time()
+        }
+        await db.commission_history.insert_one(withdrawal_history)
+    
+    return {"message": f"Withdrawal request {status}", "status": status}
+
 @app.get("/admin")
 async def admin_panel():
     """Serve admin panel"""
