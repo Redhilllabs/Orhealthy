@@ -1756,8 +1756,6 @@
 
         // Helper function to calculate TTD for live countdown
         function calculateTTD(order, deliveryConfig) {
-            if (!order.accepted_at) return null;
-            
             const now = new Date();
             let expectedTime;
             
@@ -1765,10 +1763,13 @@
                 // For preorders, expected time is preorder_time
                 const preorderDateTimeStr = `${order.preorder_date} ${order.preorder_time}`;
                 expectedTime = new Date(preorderDateTimeStr);
-            } else {
+            } else if (order.accepted_at) {
                 // For regular orders, expected time is accepted_at + regular_order_ttd_minutes
                 const ttdMinutes = deliveryConfig?.regular_order_ttd_minutes || 45;
                 expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
+            } else {
+                // No way to calculate expected time
+                return null;
             }
             
             const remainingMs = expectedTime - now;
