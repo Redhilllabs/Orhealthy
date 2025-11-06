@@ -1208,6 +1208,112 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Order Details Modal */}
+      <Modal visible={showOrderModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Order Details</Text>
+              <TouchableOpacity onPress={() => setShowOrderModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              {selectedOrder && (
+                <>
+                  {/* Order ID and Status */}
+                  <View style={styles.orderDetailSection}>
+                    <Text style={styles.orderDetailLabel}>Order ID</Text>
+                    <Text style={styles.orderDetailValue}>#{selectedOrder.order_id || selectedOrder._id?.slice(-8)}</Text>
+                  </View>
+
+                  <View style={styles.orderDetailSection}>
+                    <Text style={styles.orderDetailLabel}>Status</Text>
+                    <View style={styles.orderDetailStatusRow}>
+                      <Text style={styles.orderDetailValue}>
+                        {selectedOrder.status?.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Items */}
+                  <View style={styles.orderDetailSection}>
+                    <Text style={styles.orderDetailLabel}>Items Ordered</Text>
+                    {selectedOrder.items?.map((item: any, index: number) => (
+                      <View key={index} style={styles.orderDetailItem}>
+                        <Text style={styles.orderDetailItemName}>{item.meal_name}</Text>
+                        <Text style={styles.orderDetailItemQuantity}>x {item.quantity}</Text>
+                        <Text style={styles.orderDetailItemPrice}>₹{(item.price * item.quantity).toFixed(2)}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Payment Method */}
+                  <View style={styles.orderDetailSection}>
+                    <Text style={styles.orderDetailLabel}>Payment Method</Text>
+                    <View style={styles.orderPaymentRow}>
+                      <Ionicons 
+                        name={selectedOrder.payment_method === 'online' ? "card" : "cash"} 
+                        size={16} 
+                        color="#666" 
+                      />
+                      <Text style={styles.orderDetailValue}>
+                        {selectedOrder.payment_method === 'online' ? 'Online' : 'Pay on Delivery'}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Delivery Address */}
+                  <View style={styles.orderDetailSection}>
+                    <Text style={styles.orderDetailLabel}>Delivery Address</Text>
+                    <Text style={styles.orderDetailValue}>
+                      {selectedOrder.shipping_address?.street}
+                      {selectedOrder.shipping_address?.apartment && `, ${selectedOrder.shipping_address.apartment}`}
+                      {'\n'}{selectedOrder.shipping_address?.city}, {selectedOrder.shipping_address?.state} - {selectedOrder.shipping_address?.zip_code}
+                      {'\n'}☎ {selectedOrder.shipping_address?.phone}
+                    </Text>
+                  </View>
+
+                  {/* Total */}
+                  <View style={[styles.orderDetailSection, styles.orderDetailTotal]}>
+                    <Text style={styles.orderDetailTotalLabel}>Total Amount</Text>
+                    <Text style={styles.orderDetailTotalValue}>₹{selectedOrder.final_price?.toFixed(2)}</Text>
+                  </View>
+
+                  {/* Cancel Button - only show if status is 'arrived' */}
+                  {selectedOrder.status === 'arrived' && (
+                    <TouchableOpacity
+                      style={styles.cancelOrderButton}
+                      onPress={() => {
+                        Alert.alert(
+                          'Cancel Order',
+                          'Are you sure you want to cancel this order?',
+                          [
+                            { text: 'No', style: 'cancel' },
+                            {
+                              text: 'Yes, Cancel',
+                              style: 'destructive',
+                              onPress: () => {
+                                cancelOrder(selectedOrder._id);
+                                setShowOrderModal(false);
+                              },
+                            },
+                          ]
+                        );
+                      }}
+                    >
+                      <Ionicons name="close-circle" size={20} color="#fff" />
+                      <Text style={styles.cancelOrderButtonText}>Cancel Order</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
