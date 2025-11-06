@@ -1825,7 +1825,7 @@
         function renderOrders(orders) {
             const tbody = document.getElementById('ordersBody');
             const showAgent = (currentOrderStatusFilter === 'ready' || currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
-            const showTTD = (currentOrderStatusFilter === 'accepted' || currentOrderStatusFilter === 'preparing' || currentOrderStatusFilter === 'ready');
+            const showTTD = (currentOrderStatusFilter === 'accepted' || currentOrderStatusFilter === 'preparing' || currentOrderStatusFilter === 'ready' || currentOrderStatusFilter === 'out_for_delivery');
             const showADT = (currentOrderStatusFilter === 'delivered');
             
             if (currentOrderStatusFilter === 'preorders') {
