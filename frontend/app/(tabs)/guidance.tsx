@@ -2457,7 +2457,7 @@ export default function GuidanceScreen() {
                           quantity: 1,
                           price: selectedMealForDetail.calculated_price || selectedMealForDetail.price || 0,
                           customizations: customizations,
-                          meal_plan_id: selectedPlan?._id, // Include meal plan ID for commission tracking
+                          meal_plan_id: currentViewPlan?._id, // Include meal plan ID for commission tracking
                         };
                         
                         await axios.post(`${API_URL}/cart`, cartItem, {
