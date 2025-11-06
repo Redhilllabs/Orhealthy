@@ -1606,4 +1606,43 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  paymentOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    marginBottom: 12,
+  },
+  paymentOptionSelected: {
+    borderColor: '#6366f1',
+    backgroundColor: '#eef2ff',
+  },
+  paymentOptionDisabled: {
+    opacity: 0.6,
+  },
+  paymentOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  paymentOptionText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  comingSoonBadge: {
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  comingSoonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#92400e',
+  },
 });
