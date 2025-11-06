@@ -347,6 +347,7 @@ class Order(BaseModel):
     payment_id: Optional[str] = None
     ordered_by_guide_id: Optional[str] = None  # If guide ordered for guidee
     ordered_for_guidee_id: Optional[str] = None  # The guidee this order is for
+    meal_plan_id: Optional[str] = None  # If order was placed from a meal plan
     commission_earned: float = 0.0  # Commission earned by guide
     commission_rate: float = 0.0  # Rate at which commission was calculated
     assigned_agent_id: Optional[str] = None  # Delivery agent assigned to this order
