@@ -1010,14 +1010,15 @@ export default function ProfileScreen() {
               />
               
               <TouchableOpacity
-                style={[styles.saveButton, { marginTop: 24, backgroundColor: '#6366f1' }]}
+                style={[styles.saveButton, { marginTop: 24, marginBottom: 20, backgroundColor: '#6366f1' }]}
                 onPress={validateWithdrawal}
               >
                 <Text style={styles.saveButtonText}>Continue</Text>
               </TouchableOpacity>
+              </ScrollView>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Confirmation Modal */}
