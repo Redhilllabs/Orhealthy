@@ -2440,7 +2440,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Order History - Cancel Order Endpoint"
     - "Profile Screen - Order History Tab with Details Modal"
   stuck_tasks: []
   test_all: false
