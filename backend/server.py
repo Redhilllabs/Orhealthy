@@ -2937,6 +2937,7 @@ async def create_order(order_data: dict, request: Request):
         payment_id=order_data.get("payment_id"),
         ordered_by_guide_id=ordered_by_guide_id,
         ordered_for_guidee_id=ordered_for_guidee_id,
+        meal_plan_id=meal_plan_id,
         commission_earned=commission_earned,
         commission_rate=commission_rate,
         is_preorder=is_preorder,
