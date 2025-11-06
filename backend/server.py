@@ -20,13 +20,13 @@ load_dotenv(ROOT_DIR / '.env')
 
 # IST timezone helper
 def get_ist_time():
-    """Get current time in IST (UTC+5:30)"""
-    from datetime import timezone as tz
+    """Get current time in IST (UTC+5:30) as naive datetime"""
     utc_time = datetime.now(timezone.utc)
     # IST is UTC+5:30
-    ist_tz = tz(timedelta(hours=5, minutes=30))
-    ist_time = utc_time.astimezone(ist_tz)
-    return ist_time
+    ist_offset = timedelta(hours=5, minutes=30)
+    ist_time = utc_time + ist_offset
+    # Return as naive datetime (without timezone info) so MongoDB stores it as-is
+    return ist_time.replace(tzinfo=None)
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
