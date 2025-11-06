@@ -319,6 +319,7 @@ class CartItem(BaseModel):
     customizations: List[MealIngredient] = []
     quantity: int = 1
     price: float
+    meal_plan_id: Optional[str] = None  # Track which meal plan this item came from
 
 class Cart(BaseModel):
     user_id: str
