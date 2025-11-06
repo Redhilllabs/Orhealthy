@@ -2939,8 +2939,10 @@ async def create_order(order_data: dict, request: Request):
         ordered_by_guide_id=ordered_by_guide_id,
         ordered_for_guidee_id=ordered_for_guidee_id,
         meal_plan_id=meal_plan_id,
-        commission_earned=commission_earned,
+        guide_id_for_commission=guide_id_for_commission,
+        commission_earned=0.0,  # Will be calculated and credited on delivery
         commission_rate=commission_rate,
+        commission_credited=False,
         is_preorder=is_preorder,
         preorder_date=preorder_date,
         preorder_time=preorder_time,
