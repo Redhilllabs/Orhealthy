@@ -594,11 +594,14 @@ export default function DeliveryModeScreen() {
                   })()}
                   
                   <TouchableOpacity 
-                    style={styles.deliveredButton}
+                    style={[styles.deliveredButton, deliveringOrders.has(order._id) && styles.deliveredButtonDisabled]}
                     onPress={() => markAsDelivered(order._id)}
+                    disabled={deliveringOrders.has(order._id)}
                   >
                     <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                    <Text style={styles.deliveredButtonText}>Mark as Delivered</Text>
+                    <Text style={styles.deliveredButtonText}>
+                      {deliveringOrders.has(order._id) ? 'Processing...' : 'Mark as Delivered'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               ))
