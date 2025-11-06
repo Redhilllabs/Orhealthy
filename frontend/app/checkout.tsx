@@ -74,6 +74,7 @@ export default function CheckoutScreen() {
   const [preorderDate, setPreorderDate] = useState('');
   const [preorderTime, setPreorderTime] = useState('');
   const [deliveryConfig, setDeliveryConfig] = useState({ delivery_price: 50, min_order_for_free_delivery: 500 });
+  const [paymentMethod, setPaymentMethod] = useState('pay_on_delivery'); // pay_on_delivery or online
   const [storeTimings, setStoreTimings] = useState({ 
     opening_time: '6:00 AM', 
     closing_time: '9:00 PM',
