@@ -2119,3 +2119,65 @@ agent_communication:
       **Admin Panel URL:** /api/admin-panel
       **Default credentials:** admin@admin.com / admin
 
+
+frontend:
+  - task: "Delivery Agent Portal - Payment Method and Order Timestamp Display"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/delivery-mode.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Added display of payment method and order timestamp to delivery agent order cards:
+          - Updated payment method display to use order.payment_method field instead of payment_id
+          - Changed payment text from "COD" to "Pay on Delivery" for better clarity
+          - Added new timestamp section showing when order was placed (HH:MM:SS in IST format)
+          - Applied consistently to both "Assigned" and "Delivered" tabs
+          - Created timestampSection and timestampText styles for proper formatting
+          - Uses Ionicons time-outline icon for visual consistency
+
+metadata:
+  created_by: "main_agent"
+  version: "3.0"
+  test_sequence: 4
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Delivery Agent Portal - Payment Method and Order Timestamp Display"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      🔧 **Delivery Agent Portal Enhancement Complete**
+      
+      **Frontend Changes:**
+      1. ✅ Updated payment method display in delivery-mode.tsx
+         - Changed from checking payment_id to payment_method field
+         - Updated text: "COD" → "Pay on Delivery"
+         - Updated text: "Online" remains "Online"
+      
+      2. ✅ Added order timestamp display
+         - New timestamp section with time-outline icon
+         - Shows "Ordered at: HH:MM:SS" format
+         - Uses Indian time format (24-hour)
+         - Displays below customer info section
+      
+      3. ✅ Applied to both tabs
+         - Assigned orders tab: Shows payment method + timestamp
+         - Delivered orders tab: Shows payment method + timestamp
+      
+      **Testing Required:**
+      - Backend API endpoints should return payment_method and created_at fields
+      - Test GET /api/delivery-agents/my-orders with valid delivery agent token
+      - Verify payment_method is properly saved when orders are created
+      - Verify created_at timestamp is properly saved when orders are created
+      - Check frontend display shows correct payment method text
+      - Check frontend display shows correct timestamp in HH:MM:SS format
