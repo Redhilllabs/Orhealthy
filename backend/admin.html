@@ -1710,9 +1710,78 @@
             }
         }
 
+        // Helper function to calculate TTD for live countdown
+        function calculateTTD(order, deliveryConfig) {
+            if (!order.accepted_at) return null;
+            
+            const now = new Date();
+            let expectedTime;
+            
+            if (order.is_preorder && order.preorder_date && order.preorder_time) {
+                // For preorders, expected time is preorder_time
+                const preorderDateTimeStr = `${order.preorder_date} ${order.preorder_time}`;
+                expectedTime = new Date(preorderDateTimeStr);
+            } else {
+                // For regular orders, expected time is accepted_at + regular_order_ttd_minutes
+                const ttdMinutes = deliveryConfig?.regular_order_ttd_minutes || 45;
+                expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
+            }
+            
+            const remainingMs = expectedTime - now;
+            const remainingMinutes = Math.floor(remainingMs / 60000);
+            
+            return {
+                expectedTime,
+                remainingMs,
+                remainingMinutes
+            };
+        }
+        
+        // Helper function to format time as HH:MM:SS
+        function formatTTD(milliseconds) {
+            if (milliseconds <= 0) {
+                return '<span style="color: #ef4444; font-weight: 600;">00:00:00</span>';
+            }
+            
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            const formattedTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            // Color code: red if less than 10 minutes, orange if less than 20, green otherwise
+            let color = '#10b981'; // green
+            if (totalSeconds < 600) color = '#ef4444'; // red if < 10 min
+            else if (totalSeconds < 1200) color = '#f59e0b'; // orange if < 20 min
+            
+            return `<span style="color: ${color}; font-weight: 600;">${formattedTime}</span>`;
+        }
+        
+        // Helper function to format TTD snapshot (for delivered orders)
+        function formatTTDSnapshot(snapshotMinutes) {
+            if (snapshotMinutes === null || snapshotMinutes === undefined) return '-';
+            
+            const absMinutes = Math.abs(snapshotMinutes);
+            const hours = Math.floor(absMinutes / 60);
+            const mins = absMinutes % 60;
+            
+            let timeStr = '';
+            if (hours > 0) timeStr += `${hours}h `;
+            timeStr += `${mins}m`;
+            
+            // Green for early/on-time (positive or 0), Red for late (negative)
+            const color = snapshotMinutes >= 0 ? '#10b981' : '#ef4444';
+            const label = snapshotMinutes > 0 ? 'early' : snapshotMinutes < 0 ? 'late' : 'on-time';
+            
+            return `<span style="color: ${color}; font-weight: 600;">${timeStr}</span><br><small style="color: ${color};">(${label})</small>`;
+        }
+
         function renderOrders(orders) {
             const tbody = document.getElementById('ordersBody');
             const showAgent = (currentOrderStatusFilter === 'ready' || currentOrderStatusFilter === 'out_for_delivery' || currentOrderStatusFilter === 'delivered' || currentOrderStatusFilter === 'all');
+            const showTTD = (currentOrderStatusFilter === 'accepted' || currentOrderStatusFilter === 'preparing' || currentOrderStatusFilter === 'ready');
+            const showADT = (currentOrderStatusFilter === 'delivered');
             
             if (currentOrderStatusFilter === 'preorders') {
                 // Preorders tab - show only preorders with special columns
