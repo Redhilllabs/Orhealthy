@@ -69,6 +69,7 @@ export default function DeliveryModeScreen() {
   const [activeTab, setActiveTab] = useState<'assigned' | 'delivered' | 'history'>('assigned');
   const [isBusy, setIsBusy] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [ttdMinutes, setTtdMinutes] = useState(45); // Default TTD value
 
   useEffect(() => {
     loadData();
