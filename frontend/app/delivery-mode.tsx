@@ -160,6 +160,17 @@ export default function DeliveryModeScreen() {
       if (creditsData.total_balance !== undefined) {
         setAgentData(prev => prev ? {...prev, wallet_balance: creditsData.total_balance} : null);
       }
+
+      // Load delivery config to get TTD minutes
+      try {
+        const configResponse = await fetch(`${BACKEND_URL}/api/config/delivery`);
+        const configData = await configResponse.json();
+        console.log('Delivery config loaded, TTD:', configData.regular_order_ttd_minutes);
+        setTtdMinutes(configData.regular_order_ttd_minutes || 45);
+      } catch (error) {
+        console.error('Error loading delivery config:', error);
+        setTtdMinutes(45); // Fallback to default
+      }
       
     } catch (error) {
       console.error('Error loading delivery data:', error);
