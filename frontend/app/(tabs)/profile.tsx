@@ -868,6 +868,97 @@ export default function ProfileScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Wallet History Modal */}
+      <Modal visible={showWalletModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxHeight: '80%' }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Wallet Credit History</Text>
+              <TouchableOpacity onPress={() => setShowWalletModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.modalBody}>
+              {commissionHistory.length === 0 ? (
+                <View style={{ padding: 40, alignItems: 'center' }}>
+                  <Ionicons name="wallet-outline" size={64} color="#ccc" />
+                  <Text style={{ marginTop: 16, color: '#666', textAlign: 'center' }}>
+                    No commission history yet
+                  </Text>
+                </View>
+              ) : (
+                commissionHistory.map((item) => (
+                  <View key={item._id} style={styles.historyItem}>
+                    <View style={styles.historyItemHeader}>
+                      <Text style={styles.historyGuideeName}>{item.guidee_name}</Text>
+                      <Text style={styles.historyAmount}>
+                        +₹{item.commission_amount.toFixed(2)}
+                      </Text>
+                    </View>
+                    <View style={styles.historyItemDetails}>
+                      <Text style={styles.historyDetail}>
+                        Order: ₹{item.order_amount.toFixed(2)}
+                      </Text>
+                      <Text style={styles.historyDetail}>•</Text>
+                      <Text style={styles.historyDetail}>
+                        {item.commission_rate}% commission
+                      </Text>
+                    </View>
+                    <Text style={styles.historyDate}>
+                      {new Date(item.created_at).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Withdrawal Request Modal */}
+      <Modal visible={showWithdrawalModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Request Withdrawal</Text>
+              <TouchableOpacity onPress={() => setShowWithdrawalModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalBody}>
+              <View style={{ padding: 16, backgroundColor: '#f3f4f6', borderRadius: 8, marginBottom: 16 }}>
+                <Text style={{ fontSize: 12, color: '#666' }}>Available Balance</Text>
+                <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#1f2937' }}>
+                  ₹{(user?.commission_balance || 0).toFixed(2)}
+                </Text>
+              </View>
+              <Text style={{ fontSize: 14, marginBottom: 8, color: '#374151' }}>
+                Withdrawal Amount
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter amount"
+                keyboardType="numeric"
+                value={withdrawalAmount}
+                onChangeText={setWithdrawalAmount}
+              />
+              <TouchableOpacity
+                style={[styles.saveButton, { marginTop: 16 }]}
+                onPress={handleWithdrawalRequest}
+              >
+                <Text style={styles.saveButtonText}>Submit Request</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
