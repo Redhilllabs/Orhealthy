@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for OrHealthy Meal Planning System
-Tests the new meal planning endpoints for guides and guidees
+Backend Testing for OrHealthy TTD (Time to Deliver) System
+Testing Focus: Delivery Config Endpoints, Order Status Updates, Admin Panel Integration
 """
 
 import requests
 import json
-import os
-from datetime import datetime, timezone
-import uuid
+import time
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Optional
 
-# Get backend URL from environment
-BACKEND_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://preorder-meals.preview.emergentagent.com')
-API_BASE = f"{BACKEND_URL}/api"
+# Configuration
+BASE_URL = "https://preorder-meals.preview.emergentagent.com/api"
+ADMIN_PANEL_URL = "https://preorder-meals.preview.emergentagent.com/api/admin-panel"
+ADMIN_CREDENTIALS = {
+    "email": "admin@admin.com",
+    "password": "admin"
+}
 
-class MealPlanningTester:
+class TTDSystemTester:
     def __init__(self):
         self.session = requests.Session()
         self.guidee_token = None
