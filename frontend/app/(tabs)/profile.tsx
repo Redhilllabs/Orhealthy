@@ -118,6 +118,49 @@ export default function ProfileScreen() {
     }, [user])
   );
 
+  // Fetch commission history
+  const fetchCommissionHistory = async () => {
+    try {
+      const token = await storage.getItemAsync('session_token');
+      const response = await axios.get(`${API_URL}/commission-history`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setCommissionHistory(response.data.history);
+    } catch (error) {
+      console.error('Error fetching commission history:', error);
+    }
+  };
+
+  // Handle withdrawal request
+  const handleWithdrawalRequest = async () => {
+    const amount = parseFloat(withdrawalAmount);
+    
+    if (!amount || amount <= 0) {
+      Alert.alert('Error', 'Please enter a valid amount');
+      return;
+    }
+
+    if (amount > (user?.commission_balance || 0)) {
+      Alert.alert('Error', 'Insufficient balance');
+      return;
+    }
+
+    try {
+      const token = await storage.getItemAsync('session_token');
+      await axios.post(
+        `${API_URL}/withdrawal-requests`,
+        { amount },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      Alert.alert('Success', 'Withdrawal request submitted successfully!');
+      setWithdrawalAmount('');
+      setShowWithdrawalModal(false);
+    } catch (error: any) {
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to submit withdrawal request');
+    }
+  };
+
 
   const fetchProfileData = async () => {
     try {
