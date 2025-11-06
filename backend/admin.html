@@ -1676,8 +1676,15 @@
             
             if (currentOrderStatusFilter === 'preorders') {
                 // Preorders tab - show only preorders with special columns
-                const preorders = orders.filter(order => order.is_preorder === true);
-                tbody.innerHTML = preorders.map(order => {
+                const preorders = orders.filter(order => order.is_preorder === true || order.is_preorder === 'true');
+                console.log('Total orders:', orders.length);
+                console.log('Preorders found:', preorders.length);
+                console.log('Sample order is_preorder:', orders[0]?.is_preorder, typeof orders[0]?.is_preorder);
+                
+                if (preorders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px; color: #64748b;">No preorders found</td></tr>';
+                } else {
+                    tbody.innerHTML = preorders.map(order => {
                     return `
                     <tr>
                         <td>${order._id.slice(-8)}</td>
