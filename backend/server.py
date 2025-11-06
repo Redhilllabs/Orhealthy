@@ -349,7 +349,9 @@ class Order(BaseModel):
     commission_rate: float = 0.0  # Rate at which commission was calculated
     assigned_agent_id: Optional[str] = None  # Delivery agent assigned to this order
     agent_assigned_at: Optional[datetime] = None
+    accepted_at: Optional[datetime] = None  # When order was accepted (for TTD calculation)
     delivered_at: Optional[datetime] = None
+    delivered_at_ttd: Optional[str] = None  # TTD value snapshot when delivered (for ADT)
     is_preorder: bool = False  # Whether this is a preorder
     preorder_date: Optional[str] = None  # Delivery date for preorder (YYYY-MM-DD)
     preorder_time: Optional[str] = None  # Delivery time for preorder (e.g., "6:00 AM")
