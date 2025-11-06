@@ -2317,3 +2317,130 @@ agent_communication:
       - API endpoint existence: ✅ Working
       
       **All delivery agent portal backend functionality is now working correctly. The critical payment_method issue has been resolved.**
+
+backend:
+  - task: "Order History - Cancel Order Endpoint (PUT /api/orders/{order_id}/cancel)"
+    implemented: true
+    working: "NA"
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Added cancel order endpoint for users to cancel orders:
+          - User can only cancel their own orders
+          - Only orders with 'arrived' status can be cancelled
+          - Sets status to 'cancelled' and adds cancelled_at timestamp in IST
+          - Returns appropriate error messages for invalid attempts
+
+frontend:
+  - task: "Profile Screen - Order History Tab with Details Modal"
+    implemented: true
+    working: "NA"
+    file: "frontend/app/(tabs)/profile.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: |
+          Added complete Order History feature to profile screen:
+          1. New "Orders" tab added before "Addresses" tab
+          2. Order list view with:
+             - Order ID, status badge with color coding
+             - Item count and total price
+             - Order date in Indian format
+             - Payment method (Pay on Delivery / Online)
+          3. Order details modal on click:
+             - Complete order information
+             - List of items with quantities and prices
+             - Payment method with icon
+             - Delivery address
+             - Total amount highlighted
+             - Cancel button (only visible for 'arrived' status)
+          4. Color-coded status badges:
+             - Arrived: Blue (#e3f2fd)
+             - Accepted: Orange (#fff3e0)
+             - Preparing: Orange (#fff3e0)
+             - Ready: Purple (#f3e5f5)
+             - Out for Delivery: Pink (#fce4ec)
+             - Delivered: Green (#e8f5e9)
+             - Cancelled: Red (#ffebee)
+          5. Orders displayed from most recent to oldest
+          6. Cancellation with confirmation dialog
+
+metadata:
+  created_by: "main_agent"
+  version: "4.0"
+  test_sequence: 5
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Order History - Cancel Order Endpoint"
+    - "Profile Screen - Order History Tab with Details Modal"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      🔧 **Profile Screen Order History Enhancement Complete**
+      
+      **Backend Changes:**
+      1. ✅ Added PUT /api/orders/{order_id}/cancel endpoint
+         - User authentication required
+         - Validates user owns the order
+         - Only cancels orders in 'arrived' status
+         - Sets cancelled_at timestamp in IST
+      
+      **Frontend Changes:**
+      1. ✅ Added "Orders" tab in profile (before Addresses)
+         - New tab in navigation with receipt icon
+         - Fetches orders when tab is active
+      
+      2. ✅ Order List View (minimal display)
+         - Order ID with # prefix
+         - Color-coded status badge
+         - Item count
+         - Total price and date
+         - Payment method icon and text
+         - Tap to view full details
+      
+      3. ✅ Order Details Modal (comprehensive view)
+         - Complete order information
+         - Item list with names, quantities, prices
+         - Payment method with proper icon
+         - Full delivery address
+         - Total amount prominently displayed
+         - Cancel button (conditional: only for 'arrived' status)
+         - Confirmation dialog for cancellation
+      
+      4. ✅ Color Coding System
+         - 7 different status colors implemented
+         - Visual hierarchy for order states
+         - Consistent color scheme across app
+      
+      5. ✅ State Management
+         - Orders fetched and sorted (recent first)
+         - Real-time updates after cancellation
+         - Loading states handled
+      
+      **Testing Required:**
+      - Test GET /api/orders endpoint returns orders for authenticated user
+      - Test PUT /api/orders/{order_id}/cancel with 'arrived' status order
+      - Test PUT /api/orders/{order_id}/cancel with non-'arrived' status (should fail)
+      - Test frontend displays orders correctly
+      - Test order details modal shows complete information
+      - Test cancel button only appears for 'arrived' status
+      - Test cancellation flow with confirmation
+      - Test color coding for all status types
+      - Test payment method icons (cash vs card)
+      - Test real-time order status updates
+      
+      **Note:** Sticky header implementation for guides/delivery agents can be enhanced in future iterations to better handle space constraints.
