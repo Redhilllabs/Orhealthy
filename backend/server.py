@@ -368,7 +368,7 @@ class StoreTimingsConfig(BaseModel):
 class DeliveryConfig(BaseModel):
     delivery_price: float
     min_order_for_free_delivery: float
-    ttd_regular_orders: int = 45  # Time to deliver for regular orders in minutes
+    regular_order_ttd_minutes: int = 45  # Time to deliver for regular orders in minutes
 
 class DeliveryAgent(BaseModel):
     email: str
