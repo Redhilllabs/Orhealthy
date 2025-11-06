@@ -484,6 +484,7 @@ export default function ProfileScreen() {
     { key: 'posts', label: 'Posts', icon: 'list' },
     { key: 'idols', label: 'Idols', icon: 'heart' },
     { key: 'fans', label: 'Fans', icon: 'trophy' },
+    { key: 'orders', label: 'Orders', icon: 'receipt' },
     { key: 'addresses', label: 'Addresses', icon: 'location' },
   ];
 
