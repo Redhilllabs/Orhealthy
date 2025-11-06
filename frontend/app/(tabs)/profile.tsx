@@ -907,7 +907,7 @@ export default function ProfileScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { maxHeight: '80%' }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Wallet Credit History</Text>
+              <Text style={styles.modalTitle}>Wallet History</Text>
               <TouchableOpacity onPress={() => setShowWalletModal(false)}>
                 <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
