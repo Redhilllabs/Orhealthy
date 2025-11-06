@@ -247,9 +247,7 @@ export default function DeliveryModeScreen() {
       const preorderDateTimeStr = `${order.preorder_date} ${order.preorder_time}`;
       expectedTime = new Date(preorderDateTimeStr);
     } else if (order.accepted_at) {
-      // For regular orders, expected time is accepted_at + 45 minutes (default TTD)
-      // TODO: Fetch actual TTD from config
-      const ttdMinutes = 45;
+      // For regular orders, expected time is accepted_at + TTD minutes from config
       expectedTime = new Date(new Date(order.accepted_at).getTime() + ttdMinutes * 60000);
     } else {
       return null;
