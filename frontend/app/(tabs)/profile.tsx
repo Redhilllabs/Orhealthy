@@ -857,8 +857,11 @@ export default function ProfileScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add New Address</Text>
-              <TouchableOpacity onPress={() => setShowAddressModal(false)}>
+              <Text style={styles.modalTitle}>{editingAddressIndex !== null ? 'Edit Address' : 'Add New Address'}</Text>
+              <TouchableOpacity onPress={() => {
+                setShowAddressModal(false);
+                setEditingAddressIndex(null);
+              }}>
                 <Ionicons name="close" size={28} color="#333" />
               </TouchableOpacity>
             </View>
