@@ -1534,6 +1534,7 @@ const styles = StyleSheet.create({
   },
   scrollContentContainer: {
     flexGrow: 1,
+    paddingBottom: 100,
   },
   stickyTabsWrapper: {
     backgroundColor: '#fff',
@@ -1548,10 +1549,13 @@ const styles = StyleSheet.create({
   },
   scrollableSection: {
     backgroundColor: '#f5f5f5',
+    minHeight: 200,
   },
   tabContentWrapper: {
     flex: 1,
     backgroundColor: '#fff',
+    minHeight: 600,
+    paddingBottom: 20,
   },
   profileSection: {
     flexDirection: 'row',
