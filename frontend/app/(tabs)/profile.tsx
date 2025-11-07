@@ -1322,9 +1322,10 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1, padding: 14, backgroundColor: '#ef4444', borderRadius: 8, alignItems: 'center' }}
-                  onPress={() => {
+                  onPress={async () => {
                     setShowLogoutConfirm(false);
-                    logout();
+                    await logout();
+                    router.replace('/auth');
                   }}
                 >
                   <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Logout</Text>
