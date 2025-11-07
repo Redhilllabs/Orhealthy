@@ -391,9 +391,9 @@ export default function ProfileScreen() {
     try {
       const token = await storage.getItemAsync('session_token');
       
-      const fullAddress = newAddressApartment 
+      const fullAddress = newAddressStreet 
         ? `${newAddressApartment}, ${newAddressStreet}`
-        : newAddressStreet;
+        : newAddressApartment;
       
       const addressData = {
         label: newAddressLabel,
