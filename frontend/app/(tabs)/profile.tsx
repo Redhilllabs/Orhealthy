@@ -56,7 +56,7 @@ interface CommissionHistory {
 }
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'posts' | 'idols' | 'fans' | 'orders' | 'addresses'>('posts');
   const [loading, setLoading] = useState(false);
