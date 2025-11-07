@@ -757,104 +757,119 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <View style={styles.profileSection}>
-          {user.picture ? (
-            <Image source={{ uri: user.picture }} style={styles.profilePicture} />
-          ) : (
-            <View style={[styles.profilePicture, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarText}>{user.name?.charAt(0)}</Text>
+      {/* Sticky Header - Always on top */}
+      <View style={styles.stickyHeader}>
+        <View style={styles.header}>
+          <View style={styles.profileSection}>
+            {user.picture ? (
+              <Image source={{ uri: user.picture }} style={styles.profilePicture} />
+            ) : (
+              <View style={[styles.profilePicture, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>{user.name?.charAt(0)}</Text>
+              </View>
+            )}
+            <View style={styles.profileInfo}>
+              <Text style={styles.profileName}>{user.name}</Text>
+              <Text style={styles.profileEmail}>{user.email}</Text>
+              {user.is_guide && user.star_rating && user.star_rating > 0 && (
+                <Text style={styles.starRating}>{user.star_rating}⭐ Guide</Text>
+              )}
+              {user.is_guide && (!user.star_rating || user.star_rating === 0) && (
+                <Text style={styles.starRating}>Guide</Text>
+              )}
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutConfirm(true)}>
+            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Scrollable Content */}
+      <ScrollView 
+        style={styles.scrollView}
+        stickyHeaderIndices={[1]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Wallet and Delivery Cards - Scrollable */}
+        <View>
+          {/* Wallet Credit Section for Guides */}
+          {user.is_guide && (
+            <View style={styles.commissionSection}>
+              <View style={styles.walletHeader}>
+                <Text style={styles.commissionLabel}>💰 Wallet Balance</Text>
+                <Text style={styles.commissionAmount}>
+                  ₹{(user.commission_balance || 0).toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.walletButtons}>
+                <TouchableOpacity
+                  style={styles.historyButton}
+                  onPress={() => {
+                    fetchCommissionHistory();
+                    setShowWalletModal(true);
+                  }}
+                >
+                  <Ionicons name="time-outline" size={18} color="#6366f1" />
+                  <Text style={styles.historyButtonText}>History</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.withdrawButton}
+                  onPress={() => setShowWithdrawalModal(true)}
+                >
+                  <Ionicons name="cash-outline" size={18} color="#fff" />
+                  <Text style={styles.withdrawButtonText}>Withdraw</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
-          <View style={styles.profileInfo}>
-            <Text style={styles.profileName}>{user.name}</Text>
-            <Text style={styles.profileEmail}>{user.email}</Text>
-            {user.is_guide && user.star_rating && user.star_rating > 0 && (
-              <Text style={styles.starRating}>{user.star_rating}⭐ Guide</Text>
-            )}
-            {user.is_guide && (!user.star_rating || user.star_rating === 0) && (
-              <Text style={styles.starRating}>Guide</Text>
-            )}
-          </View>
+
+          {/* Delivery Agent Section */}
+          {isDeliveryAgent && (
+            <TouchableOpacity
+              style={styles.deliveryModeButton}
+              onPress={() => router.push('/delivery-mode')}
+            >
+              <Ionicons name="bicycle" size={24} color="#fff" />
+              <Text style={styles.deliveryModeText}>Switch to Delivery Mode</Text>
+              <Ionicons name="arrow-forward" size={20} color="#fff" />
+            </TouchableOpacity>
+          )}
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutConfirm(true)}>
-          <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Wallet Credit Section for Guides */}
-      {user.is_guide && (
-        <View style={styles.commissionSection}>
-          <View style={styles.walletHeader}>
-            <Text style={styles.commissionLabel}>💰 Wallet Balance</Text>
-            <Text style={styles.commissionAmount}>
-              ₹{(user.commission_balance || 0).toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.walletButtons}>
-            <TouchableOpacity
-              style={styles.historyButton}
-              onPress={() => {
-                fetchCommissionHistory();
-                setShowWalletModal(true);
-              }}
-            >
-              <Ionicons name="time-outline" size={18} color="#6366f1" />
-              <Text style={styles.historyButtonText}>History</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.withdrawButton}
-              onPress={() => setShowWithdrawalModal(true)}
-            >
-              <Ionicons name="cash-outline" size={18} color="#fff" />
-              <Text style={styles.withdrawButtonText}>Withdraw</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      {/* Delivery Agent Section */}
-      {isDeliveryAgent && (
-        <TouchableOpacity
-          style={styles.deliveryModeButton}
-          onPress={() => router.push('/delivery-mode')}
-        >
-          <Ionicons name="bicycle" size={24} color="#fff" />
-          <Text style={styles.deliveryModeText}>Switch to Delivery Mode</Text>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
-        </TouchableOpacity>
-      )}
-
-      {/* Horizontal Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.tabsContainer}
-        contentContainerStyle={styles.tabsContent}
-      >
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
-            onPress={() => setActiveTab(tab.key as any)}
+        {/* Sticky Tabs */}
+        <View style={styles.stickyTabsWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.tabsContainer}
+            contentContainerStyle={styles.tabsContent}
           >
-            <Ionicons
-              name={tab.icon as any}
-              size={18}
-              color={activeTab === tab.key ? '#ffd700' : '#666'}
-            />
-            <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+            {tabs.map((tab) => (
+              <TouchableOpacity
+                key={tab.key}
+                style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+                onPress={() => setActiveTab(tab.key as any)}
+              >
+                <Ionicons
+                  name={tab.icon as any}
+                  size={18}
+                  color={activeTab === tab.key ? '#ffd700' : '#666'}
+                />
+                <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      {/* Tab Content */}
-      <View style={styles.content}>
-        {renderTabContent()}
-      </View>
+        {/* Tab Content - Scrollable */}
+        <View style={styles.scrollableContent}>
+          {renderTabContent()}
+        </View>
+      </ScrollView>
 
       {/* Address Modal */}
       <Modal visible={showAddressModal} animationType="slide" transparent>
