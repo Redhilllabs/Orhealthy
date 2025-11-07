@@ -2782,6 +2782,30 @@ async def delete_address(address_index: int, request: Request):
     
     return {"message": "Address deleted"}
 
+
+@api_router.put("/addresses/{address_index}")
+async def update_address(address_index: int, address_data: dict, request: Request):
+    """Update an address"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    user_data = await db.users.find_one({"_id": ObjectId(user["_id"])})
+    addresses = user_data.get("addresses", [])
+    
+    if address_index >= len(addresses):
+        raise HTTPException(status_code=404, detail="Address not found")
+    
+    # Update the address at the given index
+    addresses[address_index] = address_data
+    
+    await db.users.update_one(
+        {"_id": ObjectId(user["_id"])},
+        {"$set": {"addresses": addresses}}
+    )
+    
+    return {"message": "Address updated"}
+
 @api_router.put("/addresses/{address_index}/default")
 async def set_default_address(address_index: int, request: Request):
     """Set an address as default"""
