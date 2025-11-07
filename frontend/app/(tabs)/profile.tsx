@@ -690,7 +690,7 @@ export default function ProfileScreen() {
           <View style={styles.addressesContainer}>
             <TouchableOpacity
               style={styles.addButton}
-              onPress={() => setShowAddressModal(true)}
+              onPress={() => openAddressModal(null)}
             >
               <Ionicons name="add-circle" size={24} color="#ffd700" />
               <Text style={styles.addButtonText}>Add New Address</Text>
@@ -703,20 +703,29 @@ export default function ProfileScreen() {
                 <View key={index} style={styles.addressCard}>
                   <View style={styles.addressHeader}>
                     <Text style={styles.addressLabel}>{addr.label}</Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        Alert.alert(
-                          'Delete Address',
-                          'Are you sure you want to delete this address?',
-                          [
-                            { text: 'Cancel', style: 'cancel' },
-                            { text: 'Delete', style: 'destructive', onPress: () => deleteAddress(index) },
-                          ]
-                        );
-                      }}
-                    >
-                      <Ionicons name="trash-outline" size={20} color="#ef4444" />
-                    </TouchableOpacity>
+                    <View style={styles.addressActions}>
+                      <TouchableOpacity
+                        onPress={() => openAddressModal(index)}
+                        style={styles.addressActionButton}
+                      >
+                        <Ionicons name="pencil-outline" size={20} color="#6366f1" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          Alert.alert(
+                            'Delete Address',
+                            'Are you sure you want to delete this address?',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              { text: 'Delete', style: 'destructive', onPress: () => deleteAddress(index) },
+                            ]
+                          );
+                        }}
+                        style={styles.addressActionButton}
+                      >
+                        <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                      </TouchableOpacity>
+                    </View>
                   </View>
                   <Text style={styles.addressText}>{addr.full_address}</Text>
                   <Text style={styles.addressText}>
