@@ -1263,6 +1263,40 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
+      {/* Logout Confirmation Modal */}
+      <Modal visible={showLogoutConfirm} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxWidth: 400 }]}>
+            <View style={{ padding: 24, alignItems: 'center' }}>
+              <Ionicons name="log-out-outline" size={64} color="#ef4444" />
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 16, textAlign: 'center' }}>
+                Logout
+              </Text>
+              <Text style={{ fontSize: 14, color: '#6b7280', marginTop: 8, textAlign: 'center' }}>
+                Are you sure you want to logout?
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 24, width: '100%' }}>
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 14, backgroundColor: '#f3f4f6', borderRadius: 8, alignItems: 'center' }}
+                  onPress={() => setShowLogoutConfirm(false)}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#6b7280' }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 14, backgroundColor: '#ef4444', borderRadius: 8, alignItems: 'center' }}
+                  onPress={() => {
+                    setShowLogoutConfirm(false);
+                    signOut();
+                  }}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Logout</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Order Details Modal */}
       <Modal visible={showOrderModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
