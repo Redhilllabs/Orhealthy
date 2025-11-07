@@ -1512,12 +1512,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  stickyHeader: {
+  fixedHeader: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    zIndex: 100,
-    elevation: 3,
+    zIndex: 1000,
+    elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1529,25 +1529,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
-  scrollView: {
+  mainScrollView: {
     flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
   },
   stickyTabsWrapper: {
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    zIndex: 50,
-    elevation: 2,
+    zIndex: 100,
+    elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 1,
-  },
-  scrollableContent: {
-    flex: 1,
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
   },
   scrollableSection: {
     backgroundColor: '#f5f5f5',
+  },
+  tabContentWrapper: {
+    flex: 1,
+    backgroundColor: '#fff',
   },
   profileSection: {
     flexDirection: 'row',
