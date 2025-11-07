@@ -80,6 +80,8 @@ export default function ProfileScreen() {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [isTabSticky, setIsTabSticky] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteAddressIndex, setDeleteAddressIndex] = useState<number | null>(null);
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
