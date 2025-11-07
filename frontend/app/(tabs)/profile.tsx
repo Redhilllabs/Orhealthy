@@ -1841,6 +1841,7 @@ const styles = StyleSheet.create({
   },
   addressesContainer: {
     flex: 1,
+    padding: 16,
   },
   habitsContainer: {
     flex: 1,
