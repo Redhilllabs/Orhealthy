@@ -873,36 +873,42 @@ export default function ProfileScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Label (e.g., Home, Office) *"
+                placeholderTextColor="#999"
                 value={newAddressLabel}
                 onChangeText={setNewAddressLabel}
               />
               <TextInput
                 style={styles.input}
-                placeholder="Apartment / Suite (optional)"
+                placeholder="Apartment / Suite / Floor *"
+                placeholderTextColor="#999"
                 value={newAddressApartment}
                 onChangeText={setNewAddressApartment}
               />
               <TextInput
                 style={styles.input}
-                placeholder="Street Address *"
+                placeholder="Street Address (optional)"
+                placeholderTextColor="#999"
                 value={newAddressStreet}
                 onChangeText={setNewAddressStreet}
               />
               <TextInput
                 style={styles.input}
                 placeholder="City *"
+                placeholderTextColor="#999"
                 value={newAddressCity}
                 onChangeText={setNewAddressCity}
               />
               <TextInput
                 style={styles.input}
                 placeholder="State *"
+                placeholderTextColor="#999"
                 value={newAddressState}
                 onChangeText={setNewAddressState}
               />
               <TextInput
                 style={styles.input}
                 placeholder="PIN Code *"
+                placeholderTextColor="#999"
                 value={newAddressZip}
                 onChangeText={setNewAddressZip}
                 keyboardType="numeric"
@@ -910,6 +916,7 @@ export default function ProfileScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Phone *"
+                placeholderTextColor="#999"
                 value={newAddressPhone}
                 onChangeText={setNewAddressPhone}
                 keyboardType="phone-pad"
