@@ -1753,6 +1753,13 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
+  addressActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  addressActionButton: {
+    padding: 4,
+  },
   habitCard: {
     backgroundColor: '#fff',
     padding: 16,
