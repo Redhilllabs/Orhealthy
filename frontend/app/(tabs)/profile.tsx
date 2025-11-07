@@ -383,7 +383,7 @@ export default function ProfileScreen() {
   };
 
   const saveNewAddress = async () => {
-    if (!newAddressLabel || !newAddressStreet || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
+    if (!newAddressLabel || !newAddressApartment || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
       Alert.alert('Error', 'Please fill all required address fields');
       return;
     }
