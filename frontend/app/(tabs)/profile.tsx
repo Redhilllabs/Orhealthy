@@ -1414,21 +1414,8 @@ export default function ProfileScreen() {
                     <TouchableOpacity
                       style={styles.cancelOrderButton}
                       onPress={() => {
-                        Alert.alert(
-                          'Cancel Order',
-                          'Are you sure you want to cancel this order?',
-                          [
-                            { text: 'No', style: 'cancel' },
-                            {
-                              text: 'Yes, Cancel',
-                              style: 'destructive',
-                              onPress: () => {
-                                cancelOrder(selectedOrder._id);
-                                setShowOrderModal(false);
-                              },
-                            },
-                          ]
-                        );
+                        setCancelOrderId(selectedOrder._id);
+                        setShowCancelOrderConfirm(true);
                       }}
                     >
                       <Ionicons name="close-circle" size={20} color="#fff" />
