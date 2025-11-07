@@ -1261,6 +1261,47 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
+      {/* Cancel Order Confirmation Modal */}
+      <Modal visible={showCancelOrderConfirm} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { maxWidth: 400 }]}>
+            <View style={{ padding: 24, alignItems: 'center' }}>
+              <Ionicons name="close-circle-outline" size={64} color="#ef4444" />
+              <Text style={{ fontSize: 20, fontWeight: 'bold', marginTop: 16, textAlign: 'center' }}>
+                Cancel Order
+              </Text>
+              <Text style={{ fontSize: 14, color: '#6b7280', marginTop: 8, textAlign: 'center' }}>
+                Are you sure you want to cancel this order? This action cannot be undone.
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 24, width: '100%' }}>
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 14, backgroundColor: '#f3f4f6', borderRadius: 8, alignItems: 'center' }}
+                  onPress={() => {
+                    setShowCancelOrderConfirm(false);
+                    setCancelOrderId(null);
+                  }}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#6b7280' }}>No, Keep Order</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, padding: 14, backgroundColor: '#ef4444', borderRadius: 8, alignItems: 'center' }}
+                  onPress={async () => {
+                    if (cancelOrderId) {
+                      await cancelOrder(cancelOrderId);
+                      setShowOrderModal(false);
+                    }
+                    setShowCancelOrderConfirm(false);
+                    setCancelOrderId(null);
+                  }}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Yes, Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Delete Address Confirmation Modal */}
       <Modal visible={showDeleteConfirm} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
