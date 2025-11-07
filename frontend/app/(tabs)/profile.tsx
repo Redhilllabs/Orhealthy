@@ -757,43 +757,42 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      {/* Sticky Header - Always on top */}
-      <View style={styles.stickyHeader}>
-        <View style={styles.header}>
-          <View style={styles.profileSection}>
-            {user.picture ? (
-              <Image source={{ uri: user.picture }} style={styles.profilePicture} />
-            ) : (
-              <View style={[styles.profilePicture, styles.avatarPlaceholder]}>
-                <Text style={styles.avatarText}>{user.name?.charAt(0)}</Text>
-              </View>
-            )}
-            <View style={styles.profileInfo}>
-              <Text style={styles.profileName}>{user.name}</Text>
-              <Text style={styles.profileEmail}>{user.email}</Text>
-              {user.is_guide && user.star_rating && user.star_rating > 0 && (
-                <Text style={styles.starRating}>{user.star_rating}⭐ Guide</Text>
-              )}
-              {user.is_guide && (!user.star_rating || user.star_rating === 0) && (
-                <Text style={styles.starRating}>Guide</Text>
-              )}
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutConfirm(true)}>
-            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Scrollable Content */}
       <ScrollView 
         style={styles.scrollView}
-        stickyHeaderIndices={[1]}
+        stickyHeaderIndices={[0, 2]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Wallet and Delivery Cards - Scrollable */}
-        <View>
+        {/* Sticky Header - User Info */}
+        <View style={styles.stickyHeader}>
+          <View style={styles.header}>
+            <View style={styles.profileSection}>
+              {user.picture ? (
+                <Image source={{ uri: user.picture }} style={styles.profilePicture} />
+              ) : (
+                <View style={[styles.profilePicture, styles.avatarPlaceholder]}>
+                  <Text style={styles.avatarText}>{user.name?.charAt(0)}</Text>
+                </View>
+              )}
+              <View style={styles.profileInfo}>
+                <Text style={styles.profileName}>{user.name}</Text>
+                <Text style={styles.profileEmail}>{user.email}</Text>
+                {user.is_guide && user.star_rating && user.star_rating > 0 && (
+                  <Text style={styles.starRating}>{user.star_rating}⭐ Guide</Text>
+                )}
+                {user.is_guide && (!user.star_rating || user.star_rating === 0) && (
+                  <Text style={styles.starRating}>Guide</Text>
+                )}
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutConfirm(true)}>
+              <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Wallet and Delivery Cards - SCROLLABLE (Not Sticky) */}
+        <View style={styles.scrollableSection}>
           {/* Wallet Credit Section for Guides */}
           {user.is_guide && (
             <View style={styles.commissionSection}>
@@ -838,7 +837,7 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* Sticky Tabs */}
+        {/* Sticky Tabs - Stick below header when scrolling */}
         <View style={styles.stickyTabsWrapper}>
           <ScrollView
             horizontal
