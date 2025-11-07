@@ -82,6 +82,8 @@ export default function ProfileScreen() {
   const [isTabSticky, setIsTabSticky] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteAddressIndex, setDeleteAddressIndex] = useState<number | null>(null);
+  const [showCancelOrderConfirm, setShowCancelOrderConfirm] = useState(false);
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
