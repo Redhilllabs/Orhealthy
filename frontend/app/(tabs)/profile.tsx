@@ -83,6 +83,7 @@ export default function ProfileScreen() {
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [editingAddressIndex, setEditingAddressIndex] = useState<number | null>(null);
   const [newAddressLabel, setNewAddressLabel] = useState('');
   const [newAddressApartment, setNewAddressApartment] = useState('');
   const [newAddressStreet, setNewAddressStreet] = useState('');
@@ -90,6 +91,7 @@ export default function ProfileScreen() {
   const [newAddressState, setNewAddressState] = useState('');
   const [newAddressZip, setNewAddressZip] = useState('');
   const [newAddressPhone, setNewAddressPhone] = useState('');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Habit modal
   const [showHabitModal, setShowHabitModal] = useState(false);
