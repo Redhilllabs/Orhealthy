@@ -1286,7 +1286,7 @@ export default function ProfileScreen() {
                   style={{ flex: 1, padding: 14, backgroundColor: '#ef4444', borderRadius: 8, alignItems: 'center' }}
                   onPress={() => {
                     setShowLogoutConfirm(false);
-                    signOut();
+                    logout();
                   }}
                 >
                   <Text style={{ fontSize: 16, fontWeight: '600', color: '#fff' }}>Logout</Text>
