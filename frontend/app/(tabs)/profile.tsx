@@ -289,6 +289,7 @@ export default function ProfileScreen() {
 
   const cancelOrder = async (orderId: string) => {
     try {
+      setLoading(true);
       const token = await storage.getItemAsync('session_token');
       await axios.put(
         `${API_URL}/orders/${orderId}/cancel`,
@@ -297,11 +298,16 @@ export default function ProfileScreen() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      Alert.alert('Success', 'Order cancelled successfully');
-      fetchOrders(); // Refresh orders list
+      await fetchOrders(); // Refresh orders list
+      // Show success message using a simple alert
+      setTimeout(() => {
+        Alert.alert('Success', 'Order cancelled successfully');
+      }, 100);
     } catch (error: any) {
       const errorMessage = error.response?.data?.detail || 'Failed to cancel order';
       Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
