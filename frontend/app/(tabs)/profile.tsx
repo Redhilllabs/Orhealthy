@@ -1462,7 +1462,10 @@ export default function ProfileScreen() {
                       style={styles.cancelOrderButton}
                       onPress={() => {
                         setCancelOrderId(selectedOrder._id);
-                        setShowCancelOrderConfirm(true);
+                        setShowOrderModal(false); // Close order modal first
+                        setTimeout(() => {
+                          setShowCancelOrderConfirm(true); // Then show cancel confirmation
+                        }, 300);
                       }}
                     >
                       <Ionicons name="close-circle" size={20} color="#fff" />
