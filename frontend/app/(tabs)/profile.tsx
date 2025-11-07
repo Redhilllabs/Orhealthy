@@ -714,14 +714,8 @@ export default function ProfileScreen() {
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => {
-                          Alert.alert(
-                            'Delete Address',
-                            'Are you sure you want to delete this address?',
-                            [
-                              { text: 'Cancel', style: 'cancel' },
-                              { text: 'Delete', style: 'destructive', onPress: () => deleteAddress(index) },
-                            ]
-                          );
+                          setDeleteAddressIndex(index);
+                          setShowDeleteConfirm(true);
                         }}
                         style={styles.addressActionButton}
                       >
