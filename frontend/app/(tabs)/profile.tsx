@@ -1285,6 +1285,9 @@ export default function ProfileScreen() {
                   onPress={() => {
                     setShowCancelOrderConfirm(false);
                     setCancelOrderId(null);
+                    setTimeout(() => {
+                      setShowOrderModal(true); // Reopen order modal
+                    }, 300);
                   }}
                 >
                   <Text style={{ fontSize: 16, fontWeight: '600', color: '#6b7280' }}>No, Keep Order</Text>
@@ -1294,7 +1297,6 @@ export default function ProfileScreen() {
                   onPress={async () => {
                     if (cancelOrderId) {
                       await cancelOrder(cancelOrderId);
-                      setShowOrderModal(false);
                     }
                     setShowCancelOrderConfirm(false);
                     setCancelOrderId(null);
