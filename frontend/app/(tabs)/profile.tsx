@@ -1544,6 +1544,9 @@ const styles = StyleSheet.create({
   scrollableContent: {
     flex: 1,
   },
+  scrollableSection: {
+    backgroundColor: '#f5f5f5',
+  },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
