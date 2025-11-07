@@ -346,6 +346,32 @@ export default function ProfileScreen() {
   };
 
 
+  const openAddressModal = (index: number | null = null) => {
+    if (index !== null) {
+      // Edit mode
+      const addr = addresses[index];
+      setEditingAddressIndex(index);
+      setNewAddressLabel(addr.label || '');
+      setNewAddressApartment(addr.apartment || '');
+      setNewAddressStreet(addr.full_address || '');
+      setNewAddressCity(addr.city || '');
+      setNewAddressState(addr.state || '');
+      setNewAddressZip(addr.pincode || '');
+      setNewAddressPhone(addr.phone || '');
+    } else {
+      // Add mode
+      setEditingAddressIndex(null);
+      setNewAddressLabel('');
+      setNewAddressApartment('');
+      setNewAddressStreet('');
+      setNewAddressCity('');
+      setNewAddressState('');
+      setNewAddressZip('');
+      setNewAddressPhone('');
+    }
+    setShowAddressModal(true);
+  };
+
   const saveNewAddress = async () => {
     if (!newAddressLabel || !newAddressStreet || !newAddressCity || !newAddressState || !newAddressZip || !newAddressPhone) {
       Alert.alert('Error', 'Please fill all required address fields');
@@ -359,24 +385,38 @@ export default function ProfileScreen() {
         ? `${newAddressApartment}, ${newAddressStreet}`
         : newAddressStreet;
       
-      await axios.post(
-        `${API_URL}/addresses`,
-        {
-          label: newAddressLabel,
-          apartment: newAddressApartment,
-          full_address: fullAddress,
-          city: newAddressCity,
-          state: newAddressState,
-          pincode: newAddressZip,
-          phone: newAddressPhone,
-          is_default: addresses.length === 0,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const addressData = {
+        label: newAddressLabel,
+        apartment: newAddressApartment,
+        full_address: fullAddress,
+        city: newAddressCity,
+        state: newAddressState,
+        pincode: newAddressZip,
+        phone: newAddressPhone,
+        is_default: editingAddressIndex === null ? addresses.length === 0 : addresses[editingAddressIndex]?.is_default || false,
+      };
 
-      Alert.alert('Success', 'Address saved successfully');
+      if (editingAddressIndex !== null) {
+        // Update existing address
+        await axios.put(
+          `${API_URL}/addresses/${editingAddressIndex}`,
+          addressData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        Alert.alert('Success', 'Address updated successfully');
+      } else {
+        // Create new address
+        await axios.post(
+          `${API_URL}/addresses`,
+          addressData,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        Alert.alert('Success', 'Address saved successfully');
+      }
+
       await fetchAddresses();
       setShowAddressModal(false);
+      setEditingAddressIndex(null);
       // Clear form
       setNewAddressLabel('');
       setNewAddressApartment('');
