@@ -1777,4 +1777,17 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 16,
   },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 12,
+  },
+  logoutItem: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#fee',
+  },
+  logoutText: {
+    color: '#ef4444',
+  },
 });
