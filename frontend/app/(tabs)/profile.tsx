@@ -793,51 +793,53 @@ export default function ProfileScreen() {
         stickyHeaderIndices={[1]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Wallet and Delivery Cards - Will scroll away */}
-        <View style={styles.scrollableSection}>
-          {/* Wallet Credit Section for Guides */}
-          {user.is_guide && (
-            <View style={styles.commissionSection}>
-              <View style={styles.walletHeader}>
-                <Text style={styles.commissionLabel}>💰 Wallet Balance</Text>
-                <Text style={styles.commissionAmount}>
-                  ₹{(user.commission_balance || 0).toFixed(2)}
-                </Text>
+        {/* Wallet and Delivery Cards - Will scroll away (only if present) */}
+        {(user.is_guide || isDeliveryAgent) && (
+          <View style={styles.scrollableSection}>
+            {/* Wallet Credit Section for Guides */}
+            {user.is_guide && (
+              <View style={styles.commissionSection}>
+                <View style={styles.walletHeader}>
+                  <Text style={styles.commissionLabel}>💰 Wallet Balance</Text>
+                  <Text style={styles.commissionAmount}>
+                    ₹{(user.commission_balance || 0).toFixed(2)}
+                  </Text>
+                </View>
+                <View style={styles.walletButtons}>
+                  <TouchableOpacity
+                    style={styles.historyButton}
+                    onPress={() => {
+                      fetchCommissionHistory();
+                      setShowWalletModal(true);
+                    }}
+                  >
+                    <Ionicons name="time-outline" size={18} color="#6366f1" />
+                    <Text style={styles.historyButtonText}>History</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.withdrawButton}
+                    onPress={() => setShowWithdrawalModal(true)}
+                  >
+                    <Ionicons name="cash-outline" size={18} color="#fff" />
+                    <Text style={styles.withdrawButtonText}>Withdraw</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.walletButtons}>
-                <TouchableOpacity
-                  style={styles.historyButton}
-                  onPress={() => {
-                    fetchCommissionHistory();
-                    setShowWalletModal(true);
-                  }}
-                >
-                  <Ionicons name="time-outline" size={18} color="#6366f1" />
-                  <Text style={styles.historyButtonText}>History</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.withdrawButton}
-                  onPress={() => setShowWithdrawalModal(true)}
-                >
-                  <Ionicons name="cash-outline" size={18} color="#fff" />
-                  <Text style={styles.withdrawButtonText}>Withdraw</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+            )}
 
-          {/* Delivery Agent Section */}
-          {isDeliveryAgent && (
-            <TouchableOpacity
-              style={styles.deliveryModeButton}
-              onPress={() => router.push('/delivery-mode')}
-            >
-              <Ionicons name="bicycle" size={24} color="#fff" />
-              <Text style={styles.deliveryModeText}>Switch to Delivery Mode</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
-            </TouchableOpacity>
-          )}
-        </View>
+            {/* Delivery Agent Section */}
+            {isDeliveryAgent && (
+              <TouchableOpacity
+                style={styles.deliveryModeButton}
+                onPress={() => router.push('/delivery-mode')}
+              >
+                <Ionicons name="bicycle" size={24} color="#fff" />
+                <Text style={styles.deliveryModeText}>Switch to Delivery Mode</Text>
+                <Ionicons name="arrow-forward" size={20} color="#fff" />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
 
         {/* Sticky Tabs - Will stick under fixed header */}
         <View style={styles.stickyTabsWrapper}>
