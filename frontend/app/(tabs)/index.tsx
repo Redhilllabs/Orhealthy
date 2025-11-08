@@ -79,6 +79,9 @@ export default function HomeScreen() {
   // Messages
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   
+  // Right Sidebar Menu
+  const [showSidebar, setShowSidebar] = useState(false);
+  
   // Create post modal
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [content, setContent] = useState('');
