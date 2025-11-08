@@ -572,7 +572,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={styles.profileButton}
-            onPress={() => router.push('/profile')}
+            onPress={() => setShowSidebar(true)}
           >
             {user?.picture ? (
               <Image source={{ uri: user.picture }} style={styles.profileAvatar} />
