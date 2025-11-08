@@ -1591,6 +1591,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 2,
   },
+  fixedTabsWrapper: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    zIndex: 100,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+  },
+  contentOnlyScrollView: {
+    flex: 1,
+  },
   scrollableSection: {
     backgroundColor: '#f5f5f5',
     minHeight: 200,
