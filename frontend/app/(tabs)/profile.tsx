@@ -84,6 +84,10 @@ export default function ProfileScreen() {
   const [deleteAddressIndex, setDeleteAddressIndex] = useState<number | null>(null);
   const [showCancelOrderConfirm, setShowCancelOrderConfirm] = useState(false);
   const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideGuidance, setGuideGuidance] = useState('');
+  const [guideExperience, setGuideExperience] = useState('');
+  const [guideProofDoc, setGuideProofDoc] = useState<any>(null);
   
   // Address modal
   const [showAddressModal, setShowAddressModal] = useState(false);
