@@ -998,6 +998,90 @@ export default function HomeScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
+      {/* Right Sidebar Menu */}
+      <Modal visible={showSidebar} animationType="slide" transparent onRequestClose={() => setShowSidebar(false)}>
+        <TouchableOpacity 
+          style={styles.sidebarOverlay}
+          activeOpacity={1}
+          onPress={() => setShowSidebar(false)}
+        >
+          <TouchableOpacity 
+            style={styles.sidebarContainer}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.sidebarHeader}>
+              <Text style={styles.sidebarTitle}>Menu</Text>
+              <TouchableOpacity onPress={() => setShowSidebar(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.sidebarContent}>
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowSidebar(false);
+                  router.push('/profile');
+                }}
+              >
+                <Ionicons name="person-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>My Profile</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowSidebar(false);
+                  router.push('/my-orders');
+                }}
+              >
+                <Ionicons name="receipt-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>My Orders</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowSidebar(false);
+                  router.push('/my-addresses');
+                }}
+              >
+                <Ionicons name="location-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>My Addresses</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowSidebar(false);
+                  router.push('/policies');
+                }}
+              >
+                <Ionicons name="document-text-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>Policies</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={() => {
+                  setShowSidebar(false);
+                  router.push('/contact-us');
+                }}
+              >
+                <Ionicons name="mail-outline" size={24} color="#333" />
+                <Text style={styles.menuItemText}>Contact Us</Text>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
+              </TouchableOpacity>
+            </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
