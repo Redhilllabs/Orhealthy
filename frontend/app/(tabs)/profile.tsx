@@ -672,9 +672,11 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={() => setShowLogoutConfirm(true)}>
-            <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-          </TouchableOpacity>
+          {!user.is_guide && (
+            <TouchableOpacity style={styles.beGuideButton} onPress={() => setShowGuideModal(true)}>
+              <Ionicons name="star" size={24} color="#ffd700" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
