@@ -1083,24 +1083,25 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={[styles.menuItem, styles.logoutItem]}
-                onPress={async () => {
+                onPress={() => {
                   setShowSidebar(false);
-                  Alert.alert(
-                    'Logout',
-                    'Are you sure you want to logout?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Logout',
-                        style: 'destructive',
-                        onPress: async () => {
-                          const { logout } = await import('../../src/context/AuthContext');
-                          await logout();
-                          router.replace('/auth');
+                  setTimeout(() => {
+                    Alert.alert(
+                      'Logout',
+                      'Are you sure you want to logout?',
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        {
+                          text: 'Logout',
+                          style: 'destructive',
+                          onPress: async () => {
+                            await logout();
+                            router.replace('/auth');
+                          },
                         },
-                      },
-                    ]
-                  );
+                      ]
+                    );
+                  }, 300);
                 }}
               >
                 <Ionicons name="log-out-outline" size={24} color="#ef4444" />
