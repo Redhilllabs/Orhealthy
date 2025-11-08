@@ -786,15 +786,16 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Main ScrollView - Everything below header */}
-      <ScrollView 
-        style={styles.mainScrollView}
-        contentContainerStyle={styles.scrollContentContainer}
-        stickyHeaderIndices={user.is_guide || isDeliveryAgent ? [1] : [0]}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Wallet and Delivery Cards - Will scroll away (only if present) */}
-        {(user.is_guide || isDeliveryAgent) && (
+      {/* Conditional Layout Based on User Type */}
+      {user.is_guide || isDeliveryAgent ? (
+        // Layout for Guides/Agents: Wallet/Delivery cards scroll, tabs stick
+        <ScrollView 
+          style={styles.mainScrollView}
+          contentContainerStyle={styles.scrollContentContainer}
+          stickyHeaderIndices={[1]}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Wallet and Delivery Cards - Will scroll away */}
           <View style={styles.scrollableSection}>
             {/* Wallet Credit Section for Guides */}
             {user.is_guide && (
@@ -839,40 +840,81 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             )}
           </View>
-        )}
 
-        {/* Sticky Tabs - Will stick under fixed header */}
-        <View style={styles.stickyTabsWrapper}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.tabsContainer}
-            contentContainerStyle={styles.tabsContent}
+          {/* Sticky Tabs */}
+          <View style={styles.stickyTabsWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.tabsContainer}
+              contentContainerStyle={styles.tabsContent}
+            >
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab.key}
+                  style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+                  onPress={() => setActiveTab(tab.key as any)}
+                >
+                  <Ionicons
+                    name={tab.icon as any}
+                    size={18}
+                    color={activeTab === tab.key ? '#ffd700' : '#666'}
+                  />
+                  <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Tab Content */}
+          <View style={styles.tabContentWrapper}>
+            {renderTabContent()}
+          </View>
+        </ScrollView>
+      ) : (
+        // Layout for Normal Users: Fixed tabs, only content scrolls
+        <>
+          {/* Fixed Tabs - Always visible below header */}
+          <View style={styles.fixedTabsWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.tabsContainer}
+              contentContainerStyle={styles.tabsContent}
+            >
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab.key}
+                  style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+                  onPress={() => setActiveTab(tab.key as any)}
+                >
+                  <Ionicons
+                    name={tab.icon as any}
+                    size={18}
+                    color={activeTab === tab.key ? '#ffd700' : '#666'}
+                  />
+                  <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
+                    {tab.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+
+          {/* Scrollable Content Only */}
+          <ScrollView 
+            style={styles.contentOnlyScrollView}
+            contentContainerStyle={styles.scrollContentContainer}
+            showsVerticalScrollIndicator={false}
           >
-            {tabs.map((tab) => (
-              <TouchableOpacity
-                key={tab.key}
-                style={[styles.tab, activeTab === tab.key && styles.activeTab]}
-                onPress={() => setActiveTab(tab.key as any)}
-              >
-                <Ionicons
-                  name={tab.icon as any}
-                  size={18}
-                  color={activeTab === tab.key ? '#ffd700' : '#666'}
-                />
-                <Text style={[styles.tabLabel, activeTab === tab.key && styles.activeTabLabel]}>
-                  {tab.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            <View style={styles.tabContentWrapper}>
+              {renderTabContent()}
+            </View>
           </ScrollView>
-        </View>
-
-        {/* Tab Content - Scrollable */}
-        <View style={styles.tabContentWrapper}>
-          {renderTabContent()}
-        </View>
-      </ScrollView>
+        </>
+      )}
 
       {/* Address Modal */}
       <Modal visible={showAddressModal} animationType="slide" transparent>
