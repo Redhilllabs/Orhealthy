@@ -790,7 +790,7 @@ export default function ProfileScreen() {
       <ScrollView 
         style={styles.mainScrollView}
         contentContainerStyle={styles.scrollContentContainer}
-        stickyHeaderIndices={[1]}
+        stickyHeaderIndices={user.is_guide || isDeliveryAgent ? [1] : [0]}
         showsVerticalScrollIndicator={false}
       >
         {/* Wallet and Delivery Cards - Will scroll away (only if present) */}
