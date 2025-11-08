@@ -1078,6 +1078,35 @@ export default function HomeScreen() {
                 <Text style={styles.menuItemText}>Contact Us</Text>
                 <Ionicons name="chevron-forward" size={20} color="#999" />
               </TouchableOpacity>
+
+              <View style={styles.menuDivider} />
+
+              <TouchableOpacity
+                style={[styles.menuItem, styles.logoutItem]}
+                onPress={async () => {
+                  setShowSidebar(false);
+                  Alert.alert(
+                    'Logout',
+                    'Are you sure you want to logout?',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      {
+                        text: 'Logout',
+                        style: 'destructive',
+                        onPress: async () => {
+                          const { logout } = await import('../../src/context/AuthContext');
+                          await logout();
+                          router.replace('/auth');
+                        },
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Ionicons name="log-out-outline" size={24} color="#ef4444" />
+                <Text style={[styles.menuItemText, styles.logoutText]}>Logout</Text>
+                <View style={{ width: 20 }} />
+              </TouchableOpacity>
             </ScrollView>
           </TouchableOpacity>
         </TouchableOpacity>
