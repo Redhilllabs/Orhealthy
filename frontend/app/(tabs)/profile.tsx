@@ -745,7 +745,12 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {!user.is_guide && (
+          {user.is_guide ? (
+            <View style={styles.guideBadge}>
+              <Ionicons name="star" size={16} color="#ffd700" />
+              <Text style={styles.guideBadgeText}>Guide</Text>
+            </View>
+          ) : (
             <TouchableOpacity style={styles.beGuideButton} onPress={() => setShowGuideModal(true)}>
               <Ionicons name="star" size={24} color="#ffd700" />
             </TouchableOpacity>
