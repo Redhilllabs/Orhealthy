@@ -1813,4 +1813,10 @@ const styles = StyleSheet.create({
   logoutText: {
     color: '#ef4444',
   },
+  confirmModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    width: '90%',
+    maxWidth: 400,
+  },
 });
