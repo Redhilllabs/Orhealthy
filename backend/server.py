@@ -178,6 +178,20 @@ class WithdrawalRequest(BaseModel):
     processed_at: Optional[datetime] = None
 
 
+class GuideOnboardingRequest(BaseModel):
+    user_id: str
+    user_name: str
+    user_email: str
+    guidance: str  # Area of expertise
+    experience: str  # Years of experience or qualifications
+    proof_document: Optional[str] = None  # File path or base64
+    status: str = 'pending'  # pending, approved, rejected
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    processed_at: Optional[datetime] = None
+    processed_by: Optional[str] = None
+
+
+
 # New models for ingredient management
 class SourceIngredientPurchase(BaseModel):
     purchase_quantity: float  # e.g., 8 (pcs)
