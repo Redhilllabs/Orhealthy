@@ -2351,6 +2351,22 @@ const styles = StyleSheet.create({
   beGuideButton: {
     padding: 8,
   },
+  guideBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#fff8dc',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#ffd700',
+  },
+  guideBadgeText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#ffd700',
+  },
   guideModalContent: {
     backgroundColor: '#fff',
     borderRadius: 20,
