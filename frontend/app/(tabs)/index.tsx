@@ -81,6 +81,7 @@ export default function HomeScreen() {
   
   // Right Sidebar Menu
   const [showSidebar, setShowSidebar] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   // Create post modal
   const [showCreatePost, setShowCreatePost] = useState(false);
