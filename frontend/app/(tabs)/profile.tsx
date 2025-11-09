@@ -360,12 +360,10 @@ export default function ProfileScreen() {
 
   const pickDocument = async () => {
     try {
-      const result = await import('expo-document-picker').then(module => 
-        module.getDocumentAsync({
-          type: ['application/pdf', 'image/*'],
-          copyToCacheDirectory: true,
-        })
-      );
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['application/pdf', 'image/*'],
+        copyToCacheDirectory: true,
+      });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const file = result.assets[0];
