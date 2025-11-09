@@ -1418,6 +1418,88 @@ export default function ProfileScreen() {
       </Modal>
 
       {/* Order Details Modal */}
+
+      {/* Guide Onboarding Modal */}
+      <Modal visible={showGuideModal} animationType="slide" transparent>
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.guideModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Become a Guide</Text>
+              <TouchableOpacity onPress={() => setShowGuideModal(false)}>
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody}>
+              <Text style={styles.guideModalDescription}>
+                Share your expertise and help others achieve their health goals. Fill out the form below to apply as a guide.
+              </Text>
+
+              <Text style={styles.inputLabel}>Guidance Area *</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                placeholder="Describe your area of expertise (e.g., Nutrition, Fitness, Weight Loss)"
+                placeholderTextColor="#999"
+                value={guideGuidance}
+                onChangeText={setGuideGuidance}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+
+              <Text style={styles.inputLabel}>Experience *</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Years of experience or qualifications"
+                placeholderTextColor="#999"
+                value={guideExperience}
+                onChangeText={setGuideExperience}
+              />
+
+              <Text style={styles.inputLabel}>Proof of Qualification *</Text>
+              <Text style={styles.fileHint}>Upload certificate or document (Max 5MB, PDF or Image)</Text>
+              
+              <TouchableOpacity
+                style={styles.filePickerButton}
+                onPress={pickDocument}
+              >
+                <Ionicons name="cloud-upload-outline" size={24} color="#6366f1" />
+                <Text style={styles.filePickerText}>
+                  {guideProofDoc ? guideProofDoc.name : 'Choose File'}
+                </Text>
+              </TouchableOpacity>
+
+              {guideProofDoc && (
+                <View style={styles.selectedFileInfo}>
+                  <Ionicons name="document" size={20} color="#4caf50" />
+                  <Text style={styles.selectedFileName}>{guideProofDoc.name}</Text>
+                  <TouchableOpacity onPress={() => setGuideProofDoc(null)}>
+                    <Ionicons name="close-circle" size={20} color="#ef4444" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.submitGuideButton}
+                onPress={submitGuideOnboarding}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitGuideButtonText}>Submit Application</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
       <Modal visible={showOrderModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
