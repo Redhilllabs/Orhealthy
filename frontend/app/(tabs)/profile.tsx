@@ -382,11 +382,6 @@ export default function ProfileScreen() {
     }
   };
 
-      setLoading(false);
-    }
-  };
-
-
   const fetchHabits = async () => {
     try {
       setLoading(true);
