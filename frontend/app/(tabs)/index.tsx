@@ -1002,7 +1002,7 @@ export default function HomeScreen() {
 
       {/* Logout Confirmation Modal */}
       <Modal visible={showLogoutConfirm} animationType="fade" transparent>
-        <View style={styles.modalOverlay}>
+        <View style={styles.centeredModalOverlay}>
           <View style={[styles.confirmModalContent]}>
             <View style={{ padding: 24, alignItems: 'center' }}>
               <Ionicons name="log-out-outline" size={64} color="#ef4444" />
