@@ -310,6 +310,9 @@ export default function ProfileScreen() {
       const errorMessage = error.response?.data?.detail || 'Failed to cancel order';
       Alert.alert('Error', errorMessage);
     } finally {
+      setLoading(false);
+    }
+  };
 
   const submitGuideOnboarding = async () => {
     if (!guideGuidance.trim() || !guideExperience.trim()) {
