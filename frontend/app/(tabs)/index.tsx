@@ -1813,6 +1813,12 @@ const styles = StyleSheet.create({
   logoutText: {
     color: '#ef4444',
   },
+  centeredModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   confirmModalContent: {
     backgroundColor: '#fff',
     borderRadius: 20,
