@@ -309,6 +309,77 @@ export default function ProfileScreen() {
       const errorMessage = error.response?.data?.detail || 'Failed to cancel order';
       Alert.alert('Error', errorMessage);
     } finally {
+
+  const submitGuideOnboarding = async () => {
+    if (!guideGuidance.trim() || !guideExperience.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    if (guideProofDoc && guideProofDoc.size > 5 * 1024 * 1024) {
+      Alert.alert('Error', 'File size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const token = await storage.getItemAsync('session_token');
+      
+      const formData = new FormData();
+      formData.append('guidance', guideGuidance);
+      formData.append('experience', guideExperience);
+      
+      if (guideProofDoc) {
+        formData.append('proof_document', {
+          uri: guideProofDoc.uri,
+          type: guideProofDoc.type || 'application/pdf',
+          name: guideProofDoc.name || 'document.pdf',
+        } as any);
+      }
+
+      await axios.post(`${API_URL}/guide-onboarding`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      Alert.alert('Success', 'Your guide onboarding request has been submitted successfully!');
+      setShowGuideModal(false);
+      setGuideGuidance('');
+      setGuideExperience('');
+      setGuideProofDoc(null);
+    } catch (error: any) {
+      console.error('Error submitting guide onboarding:', error);
+      Alert.alert('Error', error.response?.data?.detail || 'Failed to submit request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pickDocument = async () => {
+    try {
+      const result = await import('expo-document-picker').then(module => 
+        module.getDocumentAsync({
+          type: ['application/pdf', 'image/*'],
+          copyToCacheDirectory: true,
+        })
+      );
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const file = result.assets[0];
+        if (file.size && file.size > 5 * 1024 * 1024) {
+          Alert.alert('Error', 'File size must be less than 5MB');
+          return;
+        }
+        setGuideProofDoc(file);
+      }
+    } catch (error) {
+      console.error('Error picking document:', error);
+      Alert.alert('Error', 'Failed to pick document');
+    }
+  };
+
       setLoading(false);
     }
   };
