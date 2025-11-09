@@ -834,6 +834,61 @@ async def create_withdrawal_request(request_data: dict, request: Request):
         "id": str(result.inserted_id)
     }
 
+@api_router.post("/guide-onboarding")
+async def submit_guide_onboarding(
+    guidance: str = Form(...),
+    experience: str = Form(...),
+    proof_document: UploadFile = File(None),
+    request: Request = None
+):
+    """Submit guide onboarding request"""
+    user = await get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    # Check if user is already a guide
+    if user.get("is_guide"):
+        raise HTTPException(status_code=400, detail="You are already a guide")
+    
+    # Check if user already has a pending request
+    existing_request = await db.guide_onboarding_requests.find_one({
+        "user_id": user["_id"],
+        "status": "pending"
+    })
+    if existing_request:
+        raise HTTPException(status_code=400, detail="You already have a pending request")
+    
+    # Handle file upload
+    proof_doc_path = None
+    if proof_document:
+        # Check file size (5MB limit)
+        contents = await proof_document.read()
+        if len(contents) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File size must be less than 5MB")
+        
+        # Store as base64 in database (or save to filesystem)
+        import base64
+        proof_doc_path = base64.b64encode(contents).decode('utf-8')
+    
+    # Create onboarding request
+    onboarding_request = {
+        "user_id": user["_id"],
+        "user_name": user.get("name", "Unknown"),
+        "user_email": user.get("email", ""),
+        "guidance": guidance,
+        "experience": experience,
+        "proof_document": proof_doc_path,
+        "status": "pending",
+        "created_at": get_ist_time(),
+        "processed_at": None,
+        "processed_by": None
+    }
+    
+    result = await db.guide_onboarding_requests.insert_one(onboarding_request)
+    
+    return {"message": "Guide onboarding request submitted successfully", "request_id": str(result.inserted_id)}
+
+
 @api_router.get("/withdrawal-requests/my")
 async def get_my_withdrawal_requests(request: Request):
     """Get withdrawal requests for the authenticated guide"""
